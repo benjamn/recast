@@ -1,0 +1,35 @@
+{
+  "author": "Ben Newman <bn@cs.stanford.edu>",
+  "name": "recast",
+  "description": "JavaScript syntax tree transformer and conservative pretty-printer",
+  "keywords": [
+    "ast",
+    "rewriting",
+    "refactoring",
+    "codegen",
+    "syntax",
+    "transformation",
+    "parsing",
+    "pretty-printing"
+  ],
+  "version": "0.1.0",
+  "homepage": "http://github.com/benjamn/recast",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/benjamn/recast.git"
+  },
+  "main": "main.js",
+  "scripts": {
+    "test": "whiskey test/run.js"
+  },
+  "dependencies": {
+    "esprima": "= 1.0.0"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {
+    "whiskey": "0.6.x"
+  },
+  "engines": {
+    "node": ">= 0.6"
+  }
+}
