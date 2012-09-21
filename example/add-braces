@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+var Syntax = require("recast").Syntax,
+    Visitor = require("recast").Visitor,
+    builder = require("recast").builder;
+
+require("recast").run(function(ast, callback) {
+    callback(new Orthodontist().visit(ast));
+});
+
+var Orthodontist = Visitor.extend({
+    visitIfStatement: function(stmt) {
+        stmt.consequent = fix(stmt.consequent);
+        var alt = stmt.alternate;
+        if (alt && alt.type !== Syntax.IfStatement)
+            stmt.alternate = fix(alt);
+        this.genericVisit(stmt);
+    },
+
+    visitWhileStatement: visitLoop,
+    visitForStatement: visitLoop,
+    visitForInStatement: visitLoop,
+});
+
+function visitLoop(loop) {
+    loop.body = fix(loop.body);
+    this.genericVisit(loop);
+}
+
+function fix(clause) {
+    if (clause) {
+        if (clause.type !== Syntax.BlockStatement)
+            clause = builder.blockStatement([clause]);
+    }
+    return clause;
+}
