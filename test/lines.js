@@ -296,3 +296,17 @@ exports.testTrim = function(t) {
 
     t.finish();
 };
+
+exports.testNoIndentEmptyLines = function(t) {
+    var lines = fromString("a\n\nb"),
+        indented = lines.indent(4),
+        tailIndented = lines.indentTail(5);
+
+    check(indented, fromString("    a\n\n    b"));
+    check(tailIndented, fromString("a\n\n     b"));
+
+    check(indented.indent(-4), lines);
+    check(tailIndented.indent(-5), lines);
+
+    t.finish();
+};
