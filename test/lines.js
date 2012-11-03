@@ -276,13 +276,14 @@ exports.testGetSourceLocation = function(t) {
 
 exports.testTrim = function(t) {
     var string = "  xxx \n ",
+        tabWidth = 4, // arbitrary
         lines = fromString(string);
 
     function test(string) {
-        var lines = fromString(string);
-        check(lines.trimLeft(), fromString(string.replace(/^\s+/, "")));
-        check(lines.trimRight(), fromString(string.replace(/\s+$/, "")));
-        check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, "")));
+        var lines = fromString(string, tabWidth);
+        check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), tabWidth));
+        check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), tabWidth));
+        check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, ""), tabWidth));
     }
 
     test("");
@@ -307,6 +308,130 @@ exports.testNoIndentEmptyLines = function(t) {
 
     check(indented.indent(-4), lines);
     check(tailIndented.indent(-5), lines);
+
+    t.finish();
+};
+
+exports.testCountSpaces = function(t) {
+    var count = linesModule.countSpaces;
+
+    assert.strictEqual(count(""), 0);
+    assert.strictEqual(count(" "), 1);
+    assert.strictEqual(count("  "), 2);
+    assert.strictEqual(count("   "), 3);
+
+    function check(s, tabWidth, result) {
+        assert.strictEqual(count(s, tabWidth), result);
+    }
+
+    check("", 2, 0);
+    check("", 3, 0);
+    check("", 4, 0);
+
+    check(" ", 2, 1);
+    check("\t", 2, 2);
+    check("\t\t", 2, 4);
+    check(" \t\t", 2, 4);
+    check(" \t \t", 2, 4);
+    check("  \t \t", 2, 6);
+    check("  \t  \t", 2, 8);
+    check(" \t   \t", 2, 6);
+    check("   \t \t", 2, 6);
+
+    check(" ", 3, 1);
+    check("\t", 3, 3);
+    check("\t\t", 3, 6);
+    check(" \t\t", 3, 6);
+    check(" \t \t", 3, 6);
+    check("  \t \t", 3, 6);
+    check("  \t  \t", 3, 6);
+    check(" \t   \t", 3, 9);
+    check("   \t \t", 3, 9);
+
+    check("\t\t\t   ", 2, 9);
+    check("\t\t\t   ", 3, 12);
+    check("\t\t\t   ", 4, 15);
+
+    t.finish();
+};
+
+exports.testIndentWithTabs = function(t) {
+    var tabWidth = 4;
+    var tabOpts = { tabWidth: tabWidth, useTabs: true };
+    var noTabOpts = { tabWidth: tabWidth, useTabs: false };
+
+    var code = [
+        "function f() {",
+        "\treturn this;",
+        "}"
+    ].join("\n");
+
+    function checkUnchanged(lines, code) {
+        check(lines.toString(tabOpts), code);
+        check(lines.toString(noTabOpts), code);
+        check(lines.indent(3).indent(-5).indent(2).toString(tabOpts), code);
+        check(lines.indent(-3).indent(4).indent(-1).toString(noTabOpts), code);
+    }
+
+    var lines = fromString(code, tabWidth);
+    checkUnchanged(lines, code);
+
+    check(lines.indent(1).toString(tabOpts), [
+        " function f() {",
+        "\t return this;",
+        " }"
+    ].join("\n"));
+
+    check(lines.indent(tabWidth).toString(tabOpts), [
+        "\tfunction f() {",
+        "\t\treturn this;",
+        "\t}"
+    ].join("\n"));
+
+    check(lines.indent(1).toString(noTabOpts), [
+        " function f() {",
+        "     return this;",
+        " }"
+    ].join("\n"));
+
+    check(lines.indent(tabWidth).toString(noTabOpts), [
+        "    function f() {",
+        "        return this;",
+        "    }"
+    ].join("\n"));
+
+    var funkyCode = [
+        " function g() { \t ",
+        " \t\t  return this;  ",
+        "\t} "
+    ].join("\n");
+
+    var funky = fromString(funkyCode, tabWidth);
+    checkUnchanged(funky, funkyCode);
+
+    check(funky.indent(1).toString(tabOpts), [
+        "  function g() { \t ",
+        "\t\t   return this;  ",
+        "\t } "
+    ].join("\n"));
+
+    check(funky.indent(2).toString(tabOpts), [
+        "   function g() { \t ",
+        "\t\t\treturn this;  ",
+        "\t  } "
+    ].join("\n"));
+
+    check(funky.indent(1).toString(noTabOpts), [
+        "  function g() { \t ",
+        "           return this;  ",
+        "     } "
+    ].join("\n"));
+
+    check(funky.indent(2).toString(noTabOpts), [
+        "   function g() { \t ",
+        "            return this;  ",
+        "      } "
+    ].join("\n"));
 
     t.finish();
 };
