@@ -3,19 +3,19 @@ var fs = require("fs"),
     Parser = require("./lib/parser").Parser,
     Printer = require("./lib/printer").Printer;
 
-exports.run = function(transformer) {
+exports.run = function(transformer, options) {
     fs.readFile(path, "utf-8", function(err, data) {
         if (err) {
             console.log(err);
             return;
         }
 
-        var parser = new Parser(data),
-            printer = new Printer(parser);
+        var parser = new Parser(data, options),
+            printer = new Printer(parser, options);
 
         transformer(parser.getAst(), function(node) {
             var lines = printer.print(node, true);
-            process.stdout.write(lines.toString());
+            process.stdout.write(lines.toString(options));
         });
     });
 };
