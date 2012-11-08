@@ -16,3 +16,4 @@ submodule("visitor");
 submodule("comments");
 submodule("parser");
 submodule("printer");
+submodule("syntax");
