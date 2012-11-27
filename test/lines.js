@@ -352,6 +352,11 @@ exports.testCountSpaces = function(t) {
     check("\t\t\t   ", 3, 12);
     check("\t\t\t   ", 4, 15);
 
+    check("\r", 4, 0);
+    check("\r ", 4, 1);
+    check(" \r ", 4, 2);
+    check(" \r\r ", 4, 2);
+
     t.finish();
 };
 
@@ -431,6 +436,30 @@ exports.testIndentWithTabs = function(t) {
         "   function g() { \t ",
         "            return this;  ",
         "      } "
+    ].join("\n"));
+
+    // Test that '\r' characters are ignored for the purposes of indentation,
+    // but preserved when printing untouched lines.
+    code = [
+        "\rfunction f() {\r",
+        " \r   return \rthis;\r",
+        "\r} \r "
+    ].join("\n");
+
+    lines = fromString(code, tabWidth);
+
+    checkUnchanged(lines, code);
+
+    check(lines.indent(4).toString(noTabOpts), [
+        "    function f() {\r",
+        "        return \rthis;\r",
+        "    } \r "
+    ].join("\n"));
+
+    check(lines.indent(5).toString(tabOpts), [
+        "\t function f() {\r",
+        "\t\t return \rthis;\r",
+        "\t } \r "
     ].join("\n"));
 
     t.finish();
