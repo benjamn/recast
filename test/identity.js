@@ -3,7 +3,6 @@ var assert = require("assert"),
     path = require("path");
 
 function identity(ast, callback) {
-    debugger;
     callback(ast);
 }
 
