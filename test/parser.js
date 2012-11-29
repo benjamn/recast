@@ -1,14 +1,15 @@
-var Parser = require("../lib/parser").Parser,
+var assert = require("assert"),
+    Parser = require("../lib/parser").Parser,
     Printer = require("../lib/printer").Printer,
     Visitor = require("../lib/visitor").Visitor,
     Syntax = require("../lib/syntax"),
     printComment = require("../lib/comments").print,
-    linesModule = require("../lib/lines");
+    fromString = require("../lib/lines").fromString;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
 
-function testParser(t, assert) {
+function testParser(t) {
     var code = testParser + "",
         parser = new Parser(code),
         ast = parser.getAst();
@@ -40,7 +41,7 @@ function testParser(t, assert) {
     assert.strictEqual(lastStatement.comments.length, 2);
 
     var printedComments = lastStatement.comments.map(printComment),
-        joinedComments = linesModule.fromString("\n").join(printedComments),
+        joinedComments = fromString("\n").join(printedComments),
         printedComments = joinedComments.toString();
 
     assert.strictEqual(joinedComments.length, 2);
@@ -78,5 +79,46 @@ exports.testLocationFixer = testLocationFixer;
 var FunctionBodyReverser = Visitor.extend({
     visitFunctionDeclaration: function(expr) {
         expr.body.body.reverse();
+    }
+});
+
+exports.testTabHandling = function(t) {
+    function check(code, tabWidth) {
+        var lines = fromString(code, tabWidth);
+        assert.strictEqual(lines.length, 1);
+        new IdentVisitor(lines).visit(
+            new Parser(code, {
+                tabWidth: tabWidth
+            }).getAst());
+    }
+
+    for (var tabWidth = 1; tabWidth <= 8; ++tabWidth) {
+        check("\t\ti = 10;", tabWidth);
+        check("\t\ti \t= 10;", tabWidth);
+        check("\t\ti \t=\t 10;", tabWidth);
+        check("\t \ti \t=\t 10;", tabWidth);
+        check("\t \ti \t=\t 10;\t", tabWidth);
+        check("\t \ti \t=\t 10;\t ", tabWidth);
+    }
+
+    t.finish();
+};
+
+var IdentVisitor = Visitor.extend({
+    init: function(lines) {
+        this.lines = lines;
+    },
+
+    check: function(s, loc) {
+        var sliced = this.lines.slice(loc.start, loc.end);
+        assert.strictEqual(s + "", sliced.toString());
+    },
+
+    visitIdentifier: function(ident) {
+        this.check(ident.name, ident.loc);
+    },
+
+    visitLiteral: function(lit) {
+        this.check(lit.value, lit.loc);
     }
 });
