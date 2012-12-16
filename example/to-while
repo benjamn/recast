@@ -1,0 +1,68 @@
+#!/usr/bin/env node
+
+// This script converts for and do-while loops into equivalent while loops.
+// Note that for-in statements are left unmodified, as they do not have a
+// simple analogy to while loops. Also note that labeled continue statements
+// are not correctly handled at this point, and will trigger an assertion
+// failure if encountered.
+
+var assert = require("assert"),
+    Syntax = require("recast").Syntax,
+    Visitor = require("recast").Visitor,
+    builder = require("recast").builder;
+
+require("recast").run(function(ast, callback) {
+    callback(new ToWhile().visit(ast));
+});
+
+var ToWhile = Visitor.extend({
+    visitForStatement: function(fst) {
+        return builder.blockStatement([
+            fst.init,
+            builder.whileStatement(
+                fst.test,
+                insertBeforeLoopback(fst, fst.update))]);
+    },
+
+    visitDoWhileStatement: function(dwst) {
+        return builder.whileStatement(
+            builder.literal(true),
+            insertBeforeLoopback(
+                dwst,
+                builder.ifStatement(
+                    dwst.test,
+                    builder.breakStatement())));
+    }
+});
+
+function insertBeforeLoopback(loop, toInsert) {
+    var body = loop.body;
+
+    if (body.type === Syntax.BlockStatement) {
+        body.body.push(toInsert);
+    } else {
+        body = builder.blockStatement([body, toInsert]);
+        loop.body = body;
+    }
+
+    new BeforeContinue(toInsert).visit(body);
+
+    return body;
+}
+
+var BeforeContinue = Visitor.extend({
+    init: function(before) {
+        this.before = before;
+    },
+
+    visitContinueStatement: function(cst) {
+        assert.equal(cst.label, null, "Labeled continue statements are not yet supported.");
+        return builder.blockStatement([this.before, cst]);
+    },
+
+    // Do not descend into nested loops.
+    visitWhileStatement: function() {},
+    visitForStatement: function() {},
+    visitForInStatement: function() {},
+    visitDoWhileStatement: function() {}
+});
