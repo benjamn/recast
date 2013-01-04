@@ -8,12 +8,11 @@ function identity(ast, callback) {
 
 function testFile(t, path) {
     fs.readFile(path, "utf-8", function(err, source) {
-        assert.ok(!err);
-        assert.ok(source);
+        assert.equal(err, null);
+        assert.strictEqual(typeof source, "string");
 
         require("recast").runString(source, identity, {
             writeback: function(code) {
-                assert.ok(code);
                 assert.strictEqual(source, code);
                 t.finish();
             }
@@ -29,6 +28,7 @@ function addTest(name) {
 
 // Add more tests here as need be.
 addTest("test/data/regexp-props");
+addTest("test/data/empty");
 addTest("test/lines");
 addTest("lib/lines");
 addTest("lib/printer");
