@@ -4,6 +4,21 @@
 1. to remodel or reconstruct (a literary work, document, sentence, etc.).
 1. to supply (a theater or opera work) with a new cast.
 
+# Installation
+
+From NPM:
+
+    npm install recast
+    
+From GitHub:
+
+    cd path/to/node_modules
+    git clone git://github.com/benjamn/recast.git
+    cd recast
+    npm install .
+
+# Motivation
+
 The more code you have, the harder it becomes to make big, sweeping changes quickly and confidently. Even if you trust yourself not to make too many mistakes, and no matter how proficient you are with your text editor, changing tens of thousands of lines of code takes precious, non-refundable time.
 
 Is there a better way? Not always! When a task requires you to alter the semantics of many different pieces of code in subtly different ways, your brain inevitably becomes the bottleneck, and there is little hope of completely automating the process. Your best bet is to plan carefully, buckle down, and get it right the first time. Love it or loathe it, that's the way programming goes sometimes.
