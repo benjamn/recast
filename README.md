@@ -29,4 +29,4 @@ And here's the best part: when you're done running a Recast script, if you're no
 
 -----
 
-Though still under active development, Recast is ready for use with JavaScript today. There's nothing particularly JavaScript-specific about the ideas involved, but I write a lot of JS, and [a good parser](https://github.com/ariya/esprima/) was readily available. If these ideas gain sufficient traction in the JavaScript community, more languages will undoubtedly follow.
+Recast is ready for use with JavaScript today. There's nothing particularly JavaScript-specific about the ideas involved, but I write a lot of JS, and [a good parser](https://github.com/ariya/esprima/) was readily available. If these ideas gain sufficient traction in the JavaScript community, more languages will undoubtedly follow.
