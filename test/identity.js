@@ -3,6 +3,7 @@ var assert = require("assert"),
     path = require("path");
 
 function identity(ast, callback) {
+    assert.deepEqual(ast.original, ast);
     callback(ast);
 }
 
@@ -29,6 +30,7 @@ function addTest(name) {
 // Add more tests here as need be.
 addTest("test/data/regexp-props");
 addTest("test/data/empty");
+addTest("test/data/jquery-1.9.1");
 addTest("test/lines");
 addTest("lib/lines");
 addTest("lib/printer");
