@@ -37,4 +37,4 @@ exports.runString = runString;
 // Useful utilities for implementing transformer functions.
 exports.Syntax = require("./lib/syntax");
 exports.Visitor = require("./lib/visitor").Visitor;
-exports.builder = require("./lib/builder");
+exports.builder = require("./lib/types").builders;
