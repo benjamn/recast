@@ -18,4 +18,3 @@ submodule("parser");
 submodule("printer");
 submodule("syntax");
 submodule("identity");
-submodule("types");

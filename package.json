@@ -12,7 +12,7 @@
     "parsing",
     "pretty-printing"
   ],
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "http://github.com/benjamn/recast",
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
     "test": "whiskey test/run.js"
   },
   "dependencies": {
-    "esprima": "git://github.com/benjamn/esprima.git#master"
+    "esprima": "git://github.com/benjamn/esprima.git#master",
+    "ast-types": ">= 0.1.2"
   },
   "devDependencies": {},
   "optionalDependencies": {
