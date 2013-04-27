@@ -1,7 +1,8 @@
-var fs = require("fs"),
-    normalizeOptions = require("./lib/options").normalize,
-    Parser = require("./lib/parser").Parser,
-    Printer = require("./lib/printer").Printer;
+var fs = require("fs");
+var normalizeOptions = require("./lib/options").normalize;
+var Parser = require("./lib/parser").Parser;
+var Printer = require("./lib/printer").Printer;
+var genericPrinter = new Printer(new Parser(""));
 
 function run(transformer, options) {
     return runFile(process.argv[2], transformer, options);
@@ -38,3 +39,8 @@ exports.runString = runString;
 exports.Syntax = require("./lib/syntax");
 exports.Visitor = require("./lib/visitor").Visitor;
 exports.builder = require("./lib/types").builders;
+
+// Quick shortcut to the generic pretty-printer.
+exports.print = function(node) {
+    return genericPrinter.printGenerically(node).toString();
+};
