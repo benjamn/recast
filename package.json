@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "esprima": "git://github.com/benjamn/esprima.git#master",
+    "private": ">= 0.0.3",
     "ast-types": ">= 0.1.2"
   },
   "devDependencies": {},
