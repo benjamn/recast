@@ -122,3 +122,27 @@ var IdentVisitor = Visitor.extend({
         this.check(lit.value, lit.loc);
     }
 });
+
+exports.testAlternateEsprima = function(t, assert) {
+    var types = require("../lib/types");
+    var b = types.builders;
+    var esprima = {
+        parse: function(code) {
+            var program = b.program([
+                b.expressionStatement(b.identifier("surprise"))
+            ]);
+            program.comments = [];
+            return program;
+        }
+    };
+    var parser = new Parser("ignored", { esprima: esprima });
+    var ast = parser.getAst();
+    var printer = new Printer(parser);
+
+    types.namedTypes.File.assert(ast, true);
+    assert.strictEqual(
+        printer.printGenerically(ast).toString(),
+        "surprise;");
+
+    t.finish();
+};
