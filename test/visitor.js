@@ -1,5 +1,5 @@
 var Visitor = require("../lib/visitor").Visitor,
-    Syntax = require("../lib/syntax"),
+    Syntax = require("../lib/types").Syntax,
     Parser = require("../lib/parser").Parser,
     Printer = require("../lib/printer").Printer;
 

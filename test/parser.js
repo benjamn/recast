@@ -2,7 +2,7 @@ var assert = require("assert"),
     Parser = require("../lib/parser").Parser,
     Printer = require("../lib/printer").Printer,
     Visitor = require("../lib/visitor").Visitor,
-    Syntax = require("../lib/syntax"),
+    Syntax = require("../lib/types").Syntax,
     printComment = require("../lib/comments").print,
     fromString = require("../lib/lines").fromString;
 

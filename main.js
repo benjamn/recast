@@ -56,7 +56,7 @@ Object.defineProperties(exports, {
      */
     Syntax: {
         enumerable: true,
-        value: require("./lib/syntax")
+        value: types.Syntax,
     },
 
     Visitor: {
