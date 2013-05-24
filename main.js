@@ -3,7 +3,16 @@ var normalizeOptions = require("./lib/options").normalize;
 var types = require("./lib/types");
 var Parser = require("./lib/parser").Parser;
 var Printer = require("./lib/printer").Printer;
-var genericPrinter = new Printer(new Parser(""));
+
+function parse(code, options) {
+    return new Parser(code, options).getAst();
+}
+
+function print(node, options) {
+    return new Printer(options)
+        .print(node, true)
+        .toString(options);
+}
 
 function run(transformer, options) {
     return runFile(process.argv[2], transformer, options);
@@ -22,13 +31,8 @@ function runFile(path, transformer, options) {
 
 function runString(code, transformer, options) {
     options = normalizeOptions(options);
-
-    var parser = new Parser(code, options),
-        printer = new Printer(parser, options);
-
-    transformer(parser.getAst(), function(node) {
-        var lines = printer.print(node, true);
-        options.writeback(lines.toString(options));
+    transformer(parse(code, options), function(node) {
+        options.writeback(print(node, options));
     });
 }
 
@@ -80,12 +84,15 @@ Object.defineProperties(exports, {
     },
 
     /**
-     * Quick shortcut to the generic pretty-printer.
+     * Direct access to the parsing and printing interfaces.
      */
+    parse: {
+        enumerable: true,
+        value: parse
+    },
+
     print: {
         enumerable: true,
-        value: function(node) {
-            return genericPrinter.printGenerically(node).toString();
-        }
+        value: print
     }
 });
