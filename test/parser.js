@@ -1,6 +1,6 @@
 var assert = require("assert"),
     Parser = require("../lib/parser").Parser,
-    getReprinter = require("../lib/parser").getReprinter,
+    getReprinter = require("../lib/patcher").getReprinter,
     Printer = require("../lib/printer").Printer,
     Visitor = require("../lib/visitor").Visitor,
     Syntax = require("../lib/types").Syntax,
