@@ -1,9 +1,10 @@
-var assert = require("assert"),
-    fs = require("fs"),
-    path = require("path");
+var assert = require("assert");
+var fs = require("fs");
+var path = require("path");
+var util = require("../lib/util");
 
 function identity(ast, callback) {
-    assert.deepEqual(ast.original, ast);
+    assert.ok(util.deepEquivalent(ast.original, ast));
     callback(ast);
 }
 
