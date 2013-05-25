@@ -1,5 +1,6 @@
 var assert = require("assert"),
     Parser = require("../lib/parser").Parser,
+    getReprinter = require("../lib/parser").getReprinter,
     Printer = require("../lib/printer").Printer,
     Visitor = require("../lib/visitor").Visitor,
     Syntax = require("../lib/types").Syntax,
@@ -15,23 +16,23 @@ function testParser(t) {
         ast = parser.getAst();
 
     assert.strictEqual(ast.type, Syntax.File);
-    assert.ok(parser.getReprinter(ast));
+    assert.ok(getReprinter(ast));
 
     var funDecl = ast.program.body[0],
         funBody = funDecl.body;
 
     assert.strictEqual(funDecl.type, Syntax.FunctionDeclaration);
     assert.strictEqual(funBody.type, Syntax.BlockStatement);
-    assert.ok(parser.getReprinter(funBody));
+    assert.ok(getReprinter(funBody));
 
     var lastStatement = funBody.body.pop(),
         tFinish = lastStatement.expression;
 
-    assert.ok(!parser.getReprinter(funBody));
-    assert.ok(parser.getReprinter(ast));
+    assert.ok(!getReprinter(funBody));
+    assert.ok(getReprinter(ast));
 
     funBody.body.push(lastStatement);
-    assert.ok(parser.getReprinter(funBody));
+    assert.ok(getReprinter(funBody));
 
     assert.strictEqual(tFinish.callee.object.name, "t");
     assert.strictEqual(tFinish.callee.property.name, "finish");
