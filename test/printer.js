@@ -4,7 +4,7 @@ var Printer = require("../lib/printer").Printer,
 function testPrinter(t, assert) {
     var code = testPrinter + "",
         parser = new Parser(code),
-        printer = new Printer(parser);
+        printer = new Printer;
 
     assert.strictEqual(typeof printer.print, "function");
     assert.ok(printer.print(null).isEmpty());

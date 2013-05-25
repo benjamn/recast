@@ -14,9 +14,8 @@ var lines = [
 
 exports.testVisitor = function(t, assert) {
     var source = lines.join("\n"),
-        parser = new Parser(source),
-        printer = new Printer(parser),
-        ast = parser.getAst(),
+        printer = new Printer,
+        ast = new Parser(source).getAst(),
         withThis = printer.print(ast).toString(),
         thisExp = /\bthis\b/g;
 
@@ -102,7 +101,7 @@ exports.testReindent = function(t, assert) {
 
         source = lines.join("\n"),
         parser = new Parser(source),
-        printer = new Printer(parser),
+        printer = new Printer,
         ast = parser.getAst();
 
     var ff = new FunctionFinder;

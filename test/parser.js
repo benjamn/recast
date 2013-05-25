@@ -61,7 +61,7 @@ function testLocationFixer(t, assert) {
         "    b()",
         "}"].join("\n");
         parser = new Parser(code),
-        printer = new Printer(parser),
+        printer = new Printer,
         ast = parser.getAst();
 
     new FunctionBodyReverser().visit(ast);
@@ -138,7 +138,7 @@ exports.testAlternateEsprima = function(t, assert) {
     };
     var parser = new Parser("ignored", { esprima: esprima });
     var ast = parser.getAst();
-    var printer = new Printer(parser);
+    var printer = new Printer;
 
     types.namedTypes.File.assert(ast, true);
     assert.strictEqual(
