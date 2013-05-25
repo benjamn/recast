@@ -2,7 +2,7 @@ var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
 var Syntax = require("../lib/types").Syntax;
-var Parser = require("../lib/parser").Parser;
+var parse = require("../lib/parser").parse;
 var Visitor = require("../lib/visitor").Visitor;
 
 // Make sure we handle all possible node types in Syntax, and no additional
@@ -13,8 +13,7 @@ exports.testCompleteness = function(t) {
     fs.readFile(printer, "utf-8", function(err, data) {
         assert.ok(!err);
 
-        var parser = new Parser(data);
-        var ast = parser.getAst();
+        var ast = parse(data);
         assert.ok(ast);
 
         var types = {};

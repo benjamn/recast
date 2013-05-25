@@ -1,7 +1,7 @@
-var Visitor = require("../lib/visitor").Visitor,
-    Syntax = require("../lib/types").Syntax,
-    Parser = require("../lib/parser").Parser,
-    Printer = require("../lib/printer").Printer;
+var Visitor = require("../lib/visitor").Visitor;
+var Syntax = require("../lib/types").Syntax;
+var parse = require("../lib/parser").parse;
+var Printer = require("../lib/printer").Printer;
 
 var lines = [
     "// file comment",
@@ -15,7 +15,7 @@ var lines = [
 exports.testVisitor = function(t, assert) {
     var source = lines.join("\n"),
         printer = new Printer,
-        ast = new Parser(source).getAst(),
+        ast = parse(source),
         withThis = printer.print(ast).toString(),
         thisExp = /\bthis\b/g;
 
@@ -100,9 +100,8 @@ exports.testReindent = function(t, assert) {
         "})));"],
 
         source = lines.join("\n"),
-        parser = new Parser(source),
-        printer = new Printer,
-        ast = parser.getAst();
+        ast = parse(source),
+        printer = new Printer;
 
     var ff = new FunctionFinder;
     ff.visit(ast);

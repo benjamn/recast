@@ -1,12 +1,8 @@
 var fs = require("fs");
 var normalizeOptions = require("./lib/options").normalize;
 var types = require("./lib/types");
-var Parser = require("./lib/parser").Parser;
+var parse = require("./lib/parser").parse;
 var Printer = require("./lib/printer").Printer;
-
-function parse(code, options) {
-    return new Parser(code, options).getAst();
-}
 
 function print(node, options) {
     return new Printer(options)

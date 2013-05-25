@@ -1,5 +1,5 @@
 var assert = require("assert"),
-    Parser = require("../lib/parser").Parser,
+    parse = require("../lib/parser").parse,
     getReprinter = require("../lib/patcher").getReprinter,
     Printer = require("../lib/printer").Printer,
     Visitor = require("../lib/visitor").Visitor,
@@ -11,9 +11,8 @@ var assert = require("assert"),
 // test functions with names and then export them later.
 
 function testParser(t) {
-    var code = testParser + "",
-        parser = new Parser(code),
-        ast = parser.getAst();
+    var code = testParser + "";
+    var ast = parse(code);
 
     assert.strictEqual(ast.type, Syntax.File);
     assert.ok(getReprinter(ast));
@@ -59,10 +58,10 @@ function testLocationFixer(t, assert) {
         "function foo() {",
         "    a()",
         "    b()",
-        "}"].join("\n");
-        parser = new Parser(code),
-        printer = new Printer,
-        ast = parser.getAst();
+        "}"
+    ].join("\n");
+    var ast = parse(code);
+    var printer = new Printer;
 
     new FunctionBodyReverser().visit(ast);
 
@@ -88,9 +87,8 @@ exports.testTabHandling = function(t) {
         var lines = fromString(code, tabWidth);
         assert.strictEqual(lines.length, 1);
         new IdentVisitor(lines).visit(
-            new Parser(code, {
-                tabWidth: tabWidth
-            }).getAst());
+            parse(code, { tabWidth: tabWidth })
+        );
     }
 
     for (var tabWidth = 1; tabWidth <= 8; ++tabWidth) {
@@ -136,8 +134,7 @@ exports.testAlternateEsprima = function(t, assert) {
             return program;
         }
     };
-    var parser = new Parser("ignored", { esprima: esprima });
-    var ast = parser.getAst();
+    var ast = parse("ignored", { esprima: esprima });
     var printer = new Printer;
 
     types.namedTypes.File.assert(ast, true);
