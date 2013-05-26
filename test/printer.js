@@ -7,16 +7,12 @@ function testPrinter(t, assert) {
     var printer = new Printer;
 
     assert.strictEqual(typeof printer.print, "function");
-    assert.ok(printer.print(null).isEmpty());
-    assert.ok(printer.print(null, true).isEmpty());
+    assert.strictEqual(printer.print(null), "");
 
-    var printed = printer.printGenerically(ast);
-    var string = printed.toString();
-
+    var string = printer.printGenerically(ast);
     assert.ok(string.indexOf("t.finish();") > 0);
 
-    printed = printer.print(ast, true);
-    string = printed.toString();
+    string = printer.print(ast);
 
     // TODO
 

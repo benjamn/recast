@@ -70,7 +70,7 @@ function testLocationFixer(t, assert) {
         .replace("b()", "a()")
         .replace("xxx", "b()");
 
-    assert.strictEqual(altered, printer.print(ast).toString());
+    assert.strictEqual(altered, printer.print(ast));
 
     t.finish();
 }
@@ -139,7 +139,7 @@ exports.testAlternateEsprima = function(t, assert) {
 
     types.namedTypes.File.assert(ast, true);
     assert.strictEqual(
-        printer.printGenerically(ast).toString(),
+        printer.printGenerically(ast),
         "surprise;");
 
     t.finish();

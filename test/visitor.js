@@ -16,7 +16,7 @@ exports.testVisitor = function(t, assert) {
     var source = lines.join("\n"),
         printer = new Printer,
         ast = parse(source),
-        withThis = printer.print(ast).toString(),
+        withThis = printer.print(ast),
         thisExp = /\bthis\b/g;
 
     assert.ok(thisExp.test(withThis));
@@ -24,7 +24,7 @@ exports.testVisitor = function(t, assert) {
     new ThisReplacer().visit(ast);
 
     assert.strictEqual(
-        printer.print(ast).toString(),
+        printer.print(ast),
         withThis.replace(thisExp, "self"));
 
     var bc = new BazChecker;
@@ -110,7 +110,7 @@ exports.testReindent = function(t, assert) {
 
     assert.strictEqual(
         altered.join("\n"),
-        printer.print(ast).toString());
+        printer.print(ast));
 
     t.finish();
 };

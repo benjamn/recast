@@ -5,9 +5,7 @@ var parse = require("./lib/parser").parse;
 var Printer = require("./lib/printer").Printer;
 
 function print(node, options) {
-    return new Printer(options)
-        .print(node, true)
-        .toString(options);
+    return new Printer(options).print(node);
 }
 
 function run(transformer, options) {
