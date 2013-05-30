@@ -12,7 +12,7 @@ function testFile(t, path) {
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
 
-        require("recast").runString(source, identity, {
+        require("../main").runString(source, identity, {
             writeback: function(code) {
                 assert.strictEqual(source, code);
                 t.finish();
