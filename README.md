@@ -1,4 +1,4 @@
-# recast, _v_.
+# recast, _v_. [![Build Status](https://travis-ci.org/benjamn/recast.png?branch=master)](https://travis-ci.org/benjamn/recast)
 1. to give (a metal object) a different form by melting it down and reshaping it.
 1. to form, fashion, or arrange again.
 1. to remodel or reconstruct (a literary work, document, sentence, etc.).
