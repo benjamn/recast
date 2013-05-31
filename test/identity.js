@@ -4,7 +4,9 @@ var path = require("path");
 var util = require("../lib/util");
 
 function identity(ast, callback) {
-    assert.ok(util.deepEquivalent(ast.original, ast));
+    assert.ok(ast.originalPath);
+    var orig = ast.originalPath.node;
+    assert.ok(util.deepEquivalent(orig, ast));
     callback(ast);
 }
 

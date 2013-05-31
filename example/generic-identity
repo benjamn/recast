@@ -12,7 +12,7 @@ recast.run(function(ast, callback) {
 var Divorcer = recast.Visitor.extend({
     visit: function(node) {
         this.genericVisit(node);
-        node.original = null;
+        node.originalPath = null;
         return node;
     }
 });
