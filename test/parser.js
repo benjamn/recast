@@ -1,11 +1,12 @@
-var assert = require("assert"),
-    parse = require("../lib/parser").parse,
-    getReprinter = require("../lib/patcher").getReprinter,
-    Printer = require("../lib/printer").Printer,
-    Visitor = require("../lib/visitor").Visitor,
-    Syntax = require("../lib/types").Syntax,
-    printComment = require("../lib/comments").print,
-    fromString = require("../lib/lines").fromString;
+var assert = require("assert");
+var parse = require("../lib/parser").parse;
+var getReprinter = require("../lib/patcher").getReprinter;
+var Printer = require("../lib/printer").Printer;
+var Visitor = require("../lib/visitor").Visitor;
+var Syntax = require("../lib/types").Syntax;
+var printComment = require("../lib/comments").print;
+var fromString = require("../lib/lines").fromString;
+var Path = require("../lib/path").Path;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -15,23 +16,23 @@ function testParser(t) {
     var ast = parse(code);
 
     assert.strictEqual(ast.type, Syntax.File);
-    assert.ok(getReprinter(ast));
+    assert.ok(getReprinter(new Path(ast)));
 
     var funDecl = ast.program.body[0],
         funBody = funDecl.body;
 
     assert.strictEqual(funDecl.type, Syntax.FunctionDeclaration);
     assert.strictEqual(funBody.type, Syntax.BlockStatement);
-    assert.ok(getReprinter(funBody));
+    assert.ok(getReprinter(new Path(funBody)));
 
     var lastStatement = funBody.body.pop(),
         tFinish = lastStatement.expression;
 
-    assert.ok(!getReprinter(funBody));
-    assert.ok(getReprinter(ast));
+    assert.ok(!getReprinter(new Path(funBody)));
+    assert.ok(getReprinter(new Path(ast)));
 
     funBody.body.push(lastStatement);
-    assert.ok(getReprinter(funBody));
+    assert.ok(getReprinter(new Path(funBody)));
 
     assert.strictEqual(tFinish.callee.object.name, "t");
     assert.strictEqual(tFinish.callee.property.name, "finish");
