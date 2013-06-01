@@ -39,7 +39,7 @@ var GenericPrintVisitor = Visitor.extend({
     visitFunctionDeclaration: function(decl) {
         if (decl.id &&
             decl.id.type === Syntax.Identifier &&
-            decl.id.name === "genericPrint")
+            decl.id.name === "genericPrintNoParens")
         {
             new CaseVisitor(this.types).visit(decl);
         }
