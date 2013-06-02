@@ -125,7 +125,9 @@ exports.testAssign = function(t) {
 
 exports.testFunction = function(t) {
     check("a(function(){}.bind(this))");
-    check("(function(){}).call(this)");
+    check("(function(){}).apply(this, arguments)");
+    check("function f() { (function(){}).call(this) }");
+    check("while (true) { (function(){}).call(this) }");
 
     t.finish();
 };
