@@ -8,6 +8,10 @@ function print(node, options) {
     return new Printer(options).print(node);
 }
 
+function prettyPrint(node, options) {
+    return new Printer(options).printGenerically(node);
+}
+
 function run(transformer, options) {
     return runFile(process.argv[2], transformer, options);
 }
@@ -88,5 +92,10 @@ Object.defineProperties(exports, {
     print: {
         enumerable: true,
         value: print
+    },
+
+    prettyPrint: {
+        enumerable: true,
+        value: prettyPrint
     }
 });
