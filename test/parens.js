@@ -3,6 +3,7 @@ var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var util = require("../lib/util");
 var n = require("../lib/types").namedTypes;
+var b = require("../lib/types").builders;
 var printer = new Printer;
 
 function parseExpression(expr) {
@@ -135,6 +136,31 @@ exports.testFunction = function(t) {
 exports.testObjectLiteral = function(t) {
     check("a({b:c(d)}.b)");
     check("({a:b(c)}).a");
+
+    t.finish();
+};
+
+exports.testReprintedParens = function(t) {
+    var code = "a(function g(){}.call(this));";
+    var ast1 = parse(code);
+    var body = ast1.program.body;
+
+    // Copy the function from a position where it does not need
+    // parentheses to a position where it does need parentheses.
+    body.push(b.expressionStatement(
+        body[0].expression.arguments[0]));
+
+    var generic = printer.printGenerically(ast1);
+    var ast2 = parse(generic);
+    assert.ok(
+        util.deepEquivalent(ast1, ast2),
+        "generic reprinting failed: " + generic);
+
+    var reprint = printer.print(ast1);
+    var ast3 = parse(reprint);
+    assert.ok(
+        util.deepEquivalent(ast1, ast3),
+        "conservative reprinting failed: " + reprint);
 
     t.finish();
 };
