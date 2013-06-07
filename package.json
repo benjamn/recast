@@ -23,7 +23,7 @@
     "test": "whiskey test/run.js"
   },
   "dependencies": {
-    "esprima": "git://github.com/benjamn/esprima.git#master",
+    "esprima": ">= 1.0.3",
     "private": ">= 0.0.3",
     "ast-types": ">= 0.2.9"
   },
