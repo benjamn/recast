@@ -1,6 +1,10 @@
-var assert = require("assert"),
-    Patcher = require("../lib/patcher").Patcher,
-    fromString = require("../lib/lines").fromString;
+var assert = require("assert");
+var patcherModule = require("../lib/patcher");
+var getReprinter = patcherModule.getReprinter;
+var Patcher = patcherModule.Patcher;
+var fromString = require("../lib/lines").fromString;
+var parse = require("../lib/parser").parse;
+var Path = require("../lib/path").Path;
 
 var code = [
     "// file comment",
@@ -56,6 +60,44 @@ exports.testPatcher = function(t) {
         "// file comment",
         "exports.foo(oyez);"
     ].join("\n"));
+
+    t.finish();
+};
+
+var trickyCode = [
+    "    function",
+    "      foo(bar,",
+    "  baz) {",
+    "        qux();",
+    "    }"
+].join("\n");
+
+exports.testGetIndent = function(t) {
+    function check(indent) {
+        var lines = fromString(trickyCode).indent(indent);
+        var path = new Path(parse(lines.toString()))
+            .consProperty("program")
+            .consArrayElement("body", 0)
+            .consProperty("body");
+
+        var reprinter = getReprinter(path);
+        var reprintedLines = reprinter(function(path) {
+            assert.ok(false, "should not have called print function");
+        });
+
+        assert.strictEqual(reprintedLines.length, 3);
+        assert.strictEqual(reprintedLines.getIndentAt(1), 0);
+        assert.strictEqual(reprintedLines.getIndentAt(2), 4);
+        assert.strictEqual(reprintedLines.getIndentAt(3), 0);
+        assert.strictEqual(reprintedLines.toString(), [
+            "{",
+            "    qux();",
+            "}"
+        ].join("\n"));
+    }
+
+    for (var indent = -4; indent <= 4; ++indent)
+        check(indent);
 
     t.finish();
 };
