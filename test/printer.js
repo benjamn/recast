@@ -21,3 +21,29 @@ function testPrinter(t, assert) {
     t.finish();
 };
 exports.testPrinter = testPrinter;
+
+var uselessSemicolons = [
+    'function a() {',
+    '  return "a";',
+    '};',
+    '',
+    'function b() {',
+    '  return "b";',
+    '};'
+].join("\n");
+
+exports.testEmptyStatements = function(t, assert) {
+    var ast = parse(uselessSemicolons);
+    var printer = new Printer({ tabWidth: 2 });
+
+    var reprinted = printer.print(ast);
+    assert.strictEqual(typeof reprinted, "string");
+    assert.strictEqual(reprinted, uselessSemicolons);
+
+    var generic = printer.printGenerically(ast);
+    var withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
+    assert.strictEqual(typeof generic, "string");
+    assert.strictEqual(generic, withoutTrailingSemicolons);
+
+    t.finish();
+};
