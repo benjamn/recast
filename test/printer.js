@@ -113,3 +113,26 @@ exports.testSwitchCase = function(t, assert) {
 
     t.finish();
 };
+
+var tryCatch = [
+    "try {",
+    "  a();",
+    "} catch (e) {",
+    "  b(e);",
+    "}"
+].join("\n");
+
+exports.testIndentTryCatch = function(t, assert) {
+    var ast = parse(tryCatch);
+    var printer = new Printer({ tabWidth: 2 });
+    var body = ast.program.body;
+    var tryStmt = body[0];
+    n.TryStatement.assert(tryStmt);
+
+    // Force reprinting of the catch.
+    tryStmt.handlers[0].guard = null;
+
+    assert.strictEqual(printer.print(ast), tryCatch);
+
+    t.finish();
+};
