@@ -30,7 +30,12 @@ function runFile(path, transformer, options) {
 function runString(code, transformer, options) {
     options = normalizeOptions(options);
     transformer(parse(code, options), function(node) {
-        options.writeback(print(node, options));
+        var output = print(node, options);
+        if (options.writeback) {
+            options.writeback(output);
+        } else {
+            process.stdout.write(output);
+        }
     });
 }
 

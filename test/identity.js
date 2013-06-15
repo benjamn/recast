@@ -2,23 +2,19 @@ var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
 var util = require("../lib/util");
-
-function identity(ast, callback) {
-    assert.ok(util.deepEquivalent(ast.original, ast));
-    callback(ast);
-}
+var main = require("../main");
 
 function testFile(t, path) {
     fs.readFile(path, "utf-8", function(err, source) {
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
 
-        require("../main").runString(source, identity, {
-            writeback: function(code) {
-                assert.strictEqual(source, code);
-                t.finish();
-            }
-        });
+        var ast = main.parse(source);
+        assert.ok(util.deepEquivalent(ast.original, ast));
+        var code = main.print(ast);
+        assert.strictEqual(source, code);
+
+        t.finish();
     });
 }
 
