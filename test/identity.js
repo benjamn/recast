@@ -27,7 +27,7 @@ function addTest(name) {
 // Add more tests here as need be.
 addTest("test/data/regexp-props");
 addTest("test/data/empty");
-addTest("test/data/jquery-1.9.1");
+addTest("test/data/backbone");
 addTest("test/lines");
 addTest("lib/lines");
 addTest("lib/printer");
