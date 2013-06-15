@@ -230,19 +230,22 @@ exports.testSingleLine = function(t) {
     t.finish();
 };
 
-exports.testSlice = function(t) {
+function testSlice(t) {
     var code = arguments.callee + "",
         lines = fromString(code);
+    checkAllSlices(lines);
+    t.finish();
+}
+exports.testSlice = testSlice;
 
+function checkAllSlices(lines) {
     lines.eachPos(function(start) {
         lines.eachPos(function(end) {
             check(lines.slice(start, end),
                   lines.bootstrapSlice(start, end));
         }, start);
     });
-
-    t.finish();
-};
+}
 
 function getSourceLocation(lines) {
     return { start: lines.firstPos(),
