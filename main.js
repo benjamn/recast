@@ -27,15 +27,14 @@ function runFile(path, transformer, options) {
     });
 }
 
+function defaultWriteback(output) {
+    process.stdout.write(output);
+}
+
 function runString(code, transformer, options) {
-    options = normalizeOptions(options);
+    var writeback = options.writeback || defaultWriteback;
     transformer(parse(code, options), function(node) {
-        var output = print(node, options);
-        if (options.writeback) {
-            options.writeback(output);
-        } else {
-            process.stdout.write(output);
-        }
+        writeback(print(node, options));
     });
 }
 
