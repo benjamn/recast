@@ -5,7 +5,9 @@ var Printer = require("../lib/printer").Printer;
 var Visitor = require("../lib/visitor").Visitor;
 var Syntax = require("../lib/types").Syntax;
 var printComment = require("../lib/comments").print;
-var fromString = require("../lib/lines").fromString;
+var linesModule = require("../lib/lines");
+var fromString = linesModule.fromString;
+var concat = linesModule.concat;
 var Path = require("../lib/path").Path;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
@@ -41,11 +43,11 @@ function testParser(t) {
     assert.ok(lastStatement.comments instanceof Array);
     assert.strictEqual(lastStatement.comments.length, 2);
 
-    var printedComments = lastStatement.comments.map(printComment),
-        joinedComments = fromString("\n").join(printedComments),
-        printedComments = joinedComments.toString();
+    var printedComments = lastStatement.comments.map(printComment);
+    var joinedComments = concat(printedComments);
+    var printedComments = joinedComments.toString();
 
-    assert.strictEqual(joinedComments.length, 2);
+    assert.strictEqual(joinedComments.length, 3);
     assert.strictEqual(printedComments.indexOf("Make sure"), 3);
 
     // Make sure t.finish() remains the final statement in this function,
