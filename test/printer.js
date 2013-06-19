@@ -136,3 +136,46 @@ exports.testIndentTryCatch = function(t, assert) {
 
     t.finish();
 };
+
+var classBody = [
+    "class A {",
+    "  foo(x) { return x }",
+    "  bar(y) { this.foo(y); }",
+    "  baz(x, y) {",
+    "    this.foo(x);",
+    "    this.bar(y);",
+    "  }",
+    "}"
+];
+
+var classBodyExpected = [
+    "class A {",
+    "  foo(x) { return x }",
+    "  bar(y) { this.foo(y); }",
+    "",
+    "  baz(x, y) {",
+    "    this.foo(x);",
+    "    this.bar(y);",
+    "  }",
+    "",
+    "  foo(x) { return x }",
+    "}"
+];
+
+exports.testMethodPrinting = function(t, assert) {
+    var code = classBody.join("\n");
+    var ast = parse(code);
+    var printer = new Printer({ tabWidth: 2 });
+    var cb = ast.program.body[0].body;
+    n.ClassBody.assert(cb);
+
+    // Trigger reprinting of the class body.
+    cb.body.push(cb.body[0]);
+
+    assert.strictEqual(
+        printer.print(ast),
+        classBodyExpected.join("\n")
+    );
+
+    t.finish();
+};
