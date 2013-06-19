@@ -164,7 +164,11 @@ var classBodyExpected = [
 
 exports.testMethodPrinting = function(t, assert) {
     var code = classBody.join("\n");
-    var ast = parse(code);
+    try {
+        var ast = parse(code);
+    } catch (e) {
+        return t.skip("ES6 not supported: " + e);
+    }
     var printer = new Printer({ tabWidth: 2 });
     var cb = ast.program.body[0].body;
     n.ClassBody.assert(cb);
