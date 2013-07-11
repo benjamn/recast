@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "esprima": ">= 1.0.3",
-    "private": ">= 0.0.3",
-    "ast-types": ">= 0.2.12"
+    "private": ">= 0.0.4",
+    "ast-types": ">= 0.2.16"
   },
   "devDependencies": {},
   "optionalDependencies": {
