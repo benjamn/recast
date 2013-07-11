@@ -54,12 +54,10 @@ var CaseVisitor = Visitor.extend({
     visitSwitchCase: function(expr) {
         var test = expr.test;
         if (test &&
-            test.type === Syntax.MemberExpression &&
-            test.object.type === Syntax.Identifier &&
-            test.object.name === "Syntax" &&
-            test.property.type === Syntax.Identifier)
+            test.type === "Literal" &&
+            typeof test.value === "string")
         {
-            var name = test.property.name;
+            var name = test.value;
             this.types[name] = Syntax[name];
         }
     }
