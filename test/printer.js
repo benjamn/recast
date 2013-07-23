@@ -189,7 +189,8 @@ var multiLineParams = [
     "              xxx",
     "              param */ a,",
     "  // other params",
-    "  b, c, d) {",
+    "  b, c, // see?",
+    "  d) {",
     "  return a + b + c + d;",
     "}"
 ];
@@ -201,6 +202,7 @@ var multiLineParamsExpected = [
     "     param */ a,",
     "  // other params",
     "  b,",
+    "  // see?",
     "  c,",
     "  d) {",
     "  return a + b + c + d;",
