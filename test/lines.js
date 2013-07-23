@@ -215,6 +215,15 @@ exports.testSingleLine = function(t) {
     check(line.indentTail(4), string);
     check(line.indentTail(-4), string);
 
+    // Single-line Lines objects are completely unchanged by indentTail.
+    assert.strictEqual(line.indentTail(10), line);
+
+    // Multi-line Lines objects are altered by indentTail, but only if the
+    // amount of the indentation is non-zero.
+    var twice = line.concat("\n", line);
+    assert.notStrictEqual(twice.indentTail(10), twice);
+    assert.strictEqual(twice.indentTail(0), twice);
+
     check(line.concat(line), string + string);
     check(line.indentTail(4).concat(line), string + string);
     check(line.concat(line.indentTail(4)), string + string);

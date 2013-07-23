@@ -183,3 +183,46 @@ exports.testMethodPrinting = function(t, assert) {
 
     t.finish();
 };
+
+var multiLineParams = [
+    "function f(/* first",
+    "              xxx",
+    "              param */ a,",
+    "  // other params",
+    "  b, c, // see?",
+    "  d) {",
+    "  return a + b + c + d;",
+    "}"
+];
+
+var multiLineParamsExpected = [
+    "function f(",
+    "  /* first",
+    "     xxx",
+    "     param */ a,",
+    "  // other params",
+    "  b,",
+    "  // see?",
+    "  c,",
+    "  d) {",
+    "  return a + b + c + d;",
+    "}"
+];
+
+exports.testMultiLineParams = function(t, assert) {
+    var code = multiLineParams.join("\n");
+    var ast = parse(code);
+    var printer = new Printer({ tabWidth: 2 });
+
+    require("ast-types").traverse(ast, function(node) {
+        // Drop all original source information.
+        node.original = null;
+    });
+
+    assert.strictEqual(
+        printer.print(ast),
+        multiLineParamsExpected.join("\n")
+    );
+
+    t.finish();
+};
