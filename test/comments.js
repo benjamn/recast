@@ -82,6 +82,7 @@ var trailing = [
     "    // Put more properties here when you think of them.",
     "  } // There was an object literal...",
     "    // ... and here I am continuing this comment.",
+    "",
     "};"
 ];
 
