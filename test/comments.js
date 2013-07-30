@@ -154,3 +154,32 @@ exports.testTrailingComments = function(t, assert) {
 
     t.finish();
 };
+
+var paramTrailing = [
+    "function foo(bar, baz /* = null */) {",
+    "  assert.strictEqual(baz, null);",
+    "}"
+];
+
+var paramTrailingExpected = [
+    "function foo(zxcv, bar, baz /* = null */) {",
+    "  assert.strictEqual(baz, null);",
+    "}"
+];
+
+exports.testParamTrailingComments = function(t, assert) {
+    var code = paramTrailing.join("\n");
+    var ast = recast.parse(code);
+
+    var func = ast.program.body[0];
+    n.FunctionDeclaration.assert(func);
+
+    func.params.unshift(b.identifier("zxcv"));
+
+    var actual = recast.print(ast, { tabWidth: 2 });
+    var expected = paramTrailingExpected.join("\n");
+
+    assert.strictEqual(actual, expected);
+
+    t.finish();
+};
