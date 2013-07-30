@@ -4,7 +4,7 @@ var getReprinter = require("../lib/patcher").getReprinter;
 var Printer = require("../lib/printer").Printer;
 var Visitor = require("../lib/visitor").Visitor;
 var Syntax = require("../lib/types").Syntax;
-var printComment = require("../lib/comments").print;
+var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
@@ -43,8 +43,7 @@ function testParser(t) {
     assert.ok(lastStatement.comments instanceof Array);
     assert.strictEqual(lastStatement.comments.length, 2);
 
-    var printedComments = lastStatement.comments.map(printComment);
-    var joinedComments = concat(printedComments);
+    var joinedComments = printComments(lastStatement.comments);
     var printedComments = joinedComments.toString();
 
     assert.strictEqual(joinedComments.length, 3);
