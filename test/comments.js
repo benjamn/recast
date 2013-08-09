@@ -183,3 +183,38 @@ exports.testParamTrailingComments = function(t, assert) {
 
     t.finish();
 };
+
+var protoAssign = [
+    "A.prototype.foo = function() {",
+    "  return this.bar();",
+    "}", // Lack of semicolon screws up location info.
+    "",
+    "// Comment about the bar method.",
+    "A.prototype.bar = function() {",
+    "  return this.foo();",
+    "}"
+];
+
+exports.testProtoAssignComment = function(t, assert) {
+    var code = protoAssign.join("\n");
+    var ast = recast.parse(code);
+
+    var foo = ast.program.body[0];
+    var bar = ast.program.body[1];
+
+    n.ExpressionStatement.assert(foo);
+    n.ExpressionStatement.assert(bar);
+
+    assert.strictEqual(foo.expression.left.property.name, "foo");
+    assert.strictEqual(bar.expression.left.property.name, "bar");
+
+    assert.ok(!foo.comments);
+    assert.ok(bar.comments);
+    assert.strictEqual(bar.comments.length, 1);
+    assert.strictEqual(
+        bar.comments[0].value,
+        " Comment about the bar method."
+    );
+
+    t.finish();
+};
