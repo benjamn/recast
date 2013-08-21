@@ -226,3 +226,43 @@ exports.testMultiLineParams = function(t, assert) {
 
     t.finish();
 };
+
+exports.testSimpleVarPrinting = function(t, assert) {
+    var printer = new Printer({ tabWidth: 2 });
+    var varDecl = b.variableDeclaration("var", [
+        b.variableDeclarator(b.identifier("x"), null),
+        b.variableDeclarator(b.identifier("y"), null),
+        b.variableDeclarator(b.identifier("z"), null)
+    ]);
+
+    assert.strictEqual(
+        printer.print(varDecl),
+        "var x, y, z"
+    );
+
+    t.finish();
+};
+
+exports.testMultiLineVarPrinting = function(t, assert) {
+    var printer = new Printer({ tabWidth: 2 });
+    var varDecl = b.variableDeclaration("var", [
+        b.variableDeclarator(b.identifier("x"), null),
+        b.variableDeclarator(
+            b.identifier("y"),
+            b.objectExpression([
+                b.property("init", b.identifier("why"), b.literal("not"))
+            ])
+        ),
+        b.variableDeclarator(b.identifier("z"), null)
+    ]);
+
+    assert.strictEqual(printer.print(varDecl), [
+        "var x,",
+        "    y = {",
+        "      why: \"not\"",
+        "    },",
+        "    z"
+    ].join("\n"));
+
+    t.finish();
+};
