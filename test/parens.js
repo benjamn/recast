@@ -2,6 +2,7 @@ var assert = require("assert");
 var esprima = require("esprima");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
+var NodePath = require("../lib/path").NodePath;
 var util = require("../lib/util");
 var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
@@ -162,6 +163,51 @@ exports.testReprintedParens = function(t) {
     assert.ok(
         util.deepEquivalent(ast1, ast3),
         "conservative reprinting failed: " + reprint);
+
+    t.finish();
+};
+
+exports.testNegatedLoopCondition = function(t) {
+    var ast = parse([
+        "for (var i = 0; i < 10; ++i) {",
+        "  console.log(i);",
+        "}"
+    ].join("\n"))
+
+    var loop = ast.program.body[0];
+    var test = loop.test;
+    var negation = b.unaryExpression("!", test);
+
+    assert.strictEqual(
+        printer.print(negation),
+        "!(i < 10)"
+    );
+
+    loop.test = negation;
+
+    assert.strictEqual(printer.print(ast), [
+        "for (var i = 0; !(i < 10); ++i) {",
+        "  console.log(i);",
+        "}"
+    ].join("\n"));
+
+    t.finish();
+};
+
+exports.testDiscretionaryParens = function(t) {
+    var code = [
+        "if (info.line && (i > 0 || !skipFirstLine)) {",
+        "  info = copyLineInfo(info);",
+        "}"
+    ].join("\n");
+
+    var ast = parse(code);
+
+    var rightPath = new NodePath(ast).get(
+        "program", "body", 0, "test", "right");
+
+    assert.ok(rightPath.needsParens());
+    assert.strictEqual(printer.print(ast), code);
 
     t.finish();
 };
