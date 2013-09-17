@@ -194,6 +194,33 @@ exports.testNegatedLoopCondition = function(t) {
     t.finish();
 };
 
+exports.testMisleadingExistingParens = function(t) {
+    var ast = parse([
+        // The key === "oyez" expression appears to have parentheses
+        // already, but those parentheses won't help us when we negate the
+        // condition with a !.
+        'if (key === "oyez") {',
+        "  throw new Error(key);",
+        "}"
+    ].join("\n"));
+
+    var ifStmt = ast.program.body[0];
+    ifStmt.test = b.unaryExpression("!", ifStmt.test);
+
+    var binaryPath = new NodePath(ast).get(
+        "program", "body", 0, "test", "argument");
+
+    assert.ok(binaryPath.needsParens());
+
+    assert.strictEqual(printer.print(ifStmt), [
+        'if (!(key === "oyez")) {',
+        "  throw new Error(key);",
+        "}"
+    ].join("\n"));
+
+    t.finish();
+};
+
 exports.testDiscretionaryParens = function(t) {
     var code = [
         "if (info.line && (i > 0 || !skipFirstLine)) {",
