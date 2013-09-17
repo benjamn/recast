@@ -8,7 +8,7 @@ var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
-var Path = require("../lib/path").Path;
+var NodePath = require("../lib/path").NodePath;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -18,23 +18,23 @@ function testParser(t) {
     var ast = parse(code);
 
     assert.strictEqual(ast.type, Syntax.File);
-    assert.ok(getReprinter(new Path(ast)));
+    assert.ok(getReprinter(new NodePath(ast)));
 
     var funDecl = ast.program.body[0],
         funBody = funDecl.body;
 
     assert.strictEqual(funDecl.type, Syntax.FunctionDeclaration);
     assert.strictEqual(funBody.type, Syntax.BlockStatement);
-    assert.ok(getReprinter(new Path(funBody)));
+    assert.ok(getReprinter(new NodePath(funBody)));
 
     var lastStatement = funBody.body.pop(),
         tFinish = lastStatement.expression;
 
-    assert.ok(!getReprinter(new Path(funBody)));
-    assert.ok(getReprinter(new Path(ast)));
+    assert.ok(!getReprinter(new NodePath(funBody)));
+    assert.ok(getReprinter(new NodePath(ast)));
 
     funBody.body.push(lastStatement);
-    assert.ok(getReprinter(new Path(funBody)));
+    assert.ok(getReprinter(new NodePath(funBody)));
 
     assert.strictEqual(tFinish.callee.object.name, "t");
     assert.strictEqual(tFinish.callee.property.name, "finish");
