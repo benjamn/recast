@@ -4,7 +4,7 @@ var getReprinter = patcherModule.getReprinter;
 var Patcher = patcherModule.Patcher;
 var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
-var Path = require("../lib/path").Path;
+var NodePath = require("../lib/path").NodePath;
 
 var code = [
     "// file comment",
@@ -75,10 +75,8 @@ var trickyCode = [
 exports.testGetIndent = function(t) {
     function check(indent) {
         var lines = fromString(trickyCode).indent(indent);
-        var path = new Path(parse(lines.toString()))
-            .consProperty("program")
-            .consArrayElement("body", 0)
-            .consProperty("body");
+        var path = new NodePath(parse(lines.toString()))
+            .get("program", "body", 0, "body");
 
         var reprinter = getReprinter(path);
         var reprintedLines = reprinter(function(path) {

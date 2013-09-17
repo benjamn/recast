@@ -1,4 +1,5 @@
 var assert = require("assert");
+var esprima = require("esprima");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var util = require("../lib/util");
@@ -7,9 +8,9 @@ var b = require("../lib/types").builders;
 var printer = new Printer;
 
 function parseExpression(expr) {
-    var ast = parse(expr);
-    n.File.assert(ast);
-    ast = ast.program.body[0];
+    var ast = esprima.parse(expr);
+    n.Program.assert(ast);
+    ast = ast.body[0];
     if (n.ExpressionStatement.check(ast))
         return ast.expression;
     return ast;
