@@ -1,4 +1,4 @@
-var Path = require("../lib/path").Path;
+var Path = require("ast-path").Path;
 var NodePath = require("../lib/path").NodePath;
 var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
@@ -9,34 +9,6 @@ exports.testConstructor = function(t, assert) {
     var np = new NodePath(b.identifier("foo"));
     assert.strictEqual(np.constructor, NodePath);
     assert.ok(np.get("name") instanceof NodePath);
-
-    t.finish();
-};
-
-exports.testPath = function(t, assert) {
-    var path = new Path({
-        a: "asdf",
-        b: {
-            foo: 42,
-            list: [1, 2, 3, 4, 5]
-        },
-    });
-
-    var aPath = path.get("a");
-    var fooPath = path.get("b", "foo");
-
-    assert.strictEqual(aPath.value, "asdf");
-    assert.strictEqual(fooPath.value, 42);
-    assert.strictEqual(path.get("b"), fooPath.parentPath);
-
-    var odds = path.get("b", "list").filter(function(childPath) {
-        return childPath.value % 2 === 1;
-    });
-
-    assert.strictEqual(odds.length, 3);
-    assert.deepEqual(odds.map(function(childPath) {
-        return childPath.value;
-    }), [1, 3, 5]);
 
     t.finish();
 };
