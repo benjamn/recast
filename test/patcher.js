@@ -4,7 +4,7 @@ var getReprinter = patcherModule.getReprinter;
 var Patcher = patcherModule.Patcher;
 var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
-var NodePath = require("../lib/path").NodePath;
+var NodePath = require("ast-types").NodePath;
 
 var code = [
     "// file comment",

@@ -19,4 +19,3 @@ submodule("printer");
 submodule("syntax");
 submodule("identity");
 submodule("parens");
-submodule("path");

@@ -8,7 +8,7 @@ var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
-var NodePath = require("../lib/path").NodePath;
+var NodePath = require("ast-types").NodePath;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
