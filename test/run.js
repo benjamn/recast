@@ -11,7 +11,6 @@ function submodule(id) {
 
 submodule("lines");
 submodule("patcher");
-submodule("Class");
 submodule("visitor");
 submodule("comments");
 submodule("parser");
