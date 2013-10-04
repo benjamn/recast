@@ -25,8 +25,7 @@
   "dependencies": {
     "esprima": ">= 1.0.3",
     "private": ">= 0.0.5",
-    "ast-types": ">= 0.3.0",
-    "ast-path": ">= 0.1.0"
+    "ast-types": ">= 0.3.0"
   },
   "devDependencies": {},
   "optionalDependencies": {
