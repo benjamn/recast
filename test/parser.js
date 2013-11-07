@@ -86,7 +86,7 @@ var FunctionBodyReverser = Visitor.extend({
 
 exports.testTabHandling = function(t) {
     function check(code, tabWidth) {
-        var lines = fromString(code, tabWidth);
+        var lines = fromString(code, { tabWidth: tabWidth });
         assert.strictEqual(lines.length, 1);
         new IdentVisitor(lines).visit(
             parse(code, { tabWidth: tabWidth })

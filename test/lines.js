@@ -287,15 +287,15 @@ exports.testGetSourceLocation = function(t) {
 };
 
 exports.testTrim = function(t) {
-    var string = "  xxx \n ",
-        tabWidth = 4, // arbitrary
-        lines = fromString(string);
+    var string = "  xxx \n ";
+    var options = { tabWidth: 4 };
+    var lines = fromString(string);
 
     function test(string) {
-        var lines = fromString(string, tabWidth);
-        check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), tabWidth));
-        check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), tabWidth));
-        check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, ""), tabWidth));
+        var lines = fromString(string, options);
+        check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), options));
+        check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), options));
+        check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, ""), options));
     }
 
     test("");
@@ -390,7 +390,7 @@ exports.testIndentWithTabs = function(t) {
         check(lines.indent(-3).indent(4).indent(-1).toString(noTabOpts), code);
     }
 
-    var lines = fromString(code, tabWidth);
+    var lines = fromString(code, tabOpts);
     checkUnchanged(lines, code);
 
     check(lines.indent(1).toString(tabOpts), [
@@ -423,7 +423,7 @@ exports.testIndentWithTabs = function(t) {
         "\t} "
     ].join("\n");
 
-    var funky = fromString(funkyCode, tabWidth);
+    var funky = fromString(funkyCode, tabOpts);
     checkUnchanged(funky, funkyCode);
 
     check(funky.indent(1).toString(tabOpts), [
@@ -458,7 +458,7 @@ exports.testIndentWithTabs = function(t) {
         "\r} \r "
     ].join("\n");
 
-    lines = fromString(code, tabWidth);
+    lines = fromString(code, tabOpts);
 
     checkUnchanged(lines, code);
 
