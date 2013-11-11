@@ -3,12 +3,13 @@ var parse = require("../lib/parser").parse;
 var getReprinter = require("../lib/patcher").getReprinter;
 var Printer = require("../lib/printer").Printer;
 var Visitor = require("../lib/visitor").Visitor;
-var Syntax = require("../lib/types").Syntax;
 var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
-var NodePath = require("ast-types").NodePath;
+var types = require("../lib/types");
+var namedTypes = types.namedTypes;
+var NodePath = types.NodePath;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -17,14 +18,14 @@ function testParser(t) {
     var code = testParser + "";
     var ast = parse(code);
 
-    assert.strictEqual(ast.type, Syntax.File);
+    namedTypes.File.assert(ast);
     assert.ok(getReprinter(new NodePath(ast)));
 
     var funDecl = ast.program.body[0],
         funBody = funDecl.body;
 
-    assert.strictEqual(funDecl.type, Syntax.FunctionDeclaration);
-    assert.strictEqual(funBody.type, Syntax.BlockStatement);
+    namedTypes.FunctionDeclaration.assert(funDecl);
+    namedTypes.BlockStatement.assert(funBody);
     assert.ok(getReprinter(new NodePath(funBody)));
 
     var lastStatement = funBody.body.pop(),

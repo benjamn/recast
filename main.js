@@ -62,12 +62,34 @@ Object.defineProperties(exports, {
      */
     Syntax: {
         enumerable: true,
-        value: types.Syntax,
+        value: (function() {
+            var def = types.Type.def;
+            var Syntax = {};
+
+            Object.keys(types.namedTypes).forEach(function(name) {
+                if (def(name).buildable)
+                    Syntax[name] = name;
+            });
+
+            // These two types are buildable but do not technically count
+            // as syntax because they are not printable.
+            delete Syntax.SourceLocation;
+            delete Syntax.Position;
+
+            return Syntax;
+        })()
     },
 
     Visitor: {
         enumerable: true,
         value: require("./lib/visitor").Visitor
+    },
+
+    // Properties like require("recast").namedTypes exist for backwards
+    // compatibility; prefer require("recast").types.namedTypes.
+    types: {
+        enumerable: true,
+        value: types
     },
 
     builder: { // Legacy singular form.
@@ -76,12 +98,12 @@ Object.defineProperties(exports, {
     },
 
     builders: { // Plural preferred.
-        enumerable: true,
+        enumerable: false,
         value: types.builders
     },
 
     namedTypes: {
-        enumerable: true,
+        enumerable: false,
         value: types.namedTypes
     },
 

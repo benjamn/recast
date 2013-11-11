@@ -1,7 +1,7 @@
 var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
-var Syntax = require("../lib/types").Syntax;
+var types = require("../lib/types");
 var parse = require("../lib/parser").parse;
 var Visitor = require("../lib/visitor").Visitor;
 
@@ -19,10 +19,10 @@ exports.testCompleteness = function(t) {
         var types = {};
         new GenericPrintVisitor(types).visit(ast);
 
-        for (var name in Syntax) {
-            if (Syntax.hasOwnProperty(name)) {
+        for (var name in types.namedTypes) {
+            if (types.namedTypes.hasOwnProperty(name)) {
                 assert.ok(types.hasOwnProperty(name), "unhandled type: " + name);
-                assert.strictEqual(Syntax[name], types[name]);
+                assert.strictEqual(name, types[name]);
                 delete types[name];
             }
         }
@@ -37,8 +37,7 @@ var GenericPrintVisitor = Visitor.extend({
     },
 
     visitFunctionDeclaration: function(decl) {
-        if (decl.id &&
-            decl.id.type === Syntax.Identifier &&
+        if (types.namedTypes.Identifier.check(decl.id) &&
             decl.id.name === "genericPrintNoParens")
         {
             new CaseVisitor(this.types).visit(decl);
@@ -58,7 +57,7 @@ var CaseVisitor = Visitor.extend({
             typeof test.value === "string")
         {
             var name = test.value;
-            this.types[name] = Syntax[name];
+            this.types[name] = name;
         }
     }
 });

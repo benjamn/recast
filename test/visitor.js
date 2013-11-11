@@ -1,5 +1,7 @@
 var Visitor = require("../lib/visitor").Visitor;
-var Syntax = require("../lib/types").Syntax;
+var types = require("../lib/types");
+var namedTypes = types.namedTypes;
+var builders = types.builders;
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 
@@ -45,8 +47,7 @@ exports.testVisitor = function(t, assert) {
 
 var ThisReplacer = Visitor.extend({
     visitThisExpression: function(expr) {
-        return { type: Syntax.Identifier,
-                 name: "self" };
+        return builders.identifier("self");
     }
 });
 
@@ -134,7 +135,7 @@ var ObjectReplacer = Visitor.extend({
     visitCallExpression: function(expr) {
         this.genericVisit(expr);
 
-        if (expr.callee.type === Syntax.Identifier &&
+        if (namedTypes.Identifier.check(expr.callee) &&
             expr.callee.name === "b")
         {
             expr.callee.name = "xxx";
