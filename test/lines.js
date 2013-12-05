@@ -51,15 +51,17 @@ function testEachPosHelper(lines, code) {
 
     check(lines, code);
 
-    var chars = [],
-        emptyCount = 0;
+    var chars = [];
+    var emptyCount = 0;
 
-    lines.eachPos(function(pos) {
+    function iterator(pos) {
         var ch = lines.charAt(pos);
         if (ch === "")
             emptyCount += 1;
         chars.push(ch);
-    });
+    }
+
+    lines.eachPos(iterator, null);
 
     // The character at the position just past the end (as returned by
     // lastPos) should be the only empty string.
@@ -68,6 +70,14 @@ function testEachPosHelper(lines, code) {
     var joined = chars.join("");
     assert.strictEqual(joined.length, code.length);
     assert.strictEqual(joined, code);
+
+    var withoutSpaces = code.replace(/\s+/g, "");
+    chars.length = emptyCount = 0;
+    lines.eachPos(iterator, null, true); // Skip spaces this time.
+    assert.strictEqual(emptyCount, 0);
+    joined = chars.join("");
+    assert.strictEqual(joined.length, withoutSpaces.length);
+    assert.strictEqual(joined, withoutSpaces);
 }
 
 exports.testEachPos = function(t) {
