@@ -252,6 +252,8 @@ function checkAllSlices(lines) {
         lines.eachPos(function(end) {
             check(lines.slice(start, end),
                   lines.bootstrapSlice(start, end));
+            check(lines.sliceString(start, end),
+                  lines.bootstrapSliceString(start, end));
         }, start);
     });
 }
