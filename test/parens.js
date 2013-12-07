@@ -19,7 +19,7 @@ function parseExpression(expr) {
 
 function check(expr) {
     var ast1 = parseExpression(expr);
-    var printed = printer.printGenerically(ast1);
+    var printed = printer.printGenerically(ast1).code;
     try {
         var ast2 = parseExpression(printed);
     } finally {
@@ -152,13 +152,13 @@ exports.testReprintedParens = function(t) {
     body.push(b.expressionStatement(
         body[0].expression.arguments[0]));
 
-    var generic = printer.printGenerically(ast1);
+    var generic = printer.printGenerically(ast1).code;
     var ast2 = parse(generic);
     assert.ok(
         util.deepEquivalent(ast1, ast2),
         "generic reprinting failed: " + generic);
 
-    var reprint = printer.print(ast1);
+    var reprint = printer.print(ast1).code;
     var ast3 = parse(reprint);
     assert.ok(
         util.deepEquivalent(ast1, ast3),
@@ -179,13 +179,13 @@ exports.testNegatedLoopCondition = function(t) {
     var negation = b.unaryExpression("!", test);
 
     assert.strictEqual(
-        printer.print(negation),
+        printer.print(negation).code,
         "!(i < 10)"
     );
 
     loop.test = negation;
 
-    assert.strictEqual(printer.print(ast), [
+    assert.strictEqual(printer.print(ast).code, [
         "for (var i = 0; !(i < 10); ++i) {",
         "  console.log(i);",
         "}"
@@ -212,7 +212,7 @@ exports.testMisleadingExistingParens = function(t) {
 
     assert.ok(binaryPath.needsParens());
 
-    assert.strictEqual(printer.print(ifStmt), [
+    assert.strictEqual(printer.print(ifStmt).code, [
         'if (!(key === "oyez")) {',
         "  throw new Error(key);",
         "}"
@@ -234,7 +234,7 @@ exports.testDiscretionaryParens = function(t) {
         "program", "body", 0, "test", "right");
 
     assert.ok(rightPath.needsParens());
-    assert.strictEqual(printer.print(ast), code);
+    assert.strictEqual(printer.print(ast).code, code);
 
     t.finish();
 };

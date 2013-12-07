@@ -9,12 +9,12 @@ function testPrinter(t, assert) {
     var printer = new Printer;
 
     assert.strictEqual(typeof printer.print, "function");
-    assert.strictEqual(printer.print(null), "");
+    assert.strictEqual(printer.print(null).code, "");
 
-    var string = printer.printGenerically(ast);
+    var string = printer.printGenerically(ast).code;
     assert.ok(string.indexOf("t.finish();") > 0);
 
-    string = printer.print(ast);
+    string = printer.print(ast).code;
 
     // TODO
 
@@ -38,11 +38,11 @@ exports.testEmptyStatements = function(t, assert) {
     var ast = parse(uselessSemicolons);
     var printer = new Printer({ tabWidth: 2 });
 
-    var reprinted = printer.print(ast);
+    var reprinted = printer.print(ast).code;
     assert.strictEqual(typeof reprinted, "string");
     assert.strictEqual(reprinted, uselessSemicolons);
 
-    var generic = printer.printGenerically(ast);
+    var generic = printer.printGenerically(ast).code;
     var withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
     assert.strictEqual(typeof generic, "string");
     assert.strictEqual(generic, withoutTrailingSemicolons);
@@ -102,12 +102,12 @@ exports.testSwitchCase = function(t, assert) {
     );
 
     assert.strictEqual(
-        printer.print(ast),
+        printer.print(ast).code,
         switchCaseReprinted
     );
 
     assert.strictEqual(
-        printer.printGenerically(ast),
+        printer.printGenerically(ast).code,
         switchCaseGeneric
     );
 
@@ -132,7 +132,7 @@ exports.testIndentTryCatch = function(t, assert) {
     // Force reprinting of the catch.
     tryStmt.handlers[0].guard = null;
 
-    assert.strictEqual(printer.print(ast), tryCatch);
+    assert.strictEqual(printer.print(ast).code, tryCatch);
 
     t.finish();
 };
@@ -177,7 +177,7 @@ exports.testMethodPrinting = function(t, assert) {
     cb.body.push(cb.body[0]);
 
     assert.strictEqual(
-        printer.print(ast),
+        printer.print(ast).code,
         classBodyExpected.join("\n")
     );
 
@@ -220,7 +220,7 @@ exports.testMultiLineParams = function(t, assert) {
     });
 
     assert.strictEqual(
-        printer.print(ast),
+        printer.print(ast).code,
         multiLineParamsExpected.join("\n")
     );
 
@@ -236,7 +236,7 @@ exports.testSimpleVarPrinting = function(t, assert) {
     ]);
 
     assert.strictEqual(
-        printer.print(varDecl),
+        printer.print(varDecl).code,
         "var x, y, z"
     );
 
@@ -256,7 +256,7 @@ exports.testMultiLineVarPrinting = function(t, assert) {
         b.variableDeclarator(b.identifier("z"), null)
     ]);
 
-    assert.strictEqual(printer.print(varDecl), [
+    assert.strictEqual(printer.print(varDecl).code, [
         "var x,",
         "    y = {",
         "      why: \"not\"",

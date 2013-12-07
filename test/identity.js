@@ -11,7 +11,7 @@ function testFile(t, path) {
 
         var ast = main.parse(source);
         assert.ok(util.deepEquivalent(ast.original, ast));
-        var code = main.print(ast);
+        var code = main.print(ast).code;
         assert.strictEqual(source, code);
 
         t.finish();

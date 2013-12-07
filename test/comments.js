@@ -23,22 +23,22 @@ exports.testComments = function(t, assert) {
     assert.strictEqual(dup.id.name, "dup");
 
     // More of a basic sanity test than a comment test.
-    assert.strictEqual(recast.print(ast), code);
-    assert.strictEqual(recast.print(ast.program), code);
-    assert.strictEqual(recast.print(dup), code);
+    assert.strictEqual(recast.print(ast).code, code);
+    assert.strictEqual(recast.print(ast.program).code, code);
+    assert.strictEqual(recast.print(dup).code, code);
 
     assert.strictEqual(
-        recast.print(dup.params[0]),
+        recast.print(dup.params[0]).code,
         "/* string */ s"
     );
 
     assert.strictEqual(
-        recast.print(dup.params[1]),
+        recast.print(dup.params[1]).code,
         "/* int */ n"
     );
 
     assert.strictEqual(
-        recast.print(dup.body),
+        recast.print(dup.body).code,
         ["/* string */"].concat(annotated.slice(2)).join("\n")
     );
 
@@ -49,7 +49,7 @@ exports.testComments = function(t, assert) {
     var flush = fromString(indented).indent(-2);
 
     assert.strictEqual(
-        recast.print(retStmt),
+        recast.print(retStmt).code,
         flush.toString()
     );
 
@@ -59,7 +59,7 @@ exports.testComments = function(t, assert) {
     var one = join.callee.object.arguments[0].right;
     n.Literal.assert(one);
     assert.strictEqual(one.value, 1);
-    assert.strictEqual(recast.print(one), [
+    assert.strictEqual(recast.print(one).code, [
         "/*",
         " * off-by-*/ 1"
     ].join("\n"));
@@ -117,7 +117,7 @@ var trailingExpected = [
 exports.testTrailingComments = function(t, assert) {
     var code = trailing.join("\n");
     var ast = recast.parse(code);
-    assert.strictEqual(recast.print(ast), code);
+    assert.strictEqual(recast.print(ast).code, code);
 
     // Drop all original source information to force reprinting.
     require("ast-types").traverse(ast, function(node) {
@@ -144,7 +144,7 @@ exports.testTrailingComments = function(t, assert) {
         b.literal(43)
     ));
 
-    var actual = recast.print(ast, { tabWidth: 2 });
+    var actual = recast.print(ast, { tabWidth: 2 }).code;
     var expected = trailingExpected.join("\n");
 
     // Check semantic equivalence:
@@ -176,7 +176,7 @@ exports.testParamTrailingComments = function(t, assert) {
 
     func.params.unshift(b.identifier("zxcv"));
 
-    var actual = recast.print(ast, { tabWidth: 2 });
+    var actual = recast.print(ast, { tabWidth: 2 }).code;
     var expected = paramTrailingExpected.join("\n");
 
     assert.strictEqual(actual, expected);
