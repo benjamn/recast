@@ -1,6 +1,6 @@
 var recast = require("../main");
-var n = recast.namedTypes;
-var b = recast.builders;
+var n = recast.types.namedTypes;
+var b = recast.types.builders;
 var fromString = require("../lib/lines").fromString;
 var util = require("../lib/util");
 

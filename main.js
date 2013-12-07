@@ -1,5 +1,3 @@
-var fs = require("fs");
-var normalizeOptions = require("./lib/options").normalize;
 var types = require("./lib/types");
 var parse = require("./lib/parser").parse;
 var Printer = require("./lib/printer").Printer;
@@ -17,7 +15,7 @@ function run(transformer, options) {
 }
 
 function runFile(path, transformer, options) {
-    fs.readFile(path, "utf-8", function(err, code) {
+    require("fs").readFile(path, "utf-8", function(err, code) {
         if (err) {
             console.error(err);
             return;
@@ -40,28 +38,52 @@ function runString(code, transformer, options) {
 
 Object.defineProperties(exports, {
     /**
-     * Scriptable interface to recast.
+     * Parse a string of code into an augmented syntax tree suitable for
+     * arbitrary modification and reprinting.
+     */
+    parse: {
+        enumerable: true,
+        value: parse
+    },
+
+    /**
+     * Reprint a modified syntax tree using as much of the original source
+     * code as possible.
+     */
+    print: {
+        enumerable: true,
+        value: print
+    },
+
+    /**
+     * Print without attempting to reuse any original source code.
+     */
+    prettyPrint: {
+        enumerable: true,
+        value: prettyPrint
+    },
+
+    /**
+     * Customized version of require("ast-types").
+     */
+    types: {
+        enumerable: true,
+        value: types
+    },
+
+    /**
+     * Convenient command-line interface (see e.g. example/add-braces).
      */
     run: {
         enumerable: true,
         value: run
     },
 
-    runFile: {
-        enumerable: true,
-        value: runFile
-    },
-
-    runString: {
-        enumerable: true,
-        value: runString
-    },
-
     /**
      * Useful utilities for implementing transformer functions.
      */
     Syntax: {
-        enumerable: true,
+        enumerable: false,
         value: (function() {
             var def = types.Type.def;
             var Syntax = {};
@@ -81,47 +103,7 @@ Object.defineProperties(exports, {
     },
 
     Visitor: {
-        enumerable: true,
+        enumerable: false,
         value: require("./lib/visitor").Visitor
-    },
-
-    // Properties like require("recast").namedTypes exist for backwards
-    // compatibility; prefer require("recast").types.namedTypes.
-    types: {
-        enumerable: true,
-        value: types
-    },
-
-    builder: { // Legacy singular form.
-        enumerable: false,
-        value: types.builders
-    },
-
-    builders: { // Plural preferred.
-        enumerable: false,
-        value: types.builders
-    },
-
-    namedTypes: {
-        enumerable: false,
-        value: types.namedTypes
-    },
-
-    /**
-     * Direct access to the parsing and printing interfaces.
-     */
-    parse: {
-        enumerable: true,
-        value: parse
-    },
-
-    print: {
-        enumerable: true,
-        value: print
-    },
-
-    prettyPrint: {
-        enumerable: true,
-        value: prettyPrint
     }
 });
