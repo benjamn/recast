@@ -6,10 +6,11 @@
 // are not correctly handled at this point, and will trigger an assertion
 // failure if encountered.
 
-var assert = require("assert"),
-    Syntax = require("recast").Syntax,
-    Visitor = require("recast").Visitor,
-    builder = require("recast").builder;
+var assert = require("assert");
+var recast = require("recast");
+var Syntax = recast.Syntax;
+var Visitor = recast.Visitor;
+var b = recast.types.builders;
 
 require("recast").run(function(ast, callback) {
     callback(new ToWhile().visit(ast));
@@ -17,21 +18,21 @@ require("recast").run(function(ast, callback) {
 
 var ToWhile = Visitor.extend({
     visitForStatement: function(fst) {
-        return builder.blockStatement([
+        return b.blockStatement([
             fst.init,
-            builder.whileStatement(
+            b.whileStatement(
                 fst.test,
                 insertBeforeLoopback(fst, fst.update))]);
     },
 
     visitDoWhileStatement: function(dwst) {
-        return builder.whileStatement(
-            builder.literal(true),
+        return b.whileStatement(
+            b.literal(true),
             insertBeforeLoopback(
                 dwst,
-                builder.ifStatement(
+                b.ifStatement(
                     dwst.test,
-                    builder.breakStatement())));
+                    b.breakStatement())));
     }
 });
 
@@ -41,7 +42,7 @@ function insertBeforeLoopback(loop, toInsert) {
     if (body.type === Syntax.BlockStatement) {
         body.body.push(toInsert);
     } else {
-        body = builder.blockStatement([body, toInsert]);
+        body = b.blockStatement([body, toInsert]);
         loop.body = body;
     }
 
@@ -57,7 +58,7 @@ var BeforeContinue = Visitor.extend({
 
     visitContinueStatement: function(cst) {
         assert.equal(cst.label, null, "Labeled continue statements are not yet supported.");
-        return builder.blockStatement([this.before, cst]);
+        return b.blockStatement([this.before, cst]);
     },
 
     // Do not descend into nested loops.

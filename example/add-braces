@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-var Syntax = require("recast").Syntax,
-    Visitor = require("recast").Visitor,
-    builder = require("recast").builder;
+var recast = require("recast");
+var Syntax = recast.Syntax;
+var Visitor = recast.Visitor;
+var b = recast.types.builders;
 
 require("recast").run(function(ast, callback) {
     callback(new Orthodontist().visit(ast));
@@ -30,7 +31,7 @@ function visitLoop(loop) {
 function fix(clause) {
     if (clause) {
         if (clause.type !== Syntax.BlockStatement)
-            clause = builder.blockStatement([clause]);
+            clause = b.blockStatement([clause]);
     }
     return clause;
 }

@@ -32,7 +32,7 @@ function defaultWriteback(output) {
 function runString(code, transformer, options) {
     var writeback = options && options.writeback || defaultWriteback;
     transformer(parse(code, options), function(node) {
-        writeback(print(node, options));
+        writeback(print(node, options).code);
     });
 }
 
