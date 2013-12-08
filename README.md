@@ -45,11 +45,12 @@ Now do *whatever* you want to `ast`. Really, anything at all!
 var add = ast.program.body[0];
 
 // Make sure it's a FunctionDeclaration (optional).
-recast.namedTypes.FunctionDeclaration.assert(add);
+var n = recast.types.namedTypes;
+n.FunctionDeclaration.assert(add);
 
 // If you choose to use recast.builders to construct new AST nodes, all builder
 // arguments will be dynamically type-checked against the Mozilla Parser API.
-var b = recast.builders;
+var b = recast.types.builders;
 
 // This kind of manipulation should seem familiar if you've used Esprima or the
 // Mozilla Parser API before.
