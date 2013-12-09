@@ -81,8 +81,10 @@ function testEachPosHelper(lines, code) {
 }
 
 exports.testEachPos = function(t) {
-    var code = arguments.callee + "",
-        lines = fromString(code);
+    // Function.prototype.toString uses \r\n line endings on non-*NIX
+    // systems, so normalize those to \n characters.
+    var code = (arguments.callee + "").replace(/\r\n/g, "\n");
+    var lines = fromString(code);
 
     testEachPosHelper(lines, code);
 
@@ -99,8 +101,10 @@ exports.testEachPos = function(t) {
 };
 
 exports.testCharAt = function(t) {
-    var code = arguments.callee + "",
-        lines = fromString(code);
+    // Function.prototype.toString uses \r\n line endings on non-*NIX
+    // systems, so normalize those to \n characters.
+    var code = (arguments.callee + "").replace(/\r\n/g, "\n");
+    var lines = fromString(code);
 
     function compare(pos) {
         assert.strictEqual(
