@@ -1,6 +1,7 @@
 var sourceMap = require("source-map");
-var types = require("ast-types");
+var types = require("../lib/types");
 var n = types.namedTypes;
+var b = types.builders;
 var NodePath = types.NodePath;
 var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
@@ -81,6 +82,89 @@ exports.testMapping = function(t, assert) {
     check(2, 9, 2, 15); // 1
     check(2, 16, 2, 16); // ;
     check(3, 0, 3, 0); // }
+
+    t.finish();
+};
+
+exports.testInputSourceMap = function(t, assert) {
+    function addUseStrict(ast) {
+        return types.traverse(ast, function(node) {
+            if (n.Function.check(node)) {
+                node.body.body.unshift(
+                    b.expressionStatement(b.literal("use strict"))
+                );
+            }
+        });
+    }
+
+    function stripConsole(ast) {
+        return types.traverse(ast, function(node) {
+            if (n.CallExpression.check(node) &&
+                n.MemberExpression.check(node.callee) &&
+                n.Identifier.check(node.callee.object) &&
+                node.callee.object.name === "console") {
+                n.ExpressionStatement.assert(this.parent.node);
+                this.parent.replace();
+                return false;
+            }
+        });
+    }
+
+    var code = [
+        "function add(a, b) {",
+        "  var sum = a + b;",
+        "  console.log(a, b);",
+        "  return sum;",
+        "}"
+    ].join("\n");
+
+    var ast = parse(code, {
+        sourceFileName: "original.js"
+    });
+
+    var useStrictResult = new Printer({
+        sourceMapName: "useStrict.map.json"
+    }).print(addUseStrict(ast));
+
+    var useStrictAst = parse(useStrictResult.code, {
+        sourceFileName: "useStrict.js"
+    });
+
+    var oneStepResult = new Printer({
+        sourceMapName: "oneStep.map.json"
+    }).print(stripConsole(ast));
+
+    var twoStepResult = new Printer({
+        sourceMapName: "twoStep.map.json",
+        inputSourceMap: useStrictResult.map
+    }).print(stripConsole(useStrictAst));
+
+    assert.strictEqual(
+        oneStepResult.code,
+        twoStepResult.code
+    );
+
+    var smc1 = new sourceMap.SourceMapConsumer(oneStepResult.map);
+    var smc2 = new sourceMap.SourceMapConsumer(twoStepResult.map);
+
+    smc1.eachMapping(function(mapping) {
+        var pos = {
+            line: mapping.generatedLine,
+            column: mapping.generatedColumn
+        };
+
+        var orig1 = smc1.originalPositionFor(pos);
+        var orig2 = smc2.originalPositionFor(pos);
+
+        // The composition of the source maps generated separately from
+        // the two transforms should be equivalent to the source map
+        // generated from the composition of the two transforms.
+        assert.deepEqual(orig1, orig2);
+
+        // Make sure the two-step source map refers back to the original
+        // source instead of the intermediate source.
+        assert.strictEqual(orig2.source, "original.js");
+    });
 
     t.finish();
 };
