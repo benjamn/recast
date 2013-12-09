@@ -1,12 +1,21 @@
+var mocha = require('mocha'),
+    assert = require('assert'),
+    testRegEx = /^test(.*)$/;
+
 function submodule(id) {
-    var module = require("./" + id),
-        name, value;
-    for (var name in module) {
-        value = module[name];
-        if (/^test/.test(name) &&
-            typeof value === "function")
-            exports["test/" + id + "." + name] = value;
-    }
+    describe(id, function () {
+        var module = require("./" + id);
+
+        Object.keys(module).forEach(function (name) {
+            var value = this[name], match;
+
+            if ((match = name.match(testRegEx)) && value instanceof Function) {
+                it(match[1], function (done) {
+                    value({finish: done}, assert);
+                });
+            }
+        }, module);
+    });   
 }
 
 submodule("lines");
