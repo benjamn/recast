@@ -30,8 +30,10 @@ exports.testMapping = function(t, assert) {
     leftPath.replace(rightPath.value);
     rightPath.replace(leftValue);
 
+    var sourceRoot = "path/to/source/root";
     var printed = new Printer({
-        sourceMapName: "source.map.json"
+        sourceMapName: "source.map.json",
+        sourceRoot: sourceRoot
     }).print(ast);
 
     assert.ok(printed.map);
@@ -41,6 +43,11 @@ exports.testMapping = function(t, assert) {
         "source.map.json"
     );
 
+    assert.strictEqual(
+        printed.map.sourceRoot,
+        sourceRoot
+    );
+
     var smc = new sourceMap.SourceMapConsumer(printed.map);
 
     function check(origLine, origCol, genLine, genCol) {
@@ -48,7 +55,7 @@ exports.testMapping = function(t, assert) {
             line: genLine,
             column: genCol
         }), {
-            source: "source.js",
+            source: sourceRoot + "/source.js",
             line: origLine,
             column: origCol,
             name: lines.charAt({
@@ -58,7 +65,7 @@ exports.testMapping = function(t, assert) {
         });
 
         assert.deepEqual(smc.generatedPositionFor({
-            source: "source.js",
+            source: sourceRoot + "/source.js",
             line: origLine,
             column: origCol
         }), {
