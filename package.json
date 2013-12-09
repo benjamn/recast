@@ -20,7 +20,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "test": "whiskey test/run.js"
+    "test": "node ./node_modules/mocha/bin/mocha"
   },
   "dependencies": {
     "esprima": ">= 1.0.3",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {},
   "optionalDependencies": {
-    "whiskey": "0.6.x"
+    "mocha": "~1.15.1"
   },
   "engines": {
     "node": ">= 0.8"
