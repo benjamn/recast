@@ -20,7 +20,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "node ./node_modules/mocha/bin/mocha --reporter spec"
   },
   "dependencies": {
     "esprima": ">= 1.0.3",
