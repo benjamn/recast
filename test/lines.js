@@ -1,7 +1,9 @@
-var assert = require("assert"),
-    linesModule = require("../lib/lines"),
-    fromString = linesModule.fromString,
-    concat = linesModule.concat;
+var assert = require("assert");
+var fs = require("fs");
+var path = require("path");
+var linesModule = require("../lib/lines");
+var fromString = linesModule.fromString;
+var concat = linesModule.concat;
 
 function check(a, b) {
     assert.strictEqual(a.toString(), b.toString());
@@ -491,4 +493,34 @@ exports.testIndentWithTabs = function(t) {
     ].join("\n"));
 
     t.finish();
+};
+
+exports.testGuessTabWidth = function(t) {
+    var lines = fromString(arguments.callee + "");
+    assert.strictEqual(lines.guessTabWidth(), 4);
+
+    lines = fromString([
+        "function identity(x) {",
+        "  return x;",
+        "}"
+    ].join("\n"));
+    assert.strictEqual(lines.guessTabWidth(), 2);
+    assert.strictEqual(lines.indent(5).guessTabWidth(), 2);
+    assert.strictEqual(lines.indent(-4).guessTabWidth(), 2);
+
+    fs.readFile(__filename, "utf-8", function(err, source) {
+        assert.equal(err, null);
+        assert.strictEqual(fromString(source).guessTabWidth(), 4);
+
+        fs.readFile(path.join(
+            __dirname,
+            "..",
+            "package.json"
+        ), "utf-8", function(err, source) {
+            assert.equal(err, null);
+            assert.strictEqual(fromString(source).guessTabWidth(), 2);
+
+            t.finish();
+        });
+    });
 };
