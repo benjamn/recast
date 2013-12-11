@@ -59,10 +59,7 @@ exports.testMapping = function(t, assert) {
             source: sourceRoot + "/source.js",
             line: origLine,
             column: origCol,
-            name: lines.charAt({
-                line: origLine,
-                column: origCol
-            })
+            name: null
         });
 
         assert.deepEqual(smc.generatedPositionFor({
