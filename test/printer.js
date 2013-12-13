@@ -267,3 +267,55 @@ exports.testMultiLineVarPrinting = function(t, assert) {
 
     t.finish();
 };
+
+exports.testGuessTabWidth = function(t, assert) {
+    var code = [
+        "function identity(x) {",
+        "  return x;",
+        "}"
+    ].join("\n");
+
+    var guessedTwo = [
+        "function identity(x) {",
+        "  log(x);",
+        "  return x;",
+        "}"
+    ].join("\n");
+
+    var explicitFour = [
+        "function identity(x) {",
+        "    log(x);",
+        "    return x;",
+        "}"
+    ].join("\n");
+
+    var ast = parse(code);
+
+    var funDecl = ast.program.body[0];
+    n.FunctionDeclaration.assert(funDecl);
+
+    var funBody = funDecl.body.body;
+
+    funBody.unshift(
+        b.expressionStatement(
+            b.callExpression(
+                b.identifier("log"),
+                funDecl.params
+            )
+        )
+    );
+
+    assert.strictEqual(
+        new Printer().print(ast).code,
+        guessedTwo
+    );
+
+    assert.strictEqual(
+        new Printer({
+            tabWidth: 4
+        }).print(ast).code,
+        explicitFour
+    );
+
+    t.finish();
+};
