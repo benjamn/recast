@@ -67,7 +67,7 @@ add.params.push(add.params.shift());
 ```
 When you finish manipulating the AST, let `recast.print` work its magic:
 ```js
-var output = recast.print(ast);
+var output = recast.print(ast).code;
 ```
 The `output` string now looks exactly like this, weird formatting and all:
 ```js
@@ -79,13 +79,13 @@ var add = function(b, a) {
 ```
 The magic of Recast is that it reprints only those parts of the syntax tree that you modify. In other words, the following identity is guaranteed:
 ```js
-recast.print(recast.parse(source)) === source
+recast.print(recast.parse(source)).code === source
 ```
 Whenever Recast cannot reprint a modified node using the orginal source code, it falls back to using a generic pretty printer. So the worst that can happen is that your changes trigger some harmless reformatting of your code.
 
 If you really don't care about preserving the original formatting, you can access the pretty printer directly:
 ```js
-var output = recast.prettyPrint(ast, { tabWidth: 2 });
+var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
 ```
 And here's the exact `output`:
 ```js
