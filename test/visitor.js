@@ -9,7 +9,7 @@ var lines = [
     "// file comment",
     "exports.foo({",
     "    // some comment",
-    "    bar: 42,",
+    "    bar: 41 + 1,",
     "    baz: this",
     "});"
 ];
@@ -20,6 +20,10 @@ exports.testVisitor = function(t, assert) {
         ast = parse(source),
         withThis = printer.print(ast).code,
         thisExp = /\bthis\b/g;
+
+    var ec = new ExprChecker;
+    ec.visit(ast);
+    assert.deepEqual(ec.exprTypes, ['CallExpression', 'MemberExpression', 'ObjectExpression', 'BinaryExpression', 'ThisExpression']);
 
     assert.ok(thisExp.test(withThis));
 
@@ -70,6 +74,21 @@ var BazRemover = Visitor.extend({
     visitIdentifier: function(id) {
         if (id.name === "self")
             this.remove();
+    }
+});
+
+var ExprChecker = Visitor.extend({
+    init: function() {
+        this.exprTypes = [];
+    },
+
+    clear: function() {
+        this.exprTypes.length = 0;
+    },
+
+    visitExpression: function(expr) {
+        this.exprTypes.push(expr.type);
+        this.genericVisit(expr);
     }
 });
 
