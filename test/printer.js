@@ -238,7 +238,16 @@ exports.testSimpleVarPrinting = function(t, assert) {
 
     assert.strictEqual(
         printer.print(varDecl).code,
-        "var x, y, z"
+        "var x, y, z;"
+    );
+
+    var z = varDecl.declarations.pop();
+    varDecl.declarations.pop();
+    varDecl.declarations.push(z);
+
+    assert.strictEqual(
+        printer.print(varDecl).code,
+        "var x, z;"
     );
 
     t.finish();
@@ -262,7 +271,7 @@ exports.testMultiLineVarPrinting = function(t, assert) {
         "    y = {",
         "      why: \"not\"",
         "    },",
-        "    z"
+        "    z;"
     ].join("\n"));
 
     t.finish();
