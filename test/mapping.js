@@ -165,3 +165,26 @@ exports.testInputSourceMap = function(t, assert) {
 
     t.finish();
 };
+
+exports.testBecomingNull = function(t, assert) {
+    // https://github.com/facebook/regenerator/issues/103
+    var code = [
+        "for (var i = 0; false; i++)",
+        "  log(i);"
+    ].join("\n");
+    var ast = parse(code);
+    var path = new NodePath(ast);
+
+    var updatePath = path.get("program", "body", 0, "update");
+    n.UpdateExpression.assert(updatePath.value);
+
+    updatePath.replace(null);
+
+    var printed = new Printer().print(ast);
+    assert.strictEqual(printed.code, [
+        "for (var i = 0; false; )",
+        "  log(i);"
+    ].join("\n"));
+
+    t.finish();
+};
