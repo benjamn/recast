@@ -237,7 +237,7 @@ exports.testSimpleVarPrinting = function(t, assert) {
     ]);
 
     assert.strictEqual(
-        printer.print(varDecl).code,
+        printer.print(b.program([varDecl])).code,
         "var x, y, z;"
     );
 
@@ -246,7 +246,7 @@ exports.testSimpleVarPrinting = function(t, assert) {
     varDecl.declarations.push(z);
 
     assert.strictEqual(
-        printer.print(varDecl).code,
+        printer.print(b.program([varDecl])).code,
         "var x, z;"
     );
 
@@ -266,13 +266,77 @@ exports.testMultiLineVarPrinting = function(t, assert) {
         b.variableDeclarator(b.identifier("z"), null)
     ]);
 
-    assert.strictEqual(printer.print(varDecl).code, [
+    assert.strictEqual(printer.print(b.program([varDecl])).code, [
         "var x,",
         "    y = {",
         "      why: \"not\"",
         "    },",
         "    z;"
     ].join("\n"));
+
+    t.finish();
+};
+
+exports.testForLoopPrinting = function(t, assert) {
+    var printer = new Printer({ tabWidth: 2 });
+    var loop = b.forStatement(
+        b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("i"), b.literal(0))
+        ]),
+        b.binaryExpression("<", b.identifier("i"), b.literal(3)),
+        b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
+        b.expressionStatement(
+            b.callExpression(b.identifier("log"), [b.identifier("i")])
+        )
+    );
+
+    assert.strictEqual(
+        printer.print(loop).code,
+        "for (var i = 0; i < 3; i++)\n" +
+        "  log(i);"
+    );
+
+    t.finish();
+};
+
+exports.testEmptyForLoopPrinting = function(t, assert) {
+    var printer = new Printer({ tabWidth: 2 });
+    var loop = b.forStatement(
+        b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("i"), b.literal(0))
+        ]),
+        b.binaryExpression("<", b.identifier("i"), b.literal(3)),
+        b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
+        b.emptyStatement()
+    );
+
+    assert.strictEqual(
+        printer.print(loop).code,
+        "for (var i = 0; i < 3; i++)\n" +
+        "  ;"
+    );
+
+    t.finish();
+};
+
+exports.testForInLoopPrinting = function(t, assert) {
+    var printer = new Printer({ tabWidth: 2 });
+    var loop = b.forInStatement(
+        b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("key"), null)
+        ]),
+        b.identifier("obj"),
+        b.expressionStatement(
+            b.callExpression(b.identifier("log"), [b.identifier("key")])
+        ),
+        /* each: */ false
+    );
+
+    assert.strictEqual(
+        printer.print(loop).code,
+        "for (var key in obj)\n" +
+        "  log(key);"
+    );
 
     t.finish();
 };
