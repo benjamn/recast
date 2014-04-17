@@ -86,6 +86,7 @@ exports.testSequence = function(t) {
     check("[a, (b, c), d]");
     check("({ a: (1, 2) }).a");
     check("(a, b) ? (a = 1, b = 2) : (c = 3)");
+    check("a = (1, 2)");
 
     t.finish();
 };
