@@ -50,6 +50,22 @@ exports.testEmptyStatements = function(t, assert) {
     t.finish();
 };
 
+var importantSemicolons = [
+    "var a = {};", // <--- this trailing semi-colon is very important
+    "(function() {})();"
+].join("\n");
+
+exports.testIffeAfterVariableDeclarationEndingInObjectLiteral = function(t, assert) {
+    var ast = parse(importantSemicolons);
+    var printer = new Printer({ tabWidth: 2 });
+
+    var reprinted = printer.printGenerically(ast).code;
+    assert.strictEqual(typeof reprinted, "string");
+    assert.strictEqual(reprinted, importantSemicolons);
+
+    t.finish();
+};
+
 var switchCase = [
     "switch (test) {",
     "  default:",
