@@ -1,410 +1,388 @@
+var assert = require("assert");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
 
-function testPrinter(t, assert) {
-    var code = testPrinter + "";
-    var ast = parse(code);
-    var printer = new Printer;
-
-    assert.strictEqual(typeof printer.print, "function");
-    assert.strictEqual(printer.print(null).code, "");
-
-    var string = printer.printGenerically(ast).code;
-    assert.ok(string.indexOf("t.finish();") > 0);
-
-    string = printer.print(ast).code;
-
-    // TODO
-
-    assert.ok(string.indexOf("// TODO") > 0);
-
-    t.finish();
-};
-exports.testPrinter = testPrinter;
-
-var uselessSemicolons = [
-    'function a() {',
-    '  return "a";',
-    '};',
-    '',
-    'function b() {',
-    '  return "b";',
-    '};'
-].join("\n");
-
-exports.testEmptyStatements = function(t, assert) {
-    var ast = parse(uselessSemicolons);
-    var printer = new Printer({ tabWidth: 2 });
-
-    var reprinted = printer.print(ast).code;
-    assert.strictEqual(typeof reprinted, "string");
-    assert.strictEqual(reprinted, uselessSemicolons);
-
-    var generic = printer.printGenerically(ast).code;
-    var withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
-    assert.strictEqual(typeof generic, "string");
-    assert.strictEqual(generic, withoutTrailingSemicolons);
-
-    t.finish();
-};
-
-var importantSemicolons = [
-    "var a = {};", // <--- this trailing semi-colon is very important
-    "(function() {})();"
-].join("\n");
-
-exports.testIffeAfterVariableDeclarationEndingInObjectLiteral = function(t, assert) {
-    var ast = parse(importantSemicolons);
-    var printer = new Printer({ tabWidth: 2 });
-
-    var reprinted = printer.printGenerically(ast).code;
-    assert.strictEqual(typeof reprinted, "string");
-    assert.strictEqual(reprinted, importantSemicolons);
-
-    t.finish();
-};
-
-var switchCase = [
-    "switch (test) {",
-    "  default:",
-    "  case a: break",
-    "",
-    "  case b:",
-    "    break;",
-    "}",
-].join("\n");
-
-var switchCaseReprinted = [
-    "if (test) {",
-    "  switch (test) {",
-    "  default:",
-    "  case a: break",
-    "  case b:",
-    "    break;",
-    "  }",
-    "}"
-].join("\n");
-
-var switchCaseGeneric = [
-    "if (test) {",
-    "  switch (test) {",
-    "  default:",
-    "  case a:",
-    "    break;",
-    "  case b:",
-    "    break;",
-    "  }",
-    "}"
-].join("\n");
-
-exports.testSwitchCase = function(t, assert) {
-    var ast = parse(switchCase);
-    var printer = new Printer({ tabWidth: 2 });
-
-    var body = ast.program.body;
-    var switchStmt = body[0];
-    n.SwitchStatement.assert(switchStmt);
-
-    // This causes the switch statement to be reprinted.
-    switchStmt.original = null;
-
-    body[0] = b.ifStatement(
-        b.identifier("test"),
-        b.blockStatement([
-            switchStmt
-        ])
-    );
-
-    assert.strictEqual(
-        printer.print(ast).code,
-        switchCaseReprinted
-    );
-
-    assert.strictEqual(
-        printer.printGenerically(ast).code,
-        switchCaseGeneric
-    );
-
-    t.finish();
-};
-
-var tryCatch = [
-    "try {",
-    "  a();",
-    "} catch (e) {",
-    "  b(e);",
-    "}"
-].join("\n");
-
-exports.testIndentTryCatch = function(t, assert) {
-    var ast = parse(tryCatch);
-    var printer = new Printer({ tabWidth: 2 });
-    var body = ast.program.body;
-    var tryStmt = body[0];
-    n.TryStatement.assert(tryStmt);
-
-    // Force reprinting of the catch.
-    tryStmt.handlers[0].guard = null;
-
-    assert.strictEqual(printer.print(ast).code, tryCatch);
-
-    t.finish();
-};
-
-var classBody = [
-    "class A {",
-    "  foo(x) { return x }",
-    "  bar(y) { this.foo(y); }",
-    "  baz(x, y) {",
-    "    this.foo(x);",
-    "    this.bar(y);",
-    "  }",
-    "}"
-];
-
-var classBodyExpected = [
-    "class A {",
-    "  foo(x) { return x }",
-    "  bar(y) { this.foo(y); }",
-    "",
-    "  baz(x, y) {",
-    "    this.foo(x);",
-    "    this.bar(y);",
-    "  }",
-    "",
-    "  foo(x) { return x }",
-    "}"
-];
-
-exports.testMethodPrinting = function(t, assert) {
-    var code = classBody.join("\n");
-    try {
+describe("printer", function() {
+    it("Printer", function testPrinter(done) {
+        var code = testPrinter + "";
         var ast = parse(code);
-    } catch (e) {
-        // ES6 not supported, silently finish
-        return t.finish();
-    }
-    var printer = new Printer({ tabWidth: 2 });
-    var cb = ast.program.body[0].body;
-    n.ClassBody.assert(cb);
+        var printer = new Printer;
 
-    // Trigger reprinting of the class body.
-    cb.body.push(cb.body[0]);
+        assert.strictEqual(typeof printer.print, "function");
+        assert.strictEqual(printer.print(null).code, "");
 
-    assert.strictEqual(
-        printer.print(ast).code,
-        classBodyExpected.join("\n")
-    );
+        var string = printer.printGenerically(ast).code;
+        assert.ok(string.indexOf("done();") > 0);
 
-    t.finish();
-};
+        string = printer.print(ast).code;
 
-var multiLineParams = [
-    "function f(/* first",
-    "              xxx",
-    "              param */ a,",
-    "  // other params",
-    "  b, c, // see?",
-    "  d) {",
-    "  return a + b + c + d;",
-    "}"
-];
+        // TODO
 
-var multiLineParamsExpected = [
-    "function f(",
-    "  /* first",
-    "     xxx",
-    "     param */ a,",
-    "  // other params",
-    "  b,",
-    "  // see?",
-    "  c,",
-    "  d) {",
-    "  return a + b + c + d;",
-    "}"
-];
+        assert.ok(string.indexOf("// TODO") > 0);
 
-exports.testMultiLineParams = function(t, assert) {
-    var code = multiLineParams.join("\n");
-    var ast = parse(code);
-    var printer = new Printer({ tabWidth: 2 });
-
-    require("ast-types").traverse(ast, function(node) {
-        // Drop all original source information.
-        node.original = null;
+        done();
     });
 
-    assert.strictEqual(
-        printer.print(ast).code,
-        multiLineParamsExpected.join("\n")
-    );
+    var uselessSemicolons = [
+        'function a() {',
+        '  return "a";',
+        '};',
+        '',
+        'function b() {',
+        '  return "b";',
+        '};'
+    ].join("\n");
 
-    t.finish();
-};
+    it("EmptyStatements", function() {
+        var ast = parse(uselessSemicolons);
+        var printer = new Printer({ tabWidth: 2 });
 
-exports.testSimpleVarPrinting = function(t, assert) {
-    var printer = new Printer({ tabWidth: 2 });
-    var varDecl = b.variableDeclaration("var", [
-        b.variableDeclarator(b.identifier("x"), null),
-        b.variableDeclarator(b.identifier("y"), null),
-        b.variableDeclarator(b.identifier("z"), null)
-    ]);
+        var reprinted = printer.print(ast).code;
+        assert.strictEqual(typeof reprinted, "string");
+        assert.strictEqual(reprinted, uselessSemicolons);
 
-    assert.strictEqual(
-        printer.print(b.program([varDecl])).code,
-        "var x, y, z;"
-    );
+        var generic = printer.printGenerically(ast).code;
+        var withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
+        assert.strictEqual(typeof generic, "string");
+        assert.strictEqual(generic, withoutTrailingSemicolons);
+    });
 
-    var z = varDecl.declarations.pop();
-    varDecl.declarations.pop();
-    varDecl.declarations.push(z);
+    var importantSemicolons = [
+        "var a = {};", // <--- this trailing semi-colon is very important
+        "(function() {})();"
+    ].join("\n");
 
-    assert.strictEqual(
-        printer.print(b.program([varDecl])).code,
-        "var x, z;"
-    );
+    it("IffeAfterVariableDeclarationEndingInObjectLiteral", function() {
+        var ast = parse(importantSemicolons);
+        var printer = new Printer({ tabWidth: 2 });
 
-    t.finish();
-};
+        var reprinted = printer.printGenerically(ast).code;
+        assert.strictEqual(typeof reprinted, "string");
+        assert.strictEqual(reprinted, importantSemicolons);
+    });
 
-exports.testMultiLineVarPrinting = function(t, assert) {
-    var printer = new Printer({ tabWidth: 2 });
-    var varDecl = b.variableDeclaration("var", [
-        b.variableDeclarator(b.identifier("x"), null),
-        b.variableDeclarator(
-            b.identifier("y"),
-            b.objectExpression([
-                b.property("init", b.identifier("why"), b.literal("not"))
+    var switchCase = [
+        "switch (test) {",
+        "  default:",
+        "  case a: break",
+        "",
+        "  case b:",
+        "    break;",
+        "}",
+    ].join("\n");
+
+    var switchCaseReprinted = [
+        "if (test) {",
+        "  switch (test) {",
+        "  default:",
+        "  case a: break",
+        "  case b:",
+        "    break;",
+        "  }",
+        "}"
+    ].join("\n");
+
+    var switchCaseGeneric = [
+        "if (test) {",
+        "  switch (test) {",
+        "  default:",
+        "  case a:",
+        "    break;",
+        "  case b:",
+        "    break;",
+        "  }",
+        "}"
+    ].join("\n");
+
+    it("SwitchCase", function() {
+        var ast = parse(switchCase);
+        var printer = new Printer({ tabWidth: 2 });
+
+        var body = ast.program.body;
+        var switchStmt = body[0];
+        n.SwitchStatement.assert(switchStmt);
+
+        // This causes the switch statement to be reprinted.
+        switchStmt.original = null;
+
+        body[0] = b.ifStatement(
+            b.identifier("test"),
+            b.blockStatement([
+                switchStmt
             ])
-        ),
-        b.variableDeclarator(b.identifier("z"), null)
-    ]);
+        );
 
-    assert.strictEqual(printer.print(b.program([varDecl])).code, [
-        "var x,",
-        "    y = {",
-        "      why: \"not\"",
-        "    },",
-        "    z;"
-    ].join("\n"));
+        assert.strictEqual(
+            printer.print(ast).code,
+            switchCaseReprinted
+        );
 
-    t.finish();
-};
+        assert.strictEqual(
+            printer.printGenerically(ast).code,
+            switchCaseGeneric
+        );
+    });
 
-exports.testForLoopPrinting = function(t, assert) {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forStatement(
-        b.variableDeclaration("var", [
-            b.variableDeclarator(b.identifier("i"), b.literal(0))
-        ]),
-        b.binaryExpression("<", b.identifier("i"), b.literal(3)),
-        b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
-        b.expressionStatement(
-            b.callExpression(b.identifier("log"), [b.identifier("i")])
-        )
-    );
-
-    assert.strictEqual(
-        printer.print(loop).code,
-        "for (var i = 0; i < 3; i++)\n" +
-        "  log(i);"
-    );
-
-    t.finish();
-};
-
-exports.testEmptyForLoopPrinting = function(t, assert) {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forStatement(
-        b.variableDeclaration("var", [
-            b.variableDeclarator(b.identifier("i"), b.literal(0))
-        ]),
-        b.binaryExpression("<", b.identifier("i"), b.literal(3)),
-        b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
-        b.emptyStatement()
-    );
-
-    assert.strictEqual(
-        printer.print(loop).code,
-        "for (var i = 0; i < 3; i++)\n" +
-        "  ;"
-    );
-
-    t.finish();
-};
-
-exports.testForInLoopPrinting = function(t, assert) {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forInStatement(
-        b.variableDeclaration("var", [
-            b.variableDeclarator(b.identifier("key"), null)
-        ]),
-        b.identifier("obj"),
-        b.expressionStatement(
-            b.callExpression(b.identifier("log"), [b.identifier("key")])
-        ),
-        /* each: */ false
-    );
-
-    assert.strictEqual(
-        printer.print(loop).code,
-        "for (var key in obj)\n" +
-        "  log(key);"
-    );
-
-    t.finish();
-};
-
-exports.testGuessTabWidth = function(t, assert) {
-    var code = [
-        "function identity(x) {",
-        "  return x;",
+    var tryCatch = [
+        "try {",
+        "  a();",
+        "} catch (e) {",
+        "  b(e);",
         "}"
     ].join("\n");
 
-    var guessedTwo = [
-        "function identity(x) {",
-        "  log(x);",
-        "  return x;",
+    it("IndentTryCatch", function() {
+        var ast = parse(tryCatch);
+        var printer = new Printer({ tabWidth: 2 });
+        var body = ast.program.body;
+        var tryStmt = body[0];
+        n.TryStatement.assert(tryStmt);
+
+        // Force reprinting of the catch.
+        tryStmt.handlers[0].guard = null;
+
+        assert.strictEqual(printer.print(ast).code, tryCatch);
+    });
+
+    var classBody = [
+        "class A {",
+        "  foo(x) { return x }",
+        "  bar(y) { this.foo(y); }",
+        "  baz(x, y) {",
+        "    this.foo(x);",
+        "    this.bar(y);",
+        "  }",
         "}"
-    ].join("\n");
+    ];
 
-    var explicitFour = [
-        "function identity(x) {",
-        "    log(x);",
-        "    return x;",
+    var classBodyExpected = [
+        "class A {",
+        "  foo(x) { return x }",
+        "  bar(y) { this.foo(y); }",
+        "",
+        "  baz(x, y) {",
+        "    this.foo(x);",
+        "    this.bar(y);",
+        "  }",
+        "",
+        "  foo(x) { return x }",
         "}"
-    ].join("\n");
+    ];
 
-    var ast = parse(code);
+    it("MethodPrinting", function() {
+        var code = classBody.join("\n");
+        try {
+            var ast = parse(code);
+        } catch (e) {
+            // ES6 not supported, silently finish
+            return;
+        }
+        var printer = new Printer({ tabWidth: 2 });
+        var cb = ast.program.body[0].body;
+        n.ClassBody.assert(cb);
 
-    var funDecl = ast.program.body[0];
-    n.FunctionDeclaration.assert(funDecl);
+        // Trigger reprinting of the class body.
+        cb.body.push(cb.body[0]);
 
-    var funBody = funDecl.body.body;
+        assert.strictEqual(
+            printer.print(ast).code,
+            classBodyExpected.join("\n")
+        );
+    });
 
-    funBody.unshift(
-        b.expressionStatement(
-            b.callExpression(
-                b.identifier("log"),
-                funDecl.params
+    var multiLineParams = [
+        "function f(/* first",
+        "              xxx",
+        "              param */ a,",
+        "  // other params",
+        "  b, c, // see?",
+        "  d) {",
+        "  return a + b + c + d;",
+        "}"
+    ];
+
+    var multiLineParamsExpected = [
+        "function f(",
+        "  /* first",
+        "     xxx",
+        "     param */ a,",
+        "  // other params",
+        "  b,",
+        "  // see?",
+        "  c,",
+        "  d) {",
+        "  return a + b + c + d;",
+        "}"
+    ];
+
+    it("MultiLineParams", function() {
+        var code = multiLineParams.join("\n");
+        var ast = parse(code);
+        var printer = new Printer({ tabWidth: 2 });
+
+        require("ast-types").traverse(ast, function(node) {
+            // Drop all original source information.
+            node.original = null;
+        });
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            multiLineParamsExpected.join("\n")
+        );
+    });
+
+    it("SimpleVarPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var varDecl = b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("x"), null),
+            b.variableDeclarator(b.identifier("y"), null),
+            b.variableDeclarator(b.identifier("z"), null)
+        ]);
+
+        assert.strictEqual(
+            printer.print(b.program([varDecl])).code,
+            "var x, y, z;"
+        );
+
+        var z = varDecl.declarations.pop();
+        varDecl.declarations.pop();
+        varDecl.declarations.push(z);
+
+        assert.strictEqual(
+            printer.print(b.program([varDecl])).code,
+            "var x, z;"
+        );
+    });
+
+    it("MultiLineVarPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var varDecl = b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("x"), null),
+            b.variableDeclarator(
+                b.identifier("y"),
+                b.objectExpression([
+                    b.property("init", b.identifier("why"), b.literal("not"))
+                ])
+            ),
+            b.variableDeclarator(b.identifier("z"), null)
+        ]);
+
+        assert.strictEqual(printer.print(b.program([varDecl])).code, [
+            "var x,",
+            "    y = {",
+            "      why: \"not\"",
+            "    },",
+            "    z;"
+        ].join("\n"));
+    });
+
+    it("ForLoopPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var loop = b.forStatement(
+            b.variableDeclaration("var", [
+                b.variableDeclarator(b.identifier("i"), b.literal(0))
+            ]),
+            b.binaryExpression("<", b.identifier("i"), b.literal(3)),
+            b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
+            b.expressionStatement(
+                b.callExpression(b.identifier("log"), [b.identifier("i")])
             )
-        )
-    );
+        );
 
-    assert.strictEqual(
-        new Printer().print(ast).code,
-        guessedTwo
-    );
+        assert.strictEqual(
+            printer.print(loop).code,
+            "for (var i = 0; i < 3; i++)\n" +
+            "  log(i);"
+        );
+    });
 
-    assert.strictEqual(
-        new Printer({
-            tabWidth: 4
-        }).print(ast).code,
-        explicitFour
-    );
+    it("EmptyForLoopPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var loop = b.forStatement(
+            b.variableDeclaration("var", [
+                b.variableDeclarator(b.identifier("i"), b.literal(0))
+            ]),
+            b.binaryExpression("<", b.identifier("i"), b.literal(3)),
+            b.updateExpression("++", b.identifier("i"), /* prefix: */ false),
+            b.emptyStatement()
+        );
 
-    t.finish();
-};
+        assert.strictEqual(
+            printer.print(loop).code,
+            "for (var i = 0; i < 3; i++)\n" +
+            "  ;"
+        );
+    });
+
+    it("ForInLoopPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var loop = b.forInStatement(
+            b.variableDeclaration("var", [
+                b.variableDeclarator(b.identifier("key"), null)
+            ]),
+            b.identifier("obj"),
+            b.expressionStatement(
+                b.callExpression(b.identifier("log"), [b.identifier("key")])
+            ),
+            /* each: */ false
+        );
+
+        assert.strictEqual(
+            printer.print(loop).code,
+            "for (var key in obj)\n" +
+            "  log(key);"
+        );
+    });
+
+    it("GuessTabWidth", function() {
+        var code = [
+            "function identity(x) {",
+            "  return x;",
+            "}"
+        ].join("\n");
+
+        var guessedTwo = [
+            "function identity(x) {",
+            "  log(x);",
+            "  return x;",
+            "}"
+        ].join("\n");
+
+        var explicitFour = [
+            "function identity(x) {",
+            "    log(x);",
+            "    return x;",
+            "}"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var funDecl = ast.program.body[0];
+        n.FunctionDeclaration.assert(funDecl);
+
+        var funBody = funDecl.body.body;
+
+        funBody.unshift(
+            b.expressionStatement(
+                b.callExpression(
+                    b.identifier("log"),
+                    funDecl.params
+                )
+            )
+        );
+
+        assert.strictEqual(
+            new Printer().print(ast).code,
+            guessedTwo
+        );
+
+        assert.strictEqual(
+            new Printer({
+                tabWidth: 4
+            }).print(ast).code,
+            explicitFour
+        );
+    });
+});

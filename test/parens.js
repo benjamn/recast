@@ -41,201 +41,177 @@ var operators = [
     "&&", "||"
 ];
 
-exports.testArithmetic = function(t) {
-    check("1 - 2");
-    check("  2 +2 ");
+describe("parens", function() {
+    it("Arithmetic", function() {
+        check("1 - 2");
+        check("  2 +2 ");
 
-    operators.forEach(function(op1) {
-        operators.forEach(function(op2) {
-            check("(a " + op1 + " b) " + op2 + " c");
-            check("a " + op1 + " (b " + op2 + " c)");
+        operators.forEach(function(op1) {
+            operators.forEach(function(op2) {
+                check("(a " + op1 + " b) " + op2 + " c");
+                check("a " + op1 + " (b " + op2 + " c)");
+            });
         });
     });
 
-    t.finish();
-};
+    it("Unary", function() {
+        check("(-a).b");
+        check("(+a).b");
+        check("(!a).b");
+        check("(~a).b");
+        check("(typeof a).b");
+        check("(void a).b");
+        check("(delete a.b).c");
+    });
 
-exports.testUnary = function(t) {
-    check("(-a).b");
-    check("(+a).b");
-    check("(!a).b");
-    check("(~a).b");
-    check("(typeof a).b");
-    check("(void a).b");
-    check("(delete a.b).c");
+    it("Binary", function() {
+        check("(a && b)()");
+        check("typeof (a && b)");
+        check("(a && b)[c]");
+        check("(a && b).c");
+    });
 
-    t.finish();
-};
+    it("Sequence", function() {
+        check("(a, b)()");
+        check("a(b, (c, d), e)");
+        check("!(a, b)");
+        check("a + (b, c) + d");
+        check("var a = (1, 2), b = a + a;");
+        check("(a, { b: 2 }).b");
+        check("[a, (b, c), d]");
+        check("({ a: (1, 2) }).a");
+        check("(a, b) ? (a = 1, b = 2) : (c = 3)");
+        check("a = (1, 2)");
+    });
 
-exports.testBinary = function(t) {
-    check("(a && b)()");
-    check("typeof (a && b)");
-    check("(a && b)[c]");
-    check("(a && b).c");
+    it("NewExpression", function() {
+        check("new (a.b())");
+        check("new (a.b())(c)");
+        check("new a.b(c)");
+        check("+new Date");
+        check("(new Date).getTime()");
+        check("new a");
+        check("(new a)(b)");
+        check("(new (a.b(c))(d))(e)");
+        check("(new Date)['getTime']()");
+        check('(new Date)["getTime"]()');
+    });
 
-    t.finish();
-};
+    it("Numbers", function() {
+        check("(1).foo");
+        check("(-1).foo");
+        check("+0");
+        check("NaN.foo");
+        check("(-Infinity).foo");
+    });
 
-exports.testSequence = function(t) {
-    check("(a, b)()");
-    check("a(b, (c, d), e)");
-    check("!(a, b)");
-    check("a + (b, c) + d");
-    check("var a = (1, 2), b = a + a;");
-    check("(a, { b: 2 }).b");
-    check("[a, (b, c), d]");
-    check("({ a: (1, 2) }).a");
-    check("(a, b) ? (a = 1, b = 2) : (c = 3)");
-    check("a = (1, 2)");
+    it("Assign", function() {
+        check("!(a = false)");
+        check("a + (b = 2) + c");
+        check("(a = fn)()");
+        check("(a = b) ? c : d");
+        check("(a = b)[c]");
+        check("(a = b).c");
+    });
 
-    t.finish();
-};
+    it("Function", function() {
+        check("a(function(){}.bind(this))");
+        check("(function(){}).apply(this, arguments)");
+        check("function f() { (function(){}).call(this) }");
+        check("while (true) { (function(){}).call(this) }");
+    });
 
-exports.testNewExpression = function(t) {
-    check("new (a.b())");
-    check("new (a.b())(c)");
-    check("new a.b(c)");
-    check("+new Date");
-    check("(new Date).getTime()");
-    check("new a");
-    check("(new a)(b)");
-    check("(new (a.b(c))(d))(e)");
-    check("(new Date)['getTime']()");
-    check('(new Date)["getTime"]()');
+    it("ObjectLiteral", function() {
+        check("a({b:c(d)}.b)");
+        check("({a:b(c)}).a");
+    });
 
-    t.finish();
-};
+    it("ReprintedParens", function() {
+        var code = "a(function g(){}.call(this));";
+        var ast1 = parse(code);
+        var body = ast1.program.body;
 
-exports.testNumbers = function(t) {
-    check("(1).foo");
-    check("(-1).foo");
-    check("+0");
-    check("NaN.foo");
-    check("(-Infinity).foo");
+        // Copy the function from a position where it does not need
+        // parentheses to a position where it does need parentheses.
+        body.push(b.expressionStatement(
+            body[0].expression.arguments[0]));
 
-    t.finish();
-};
+        var generic = printer.printGenerically(ast1).code;
+        var ast2 = parse(generic);
+        assert.ok(
+            util.deepEquivalent(ast1, ast2),
+            "generic reprinting failed: " + generic);
 
-exports.testAssign = function(t) {
-    check("!(a = false)");
-    check("a + (b = 2) + c");
-    check("(a = fn)()");
-    check("(a = b) ? c : d");
-    check("(a = b)[c]");
-    check("(a = b).c");
+        var reprint = printer.print(ast1).code;
+        var ast3 = parse(reprint);
+        assert.ok(
+            util.deepEquivalent(ast1, ast3),
+            "conservative reprinting failed: " + reprint);
+    });
 
-    t.finish();
-};
+    it("NegatedLoopCondition", function() {
+        var ast = parse([
+            "for (var i = 0; i < 10; ++i) {",
+            "  console.log(i);",
+            "}"
+        ].join("\n"))
 
-exports.testFunction = function(t) {
-    check("a(function(){}.bind(this))");
-    check("(function(){}).apply(this, arguments)");
-    check("function f() { (function(){}).call(this) }");
-    check("while (true) { (function(){}).call(this) }");
+        var loop = ast.program.body[0];
+        var test = loop.test;
+        var negation = b.unaryExpression("!", test);
 
-    t.finish();
-};
+        assert.strictEqual(
+            printer.print(negation).code,
+            "!(i < 10)"
+        );
 
-exports.testObjectLiteral = function(t) {
-    check("a({b:c(d)}.b)");
-    check("({a:b(c)}).a");
+        loop.test = negation;
 
-    t.finish();
-};
+        assert.strictEqual(printer.print(ast).code, [
+            "for (var i = 0; !(i < 10); ++i) {",
+            "  console.log(i);",
+            "}"
+        ].join("\n"));
+    });
 
-exports.testReprintedParens = function(t) {
-    var code = "a(function g(){}.call(this));";
-    var ast1 = parse(code);
-    var body = ast1.program.body;
+    it("MisleadingExistingParens", function() {
+        var ast = parse([
+            // The key === "oyez" expression appears to have parentheses
+            // already, but those parentheses won't help us when we negate the
+            // condition with a !.
+            'if (key === "oyez") {',
+            "  throw new Error(key);",
+            "}"
+        ].join("\n"));
 
-    // Copy the function from a position where it does not need
-    // parentheses to a position where it does need parentheses.
-    body.push(b.expressionStatement(
-        body[0].expression.arguments[0]));
+        var ifStmt = ast.program.body[0];
+        ifStmt.test = b.unaryExpression("!", ifStmt.test);
 
-    var generic = printer.printGenerically(ast1).code;
-    var ast2 = parse(generic);
-    assert.ok(
-        util.deepEquivalent(ast1, ast2),
-        "generic reprinting failed: " + generic);
+        var binaryPath = new NodePath(ast).get(
+            "program", "body", 0, "test", "argument");
 
-    var reprint = printer.print(ast1).code;
-    var ast3 = parse(reprint);
-    assert.ok(
-        util.deepEquivalent(ast1, ast3),
-        "conservative reprinting failed: " + reprint);
+        assert.ok(binaryPath.needsParens());
 
-    t.finish();
-};
+        assert.strictEqual(printer.print(ifStmt).code, [
+            'if (!(key === "oyez")) {',
+            "  throw new Error(key);",
+            "}"
+        ].join("\n"));
+    });
 
-exports.testNegatedLoopCondition = function(t) {
-    var ast = parse([
-        "for (var i = 0; i < 10; ++i) {",
-        "  console.log(i);",
-        "}"
-    ].join("\n"))
+    it("DiscretionaryParens", function() {
+        var code = [
+            "if (info.line && (i > 0 || !skipFirstLine)) {",
+            "  info = copyLineInfo(info);",
+            "}"
+        ].join("\n");
 
-    var loop = ast.program.body[0];
-    var test = loop.test;
-    var negation = b.unaryExpression("!", test);
+        var ast = parse(code);
 
-    assert.strictEqual(
-        printer.print(negation).code,
-        "!(i < 10)"
-    );
+        var rightPath = new NodePath(ast).get(
+            "program", "body", 0, "test", "right");
 
-    loop.test = negation;
-
-    assert.strictEqual(printer.print(ast).code, [
-        "for (var i = 0; !(i < 10); ++i) {",
-        "  console.log(i);",
-        "}"
-    ].join("\n"));
-
-    t.finish();
-};
-
-exports.testMisleadingExistingParens = function(t) {
-    var ast = parse([
-        // The key === "oyez" expression appears to have parentheses
-        // already, but those parentheses won't help us when we negate the
-        // condition with a !.
-        'if (key === "oyez") {',
-        "  throw new Error(key);",
-        "}"
-    ].join("\n"));
-
-    var ifStmt = ast.program.body[0];
-    ifStmt.test = b.unaryExpression("!", ifStmt.test);
-
-    var binaryPath = new NodePath(ast).get(
-        "program", "body", 0, "test", "argument");
-
-    assert.ok(binaryPath.needsParens());
-
-    assert.strictEqual(printer.print(ifStmt).code, [
-        'if (!(key === "oyez")) {',
-        "  throw new Error(key);",
-        "}"
-    ].join("\n"));
-
-    t.finish();
-};
-
-exports.testDiscretionaryParens = function(t) {
-    var code = [
-        "if (info.line && (i > 0 || !skipFirstLine)) {",
-        "  info = copyLineInfo(info);",
-        "}"
-    ].join("\n");
-
-    var ast = parse(code);
-
-    var rightPath = new NodePath(ast).get(
-        "program", "body", 0, "test", "right");
-
-    assert.ok(rightPath.needsParens());
-    assert.strictEqual(printer.print(ast).code, code);
-
-    t.finish();
-};
+        assert.ok(rightPath.needsParens());
+        assert.strictEqual(printer.print(ast).code, code);
+    });
+});
