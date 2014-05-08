@@ -140,10 +140,8 @@ describe("printer", function() {
         var tryStmt = body[0];
         n.TryStatement.assert(tryStmt);
 
-        // Force reprinting of the catch.
-        tryStmt.handlers[0].guard = null;
-
-        assert.strictEqual(printer.print(ast).code, tryCatch);
+        // Force reprinting.
+        assert.strictEqual(printer.printGenerically(ast).code, tryCatch);
     });
 
     var classBody = [
