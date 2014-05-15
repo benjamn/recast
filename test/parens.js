@@ -147,6 +147,47 @@ describe("parens", function() {
         assert.ok(
             util.deepEquivalent(ast1, ast3),
             "conservative reprinting failed: " + reprint);
+
+        body.shift();
+        reprint = printer.print(ast1).code;
+        var ast4 = parse(reprint);
+        assert.strictEqual(ast4.program.body.length, 1);
+        var callExp = ast4.program.body[0].expression;
+        n.CallExpression.assert(callExp);
+        n.MemberExpression.assert(callExp.callee);
+        n.FunctionExpression.assert(callExp.callee.object);
+        assert.ok(
+            util.deepEquivalent(ast1, ast4),
+            "reprinting after body.shift() failed: " + reprint
+        );
+
+        var objCode = "({ foo: 42 }.foo);";
+        var objAst = parse(objCode);
+        var memExp = objAst.program.body[0].expression;
+        n.MemberExpression.assert(memExp);
+        n.ObjectExpression.assert(memExp.object);
+        n.Identifier.assert(memExp.property);
+        assert.strictEqual(memExp.property.name, "foo");
+        var blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
+        reprint = printer.print(blockStmt).code;
+        assert.ok(
+            util.deepEquivalent(blockStmt, parse(reprint).program.body[0]),
+            "object literal reprinting failed: " + reprint
+        );
+    });
+
+    it("don't reparenthesize valid IIFEs", function() {
+        var iifeCode = "(function     spaces   () {        }.call()  )  ;";
+        var iifeAst = parse(iifeCode);
+        var iifeReprint = printer.print(iifeAst).code;
+        assert.strictEqual(iifeReprint, iifeCode);
+    });
+
+    it("don't reparenthesize valid object literals", function() {
+        var objCode = "(  {    foo   :  42}.  foo )  ;";
+        var objAst = parse(objCode);
+        var objReprint = printer.print(objAst).code;
+        assert.strictEqual(objReprint, objCode);
     });
 
     it("NegatedLoopCondition", function() {
