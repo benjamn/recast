@@ -21,7 +21,8 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha --reporter spec"
+    "test": "node ./node_modules/mocha/bin/mocha --reporter spec",
+    "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
   },
   "dependencies": {
     "esprima": "git://github.com/ariya/esprima.git#harmony",

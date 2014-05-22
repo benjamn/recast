@@ -1,5 +1,5 @@
 var assert = require("assert");
-var esprima = require("esprima");
+var esprima = require("esprima-fb");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var NodePath = require("ast-types").NodePath;
