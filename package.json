@@ -20,10 +20,11 @@
   },
   "main": "main.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha --reporter spec"
+    "test": "node ./node_modules/mocha/bin/mocha --reporter spec",
+    "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
   },
   "dependencies": {
-    "esprima": "~1.1.1",
+    "esprima-fb": "^3001.1.0-dev-harmony-fb",
     "source-map": "0.1.32",
     "private": "~0.1.3",
     "cls": "~0.1.3",
