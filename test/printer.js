@@ -383,4 +383,25 @@ describe("printer", function() {
             explicitFour
         );
     });
+
+    it("FunctionDefaultsAndRest", function() {
+        var printer = new Printer();
+        var funExpr = b.functionExpression(
+            b.identifier('a'),
+            [b.identifier('b'), b.identifier('c')],
+            b.blockStatement([]),
+            false,
+            false,
+            false,
+            undefined
+        );
+
+        funExpr.defaults = [undefined, b.literal(1)];
+        funExpr.rest = b.identifier('d');
+
+        assert.strictEqual(
+            printer.print(funExpr).code,
+            "function a(b, c=1, ...d) {}"
+        );
+    });
 });
