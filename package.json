@@ -18,16 +18,17 @@
     "type": "git",
     "url": "git://github.com/benjamn/recast.git"
   },
+  "license": "MIT",
   "main": "main.js",
   "scripts": {
     "test": "node ./node_modules/mocha/bin/mocha --reporter spec"
   },
   "dependencies": {
-    "esprima": "~1.1.1",
+    "esprima": "git://github.com/ariya/esprima.git#harmony",
     "source-map": "0.1.32",
-    "private": "~0.1.3",
+    "private": "~0.1.4",
     "cls": "~0.1.3",
-    "ast-types": "~0.3.27"
+    "ast-types": "~0.3.28"
   },
   "devDependencies": {
     "mocha": "~1.18.2"
