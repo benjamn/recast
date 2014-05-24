@@ -40,7 +40,6 @@ describe("ES6 Compatability", function() {
                 false,
                 false
             );
-            debugger;
             assert.strictEqual(
                 printer.print(newES5MethodProperty).code,
                 printer.print(correctMethodProperty).code
