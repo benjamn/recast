@@ -404,4 +404,31 @@ describe("printer", function() {
             "function a(b, c=1, ...d) {}"
         );
     });
+
+    it("ExportDeclaration semicolons", function() {
+        var printer = new Printer();
+        var code = "export var foo = 42;";
+        var ast = parse(code);
+
+        assert.strictEqual(printer.print(ast).code, code);
+        assert.strictEqual(printer.printGenerically(ast).code, code);
+
+        code = "export var foo = 42";
+        ast = parse(code);
+
+        assert.strictEqual(printer.print(ast).code, code);
+        assert.strictEqual(printer.printGenerically(ast).code, code + ";");
+
+        code = "export function foo() {}";
+        ast = parse(code);
+
+        assert.strictEqual(printer.print(ast).code, code);
+        assert.strictEqual(printer.printGenerically(ast).code, code + ";");
+
+        code = "export function foo() {};";
+        ast = parse(code);
+
+        assert.strictEqual(printer.print(ast).code, code);
+        assert.strictEqual(printer.printGenerically(ast).code, code);
+    });
 });
