@@ -37,6 +37,68 @@ function runString(code, transformer, options) {
 }
 
 Object.defineProperties(exports, {
+  /** 
+   * The bulidres from ast-types. Can be used to build a new node of a specific
+   * type
+   */
+    builders: {
+        enumerable: true,
+        value: types.builders
+    },
+    /**
+     * A utility function to be used with recast.visitMixed to chain multiple
+     * visitors one after the other in the same traversal of an AST
+     */
+    chainVisitors: {
+        enumerable: true,
+        value: 5 //chainVisitors
+    },
+    /**
+     * convinience function for producing a compile function that transformers
+     * need to implement.
+     */
+    genCompile: {
+        enumerable: true,
+        value: function(transformFunc) {
+            return function(code, options, pretty) {
+                var ast = this.parse(code, options);
+                var newAst = transformFunc(ast);
+                if (pretty) {
+                    return this.print(newAst);
+                }
+                return this.prettyPrint(newAst);
+            }.bind(this);
+        }
+    },
+    /**
+     * convinience function for producing a parse function that transformers
+     * need to implement.
+     */
+    genParse: {
+        enumerable: true,
+        value: function(transformFunc) {
+            return function(code, options) {
+                var ast = this.parse(code, options);
+                return transformFunc(ast);
+            }.bind(this);
+        }
+    },
+    /**
+     * A utility function to be used with recast.visitMixed to resolve cases
+     * where multiple visitors are needed
+     * */
+    mixVisitors: {
+        enumerable: true,
+        value: 5 //mixVisitors
+    },
+    /**
+     * The namedTypes component of ast-types. Used for checking nodes for
+     * their respective types, usually for conditionals
+     */
+    namedTypes: {
+        enumerable: true,
+        value: types.namedTypes
+    },
     /**
      * Parse a string of code into an augmented syntax tree suitable for
      * arbitrary modification and reprinting.
@@ -100,6 +162,13 @@ Object.defineProperties(exports, {
 
             return Syntax;
         })()
+    },
+    /**
+     * The main interface for traversing AST using visitors
+     */
+    visit: {
+        enumerable: true,
+        value: require("./lib/visitor").visit
     },
 
     Visitor: {
