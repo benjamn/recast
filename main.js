@@ -63,7 +63,7 @@ Object.defineProperties(exports, {
             return function(code, options, pretty) {
                 var ast = this.parse(code, options);
                 var newAst = transformFunc(ast);
-                if (pretty) {
+                if (!pretty) {
                     return this.print(newAst);
                 }
                 return this.prettyPrint(newAst);
