@@ -73,7 +73,7 @@ describe("Simple Transformer Tests", function() {
       // we'll use post order traversal in this case
       visitFunctionDeclaration: function(nodePath) {
         this.traverse();
-        nodePath.replace(b.ifStatement(
+        this.replace(b.ifStatement(
           b.binaryExpression(
             "==",
             b.literal(nodePath.value.id.name),
@@ -87,7 +87,7 @@ describe("Simple Transformer Tests", function() {
         traversal_stack.push('function');
       },
       visitProperty: function(nodePath) {
-        nodePath.replace(b.property(
+        this.replace(b.property(
           "init",
           b.identifier("var" + counter++),
           nodePath.value.value,
@@ -123,7 +123,7 @@ describe("Simple Transformer Tests", function() {
     //replaces all functions with `var myVar = 5;`
     var visitors = {
       visitFunctionDeclaration: function(nodePath) {
-        nodePath.replace(b.variableDeclaration(
+        this.replace(b.variableDeclaration(
           "var",
           [b.variableDeclarator(
             b.identifier("myVar"),
@@ -152,7 +152,7 @@ describe("Simple Transformer Tests", function() {
     //replaces all functions with `var myVar = 5;`
     var visitorsA = {
       visitFunctionDeclaration: function(nodePath) {
-        nodePath.replace(b.variableDeclaration(
+        this.replace(b.variableDeclaration(
           "var",
           [b.variableDeclarator(
             b.identifier("myVar"),
@@ -164,7 +164,7 @@ describe("Simple Transformer Tests", function() {
     //replaces all functions with `var yourVar = 6;`
     var visitorsB = {
       visitFunctionDeclaration: function(nodePath) {
-        nodePath.replace(b.variableDeclaration(
+        this.replace(b.variableDeclaration(
           "var",
           [b.variableDeclarator(
             b.identifier("yourVar"),
@@ -293,7 +293,7 @@ describe("Transformers Errors and Warnings", function() {
   it("Should fail if a visitor doesn't call traverse", function() {
     var badVisitors = {
       visitIdentifier: function(nodePath) {
-        nodePath.replace(b.identifier("identifier"));
+        this.replace(b.identifier("identifier"));
       }
     };
     var badTransformer = makeTransformer(badVisitors);
@@ -312,7 +312,7 @@ describe("Transformers Errors and Warnings", function() {
     var badVisitors = {
       visitIdentifier: function(nodePath) {
         this.traverse();
-        nodePath.replace(b.identifier("identifier"));
+        this.replace(b.identifier("identifier"));
         this.traverse(); //only call traverse once per visit
       }
     };
