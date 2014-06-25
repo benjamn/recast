@@ -200,6 +200,93 @@ describe("Simple Transformer Tests", function() {
     var outputAST = recast.visit(recast.parse(source), transformFunc);
     assert.equal(recast.print(outputAST).code, reprint(expected));
   });
+
+  it("should allow chaining multiple visitors on the same node", function() {
+    var counter = 0;
+    // replace all identifiers with `var{counter}`
+    var visitorsA = {
+      visitIdentifier: function(nodePath) {
+        this.replace(b.identifier("var" + counter++));
+        this.traverse();
+      }
+    };
+    // appends identifier names with "__modified"
+    var visitorsB = {
+      visitIdentifier: function(nodePath) {
+        this.replace(b.identifier(nodePath.value.name + "__modified"));
+        this.traverse();
+      }
+    }
+    var transformerA = makeTransformer(visitorsA);
+    var transformerB = makeTransformer(visitorsB);
+
+    // please note that after the transformation, this code will NOT function
+    // correctly since multiple references to the same identifier now refer
+    // to different identifiers.
+    var source = [
+      "var firstVar = 6;",
+      "var secondVar = 'hello', thirdVar;",
+      "function firstFunc(firstParam, secondParam){",
+      "  console.log(firstParam, secondParam);",
+      "}",
+      "firstFunc(7, 12);"
+    ].join("\n");
+    var expected = [
+      "var var0__modified = 6;",
+      "var var1__modified = 'hello', var2__modified;",
+      "function var3__modified(var4__modified, var5__modified){",
+      "  var6__modified.var7__modified(var8__modified, var9__modified);",
+      "}",
+      "var10__modified(7, 12);"
+    ].join("\n");
+
+    var outputAST = recast.visit(
+      recast.parse(source),
+      [visitorsA, visitorsB]
+    );
+    assert.equal(recast.print(outputAST).code, reprint(expected));
+
+  });
+
+  it("should allow chaining visitors when the node changes type", function() {
+    var counter = 0;
+    // replace all functions with identifiers of the form `var{counter}`
+    var visitorsA = {
+      visitFunctionExpression: function(nodePath) {
+        this.replace(b.identifier("var" + counter++));
+        this.traverse();
+      }
+    };
+    // appends identifier names with "__modified"
+    var visitorsB = {
+      visitIdentifier: function(nodePath) {
+        this.replace(b.identifier(nodePath.value.name + "__modified"));
+        this.traverse();
+      }
+    }
+    var transformerA = makeTransformer(visitorsA);
+    var transformerB = makeTransformer(visitorsB);
+
+    // please note that after the transformation, this code will NOT function
+    // correctly since multiple references to the same identifier now refer
+    // to different identifiers.
+    var source = [
+      "var y = function(){};",
+      "var x = function(){};"
+    ].join("\n");
+    var expected = [
+      "var y__modified = var0__modified;",
+      "var x__modified = var1__modified;"
+    ].join("\n");
+
+    var outputAST = recast.visit(
+      recast.parse(source),
+      [visitorsA, visitorsB]
+    );
+    assert.equal(recast.print(outputAST).code, reprint(expected));
+
+  });
+
 });
 
 describe("Transformers Errors and Warnings", function() {
