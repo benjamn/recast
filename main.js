@@ -46,14 +46,6 @@ Object.defineProperties(exports, {
         value: types.builders
     },
     /**
-     * A utility function to be used with recast.visitMixed to chain multiple
-     * visitors one after the other in the same traversal of an AST
-     */
-    chainVisitors: {
-        enumerable: true,
-        value: 5 //chainVisitors
-    },
-    /**
      * convinience function for producing a compile function that transformers
      * need to implement.
      */
@@ -82,14 +74,6 @@ Object.defineProperties(exports, {
                 return transformFunc(ast);
             }.bind(this);
         }
-    },
-    /**
-     * A utility function to be used with recast.visitMixed to resolve cases
-     * where multiple visitors are needed
-     * */
-    mixVisitors: {
-        enumerable: true,
-        value: 5 //mixVisitors
     },
     /**
      * The namedTypes component of ast-types. Used for checking nodes for
