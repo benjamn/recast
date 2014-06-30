@@ -147,9 +147,8 @@ describe("comments", function() {
         var actual = recast.print(ast, { tabWidth: 2 }).code;
         var expected = trailingExpected.join("\n");
 
-        console.log(recast.print(ast).code);
-        console.log(recast.print(recast.parse(actual)).code);
         // Check semantic equivalence:
+        console.log()
         util.assertEquivalent(ast, recast.parse(actual));
 
         assert.strictEqual(actual, expected);
