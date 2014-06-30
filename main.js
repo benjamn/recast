@@ -37,52 +37,6 @@ function runString(code, transformer, options) {
 }
 
 Object.defineProperties(exports, {
-  /** 
-   * The bulidres from ast-types. Can be used to build a new node of a specific
-   * type
-   */
-    builders: {
-        enumerable: true,
-        value: types.builders
-    },
-    /**
-     * convinience function for producing a compile function that transformers
-     * need to implement.
-     */
-    genCompile: {
-        enumerable: true,
-        value: function(transformFunc) {
-            return function(code, options, pretty) {
-                var ast = this.parse(code, options);
-                var newAst = transformFunc(ast);
-                if (!pretty) {
-                    return this.print(newAst);
-                }
-                return this.prettyPrint(newAst);
-            }.bind(this);
-        }
-    },
-    /**
-     * convinience function for producing a parse function that transformers
-     * need to implement.
-     */
-    genParse: {
-        enumerable: true,
-        value: function(transformFunc) {
-            return function(code, options) {
-                var ast = this.parse(code, options);
-                return transformFunc(ast);
-            }.bind(this);
-        }
-    },
-    /**
-     * The namedTypes component of ast-types. Used for checking nodes for
-     * their respective types, usually for conditionals
-     */
-    namedTypes: {
-        enumerable: true,
-        value: types.namedTypes
-    },
     /**
      * Parse a string of code into an augmented syntax tree suitable for
      * arbitrary modification and reprinting.
@@ -146,6 +100,17 @@ Object.defineProperties(exports, {
 
             return Syntax;
         })()
+    },
+    /**
+     * A class that represents a transformer, which is built from a definition
+     * of visitors (which is the parameter a Transformer is initialized with) as
+     * the constructor's single parameter. This transform makes use of 
+     * recast.visit and is designed to be used as an external transformer in
+     * packages that make use of recast.visit().
+     */
+    Transformer: {
+        enumerable: false,
+        value: require('./lib/transformer')
     },
     /**
      * The main interface for traversing AST using visitors
