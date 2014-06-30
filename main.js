@@ -101,6 +101,24 @@ Object.defineProperties(exports, {
             return Syntax;
         })()
     },
+    /**
+     * A class that represents a transformer, which is built from a definition
+     * of visitors (which is the parameter a Transformer is initialized with) as
+     * the constructor's single parameter. This transform makes use of 
+     * recast.visit and is designed to be used as an external transformer in
+     * packages that make use of recast.visit().
+     */
+    Transformer: {
+        enumerable: false,
+        value: require('./lib/transformer')
+    },
+    /**
+     * The main interface for traversing AST using visitors
+     */
+    visit: {
+        enumerable: true,
+        value: require("./lib/visitor").visit
+    },
 
     Visitor: {
         enumerable: false,

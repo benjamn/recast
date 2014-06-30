@@ -148,6 +148,7 @@ describe("comments", function() {
         var expected = trailingExpected.join("\n");
 
         // Check semantic equivalence:
+        console.log()
         util.assertEquivalent(ast, recast.parse(actual));
 
         assert.strictEqual(actual, expected);
