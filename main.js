@@ -46,6 +46,11 @@ Object.defineProperties(exports, {
         value: parse
     },
 
+    visit: {
+        enumerable: true,
+        value: require("./lib/path-visitor").visit
+    },
+
     /**
      * Reprint a modified syntax tree using as much of the original source
      * code as possible.
