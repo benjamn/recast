@@ -25,7 +25,7 @@
     "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
   },
   "dependencies": {
-    "esprima": "git://github.com/ariya/esprima.git#harmony",
+    "esprima": "git+https://github.com/ariya/esprima.git#harmony",
     "source-map": "0.1.32",
     "private": "~0.1.4",
     "cls": "~0.1.3",
