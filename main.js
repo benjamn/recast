@@ -47,6 +47,24 @@ Object.defineProperties(exports, {
     },
 
     /**
+     * Traverse and potentially modify an abstract syntax tree using a
+     * convenient visitor syntax:
+     *
+     *   recast.visit(ast, {
+     *     names: [],
+     *     visitIdentifier: function(path) {
+     *       var node = path.value;
+     *       this.visitor.names.push(node.name);
+     *       this.traverse(path);
+     *     }
+     *   });
+     */
+    visit: {
+        enumerable: true,
+        value: require("ast-types").visit
+    },
+
+    /**
      * Reprint a modified syntax tree using as much of the original source
      * code as possible.
      */
