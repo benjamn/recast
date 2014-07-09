@@ -12,7 +12,7 @@
     "parsing",
     "pretty-printing"
   ],
-  "version": "0.6.1",
+  "version": "0.6.2",
   "homepage": "http://github.com/benjamn/recast",
   "repository": {
     "type": "git",
