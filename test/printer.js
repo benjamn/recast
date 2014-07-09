@@ -1,4 +1,5 @@
 var assert = require("assert");
+var recast = require("..");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var n = require("../lib/types").namedTypes;
@@ -220,9 +221,11 @@ describe("printer", function() {
         var ast = parse(code);
         var printer = new Printer({ tabWidth: 2 });
 
-        require("ast-types").traverse(ast, function(node) {
-            // Drop all original source information.
-            node.original = null;
+        recast.visit(ast, {
+            visitNode: function(path) {
+                path.value.original = null;
+                this.traverse(path);
+            }
         });
 
         assert.strictEqual(

@@ -1,5 +1,6 @@
 var assert = require("assert");
 var sourceMap = require("source-map");
+var recast = require("..");
 var types = require("../lib/types");
 var n = types.namedTypes;
 var b = types.builders;
@@ -85,24 +86,27 @@ describe("mapping", function() {
 
     it("InputSourceMap", function() {
         function addUseStrict(ast) {
-            return types.traverse(ast, function(node) {
-                if (n.Function.check(node)) {
-                    node.body.body.unshift(
+            return recast.visit(ast, {
+                visitFunction: function(path) {
+                    path.get("body", "body").unshift(
                         b.expressionStatement(b.literal("use strict"))
                     );
+                    this.traverse(path);
                 }
             });
         }
 
         function stripConsole(ast) {
-            return types.traverse(ast, function(node) {
-                if (n.CallExpression.check(node) &&
-                    n.MemberExpression.check(node.callee) &&
-                    n.Identifier.check(node.callee.object) &&
-                    node.callee.object.name === "console") {
-                    n.ExpressionStatement.assert(this.parent.node);
-                    this.parent.replace();
-                    return false;
+            return recast.visit(ast, {
+                visitCallExpression: function(path) {
+                    var node = path.value;
+                    if (n.MemberExpression.check(node.callee) &&
+                        n.Identifier.check(node.callee.object) &&
+                        node.callee.object.name === "console") {
+                        n.ExpressionStatement.assert(path.parent.node);
+                        path.parent.replace();
+                        return false;
+                    }
                 }
             });
         }

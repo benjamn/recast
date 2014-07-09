@@ -120,8 +120,11 @@ describe("comments", function() {
         assert.strictEqual(recast.print(ast).code, code);
 
         // Drop all original source information to force reprinting.
-        require("ast-types").traverse(ast, function(node) {
-            node.original = null;
+        recast.visit(ast, {
+            visitNode: function(path) {
+                this.traverse(path);
+                path.value.original = null;
+            }
         });
 
         var assign = ast.program.body[0].expression;
