@@ -61,7 +61,7 @@ Object.defineProperties(exports, {
      */
     visit: {
         enumerable: true,
-        value: require("ast-types").visit
+        value: types.visit
     },
 
     /**
