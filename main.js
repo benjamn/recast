@@ -77,7 +77,7 @@ Object.defineProperties(exports, {
      * Print without attempting to reuse any original source code.
      */
     prettyPrint: {
-        enumerable: true,
+        enumerable: false,
         value: prettyPrint
     },
 
@@ -85,7 +85,7 @@ Object.defineProperties(exports, {
      * Customized version of require("ast-types").
      */
     types: {
-        enumerable: true,
+        enumerable: false,
         value: types
     },
 
@@ -93,7 +93,7 @@ Object.defineProperties(exports, {
      * Convenient command-line interface (see e.g. example/add-braces).
      */
     run: {
-        enumerable: true,
+        enumerable: false,
         value: run
     },
 
