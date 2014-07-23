@@ -160,12 +160,10 @@ describe("printer", function() {
         "class A {",
         "  foo(x) { return x }",
         "  bar(y) { this.foo(y); }",
-        "",
         "  baz(x, y) {",
         "    this.foo(x);",
         "    this.bar(y);",
         "  }",
-        "",
         "  foo(x) { return x }",
         "}"
     ];
@@ -433,5 +431,73 @@ describe("printer", function() {
 
         assert.strictEqual(printer.print(ast).code, code);
         assert.strictEqual(printer.printGenerically(ast).code, code);
+    });
+
+    var stmtListSpaces = [
+        "",
+        "var x = 1;",
+        "",
+        "",
+        "// y summation",
+        "var y = x + 1;",
+        "var z = x + y;",
+        "// after z",
+        "",
+        "console.log(x, y, z);",
+        "",
+        ""
+    ].join("\n");
+
+    var stmtListSpacesExpected = [
+        "",
+        "debugger;",
+        "var x = 1;",
+        "",
+        "",
+        "// y summation",
+        "var y = x + 1;",
+        "debugger;",
+        "var z = x + y;",
+        "// after z",
+        "",
+        "console.log(x, y, z);",
+        "",
+        "debugger;",
+        "",
+        ""
+    ].join("\n");
+
+    it("Statement list whitespace reuse", function() {
+        var ast = parse(stmtListSpaces);
+        var printer = new Printer({ tabWidth: 2 });
+        var debugStmt = b.expressionStatement(b.identifier("debugger"));
+
+        ast.program.body.splice(2, 0, debugStmt);
+        ast.program.body.unshift(debugStmt);
+        ast.program.body.push(debugStmt);
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            stmtListSpacesExpected
+        );
+
+        var funDecl = b.functionDeclaration(
+            b.identifier("foo"),
+            [],
+            b.blockStatement(ast.program.body)
+        );
+
+        var linesModule = require("../lib/lines");
+
+        assert.strictEqual(
+            printer.print(funDecl).code,
+            linesModule.concat([
+                "function foo() {\n",
+                linesModule.fromString(
+                    stmtListSpacesExpected.replace(/^\s+|\s+$/g, "")
+                ).indent(2),
+                "\n}"
+            ]).toString()
+        );
     });
 });
