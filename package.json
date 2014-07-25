@@ -27,12 +27,12 @@
   "dependencies": {
     "esprima": "git+https://github.com/ariya/esprima.git#harmony",
     "source-map": "0.1.32",
-    "private": "~0.1.4",
+    "private": "~0.1.5",
     "cls": "~0.1.3",
-    "ast-types": "~0.4.0"
+    "ast-types": "~0.4.7"
   },
   "devDependencies": {
-    "mocha": "~1.18.2"
+    "mocha": "~1.21.0"
   },
   "engines": {
     "node": ">= 0.8"
