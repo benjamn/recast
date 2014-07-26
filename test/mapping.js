@@ -10,8 +10,8 @@ var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var Mapping = require("../lib/mapping");
 
-describe("mapping", function() {
-    it("Mapping", function() {
+describe("source maps", function() {
+    it("should generate correct mappings", function() {
         var code = [
             "function foo(bar) {",
             "  return 1 + bar;",
@@ -84,7 +84,7 @@ describe("mapping", function() {
         check(3, 0, 3, 0); // }
     });
 
-    it("InputSourceMap", function() {
+    it("should compose with inputSourceMap", function() {
         function addUseStrict(ast) {
             return recast.visit(ast, {
                 visitFunction: function(path) {
@@ -168,7 +168,7 @@ describe("mapping", function() {
         });
     });
 
-    it("BecomingNull", function() {
+    it("should work when a child node becomes null", function() {
         // https://github.com/facebook/regenerator/issues/103
         var code = [
             "for (var i = 0; false; i++)",
@@ -187,5 +187,24 @@ describe("mapping", function() {
             "for (var i = 0; false; )",
             "  log(i);"
         ].join("\n"));
+    });
+
+    it("should tolerate programs that become empty", function() {
+        var source = "foo();";
+        var ast = recast.parse(source, {
+            sourceFileName: "foo.js"
+        });
+
+        assert.strictEqual(ast.program.body.length, 1);
+        ast.program.body.length = 0;
+
+        var result = recast.print(ast, {
+            sourceMapName: "foo.map.json"
+        });
+
+        assert.strictEqual(result.map.file, "foo.map.json");
+        assert.deepEqual(result.map.sources, []);
+        assert.deepEqual(result.map.names, []);
+        assert.strictEqual(result.map.mappings, "");
     });
 });
