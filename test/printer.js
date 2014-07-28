@@ -406,6 +406,19 @@ describe("printer", function() {
         );
     });
 
+    it("generically prints parsed code and generated code the same way", function() {
+        var printer = new Printer();
+        var ast = b.program([
+            b.expressionStatement(b.literal(1)),
+            b.expressionStatement(b.literal(2))
+        ]);
+
+        assert.strictEqual(
+            printer.printGenerically(parse("1; 2;")).code,
+            printer.printGenerically(ast).code
+        );
+    });
+
     it("ExportDeclaration semicolons", function() {
         var printer = new Printer();
         var code = "export var foo = 42;";
