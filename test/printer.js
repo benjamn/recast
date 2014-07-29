@@ -513,4 +513,30 @@ describe("printer", function() {
             ]).toString()
         );
     });
+
+    it("should print static methods with the static keyword", function() {
+        var printer = new Printer({ tabWidth: 4 });
+        var ast = parse([
+            "class A {",
+            "  static foo() {}",
+            "}"
+        ].join("\n"));
+
+        var classBody = ast.program.body[0].body;
+        n.ClassBody.assert(classBody);
+
+        var foo = classBody.body[0];
+        n.MethodDefinition.assert(foo);
+
+        classBody.body.push(foo);
+
+        foo.key.name = "formerlyFoo";
+
+        assert.strictEqual(printer.print(ast).code, [
+            "class A {",
+            "    static formerlyFoo() {}",
+            "    static formerlyFoo() {}",
+            "}"
+        ].join("\n"));
+    });
 });
