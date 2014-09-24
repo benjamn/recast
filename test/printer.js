@@ -64,6 +64,89 @@ describe("printer", function() {
         assert.strictEqual(reprinted, importantSemicolons);
     });
 
+    var arrayExprWithTrailingComma = '[1, 2,];';
+    var arrayExprWithoutTrailingComma = '[1, 2];';
+
+    it("ArrayExpressionWithTrailingComma", function() {
+        var ast = parse(arrayExprWithTrailingComma);
+        var printer = new Printer({ tabWidth: 2 });
+
+        var body = ast.program.body;
+        var arrayExpr = body[0].expression;
+        n.ArrayExpression.assert(arrayExpr);
+
+        // This causes the array expression to be reprinted.
+        var arrayExprOrig = arrayExpr.original;
+        arrayExpr.original = null;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            arrayExprWithoutTrailingComma
+        );
+
+        arrayExpr.original = arrayExprOrig;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            arrayExprWithTrailingComma
+        );
+    });
+
+    var arrayExprWithHoles = '[,,];';
+
+    it("ArrayExpressionWithHoles", function() {
+        var ast = parse(arrayExprWithHoles);
+        var printer = new Printer({ tabWidth: 2 });
+
+        var body = ast.program.body;
+        var arrayExpr = body[0].expression;
+        n.ArrayExpression.assert(arrayExpr);
+
+        // This causes the array expression to be reprinted.
+        var arrayExprOrig = arrayExpr.original;
+        arrayExpr.original = null;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            arrayExprWithHoles
+        );
+
+        arrayExpr.original = arrayExprOrig;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            arrayExprWithHoles
+        );
+    });
+
+    var objectExprWithTrailingComma = '({x: 1, y: 2,});';
+    var objectExprWithoutTrailingComma = '({\n  x: 1,\n  y: 2\n});';
+
+    it("ArrayExpressionWithTrailingComma", function() {
+        var ast = parse(objectExprWithTrailingComma);
+        var printer = new Printer({ tabWidth: 2 });
+
+        var body = ast.program.body;
+        var objectExpr = body[0].expression;
+        n.ObjectExpression.assert(objectExpr);
+
+        // This causes the array expression to be reprinted.
+        var objectExprOrig = objectExpr.original;
+        objectExpr.original = null;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            objectExprWithoutTrailingComma
+        );
+
+        objectExpr.original = objectExprOrig;
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            objectExprWithTrailingComma
+        );
+    });
+
     var switchCase = [
         "switch (test) {",
         "  default:",
