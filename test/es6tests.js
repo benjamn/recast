@@ -46,4 +46,15 @@ describe("ES6 Compatability", function() {
             );
         }
     );
+
+  it(
+      "respects destructuring assignments",
+      function respectDestructuringAssignment() {
+          var printer = new Printer({ tabWidth: 2 });
+          var code = 'var {a} = {};';
+          var ast = parse(code);
+          n.VariableDeclaration.assert(ast.program.body[0]);
+          assert.strictEqual(printer.print(ast).code, code);
+      }
+  );
 });
