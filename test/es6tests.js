@@ -1,8 +1,9 @@
 var assert = require("assert");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
-var n = require("../lib/types").namedTypes;
-var b = require("../lib/types").builders;
+var types = require("../lib/types");
+var n = types.namedTypes;
+var b = types.builders;
 
 describe("ES6 Compatability", function() {
     function convertShorthandMethod() {
@@ -65,12 +66,12 @@ describe("ES6 Compatability", function() {
 });
 
 describe("import/export syntax", function() {
-    var recast = require("recast");
+    var printer = new Printer({ tabWidth: 2 });
 
     function check(source) {
-        var ast1 = recast.parse(source);
-        var ast2 = recast.parse(recast.prettyPrint(ast1).code);
-        recast.types.astNodesAreEquivalent.assert(ast1, ast2);
+        var ast1 = parse(source);
+        var ast2 = parse(printer.printGenerically(ast1).code);
+        types.astNodesAreEquivalent.assert(ast1, ast2);
     }
 
     it("should parse and print import statements correctly", function() {
@@ -139,7 +140,7 @@ describe("import/export syntax", function() {
     it("should forbid invalid import/export syntax", function() {
         function checkInvalid(source, expectedMessage) {
             try {
-                recast.parse(source);
+                parse(source);
                 throw new Error("Parsing should have failed: " +
                                 JSON.stringify(source));
             } catch (err) {
