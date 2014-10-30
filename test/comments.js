@@ -102,8 +102,8 @@ describe("comments", function() {
         "",
         "  // There was an object literal...",
         "  // ... and here I am continuing this comment.",
-        "  qux: // Here is an object literal.",
-        "  {",
+        "  qux: {",
+        "    // Here is an object literal.",
         "    // Put more properties here when you think of them.",
         "    zxcv: 42,",
         "",
@@ -209,9 +209,10 @@ describe("comments", function() {
 
         assert.ok(!foo.comments);
         assert.ok(bar.comments);
-        assert.strictEqual(bar.comments.length, 1);
+        assert.strictEqual(bar.comments.leading.length, 1);
+        assert.strictEqual(bar.comments.trailing.length, 0);
         assert.strictEqual(
-            bar.comments[0].value,
+            bar.comments.leading[0].value,
             " Comment about the bar method."
         );
     });

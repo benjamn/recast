@@ -40,8 +40,7 @@ describe("parser", function() {
         assert.strictEqual(doneCall.callee.name, "done");
 
         assert.ok(lastStatement.comments);
-        assert.ok(lastStatement.comments instanceof Array);
-        assert.strictEqual(lastStatement.comments.length, 2);
+        assert.strictEqual(lastStatement.comments.leading.length, 2);
 
         var joinedComments = printComments(lastStatement.comments);
         var printedComments = joinedComments.toString();
