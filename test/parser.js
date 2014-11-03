@@ -2,7 +2,6 @@ var assert = require("assert");
 var parse = require("../lib/parser").parse;
 var getReprinter = require("../lib/patcher").getReprinter;
 var Printer = require("../lib/printer").Printer;
-var Visitor = require("../lib/visitor").Visitor;
 var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
@@ -65,7 +64,11 @@ describe("parser", function() {
         var ast = parse(code);
         var printer = new Printer;
 
-        new FunctionBodyReverser().visit(ast);
+        types.visit(ast, {
+            visitFunctionDeclaration: function(path) {
+                path.node.body.body.reverse();
+            }
+        });
 
         var altered = code
             .replace("a()", "xxx")
@@ -75,19 +78,27 @@ describe("parser", function() {
         assert.strictEqual(altered, printer.print(ast).code);
     });
 
-    var FunctionBodyReverser = Visitor.extend({
-        visitFunctionDeclaration: function(expr) {
-            expr.body.body.reverse();
-        }
-    });
-
     it("TabHandling", function() {
         function check(code, tabWidth) {
             var lines = fromString(code, { tabWidth: tabWidth });
             assert.strictEqual(lines.length, 1);
-            new IdentVisitor(lines).visit(
-                parse(code, { tabWidth: tabWidth })
-            );
+
+            types.visit(parse(code, { tabWidth: tabWidth }), {
+                check: function(s, loc) {
+                    var sliced = lines.slice(loc.start, loc.end);
+                    assert.strictEqual(s + "", sliced.toString());
+                },
+
+                visitIdentifier: function(path) {
+                    var ident = path.node;
+                    this.check(ident.name, ident.loc);
+                },
+
+                visitLiteral: function(path) {
+                    var lit = path.node;
+                    this.check(lit.value, lit.loc);
+                }
+            });
         }
 
         for (var tabWidth = 1; tabWidth <= 8; ++tabWidth) {
@@ -97,25 +108,6 @@ describe("parser", function() {
             check("\t \ti \t=\t 10;", tabWidth);
             check("\t \ti \t=\t 10;\t", tabWidth);
             check("\t \ti \t=\t 10;\t ", tabWidth);
-        }
-    });
-
-    var IdentVisitor = Visitor.extend({
-        init: function(lines) {
-            this.lines = lines;
-        },
-
-        check: function(s, loc) {
-            var sliced = this.lines.slice(loc.start, loc.end);
-            assert.strictEqual(s + "", sliced.toString());
-        },
-
-        visitIdentifier: function(ident) {
-            this.check(ident.name, ident.loc);
-        },
-
-        visitLiteral: function(lit) {
-            this.check(lit.value, lit.loc);
         }
     });
 
