@@ -67,6 +67,7 @@ describe("parser", function() {
         types.visit(ast, {
             visitFunctionDeclaration: function(path) {
                 path.node.body.body.reverse();
+                this.traverse(path);
             }
         });
 
@@ -92,11 +93,13 @@ describe("parser", function() {
                 visitIdentifier: function(path) {
                     var ident = path.node;
                     this.check(ident.name, ident.loc);
+                    this.traverse(path);
                 },
 
                 visitLiteral: function(path) {
                     var lit = path.node;
                     this.check(lit.value, lit.loc);
+                    this.traverse(path);
                 }
             });
         }
