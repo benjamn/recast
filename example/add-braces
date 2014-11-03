@@ -1,37 +1,44 @@
 #!/usr/bin/env node
 
 var recast = require("recast");
-var Syntax = recast.Syntax;
-var Visitor = recast.Visitor;
-var b = recast.types.builders;
+var types = recast.types;
+var n = types.namedTypes;
+var b = types.builders;
 
 require("recast").run(function(ast, callback) {
-    callback(new Orthodontist().visit(ast));
+    recast.visit(ast, {
+        visitIfStatement: function(path) {
+            var stmt = path.node;
+            stmt.consequent = fix(stmt.consequent);
+
+            var alt = stmt.alternate;
+            if (n.IfStatement.check(alt)) {
+                stmt.alternate = fix(alt);
+            }
+
+            this.traverse(path);
+        },
+
+        visitWhileStatement: visitLoop,
+        visitForStatement: visitLoop,
+        visitForInStatement: visitLoop
+    });
+
+    callback(ast);
 });
 
-var Orthodontist = Visitor.extend({
-    visitIfStatement: function(stmt) {
-        stmt.consequent = fix(stmt.consequent);
-        var alt = stmt.alternate;
-        if (alt && alt.type !== Syntax.IfStatement)
-            stmt.alternate = fix(alt);
-        this.genericVisit(stmt);
-    },
-
-    visitWhileStatement: visitLoop,
-    visitForStatement: visitLoop,
-    visitForInStatement: visitLoop,
-});
-
-function visitLoop(loop) {
+function visitLoop(path) {
+    var loop = path.node;
     loop.body = fix(loop.body);
-    this.genericVisit(loop);
+    this.traverse(path);
 }
 
 function fix(clause) {
     if (clause) {
-        if (clause.type !== Syntax.BlockStatement)
+        if (!n.BlockStatement.check(clause)) {
             clause = b.blockStatement([clause]);
+        }
     }
+
     return clause;
 }
