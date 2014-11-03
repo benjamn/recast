@@ -6,13 +6,12 @@
 var recast = require("recast");
 
 recast.run(function(ast, callback) {
-    callback(new Divorcer().visit(ast));
-});
+    recast.visit(ast, {
+        visitNode: function(path) {
+            this.traverse(path);
+            path.node.original = null;
+        }
+    });
 
-var Divorcer = recast.Visitor.extend({
-    visit: function(node) {
-        this.genericVisit(node);
-        node.original = null;
-        return node;
-    }
+    callback(ast);
 });
