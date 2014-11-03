@@ -102,7 +102,15 @@ Object.defineProperties(exports, {
      */
     Syntax: {
         enumerable: false,
-        value: (function() {
+        get: function getSyntax() {
+            if (getSyntax.cached) {
+                return getSyntax.cached;
+            }
+
+            require("depd")('require("recast").Syntax')(
+                "Please use recast.types.namedTypes instead of recast.Syntax"
+            );
+
             var def = types.Type.def;
             var Syntax = {};
 
@@ -116,8 +124,8 @@ Object.defineProperties(exports, {
             delete Syntax.SourceLocation;
             delete Syntax.Position;
 
-            return Syntax;
-        })()
+            return getSyntax.cached = Syntax;
+        }
     },
 
     Visitor: {
