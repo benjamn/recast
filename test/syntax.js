@@ -3,7 +3,6 @@ var fs = require("fs");
 var path = require("path");
 var types = require("../lib/types");
 var parse = require("../lib/parser").parse;
-var Visitor = require("../lib/visitor").Visitor;
 
 describe("syntax", function() {
     // Make sure we handle all possible node types in Syntax, and no additional
@@ -17,49 +16,39 @@ describe("syntax", function() {
             var ast = parse(data);
             assert.ok(ast);
 
-            var types = {};
-            new GenericPrintVisitor(types).visit(ast);
+            var typeNames = {};
+            types.visit(ast, {
+                visitFunctionDeclaration: function(path) {
+                    var decl = path.node;
+                    if (types.namedTypes.Identifier.check(decl.id) &&
+                        decl.id.name === "genericPrintNoParens") {
+                        this.traverse(path, {
+                            visitSwitchCase: function(path) {
+                                var test = path.node.test;
+                                if (test &&
+                                    test.type === "Literal" &&
+                                    typeof test.value === "string") {
+                                    var name = test.value;
+                                    typeNames[name] = name;
+                                }
+                                return false;
+                            }
+                        });
+                    } else {
+                        this.traverse(path);
+                    }
+                }
+            });
 
             for (var name in types.namedTypes) {
                 if (types.namedTypes.hasOwnProperty(name)) {
-                    assert.ok(types.hasOwnProperty(name), "unhandled type: " + name);
-                    assert.strictEqual(name, types[name]);
-                    delete types[name];
+                    assert.ok(typeNames.hasOwnProperty(name), "unhandled type: " + name);
+                    assert.strictEqual(name, typeNames[name]);
+                    delete typeNames[name];
                 }
             }
 
             done();
         });
-    });
-
-    var GenericPrintVisitor = Visitor.extend({
-        init: function(types) {
-            this.types = types;
-        },
-
-        visitFunctionDeclaration: function(decl) {
-            if (types.namedTypes.Identifier.check(decl.id) &&
-                decl.id.name === "genericPrintNoParens")
-            {
-                new CaseVisitor(this.types).visit(decl);
-            }
-        }
-    })
-
-    var CaseVisitor = Visitor.extend({
-        init: function(types) {
-            this.types = types;
-        },
-
-        visitSwitchCase: function(expr) {
-            var test = expr.test;
-            if (test &&
-                test.type === "Literal" &&
-                typeof test.value === "string")
-            {
-                var name = test.value;
-                this.types[name] = name;
-            }
-        }
     });
 });
