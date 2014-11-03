@@ -95,41 +95,5 @@ Object.defineProperties(exports, {
     run: {
         enumerable: false,
         value: run
-    },
-
-    /**
-     * Useful utilities for implementing transformer functions.
-     */
-    Syntax: {
-        enumerable: false,
-        get: function getSyntax() {
-            if (getSyntax.cached) {
-                return getSyntax.cached;
-            }
-
-            require("depd")('require("recast").Syntax')(
-                "Please use recast.types.namedTypes instead of recast.Syntax"
-            );
-
-            var def = types.Type.def;
-            var Syntax = {};
-
-            Object.keys(types.namedTypes).forEach(function(name) {
-                if (def(name).buildable)
-                    Syntax[name] = name;
-            });
-
-            // These two types are buildable but do not technically count
-            // as syntax because they are not printable.
-            delete Syntax.SourceLocation;
-            delete Syntax.Position;
-
-            return getSyntax.cached = Syntax;
-        }
-    },
-
-    Visitor: {
-        enumerable: false,
-        value: require("./lib/visitor").Visitor
     }
 });
