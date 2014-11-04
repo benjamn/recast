@@ -1,7 +1,7 @@
 var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
-var util = require("../lib/util");
+var types = require("../lib/types");
 var main = require("../main");
 
 function testFile(path) {
@@ -10,7 +10,7 @@ function testFile(path) {
         assert.strictEqual(typeof source, "string");
 
         var ast = main.parse(source);
-        assert.ok(util.deepEquivalent(ast.original, ast));
+        types.astNodesAreEquivalent.assert(ast.original, ast);
         var code = main.print(ast).code;
         assert.strictEqual(source, code);
     });

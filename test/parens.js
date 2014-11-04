@@ -3,9 +3,9 @@ var esprima = require("esprima-fb");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var NodePath = require("ast-types").NodePath;
-var util = require("../lib/util");
-var n = require("../lib/types").namedTypes;
-var b = require("../lib/types").builders;
+var types = require("../lib/types");
+var n = types.namedTypes;
+var b = types.builders;
 var printer = new Printer;
 
 function parseExpression(expr) {
@@ -23,10 +23,7 @@ function check(expr) {
     try {
         var ast2 = parseExpression(printed);
     } finally {
-        assert.ok(
-            util.deepEquivalent(ast1, ast2),
-            expr + " printed incorrectly as " + printed
-        );
+        types.astNodesAreEquivalent.assert(ast1, ast2);
     }
 }
 
@@ -138,15 +135,11 @@ describe("parens", function() {
 
         var generic = printer.printGenerically(ast1).code;
         var ast2 = parse(generic);
-        assert.ok(
-            util.deepEquivalent(ast1, ast2),
-            "generic reprinting failed: " + generic);
+        types.astNodesAreEquivalent.assert(ast1, ast2);
 
         var reprint = printer.print(ast1).code;
         var ast3 = parse(reprint);
-        assert.ok(
-            util.deepEquivalent(ast1, ast3),
-            "conservative reprinting failed: " + reprint);
+        types.astNodesAreEquivalent.assert(ast1, ast3);
 
         body.shift();
         reprint = printer.print(ast1).code;
@@ -156,10 +149,7 @@ describe("parens", function() {
         n.CallExpression.assert(callExp);
         n.MemberExpression.assert(callExp.callee);
         n.FunctionExpression.assert(callExp.callee.object);
-        assert.ok(
-            util.deepEquivalent(ast1, ast4),
-            "reprinting after body.shift() failed: " + reprint
-        );
+        types.astNodesAreEquivalent.assert(ast1, ast4);
 
         var objCode = "({ foo: 42 }.foo);";
         var objAst = parse(objCode);
@@ -170,9 +160,9 @@ describe("parens", function() {
         assert.strictEqual(memExp.property.name, "foo");
         var blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
         reprint = printer.print(blockStmt).code;
-        assert.ok(
-            util.deepEquivalent(blockStmt, parse(reprint).program.body[0]),
-            "object literal reprinting failed: " + reprint
+        types.astNodesAreEquivalent.assert(
+            blockStmt,
+            parse(reprint).program.body[0]
         );
     });
 

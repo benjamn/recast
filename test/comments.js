@@ -2,7 +2,6 @@ var recast = require("../main");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
 var fromString = require("../lib/lines").fromString;
-var util = require("../lib/util");
 var assert = require("assert");
 
 var annotated = [
@@ -151,7 +150,10 @@ describe("comments", function() {
         var expected = trailingExpected.join("\n");
 
         // Check semantic equivalence:
-        util.assertEquivalent(ast, recast.parse(actual));
+        recast.types.astNodesAreEquivalent.assert(
+            ast,
+            recast.parse(actual)
+        );
 
         assert.strictEqual(actual, expected);
     });
