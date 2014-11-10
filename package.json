@@ -28,7 +28,7 @@
     "esprima-fb": "~7001.1.0-dev-harmony-fb",
     "source-map": "0.1.32",
     "private": "~0.1.5",
-    "ast-types": "~0.6.0"
+    "ast-types": "~0.6.1"
   },
   "devDependencies": {
     "mocha": "~1.21.0"
