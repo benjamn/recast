@@ -218,4 +218,68 @@ describe("comments", function() {
             " Comment about the bar method."
         );
     });
+
+    var conciseMethods = [
+        "var obj = {",
+        "  a(/*before*/ param) {},",
+        "  b(param /*after*/) {},",
+        "  c(param) /*body*/ {}",
+        "};",
+    ];
+
+    it("should correctly attach to concise methods", function() {
+        var code = conciseMethods.join("\n");
+        var ast = recast.parse(code);
+
+        var objExpr = ast.program.body[0].declarations[0].init;
+        n.ObjectExpression.assert(objExpr);
+
+        var a = objExpr.properties[0];
+        n.Identifier.assert(a.key);
+        assert.strictEqual(a.key.name, "a");
+
+        var aComments = a.value.params[0].comments;
+        assert.strictEqual(aComments.leading.length, 1);
+        assert.strictEqual(aComments.dangling.length, 0);
+        assert.strictEqual(aComments.trailing.length, 0);
+        var aComment = aComments.leading[0];
+        assert.strictEqual(aComment.type, "Block");
+        assert.strictEqual(aComment.value, "before");
+        assert.strictEqual(
+            recast.print(a).code,
+            "a(/*before*/ param) {}"
+        );
+
+        var b = objExpr.properties[1];
+        n.Identifier.assert(b.key);
+        assert.strictEqual(b.key.name, "b");
+
+        var bComments = b.value.params[0].comments;
+        assert.strictEqual(bComments.leading.length, 0);
+        assert.strictEqual(bComments.dangling.length, 0);
+        assert.strictEqual(bComments.trailing.length, 1);
+        var bComment = bComments.trailing[0];
+        assert.strictEqual(bComment.type, "Block");
+        assert.strictEqual(bComment.value, "after");
+        assert.strictEqual(
+            recast.print(b).code,
+            "b(param /*after*/) {}"
+        );
+
+        var c = objExpr.properties[2];
+        n.Identifier.assert(c.key);
+        assert.strictEqual(c.key.name, "c");
+
+        var cComments = c.value.body.comments;
+        assert.strictEqual(cComments.leading.length, 1);
+        assert.strictEqual(cComments.dangling.length, 0);
+        assert.strictEqual(cComments.trailing.length, 0);
+        var cComment = cComments.leading[0];
+        assert.strictEqual(cComment.type, "Block");
+        assert.strictEqual(cComment.value, "body");
+        assert.strictEqual(
+            recast.print(c).code,
+            "c(param) /*body*/ {}"
+        );
+    });
 });
