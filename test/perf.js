@@ -1,6 +1,6 @@
 var path = require("path");
 var fs = require("fs");
-var recast = require("recast");
+var recast = require("..");
 
 var source = fs.readFileSync(
     path.join(__dirname, "data", "backbone.js"),
