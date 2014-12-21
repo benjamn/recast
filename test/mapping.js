@@ -54,7 +54,7 @@ describe("source maps", function() {
 
         var smc = new sourceMap.SourceMapConsumer(printed.map);
 
-        function check(origLine, origCol, genLine, genCol) {
+        function check(origLine, origCol, genLine, genCol, lastColumn) {
             assert.deepEqual(smc.originalPositionFor({
                 line: genLine,
                 column: genCol
@@ -71,17 +71,18 @@ describe("source maps", function() {
                 column: origCol
             }), {
                 line: genLine,
-                column: genCol
+                column: genCol,
+                lastColumn: lastColumn
             });
         }
 
-        check(1, 0, 1, 0); // function
-        check(1, 18, 1, 18); // {
-        check(2, 2, 2, 2); // return
-        check(2, 13, 2, 9); // bar
-        check(2, 9, 2, 15); // 1
-        check(2, 16, 2, 16); // ;
-        check(3, 0, 3, 0); // }
+        check(1, 0, 1, 0, null); // function
+        check(1, 18, 1, 18, null); // {
+        check(2, 2, 2, 2, null); // return
+        check(2, 13, 2, 9, null); // bar
+        check(2, 9, 2, 15, null); // 1
+        check(2, 16, 2, 16, null); // ;
+        check(3, 0, 3, 0, null); // }
     });
 
     it("should compose with inputSourceMap", function() {
