@@ -4,7 +4,7 @@ var getReprinter = patcherModule.getReprinter;
 var Patcher = patcherModule.Patcher;
 var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
-var NodePath = require("ast-types").NodePath;
+var FastPath = require("../lib/fast-path");
 
 var code = [
     "// file comment",
@@ -74,10 +74,11 @@ describe("patcher", function() {
     it("GetIndent", function() {
         function check(indent) {
             var lines = fromString(trickyCode).indent(indent);
-            var path = new NodePath(parse(lines.toString()))
-                .get("program", "body", 0, "body");
+            var file = parse(lines.toString());
+            var reprinter = FastPath.from(file).call(function(bodyPath) {
+                return getReprinter(bodyPath);
+            }, "program", "body", 0, "body");
 
-            var reprinter = getReprinter(path);
             var reprintedLines = reprinter(function(path) {
                 assert.ok(false, "should not have called print function");
             });
@@ -93,7 +94,8 @@ describe("patcher", function() {
             ].join("\n"));
         }
 
-        for (var indent = -4; indent <= 4; ++indent)
+        for (var indent = -4; indent <= 4; ++indent) {
             check(indent);
+        }
     });
 });
