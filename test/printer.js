@@ -627,30 +627,27 @@ describe("printer", function() {
         var ast = parse([
             "var obj = {",
             "    \"foo's\": 'bar',",
-            "    //This is pretty messy",
             "    '\"bar\\'s\"': /regex/m",
-            "}"
+            "};"
         ].join("\n"));
 
         var variableDeclaration = ast.program.body[0];
         n.VariableDeclaration.assert(variableDeclaration);
 
         var printer = new Printer({ quotemark: "single" });
-        assert.strictEqual(printer.print(ast).code, [
+        assert.strictEqual(printer.printGenerically(ast).code, [
             "var obj = {",
             "    'foo\\'s': 'bar',",
-            "    //This is pretty messy",
             "    '\"bar\\'s\"': /regex/m",
-            "}"
+            "};"
         ].join("\n"));
 
         var printer2 = new Printer({ quotemark: "double" });
-        assert.strictEqual(printer2.print(ast).code, [
+        assert.strictEqual(printer2.printGenerically(ast).code, [
             "var obj = {",
             "    \"foo's\": \"bar\",",
-            "    //This is pretty messy",
             '    "\\"bar\'s\\"": /regex/m',
-            "}"
+            "};"
         ].join("\n"));
     });
 });
