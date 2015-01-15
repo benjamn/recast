@@ -634,7 +634,7 @@ describe("printer", function() {
         var variableDeclaration = ast.program.body[0];
         n.VariableDeclaration.assert(variableDeclaration);
 
-        var printer = new Printer({ quotemark: "single" });
+        var printer = new Printer({ quote: "single" });
         assert.strictEqual(printer.printGenerically(ast).code, [
             "var obj = {",
             "    'foo\\'s': 'bar',",
@@ -642,12 +642,20 @@ describe("printer", function() {
             "};"
         ].join("\n"));
 
-        var printer2 = new Printer({ quotemark: "double" });
+        var printer2 = new Printer({ quote: "double" });
         assert.strictEqual(printer2.printGenerically(ast).code, [
             "var obj = {",
             "    \"foo's\": \"bar\",",
             '    "\\"bar\'s\\"": /regex/m',
             "};"
         ].join("\n"));
+        
+        var printer3 = new Printer({ quote: "auto" });
+        assert.strictEqual(printer3.printGenerically(ast).code, [
+            "var obj = {",
+            '    "foo\'s": "bar",',
+            '    \'"bar\\\'s"\': /regex/m',
+            "};"
+        ].join("\n"));        
     });
 });
