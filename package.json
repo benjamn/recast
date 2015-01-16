@@ -25,7 +25,7 @@
     "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
   },
   "dependencies": {
-    "esprima-fb": "~9001.1.0-dev-harmony-fb",
+    "esprima-fb": "~10001.1.0-dev-harmony-fb",
     "source-map": "~0.1.40",
     "private": "~0.1.5",
     "ast-types": "~0.6.1"
