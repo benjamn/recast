@@ -8,7 +8,7 @@ var fromString = linesModule.fromString;
 var concat = linesModule.concat;
 var types = require("../lib/types");
 var namedTypes = types.namedTypes;
-var NodePath = types.NodePath;
+var FastPath = require("../lib/fast-path");
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -19,23 +19,23 @@ describe("parser", function() {
         var ast = parse(code);
 
         namedTypes.File.assert(ast);
-        assert.ok(getReprinter(new NodePath(ast)));
+        assert.ok(getReprinter(FastPath.from(ast)));
 
         var funDecl = ast.program.body[0],
             funBody = funDecl.body;
 
         namedTypes.FunctionDeclaration.assert(funDecl);
         namedTypes.BlockStatement.assert(funBody);
-        assert.ok(getReprinter(new NodePath(funBody)));
+        assert.ok(getReprinter(FastPath.from(funBody)));
 
         var lastStatement = funBody.body.pop(),
             doneCall = lastStatement.expression;
 
-        assert.ok(!getReprinter(new NodePath(funBody)));
-        assert.ok(getReprinter(new NodePath(ast)));
+        assert.ok(!getReprinter(FastPath.from(funBody)));
+        assert.ok(getReprinter(FastPath.from(ast)));
 
         funBody.body.push(lastStatement);
-        assert.ok(getReprinter(new NodePath(funBody)));
+        assert.ok(getReprinter(FastPath.from(funBody)));
 
         assert.strictEqual(doneCall.callee.name, "done");
 
