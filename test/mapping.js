@@ -169,6 +169,95 @@ describe("source maps", function() {
         });
     });
 
+    it("should extract inline sourcemap from source", function() {
+        function addUseStrict(ast) {
+            return recast.visit(ast, {
+                visitFunction: function(path) {
+                    path.get("body", "body").unshift(
+                        b.expressionStatement(b.literal("use strict"))
+                    );
+                    this.traverse(path);
+                }
+            });
+        }
+
+        function stripConsole(ast) {
+            return recast.visit(ast, {
+                visitCallExpression: function(path) {
+                    var node = path.value;
+                    if (n.MemberExpression.check(node.callee) &&
+                        n.Identifier.check(node.callee.object) &&
+                        node.callee.object.name === "console") {
+                        n.ExpressionStatement.assert(path.parent.node);
+                        path.parent.replace();
+                        return false;
+                    }
+                }
+            });
+        }
+
+        var code = [
+            "function add(a, b) {",
+            "  var sum = a + b;",
+            "  console.log(a, b);",
+            "  return sum;",
+            "}"
+        ].join("\n");
+
+        var ast = parse(code, {
+            sourceFileName: "original.js"
+        });
+
+        var useStrictResult = new Printer({
+            sourceMapName: "useStrict.map.json"
+        }).print(addUseStrict(ast));
+
+        var useStrictResultCodeAndMap = [
+                useStrictResult.code,
+                "//# sourceMappingURL=data:application/json;base64,",
+                new Buffer(JSON.stringify(useStrictResult.map)).toString('base64')
+            ].join('');
+
+        var useStrictAst = parse(useStrictResultCodeAndMap, {
+            sourceFileName: "useStrict.js"
+        });
+
+        var oneStepResult = new Printer({
+            sourceMapName: "oneStep.map.json"
+        }).print(stripConsole(ast));
+
+        var twoStepResult = new Printer({
+            sourceMapName: "twoStep.map.json"
+        }).print(stripConsole(useStrictAst));
+
+        assert.strictEqual(
+            oneStepResult.code,
+            twoStepResult.code
+        );
+
+        var smc1 = new sourceMap.SourceMapConsumer(oneStepResult.map);
+        var smc2 = new sourceMap.SourceMapConsumer(twoStepResult.map);
+
+        smc1.eachMapping(function(mapping) {
+            var pos = {
+                line: mapping.generatedLine,
+                column: mapping.generatedColumn
+            };
+
+            var orig1 = smc1.originalPositionFor(pos);
+            var orig2 = smc2.originalPositionFor(pos);
+
+            // The composition of the source maps generated separately from
+            // the two transforms should be equivalent to the source map
+            // generated from the composition of the two transforms.
+            assert.deepEqual(orig1, orig2);
+
+            // Make sure the two-step source map refers back to the original
+            // source instead of the intermediate source.
+            assert.strictEqual(orig2.source, "original.js");
+        });
+    });
+
     it("should work when a child node becomes null", function() {
         // https://github.com/facebook/regenerator/issues/103
         var code = [
