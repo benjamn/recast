@@ -622,4 +622,40 @@ describe("printer", function() {
             "}"
         ].join("\n"));
     });
+    
+    it("should print string literals with the specified delimiter", function() {
+        var ast = parse([
+            "var obj = {",
+            "    \"foo's\": 'bar',",
+            "    '\"bar\\'s\"': /regex/m",
+            "};"
+        ].join("\n"));
+
+        var variableDeclaration = ast.program.body[0];
+        n.VariableDeclaration.assert(variableDeclaration);
+
+        var printer = new Printer({ quote: "single" });
+        assert.strictEqual(printer.printGenerically(ast).code, [
+            "var obj = {",
+            "    'foo\\'s': 'bar',",
+            "    '\"bar\\'s\"': /regex/m",
+            "};"
+        ].join("\n"));
+
+        var printer2 = new Printer({ quote: "double" });
+        assert.strictEqual(printer2.printGenerically(ast).code, [
+            "var obj = {",
+            "    \"foo's\": \"bar\",",
+            '    "\\"bar\'s\\"": /regex/m',
+            "};"
+        ].join("\n"));
+        
+        var printer3 = new Printer({ quote: "auto" });
+        assert.strictEqual(printer3.printGenerically(ast).code, [
+            "var obj = {",
+            '    "foo\'s": "bar",',
+            '    \'"bar\\\'s"\': /regex/m',
+            "};"
+        ].join("\n"));        
+    });
 });
