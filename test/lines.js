@@ -499,4 +499,37 @@ describe("lines", function() {
             });
         });
     });
+
+    it("ExoticWhitespace", function() {
+        var source = "";
+        var spacePattern = /^\s+$/;
+
+        for (var i = 0; i < 0xffff; ++i) {
+            var ch = String.fromCharCode(i);
+            if (spacePattern.test(ch)) {
+                source += ch;
+            }
+        }
+
+        source += "x";
+
+        var options = { tabWidth: 4 };
+        var lines = fromString(source, options);
+
+        assert.strictEqual(lines.length, 2);
+        assert.strictEqual(lines.getLineLength(1), options.tabWidth);
+        assert.strictEqual(lines.getIndentAt(1), options.tabWidth);
+
+        assert.strictEqual(lines.slice({
+            line: 2,
+            column: lines.getLineLength(2) - 1
+        }).toString(options), "x");
+
+        assert.ok(spacePattern.test(
+            lines.slice(lines.firstPos(), {
+                line: 2,
+                column: lines.getLineLength(2) - 1
+            }).toString(options)
+        ));
+    });
 });
