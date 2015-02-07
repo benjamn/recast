@@ -685,8 +685,8 @@ describe("printer", function() {
             " * This class was in an IIFE and returned an instance of itself." +
             " */" +
             "function SimpleClass() {" +
-            "};" +
+            "}\n" +
             "module.exports = SimpleClass;"
-        ].join("\n"));
+        ].join());
     });
 });
