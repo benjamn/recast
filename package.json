@@ -31,7 +31,8 @@
     "ast-types": "~0.6.1"
   },
   "devDependencies": {
-    "mocha": "~1.21.0"
+    "mocha": "~1.21.0",
+    "node-v8-clone": "^0.6.2"
   },
   "engines": {
     "node": ">= 0.8"
