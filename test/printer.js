@@ -662,10 +662,10 @@ describe("printer", function() {
     it("should print block comments at head of class once", function() {
         // Given.
         var ast = parse([
-            "/**" +
-            " * This class was in an IIFE and returned an instance of itself." +
-            " */" +
-            "function SimpleClass() {" +
+            "/**",
+            " * This class was in an IIFE and returned an instance of itself.",
+            " */",
+            "function SimpleClass() {",
             "};"
         ].join("\n"));
 
@@ -677,16 +677,16 @@ describe("printer", function() {
         ast.program.body.push(exportStatement);
 
         // When.
-        var printedClass = new Printer().print(ast).code
+        var printedClass = new Printer().print(ast).code;
 
         // Then.
         assert.strictEqual(printedClass, [
-            "/**" +
-            " * This class was in an IIFE and returned an instance of itself." +
-            " */" +
-            "function SimpleClass() {" +
-            "}\n" +
+            "/**",
+            " * This class was in an IIFE and returned an instance of itself.",
+            " */",
+            "function SimpleClass() {",
+            "}",
             "module.exports = SimpleClass;"
-        ].join());
+        ].join("\n"));
     });
 });
