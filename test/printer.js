@@ -658,4 +658,35 @@ describe("printer", function() {
             "};"
         ].join("\n"));        
     });
+
+    it("should print block comments at head of class once", function() {
+        // Given.
+        var ast = parse([
+            "/**" +
+            " * This class was in an IIFE and returned an instance of itself." +
+            " */" +
+            "function SimpleClass() {" +
+            "};"
+        ].join("\n"));
+
+        var classIdentifier = b.identifier('SimpleClass');
+        var exportsExpression = b.memberExpression(b.identifier('module'), b.identifier('exports'), false);
+        var assignmentExpression = b.assignmentExpression('=', exportsExpression, classIdentifier);
+        var exportStatement = b.expressionStatement(assignmentExpression);
+
+        ast.program.body.push(exportStatement);
+
+        // When.
+        var printedClass = new Printer().print(ast).code
+
+        // Then.
+        assert.strictEqual(printedClass, [
+            "/**" +
+            " * This class was in an IIFE and returned an instance of itself." +
+            " */" +
+            "function SimpleClass() {" +
+            "}\n" +
+            "module.exports = SimpleClass;"
+        ].join());
+    });
 });
