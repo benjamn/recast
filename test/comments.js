@@ -15,7 +15,7 @@ var annotated = [
 ];
 
 describe("comments", function() {
-    it("Comments", function() {
+    it("attachment and reprinting", function() {
         var code = annotated.join("\n");
         var ast = recast.parse(code);
 
@@ -313,4 +313,34 @@ describe("comments", function() {
         // An exception will be thrown if `comments` aren't configurable.
     });
 
+    it("should be reprinted when modified", function() {
+        var code = [
+            "foo;",
+            "// bar",
+            "bar;"
+        ].join("\n");
+
+        var ast = recast.parse(code);
+
+        var comments = ast.program.body[1].comments;
+        assert.strictEqual(comments.length, 1);
+        var comment = comments[0];
+        assert.strictEqual(comment.type, "Line");
+        assert.strictEqual(comment.value, " bar");
+
+        comment.value = " barbara";
+        assert.strictEqual(recast.print(ast).code, [
+            "foo;",
+            "// barbara",
+            "bar;"
+        ].join("\n"));
+
+        ast.program.body[0].comments = comments;
+        delete ast.program.body[1].comments;
+        assert.strictEqual(recast.print(ast).code, [
+            "// barbara",
+            "foo;",
+            "bar;"
+        ].join("\n"));
+    });
 });
