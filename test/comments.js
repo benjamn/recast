@@ -282,4 +282,25 @@ describe("comments", function() {
             "c(param) /*body*/ {}"
         );
     });
+
+    it("should attach comments as configurable", function() {
+        // Given
+        var simpleCommentedCode = [
+            "// A comment",
+            "var obj = {",
+            "};",
+        ];
+        var code = simpleCommentedCode.join("\n");
+        var ast = recast.parse(code);
+
+        // When
+        Object.defineProperty(ast.program, 'comments', {
+            value: undefined,
+            enumerable: false
+        });
+
+        // Then
+        // An exception will be thrown if `comments` aren't configurable.
+    });
+
 });
