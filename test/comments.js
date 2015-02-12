@@ -211,10 +211,14 @@ describe("comments", function() {
 
         assert.ok(!foo.comments);
         assert.ok(bar.comments);
-        assert.strictEqual(bar.comments.leading.length, 1);
-        assert.strictEqual(bar.comments.trailing.length, 0);
+        assert.strictEqual(bar.comments.length, 1);
+
+        var barComment = bar.comments[0];
+        assert.strictEqual(barComment.leading, true);
+        assert.strictEqual(barComment.trailing, false);
+
         assert.strictEqual(
-            bar.comments.leading[0].value,
+            barComment.value,
             " Comment about the bar method."
         );
     });
@@ -239,12 +243,14 @@ describe("comments", function() {
         assert.strictEqual(a.key.name, "a");
 
         var aComments = a.value.params[0].comments;
-        assert.strictEqual(aComments.leading.length, 1);
-        assert.strictEqual(aComments.dangling.length, 0);
-        assert.strictEqual(aComments.trailing.length, 0);
-        var aComment = aComments.leading[0];
+        assert.strictEqual(aComments.length, 1);
+
+        var aComment = aComments[0];
+        assert.strictEqual(aComment.leading, true);
+        assert.strictEqual(aComment.trailing, false);
         assert.strictEqual(aComment.type, "Block");
         assert.strictEqual(aComment.value, "before");
+
         assert.strictEqual(
             recast.print(a).code,
             "a(/*before*/ param) {}"
@@ -255,12 +261,14 @@ describe("comments", function() {
         assert.strictEqual(b.key.name, "b");
 
         var bComments = b.value.params[0].comments;
-        assert.strictEqual(bComments.leading.length, 0);
-        assert.strictEqual(bComments.dangling.length, 0);
-        assert.strictEqual(bComments.trailing.length, 1);
-        var bComment = bComments.trailing[0];
+        assert.strictEqual(bComments.length, 1);
+
+        var bComment = bComments[0];
+        assert.strictEqual(bComment.leading, false);
+        assert.strictEqual(bComment.trailing, true);
         assert.strictEqual(bComment.type, "Block");
         assert.strictEqual(bComment.value, "after");
+
         assert.strictEqual(
             recast.print(b).code,
             "b(param /*after*/) {}"
@@ -271,12 +279,14 @@ describe("comments", function() {
         assert.strictEqual(c.key.name, "c");
 
         var cComments = c.value.body.comments;
-        assert.strictEqual(cComments.leading.length, 1);
-        assert.strictEqual(cComments.dangling.length, 0);
-        assert.strictEqual(cComments.trailing.length, 0);
-        var cComment = cComments.leading[0];
+        assert.strictEqual(cComments.length, 1);
+
+        var cComment = cComments[0];
+        assert.strictEqual(cComment.leading, true);
+        assert.strictEqual(cComment.trailing, false);
         assert.strictEqual(cComment.type, "Block");
         assert.strictEqual(cComment.value, "body");
+
         assert.strictEqual(
             recast.print(c).code,
             "c(param) /*body*/ {}"

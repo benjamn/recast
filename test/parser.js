@@ -39,14 +39,25 @@ describe("parser", function() {
 
         assert.strictEqual(doneCall.callee.name, "done");
 
-        assert.ok(lastStatement.comments);
-        assert.strictEqual(lastStatement.comments.leading.length, 2);
+        assert.strictEqual(lastStatement.comments.length, 2);
 
-        var joinedComments = printComments(lastStatement.comments);
-        var printedComments = joinedComments.toString();
+        var firstComment = lastStatement.comments[0];
+        assert.strictEqual(firstComment.type, "Line");
+        assert.strictEqual(firstComment.leading, true);
+        assert.strictEqual(firstComment.trailing, false);
+        assert.strictEqual(
+            firstComment.value,
+            " Make sure done() remains the final statement in this function,"
+        );
 
-        assert.strictEqual(joinedComments.length, 3);
-        assert.strictEqual(printedComments.indexOf("Make sure"), 3);
+        var secondComment = lastStatement.comments[1];
+        assert.strictEqual(secondComment.type, "Line");
+        assert.strictEqual(secondComment.leading, true);
+        assert.strictEqual(secondComment.trailing, false);
+        assert.strictEqual(
+            secondComment.value,
+            " or the above assertions will probably fail."
+        );
 
         // Make sure done() remains the final statement in this function,
         // or the above assertions will probably fail.
