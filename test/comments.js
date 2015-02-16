@@ -342,5 +342,167 @@ describe("comments", function() {
             "foo;",
             "bar;"
         ].join("\n"));
+
+        ast.program.body[0] = b.blockStatement([
+            ast.program.body[0]
+        ]);
+        assert.strictEqual(recast.print(ast).code, [
+            "{",
+            "  // barbara",
+            "  foo;",
+            "}",
+            "",
+            "bar;"
+        ].join("\n"));
+
+        var comment = ast.program.body[0].body[0].comments[0];
+        comment.type = "Block";
+        assert.strictEqual(recast.print(ast).code, [
+            "{",
+            "  /* barbara*/",
+            "  foo;",
+            "}",
+            "",
+            "bar;"
+        ].join("\n"));
+
+        comment.value += "\n * babar\n ";
+        assert.strictEqual(recast.print(ast).code, [
+            "{",
+            "  /* barbara",
+            "   * babar",
+            "   */",
+            "  foo;",
+            "}",
+            "",
+            "bar;"
+        ].join("\n"));
+
+        ast.program.body[1].comments = [comment];
+        assert.strictEqual(recast.print(ast).code, [
+            "{",
+            "  /* barbara",
+            "   * babar",
+            "   */",
+            "  foo;",
+            "}",
+            "",
+            "/* barbara",
+            " * babar",
+            " */",
+            "bar;"
+        ].join("\n"));
+
+        delete ast.program.body[0].body[0].comments;
+        ast.program.comments = [b.line(" program comment")];
+        assert.strictEqual(recast.print(ast).code, [
+            "// program comment",
+            "{",
+            "  foo;",
+            "}",
+            "",
+            "/* barbara",
+            " * babar",
+            " */",
+            "bar;"
+        ].join("\n"));
+
+        ast.program.body.push(
+            ast.program.body.shift()
+        );
+        assert.strictEqual(recast.print(ast).code, [
+            "// program comment",
+            "/* barbara",
+            " * babar",
+            " */",
+            "bar;",
+            "",
+            "{",
+            "  foo;",
+            "}"
+        ].join("\n"));
+
+        recast.visit(ast, {
+            visitNode: function(path) {
+                delete path.value.comments;
+                this.traverse(path);
+            }
+        });
+        assert.strictEqual(recast.print(ast).code, [
+            "bar;",
+            "",
+            "{",
+            "  foo;",
+            "}"
+        ].join("\n"));
+
+        ast.program.body[1] = ast.program.body[1].body[0];
+        assert.strictEqual(recast.print(ast).code, [
+            "bar;",
+            "foo;"
+        ].join("\n"));
+    });
+
+    it("should preserve stray non-comment syntax", function() {
+        var code = [
+            "[",
+            "  foo",
+            "  , /* comma */",
+            "  /* hole */",
+            "  , /* comma */",
+            "  bar",
+            "]"
+        ].join("\n");
+
+        var ast = recast.parse(code);
+        assert.strictEqual(recast.print(ast).code, code);
+
+        var elems = ast.program.body[0].expression.elements;
+        elems[0].comments.push(b.line(" line comment", true, false));
+        assert.strictEqual(recast.print(ast).code, [
+            "[",
+            "  // line comment",
+            "  foo /* comma */",
+            "  /* hole */",
+            "  ,",
+            "  , /* comma */",
+            "  bar",
+            "]"
+        ].join("\n"));
+    });
+
+    it("should be reprinted even if dangling", function() {
+        var code = [
+            "[/*dangling*/] // array literal"
+        ].join("\n");
+
+        var ast = recast.parse(code);
+        var array = ast.program.body[0].expression;
+        var danglingComment = array.comments[0];
+        var trailingComment = array.comments[1];
+
+        assert.strictEqual(danglingComment.leading, false);
+        assert.strictEqual(danglingComment.trailing, false);
+
+        assert.strictEqual(trailingComment.leading, false);
+        assert.strictEqual(trailingComment.trailing, true);
+
+        danglingComment.value = " neither leading nor trailing ";
+        assert.strictEqual(recast.print(ast).code, [
+            "[/* neither leading nor trailing */] // array literal"
+        ].join("\n"));
+
+        trailingComment.value = " trailing";
+        assert.strictEqual(recast.print(ast).code, [
+            "[/* neither leading nor trailing */] // trailing"
+        ].join("\n"));
+
+        // Unfortuantely altering the elements of the array leads to
+        // reprinting which blows away the dangling comment.
+        array.elements.push(b.literal(1));
+        assert.strictEqual(
+            recast.print(ast).code,
+            "[1] // trailing"
+        );
     });
 });
