@@ -505,4 +505,42 @@ describe("comments", function() {
             "[1] // trailing"
         );
     });
+
+    it("should attach to program.body[0] instead of program", function() {
+        var code = [
+            "// comment 1",
+            "var a;",
+            "// comment 2",
+            "var b;",
+            "if (true) {",
+            "  // comment 3",
+            "  var c;",
+            "}"
+        ].join('\n');
+
+        var ast = recast.parse(code);
+
+        assert.ok(!ast.program.comments);
+
+        var aDecl = ast.program.body[0];
+        n.VariableDeclaration.assert(aDecl);
+        assert.strictEqual(aDecl.comments.length, 1);
+        assert.strictEqual(aDecl.comments[0].leading, true);
+        assert.strictEqual(aDecl.comments[0].trailing, false);
+        assert.strictEqual(aDecl.comments[0].value, " comment 1");
+
+        var bDecl = ast.program.body[1];
+        n.VariableDeclaration.assert(bDecl);
+        assert.strictEqual(bDecl.comments.length, 1);
+        assert.strictEqual(bDecl.comments[0].leading, true);
+        assert.strictEqual(bDecl.comments[0].trailing, false);
+        assert.strictEqual(bDecl.comments[0].value, " comment 2");
+
+        var cDecl = ast.program.body[2].consequent.body[0];
+        n.VariableDeclaration.assert(cDecl);
+        assert.strictEqual(cDecl.comments.length, 1);
+        assert.strictEqual(cDecl.comments[0].leading, true);
+        assert.strictEqual(cDecl.comments[0].trailing, false);
+        assert.strictEqual(cDecl.comments[0].value, " comment 3");
+    });
 });
