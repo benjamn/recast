@@ -689,4 +689,95 @@ describe("printer", function() {
             "module.exports = SimpleClass;"
         ].join("\n"));
     });
+
+    it("should support computed properties", function() {
+        var code = [
+            'class A {',
+            '  ["a"]() {}',
+            '  [ID("b")]() {}',
+            '  [0]() {}',
+            '  [ID(1)]() {}',
+            '  get ["a"]() {}',
+            '  get [ID("b")]() {}',
+            '  get [0]() {}',
+            '  get [ID(1)]() {}',
+            '  set ["a"](x) {}',
+            '  set [ID("b")](x) {}',
+            '  set [0](x) {}',
+            '  set [ID(1)](x) {}',
+            '  static ["a"]() {}',
+            '  static [ID("b")]() {}',
+            '  static [0]() {}',
+            '  static [ID(1)]() {}',
+            '  static get ["a"]() {}',
+            '  static get [ID("b")]() {}',
+            '  static get [0]() {}',
+            '  static get [ID(1)]() {}',
+            '  static set ["a"](x) {}',
+            '  static set [ID("b")](x) {}',
+            '  static set [0](x) {}',
+            '  static set [ID(1)](x) {}',
+            '}'
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        assert.strictEqual(
+            printer.printGenerically(ast).code,
+            code
+        );
+
+        var code = [
+            'var obj = {',
+            '  ["a"]: 1,',
+            '  [ID("b")]: 2,',
+            '  [0]: 3,',
+            '  [ID(1)]: 4,',
+            '  ["a"]() {},',
+            '  [ID("b")]() {},',
+            '  [0]() {},',
+            '  [ID(1)]() {},',
+            '  get ["a"]() {},',
+            '  get [ID("b")]() {},',
+            '  get [0]() {},',
+            '  get [ID(1)]() {},',
+            '  set ["a"](x) {},',
+            '  set [ID("b")](x) {},',
+            '  set [0](x) {},',
+            '  set [ID(1)](x) {}',
+            '};'
+        ].join("\n");
+
+        ast = parse(code);
+
+        assert.strictEqual(
+            printer.printGenerically(ast).code,
+            code
+        );
+
+        ast = parse([
+            "var o = {",
+            "  // This foo will become a computed method name.",
+            "  foo() { return bar }",
+            "};"
+        ].join("\n"));
+
+        var objExpr = ast.program.body[0].declarations[0].init;
+        n.ObjectExpression.assert(objExpr);
+
+        assert.strictEqual(objExpr.properties[0].computed, false);
+        objExpr.properties[0].computed = true;
+        objExpr.properties[0].kind = "get";
+
+        assert.strictEqual(recast.print(ast).code, [
+            "var o = {",
+            "  // This foo will become a computed method name.",
+            "  get [foo]() { return bar }",
+            "};"
+        ].join("\n"));
+    });
 });
