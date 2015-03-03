@@ -780,4 +780,20 @@ describe("printer", function() {
             "};"
         ].join("\n"));
     });
+
+    it("should support AssignmentPattern and RestElement", function() {
+        var code = [
+            "function foo(a, [b, c]=d(a), ...[e, f, ...rest]) {",
+            "  return [a, b, c, e, f, rest];",
+            "}"
+        ].join("\n");
+
+        var ast = parse(code);
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
