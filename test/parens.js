@@ -245,4 +245,26 @@ describe("parens", function() {
         assert.ok(rightPath.needsParens());
         assert.strictEqual(printer.print(ast).code, code);
     });
+
+    it("should not be added to multiline boolean expressions", function() {
+        var code = [
+            "function foo() {",
+            "  return !(",
+            "    a &&",
+            "    b &&",
+            "    c",
+            "  );",
+            "}"
+        ].join("\n");
+
+        var ast = parse(code);
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            code
+        );
+    });
 });
