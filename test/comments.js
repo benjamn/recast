@@ -1,8 +1,10 @@
 var recast = require("../main");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
+var Printer = require("../lib/printer").Printer;
 var fromString = require("../lib/lines").fromString;
 var assert = require("assert");
+var printer = new Printer;
 
 var annotated = [
     "function dup(/* string */ s,",
@@ -542,5 +544,26 @@ describe("comments", function() {
         assert.strictEqual(cDecl.comments[0].leading, true);
         assert.strictEqual(cDecl.comments[0].trailing, false);
         assert.strictEqual(cDecl.comments[0].value, " comment 3");
+    });
+
+    it("should not collapse multi line function definitions", function() {
+        var code = [
+            "var obj = {",
+            "  a(",
+            "    /*before*/ param",
+            "  ) /*after*/ {",
+            "  },",
+            "};",
+        ].join('\n');
+
+        var ast = recast.parse(code);
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        assert.strictEqual(
+            printer.print(ast).code,
+            code
+        );
     });
 });
