@@ -116,6 +116,9 @@ describe("parens", function() {
         check("(function(){}).apply(this, arguments)");
         check("function f() { (function(){}).call(this) }");
         check("while (true) { (function(){}).call(this) }");
+        check("() => ({a:1,b:2})");
+        check("(x, y={z:1}) => x + y.z");
+        check("a || ((x, y={z:1}) => x + y.z)");
     });
 
     it("ObjectLiteral", function() {
