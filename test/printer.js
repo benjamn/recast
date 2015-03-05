@@ -487,6 +487,22 @@ describe("printer", function() {
             printer.print(funExpr).code,
             "function a(b, c=1, ...d) {}"
         );
+
+        var arrowFunExpr = b.arrowFunctionExpression(
+            [b.identifier('b'), b.identifier('c')],
+            b.blockStatement([]),
+            false,
+            false,
+            false,
+            undefined);
+
+        arrowFunExpr.defaults = [undefined, b.literal(1)];
+        arrowFunExpr.rest = b.identifier('d');
+
+        assert.strictEqual(
+            printer.print(arrowFunExpr).code,
+            "(b, c=1, ...d) => {}"
+        );
     });
 
     it("generically prints parsed code and generated code the same way", function() {
