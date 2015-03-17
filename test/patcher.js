@@ -1,4 +1,8 @@
 var assert = require("assert");
+var recast = require("..");
+var types = require("../lib/types");
+var n = types.namedTypes;
+var b = types.builders;
 var patcherModule = require("../lib/patcher");
 var getReprinter = patcherModule.getReprinter;
 var Patcher = patcherModule.Patcher;
@@ -97,5 +101,35 @@ describe("patcher", function() {
         for (var indent = -4; indent <= 4; ++indent) {
             check(indent);
         }
+    });
+
+    it("should patch return/throw/etc. arguments correctly", function() {
+        var strAST = parse('return"foo"');
+        var returnStmt = strAST.program.body[0];
+        n.ReturnStatement.assert(returnStmt);
+        assert.strictEqual(
+            recast.print(strAST).code,
+            'return"foo"'
+        );
+
+        returnStmt.argument = b.literal(null);
+        assert.strictEqual(
+            recast.print(strAST).code,
+            "return null" // Instead of returnnull.
+        );
+
+        var arrAST = parse("throw[1,2,3]");
+        var throwStmt = arrAST.program.body[0];
+        n.ThrowStatement.assert(throwStmt);
+        assert.strictEqual(
+            recast.print(arrAST).code,
+            "throw[1,2,3]"
+        );
+
+        throwStmt.argument = b.literal(false);
+        assert.strictEqual(
+            recast.print(arrAST).code,
+            "throw false" // Instead of throwfalse.
+        );
     });
 });
