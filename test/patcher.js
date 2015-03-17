@@ -131,5 +131,64 @@ describe("patcher", function() {
             recast.print(arrAST).code,
             "throw false" // Instead of throwfalse.
         );
+
+        var inAST = parse('"foo"in bar');
+        var inExpr = inAST.program.body[0].expression;
+
+        n.BinaryExpression.assert(inExpr);
+        assert.strictEqual(inExpr.operator, "in");
+
+        n.Literal.assert(inExpr.left);
+        assert.strictEqual(inExpr.left.value, "foo");
+
+        assert.strictEqual(
+            recast.print(inAST).code,
+            '"foo"in bar'
+        );
+
+        inExpr.left = b.identifier("x");
+        assert.strictEqual(
+            recast.print(inAST).code,
+            "x in bar" // Instead of xin bar.
+        );
+    });
+
+    it("should not add spaces to the beginnings of lines", function() {
+        var twoLineCode = [
+            "return",      // Because of ASI rules, these two lines will
+            '"use strict"' // parse as separate statements.
+        ].join("\n");
+
+        var twoLineAST = parse(twoLineCode);
+
+        assert.strictEqual(twoLineAST.program.body.length, 2);
+        var useStrict = twoLineAST.program.body[1];
+        n.ExpressionStatement.assert(useStrict);
+        n.Literal.assert(useStrict.expression);
+        assert.strictEqual(useStrict.expression.value, "use strict");
+
+        assert.strictEqual(
+            recast.print(twoLineAST).code,
+            twoLineCode
+        );
+
+        useStrict.expression = b.identifier("sloppy");
+
+        var withSloppyIdentifier = recast.print(twoLineAST).code;
+        assert.strictEqual(withSloppyIdentifier, [
+            "return",
+            "sloppy" // The key is that no space should be added to the
+                     // beginning of this line.
+        ].join("\n"));
+
+        twoLineAST.program.body[1] = b.expressionStatement(
+            b.callExpression(b.identifier("foo"), [])
+        );
+
+        var withFooCall = recast.print(twoLineAST).code;
+        assert.strictEqual(withFooCall, [
+            "return",
+            "foo()"
+        ].join("\n"));
     });
 });
