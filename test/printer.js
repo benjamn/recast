@@ -891,4 +891,37 @@ describe("printer", function() {
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
+
+    it("should add parenthesis around SpreadElementPattern", function() {
+        var code = "(...rest) => rest;";
+
+        var ast = b.program([
+            b.expressionStatement(b.arrowFunctionExpression(
+                [b.spreadElementPattern(b.identifier('rest'))],
+                b.identifier('rest'),
+                false
+            ))
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // Do the same for the `rest` field.
+        var arrowFunction = b.arrowFunctionExpression(
+            [],
+            b.identifier('rest'),
+            false
+        );
+        arrowFunction.rest = b.identifier('rest');
+        ast = b.program([
+            b.expressionStatement(arrowFunction)
+        ]);
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
