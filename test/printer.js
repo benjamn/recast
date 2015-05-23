@@ -638,7 +638,7 @@ describe("printer", function() {
             "}"
         ].join("\n"));
     });
-    
+
     it("should print string literals with the specified delimiter", function() {
         var ast = parse([
             "var obj = {",
@@ -665,14 +665,14 @@ describe("printer", function() {
             '    "\\"bar\'s\\"": /regex/m',
             "};"
         ].join("\n"));
-        
+
         var printer3 = new Printer({ quote: "auto" });
         assert.strictEqual(printer3.printGenerically(ast).code, [
             "var obj = {",
             '    "foo\'s": "bar",',
             '    \'"bar\\\'s"\': /regex/m',
             "};"
-        ].join("\n"));        
+        ].join("\n"));
     });
 
     it("should print block comments at head of class once", function() {
@@ -810,6 +810,39 @@ describe("printer", function() {
         });
 
         var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("should add parenthesis around SpreadElementPattern", function() {
+        var code = "(...rest) => rest;";
+
+        var ast = b.program([
+            b.expressionStatement(b.arrowFunctionExpression(
+                [b.spreadElementPattern(b.identifier('rest'))],
+                b.identifier('rest'),
+                false
+            ))
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // Do the same for the `rest` field.
+        var arrowFunction = b.arrowFunctionExpression(
+            [],
+            b.identifier('rest'),
+            false
+        );
+        arrowFunction.rest = b.identifier('rest');
+        ast = b.program([
+            b.expressionStatement(arrowFunction)
+        ]);
+
+        pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
 });
