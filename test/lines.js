@@ -509,7 +509,6 @@ describe("lines", function() {
             "\treturn x;",
             "}"
         ].join("\n"), { tabWidth: 4 });
-        debugger;
         assert.strictEqual(lines.guessUseTabs(), true);
         assert.strictEqual(lines.indent(5).guessUseTabs(), true);
         assert.strictEqual(lines.indent(-4).guessUseTabs(), true);
