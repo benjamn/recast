@@ -500,6 +500,39 @@ describe("lines", function() {
         });
     });
 
+    it("GuessUseTabs", function(done) {
+        var lines = fromString(arguments.callee + "");
+        assert.strictEqual(lines.guessUseTabs(), false);
+
+        lines = fromString([
+            "function identity(x) {",
+            "\treturn x;",
+            "}"
+        ].join("\n"), { tabWidth: 4 });
+        debugger;
+        assert.strictEqual(lines.guessUseTabs(), true);
+        assert.strictEqual(lines.indent(5).guessUseTabs(), true);
+        assert.strictEqual(lines.indent(-4).guessUseTabs(), true);
+
+        fs.readFile(__filename, "utf-8", function(err, source) {
+            assert.equal(err, null);
+            assert.strictEqual(fromString(source).guessUseTabs(), false);
+
+            fs.readFile(path.join(
+                __dirname,
+                "data",
+                "fileWithTabs.js"
+            ), "utf-8", function(err, source) {
+                assert.equal(err, null);
+
+                var tabOpts = { tabWidth: 4 };
+                assert.strictEqual(fromString(source, tabOpts).guessUseTabs(), true);
+
+                done();
+            });
+        });
+    });
+
     it("ExoticWhitespace", function() {
         var source = "";
         var spacePattern = /^\s+$/;
