@@ -468,6 +468,57 @@ describe("printer", function() {
         );
     });
 
+    it("GuessUseTabs", function() {
+        var code = [
+            "function identity(x) {",
+            "\treturn x;",
+            "}"
+        ].join("\n");
+
+        var guessedTabs = [
+            "function identity(x) {",
+            "\tlog(x);",
+            "\treturn x;",
+            "}"
+        ].join("\n");
+
+        var explicitSpaces = [
+            "function identity(x) {",
+            "    log(x);",
+            "    return x;",
+            "}"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var funDecl = ast.program.body[0];
+        n.FunctionDeclaration.assert(funDecl);
+
+        var funBody = funDecl.body.body;
+
+        funBody.unshift(
+            b.expressionStatement(
+                b.callExpression(
+                    b.identifier("log"),
+                    funDecl.params
+                )
+            )
+        );
+
+        assert.strictEqual(
+            new Printer().print(ast).code,
+            guessedTabs
+        );
+
+        assert.strictEqual(
+            new Printer({
+                tabWidth: 4,
+                useTabs: false
+            }).print(ast).code,
+            explicitSpaces
+        );
+    });
+
     it("FunctionDefaultsAndRest", function() {
         var printer = new Printer();
         var funExpr = b.functionExpression(
