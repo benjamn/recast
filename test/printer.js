@@ -638,7 +638,7 @@ describe("printer", function() {
             "}"
         ].join("\n"));
     });
-    
+
     it("should print string literals with the specified delimiter", function() {
         var ast = parse([
             "var obj = {",
@@ -665,14 +665,14 @@ describe("printer", function() {
             '    "\\"bar\'s\\"": /regex/m',
             "};"
         ].join("\n"));
-        
+
         var printer3 = new Printer({ quote: "auto" });
         assert.strictEqual(printer3.printGenerically(ast).code, [
             "var obj = {",
             '    "foo\'s": "bar",',
             '    \'"bar\\\'s"\': /regex/m',
             "};"
-        ].join("\n"));        
+        ].join("\n"));
     });
 
     it("should print block comments at head of class once", function() {
@@ -795,6 +795,85 @@ describe("printer", function() {
             "  get [foo]() { return bar }",
             "};"
         ].join("\n"));
+    });
+
+    it("prints trailing commas in object literals", function() {
+        var code = [
+            "({",
+            "  foo: bar,",
+            "  bar: foo,",
+            "});"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var printer = new Printer({
+            tabWidth: 2,
+            trailingComma: true,
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("prints trailing commas in function calls", function() {
+        var code = [
+            "call(",
+            "  1,",
+            "  2,",
+            ");"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var printer = new Printer({
+            tabWidth: 2,
+            wrapColumn: 1,
+            trailingComma: true,
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("prints trailing commas in array expressions", function() {
+        var code = [
+            "[",
+            "  1,",
+            "  2,",
+            "];"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var printer = new Printer({
+            tabWidth: 2,
+            wrapColumn: 1,
+            trailingComma: true,
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("prints trailing commas in function definitions", function() {
+        var code = [
+            "function foo(",
+            "  a,",
+            "  b,",
+            ") {}"
+        ].join("\n");
+
+        var ast = parse(code);
+
+        var printer = new Printer({
+            tabWidth: 2,
+            wrapColumn: 1,
+            trailingComma: true,
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
     });
 
     it("should support AssignmentPattern and RestElement", function() {
