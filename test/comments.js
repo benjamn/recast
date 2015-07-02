@@ -566,4 +566,29 @@ describe("comments", function() {
             code
         );
     });
+
+    it("should be pretty-printable in illegal positions", function() {
+        var code = [
+            "var sum = function /*anonymous*/(/*...args*/) /*int*/ {",
+            "  // TODO",
+            "};"
+        ].join("\n");
+
+        var ast = recast.parse(code);
+        var funExp = ast.program.body[0].declarations[0].init;
+        n.FunctionExpression.assert(funExp);
+
+        funExp.original = null;
+
+        var comments = funExp.body.comments;
+        assert.strictEqual(comments.length, 4);
+        funExp.id = comments.shift();
+        funExp.params.push(comments.shift());
+        funExp.body.body.push(comments.pop());
+
+        assert.strictEqual(
+            recast.print(ast).code,
+            code
+        );
+    });
 });
