@@ -160,6 +160,38 @@ describe("comments", function() {
         assert.strictEqual(actual, expected);
     });
 
+    var bodyTrailing = [
+        "module.exports = {};",
+        "/**",
+        " * Trailing comment.",
+        " */"
+    ];
+
+    var bodyTrailingExpected = [
+        "module.exports = {};",
+        "/**",
+        " * Trailing comment.",
+        " */"
+    ];
+
+    it("BodyTrailingComments", function() {
+        var code = bodyTrailing.join("\n");
+        var ast = recast.parse(code);
+
+        // Drop all original source information to force reprinting.
+        recast.visit(ast, {
+            visitNode: function(path) {
+                this.traverse(path);
+                path.value.original = null;
+            }
+        });
+
+        var actual = recast.print(ast, { tabWidth: 2 }).code;
+        var expected = bodyTrailingExpected.join("\n");
+
+        assert.strictEqual(actual, expected);
+    });
+
     var paramTrailing = [
         "function foo(bar, baz /* = null */) {",
         "  assert.strictEqual(baz, null);",
