@@ -891,4 +891,96 @@ describe("printer", function() {
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
+
+    it("should add parenthesis around SpreadElementPattern", function() {
+        var code = "(...rest) => rest;";
+
+        var ast = b.program([
+            b.expressionStatement(b.arrowFunctionExpression(
+                [b.spreadElementPattern(b.identifier('rest'))],
+                b.identifier('rest'),
+                false
+            ))
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // Do the same for the `rest` field.
+        var arrowFunction = b.arrowFunctionExpression(
+            [],
+            b.identifier('rest'),
+            false
+        );
+        arrowFunction.rest = b.identifier('rest');
+        ast = b.program([
+            b.expressionStatement(arrowFunction)
+        ]);
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("should print ClassProperty correctly", function() {
+        var code = [
+            "class A {",
+            "  foo: Type = Bar;",
+            "}",
+        ].join("\n");
+
+        var ast = b.program([
+            b.classDeclaration(
+                b.identifier('A'),
+                b.classBody([
+                    b.classProperty(
+                        b.identifier('foo'),
+                        b.identifier('Bar'),
+                        b.typeAnnotation(
+                            b.genericTypeAnnotation(b.identifier('Type'), null)
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("should print static ClassProperty correctly", function() {
+        var code = [
+            "class A {",
+            "  static foo = Bar;",
+            "}",
+        ].join("\n");
+
+        var ast = b.program([
+            b.classDeclaration(
+                b.identifier('A'),
+                b.classBody([
+                    b.classProperty(
+                        b.identifier('foo'),
+                        b.identifier('Bar'),
+                        null,
+                        true
+                    )
+                ])
+            )
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
