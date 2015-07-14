@@ -21,7 +21,7 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha --reporter spec",
+    "test": "node ./node_modules/mocha/bin/mocha --reporter spec --full-trace",
     "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
   },
   "dependencies": {
