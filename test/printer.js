@@ -4,6 +4,7 @@ var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
+var fromString = require("../lib/lines").fromString;
 
 describe("printer", function() {
     it("Printer", function testPrinter(done) {
@@ -982,5 +983,42 @@ describe("printer", function() {
 
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
+    });
+
+    it("should preserve newlines at the beginning/end of files", function() {
+        var code = [
+            "",
+            "f();",
+            ""
+        ].join("\n");
+
+        var lines = fromString(code);
+        var ast = parse(code, {
+            esprima: {
+                parse: function(source, options) {
+                    var program = require("esprima-fb").parse(source, options);
+                    n.Program.assert(program);
+                    // Expand ast.program.loc to include any
+                    // leading/trailing whitespace, to simulate the
+                    // behavior of some parsers, e.g. babel-core.
+                    lines.skipSpaces(program.loc.start, true, true);
+                    lines.skipSpaces(program.loc.end, false, true);
+                    return program;
+                }
+            }
+        });
+
+        ast.program.body.unshift(b.debuggerStatement());
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        assert.strictEqual(printer.print(ast).code, [
+            "",
+            "debugger;",
+            "f();",
+            ""
+        ].join("\n"));
     });
 });
