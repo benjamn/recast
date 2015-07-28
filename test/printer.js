@@ -893,7 +893,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("should add parenthesis around SpreadElementPattern", function() {
+    it("adds parenthesis around SpreadElementPattern", function() {
         var code = "(...rest) => rest;";
 
         var ast = b.program([
@@ -926,7 +926,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("should print ClassProperty correctly", function() {
+    it("prints ClassProperty correctly", function() {
         var code = [
             "class A {",
             "  foo: Type = Bar;",
@@ -956,7 +956,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("should print static ClassProperty correctly", function() {
+    it("prints static ClassProperty correctly", function() {
         var code = [
             "class A {",
             "  static foo = Bar;",
@@ -985,7 +985,84 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("should preserve newlines at the beginning/end of files", function() {
+    it("prints template expressions correctly", function() {
+        var code = [
+            "graphql`query`;",
+        ].join("\n");
+
+        var ast = b.program([
+            b.taggedTemplateStatement(
+                b.identifier('graphql'),
+                b.templateLiteral(
+                    [b.templateElement({cooked: 'query', raw: 'query'}, false)],
+                    []
+                )
+            )
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        code = [
+            "graphql`query${foo.getQuery()}field${bar}`;",
+        ].join("\n");
+
+        ast = b.program([
+            b.taggedTemplateStatement(
+                b.identifier('graphql'),
+                b.templateLiteral(
+                    [
+                        b.templateElement(
+                            {cooked: 'query', raw: 'query'},
+                            false
+                        ),
+                        b.templateElement(
+                            {cooked: 'field', raw: 'field'},
+                            false
+                        ),
+                        b.templateElement(
+                            {cooked: '', raw: ''},
+                            true
+                        ),
+                    ],
+                    [
+                        b.callExpression(
+                            b.memberExpression(
+                                b.identifier('foo'),
+                                b.identifier('getQuery'),
+                                false
+                            ),
+                            []
+                        ),
+                        b.identifier('bar')
+                    ]
+                )
+            )
+        ]);
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        code = [
+            "graphql`",
+            "  query {",
+            "    ${foo.getQuery()},",
+            "    field,",
+            "    ${bar},",
+            "  }",
+            "`;",
+        ].join("\n");
+
+        ast = parse(code);
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("preserves newlines at the beginning/end of files", function() {
         var code = [
             "",
             "f();",
