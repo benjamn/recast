@@ -893,7 +893,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("adds parenthesis around SpreadElementPattern", function() {
+    it("adds parenthesis around spread patterns", function() {
         var code = "(...rest) => rest;";
 
         var ast = b.program([
@@ -909,6 +909,18 @@ describe("printer", function() {
         });
 
         var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // Print RestElement the same way
+        ast = b.program([
+            b.expressionStatement(b.arrowFunctionExpression(
+                [b.restElement(b.identifier('rest'))],
+                b.identifier('rest'),
+                false
+            ))
+        ]);
+
+        pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
 
         // Do the same for the `rest` field.
