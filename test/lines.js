@@ -10,6 +10,30 @@ function check(a, b) {
 }
 
 describe("lines", function() {
+
+    describe('line terminators', function() {
+        var source = [
+            'foo;',
+            'bar;',
+        ];
+
+        var terminators = [
+            '\u000A',
+            '\u000D',
+            '\u2028',
+            '\u2029',
+            '\u000D\u000A',
+        ];
+        terminators.forEach(function(t) {
+            it('can handle ' + escape(t) + ' as line terminator', function() {
+                var lines = fromString(source.join(t));
+                assert.strictEqual(lines.length, 2);
+                assert.strictEqual(lines.getLineLength(1), 4);
+            });
+        });
+    });
+
+
     it("FromString", function() {
         function checkIsCached(s) {
             assert.strictEqual(fromString(s), fromString(s));
