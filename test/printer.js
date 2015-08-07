@@ -1110,4 +1110,25 @@ describe("printer", function() {
             ""
         ].join("\n"));
     });
+
+    it("prints object patterns on one line with `oneLine` option", function () {
+        var code = [
+            "var {",
+            "  foo,",
+            "  bar,",
+            "} = require('foobar');",
+        ].join("\n")
+
+        var ast = parse(code);
+        ast.program.body[0].declarations[0].id.oneLine = true;
+
+        var printer = new Printer({
+            tabWidth: 2,
+            trailingComma: true, // Make sure the trailing comma isn't printed
+        });
+
+        var expected = "var {foo, bar} = require(\"foobar\");";
+        var actual = printer.printGenerically(ast).code;
+        assert.strictEqual(actual, expected);
+    });
 });
