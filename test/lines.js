@@ -469,12 +469,12 @@ describe("lines", function() {
             "      } "
         ].join("\n"));
 
-        // Test that '\r' characters are ignored for the purposes of indentation,
+        // Test that '\v' characters are ignored for the purposes of indentation,
         // but preserved when printing untouched lines.
         code = [
-            "\rfunction f() {\r",
-            " \r   return \rthis;\r",
-            "\r} \r "
+            "\vfunction f() {\v",
+            " \v   return \vthis;\v",
+            "\v} \v "
         ].join("\n");
 
         lines = fromString(code, tabOpts);
@@ -482,15 +482,15 @@ describe("lines", function() {
         checkUnchanged(lines, code);
 
         check(lines.indent(4).toString(noTabOpts), [
-            "    function f() {\r",
-            "        return \rthis;\r",
-            "    } \r "
+            "    function f() {\v",
+            "        return \vthis;\v",
+            "    } \v "
         ].join("\n"));
 
         check(lines.indent(5).toString(tabOpts), [
-            "\t function f() {\r",
-            "\t\t return \rthis;\r",
-            "\t } \r "
+            "\t function f() {\v",
+            "\t\t return \vthis;\v",
+            "\t } \v "
         ].join("\n"));
     });
 
