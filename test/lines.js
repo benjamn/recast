@@ -540,19 +540,19 @@ describe("lines", function() {
         var options = { tabWidth: 4 };
         var lines = fromString(source, options);
 
-        assert.strictEqual(lines.length, 2);
+        assert.strictEqual(lines.length, 5);
         assert.strictEqual(lines.getLineLength(1), options.tabWidth);
         assert.strictEqual(lines.getIndentAt(1), options.tabWidth);
 
         assert.strictEqual(lines.slice({
-            line: 2,
-            column: lines.getLineLength(2) - 1
+            line: 5,
+            column: lines.getLineLength(5) - 1
         }).toString(options), "x");
 
         assert.ok(spacePattern.test(
             lines.slice(lines.firstPos(), {
-                line: 2,
-                column: lines.getLineLength(2) - 1
+                line: 5,
+                column: lines.getLineLength(5) - 1
             }).toString(options)
         ));
     });
