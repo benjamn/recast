@@ -274,4 +274,21 @@ describe("import/export syntax", function() {
             "Unexpected token ,"
         );
     });
+
+    it("should pretty-print template strings with backticks", function() {
+        var code = [
+            'var noun = "fool";',
+            'var s = `I am a ${noun}`;',
+            'var t = tag`You said: ${s}!`;'
+        ].join("\n");
+
+        var ast = parse(code);
+
+        assert.strictEqual(
+            new Printer({
+                tabWidth: 2
+            }).printGenerically(ast).code,
+            code
+        );
+    });
 });
