@@ -1110,4 +1110,20 @@ describe("printer", function() {
             ""
         ].join("\n"));
     });
+
+    it("respects options.lineTerminator", function() {
+        var lines = [
+            "var first = 1;",
+            "var second = 2;"
+        ];
+        var code = lines.join("\n");
+        var ast = parse(code);
+
+        assert.strictEqual(
+            new Printer({
+                lineTerminator: "\r\n"
+            }).print(ast).code,
+            lines.join("\r\n")
+        );
+    });
 });
