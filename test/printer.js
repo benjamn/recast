@@ -938,6 +938,42 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("adds parenthesis around async arrow functions with args", function() {
+        var code = "async () => {};";
+
+        var fn = b.arrowFunctionExpression(
+            [],
+            b.blockStatement([]),
+            false
+        );
+        fn.async = true;
+
+        var ast = b.program([
+            b.expressionStatement(fn)
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // No parenthesis for single params if they are identifiers
+        code = "async foo => {};";
+        fn.params = [b.identifier('foo')];
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // Add parenthesis for destructuring
+        code = "async ([a, b]) => {};";
+        fn.params = [b.arrayPattern([b.identifier('a'), b.identifier('b')])];
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
     it("prints ClassProperty correctly", function() {
         var code = [
             "class A {",
