@@ -83,7 +83,7 @@ The magic of Recast is that it reprints only those parts of the syntax tree that
 ```js
 recast.print(recast.parse(source)).code === source
 ```
-Whenever Recast cannot reprint a modified node using the orginal source code, it falls back to using a generic pretty printer. So the worst that can happen is that your changes trigger some harmless reformatting of your code.
+Whenever Recast cannot reprint a modified node using the original source code, it falls back to using a generic pretty printer. So the worst that can happen is that your changes trigger some harmless reformatting of your code.
 
 If you really don't care about preserving the original formatting, you can access the pretty printer directly:
 ```js
