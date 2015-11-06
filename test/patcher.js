@@ -9,6 +9,7 @@ var Patcher = patcherModule.Patcher;
 var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
 var FastPath = require("../lib/fast-path");
+var eol = require("os").EOL;
 
 var code = [
     "// file comment",
@@ -28,7 +29,7 @@ function loc(sl, sc, el, ec) {
 
 describe("patcher", function() {
     it("Patcher", function() {
-        var lines = fromString(code.join("\n")),
+        var lines = fromString(code.join(eol)),
             patcher = new Patcher(lines),
             selfLoc = loc(5, 9, 5, 13);
 
@@ -39,7 +40,7 @@ describe("patcher", function() {
         assert.strictEqual(patcher.get(selfLoc).toString(), "self");
 
         var got = patcher.get().toString();
-        assert.strictEqual(got, code.join("\n").replace("this", "self"));
+        assert.strictEqual(got, code.join(eol).replace("this", "self"));
 
         // Make sure comments are preserved.
         assert.ok(got.indexOf("// some") >= 0);
@@ -54,7 +55,7 @@ describe("patcher", function() {
         assert.strictEqual(patcher.get().toString(), [
             "// file comment",
             "exports.foo(oyez);"
-        ].join("\n"));
+        ].join(eol));
 
         // "Reset" the patcher.
         patcher = new Patcher(lines);
@@ -64,7 +65,7 @@ describe("patcher", function() {
         assert.strictEqual(patcher.get().toString(), [
             "// file comment",
             "exports.foo(oyez);"
-        ].join("\n"));
+        ].join(eol));
     });
 
     var trickyCode = [
@@ -73,7 +74,7 @@ describe("patcher", function() {
         "  baz) {",
         "        qux();",
         "    }"
-    ].join("\n");
+    ].join(eol);
 
     it("GetIndent", function() {
         function check(indent) {
@@ -95,7 +96,7 @@ describe("patcher", function() {
                 "{",
                 "    qux();",
                 "}"
-            ].join("\n"));
+            ].join(eol));
         }
 
         for (var indent = -4; indent <= 4; ++indent) {
@@ -157,7 +158,7 @@ describe("patcher", function() {
         var twoLineCode = [
             "return",      // Because of ASI rules, these two lines will
             '"use strict"' // parse as separate statements.
-        ].join("\n");
+        ].join(eol);
 
         var twoLineAST = parse(twoLineCode);
 
@@ -179,7 +180,7 @@ describe("patcher", function() {
             "return",
             "sloppy" // The key is that no space should be added to the
                      // beginning of this line.
-        ].join("\n"));
+        ].join(eol));
 
         twoLineAST.program.body[1] = b.expressionStatement(
             b.callExpression(b.identifier("foo"), [])
@@ -189,6 +190,6 @@ describe("patcher", function() {
         assert.strictEqual(withFooCall, [
             "return",
             "foo()"
-        ].join("\n"));
+        ].join(eol));
     });
 });

@@ -4,6 +4,7 @@ var Printer = require("../lib/printer").Printer;
 var types = require("../lib/types");
 var n = types.namedTypes;
 var b = types.builders;
+var eol = require("os").EOL;
 
 describe("type syntax", function() {
     var printer = new Printer({ tabWidth: 2, quote: 'single' });
@@ -56,10 +57,10 @@ describe("type syntax", function() {
         check("var a: () => X = fn;");
 
         // Object
-        check("var a: {\n  b: number;\n  x: {y: A};\n};");
+        check("var a: {" + eol + "  b: number;" + eol + "  x: {y: A};" + eol + "};");
         check("var b: {[key: string]: number};")
         check("var c: {(): number};")
-        check("var d: {\n  [key: string]: A;\n  [key: number]: B;\n  (): C;\n  a: D;\n};")
+        check("var d: {" + eol + "  [key: string]: A;" + eol + "  [key: number]: B;" + eol + "  (): C;" + eol + "  a: D;" + eol + "};")
 
         // Casts
         check("(1 + 1: number);");
@@ -71,19 +72,19 @@ describe("type syntax", function() {
         check("declare function foo(c: C, b: B): void;");
         check("declare function foo(c: (e: Event) => void, b: B): void;");
         check("declare class C {x: string}");
-        check("declare module M {\n  declare function foo(c: C): void;\n}");
+        check("declare module M {" + eol + "  declare function foo(c: C): void;" + eol + "}");
 
         // Classes
-        check("class A {\n  a: number;\n}");
-        check("class A {\n  foo(a: number): string {}\n}");
-        check("class A {\n  static foo(a: number): string {}\n}");
+        check("class A {" + eol + "  a: number;" + eol + "}");
+        check("class A {" + eol + "  foo(a: number): string {}" + eol + "}");
+        check("class A {" + eol + "  static foo(a: number): string {}" + eol + "}");
 
         // Type parameters
         check("class A<T> {}");
         check("class A<X, Y> {}");
         check("class A<X> extends B<Y> {}");
         check("function a<T>(y: Y<T>): T {}");
-        check("class A {\n  foo<T>(a: number): string {}\n}");
+        check("class A {" + eol + "  foo<T>(a: number): string {}" + eol + "}");
 
         // Interfaces
         check("interface A<X> extends B<A>, C {a: number}");

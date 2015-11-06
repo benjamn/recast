@@ -4,6 +4,7 @@ var path = require("path");
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
+var eol = require("os").EOL;
 
 function check(a, b) {
     assert.strictEqual(a.toString(), b.toString());
@@ -42,7 +43,7 @@ describe("lines", function() {
 
         checkIsCached("");
         checkIsCached(",");
-        checkIsCached("\n");
+        checkIsCached(eol);
         checkIsCached("this");
         checkIsCached(", ");
         checkIsCached(": ");
@@ -90,6 +91,10 @@ describe("lines", function() {
         // lastPos) should be the only empty string.
         assert.strictEqual(emptyCount, 1);
 
+        // Function.prototype.toString uses \r\n line endings on non-*NIX
+        // systems, so normalize those to \n characters.
+        code = code.replace(/\r\n/g, "\n");
+
         var joined = chars.join("");
         assert.strictEqual(joined.length, code.length);
         assert.strictEqual(joined, code);
@@ -104,9 +109,7 @@ describe("lines", function() {
     }
 
     it("EachPos", function() {
-        // Function.prototype.toString uses \r\n line endings on non-*NIX
-        // systems, so normalize those to \n characters.
-        var code = (arguments.callee + "").replace(/\r\n/g, "\n");
+        var code = (arguments.callee + "");
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
@@ -139,9 +142,9 @@ describe("lines", function() {
         // out-of-bounds input positions.
         fromString(exports.testBasic).eachPos(compare);
 
-        var original = fromString("  ab\n  c"),
+        var original = fromString("  ab" + eol + "  c"),
             indented = original.indentTail(4),
-            reference = fromString("  ab\n      c");
+            reference = fromString("  ab" + eol + "      c");
 
         function compareIndented(pos) {
             var c = indented.charAt(pos);
@@ -160,12 +163,12 @@ describe("lines", function() {
 
     it("Concat", function() {
         var strings = ["asdf", "zcxv", "qwer"],
-            lines = fromString(strings.join("\n")),
+            lines = fromString(strings.join(eol)),
             indented = lines.indentTail(4);
 
         assert.strictEqual(lines.length, 3);
 
-        check(indented, strings.join("\n    "));
+        check(indented, strings.join(eol + "    "));
 
         assert.strictEqual(5, concat([lines, indented]).length);
         assert.strictEqual(5, concat([indented, lines]).length);
@@ -174,11 +177,11 @@ describe("lines", function() {
               lines.toString() + indented.toString());
 
         check(concat([lines, indented]).indentTail(4),
-              strings.join("\n    ") +
-              strings.join("\n        "));
+              strings.join(eol + "    ") +
+              strings.join(eol + "        "));
 
         check(concat([indented, lines]),
-              strings.join("\n    ") + lines.toString());
+              strings.join(eol + "    ") + lines.toString());
 
         check(concat([lines, indented]),
               lines.concat(indented));
@@ -227,13 +230,13 @@ describe("lines", function() {
         c("");
         c(" ");
         c("    ");
-        c(" \n");
-        c("\n ");
-        c(" \n ");
-        c("\n \n ");
-        c(" \n\n ");
-        c(" \n \n ");
-        c(" \n \n\n");
+        c(" " + eol);
+        c(eol + " ");
+        c(" " + eol + " ");
+        c(eol + " " + eol + " ");
+        c(" " + eol + eol + " ");
+        c(" " + eol + " " + eol + " ");
+        c(" " + eol + " " + eol + eol);
     });
 
     it("SingleLine", function() {
@@ -249,7 +252,7 @@ describe("lines", function() {
 
         // Multi-line Lines objects are altered by indentTail, but only if the
         // amount of the indentation is non-zero.
-        var twice = line.concat("\n", line);
+        var twice = line.concat(eol, line);
         assert.notStrictEqual(twice.indentTail(10), twice);
         assert.strictEqual(twice.indentTail(0), twice);
 
@@ -296,7 +299,7 @@ describe("lines", function() {
             var indented = lines.indentTail(indent),
                 loc = getSourceLocation(indented),
                 string = indented.toString(),
-                strings = string.split("\n"),
+                strings = string.split(eol),
                 lastLine = strings[strings.length - 1];
 
             assert.strictEqual(loc.end.line, strings.length);
@@ -312,7 +315,7 @@ describe("lines", function() {
     });
 
     it("Trim", function() {
-        var string = "  xxx \n ";
+        var string = "  xxx " + eol + " ";
         var options = { tabWidth: 4 };
         var lines = fromString(string);
 
@@ -325,21 +328,21 @@ describe("lines", function() {
 
         test("");
         test(" ");
-        test("  xxx \n ");
+        test("  xxx " + eol + " ");
         test("  xxx");
         test("xxx  ");
-        test("\nx\nx\nx\n");
-        test("\t\nx\nx\nx\n\t\n");
+        test(eol + "x" + eol + "x" + eol + "x" + eol);
+        test("\t" + eol + "x" + eol + "x" + eol + "x" + eol + "\t" + eol);
         test("xxx");
     });
 
     it("NoIndentEmptyLines", function() {
-        var lines = fromString("a\n\nb"),
+        var lines = fromString("a" + eol + eol + "b"),
             indented = lines.indent(4),
             tailIndented = lines.indentTail(5);
 
-        check(indented, fromString("    a\n\n    b"));
-        check(tailIndented, fromString("a\n\n     b"));
+        check(indented, fromString("    a" + eol + eol + "    b"));
+        check(tailIndented, fromString("a" + eol + eol + "     b"));
 
         check(indented.indent(-4), lines);
         check(tailIndented.indent(-5), lines);
@@ -400,7 +403,7 @@ describe("lines", function() {
             "function f() {",
             "\treturn this;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         function checkUnchanged(lines, code) {
             check(lines.toString(tabOpts), code);
@@ -416,31 +419,31 @@ describe("lines", function() {
             " function f() {",
             "\t return this;",
             " }"
-        ].join("\n"));
+        ].join(eol));
 
         check(lines.indent(tabWidth).toString(tabOpts), [
             "\tfunction f() {",
             "\t\treturn this;",
             "\t}"
-        ].join("\n"));
+        ].join(eol));
 
         check(lines.indent(1).toString(noTabOpts), [
             " function f() {",
             "     return this;",
             " }"
-        ].join("\n"));
+        ].join(eol));
 
         check(lines.indent(tabWidth).toString(noTabOpts), [
             "    function f() {",
             "        return this;",
             "    }"
-        ].join("\n"));
+        ].join(eol));
 
         var funkyCode = [
             " function g() { \t ",
             " \t\t  return this;  ",
             "\t} "
-        ].join("\n");
+        ].join(eol);
 
         var funky = fromString(funkyCode, tabOpts);
         checkUnchanged(funky, funkyCode);
@@ -449,25 +452,25 @@ describe("lines", function() {
             "  function g() { \t ",
             "\t\t   return this;  ",
             "\t } "
-        ].join("\n"));
+        ].join(eol));
 
         check(funky.indent(2).toString(tabOpts), [
             "   function g() { \t ",
             "\t\t\treturn this;  ",
             "\t  } "
-        ].join("\n"));
+        ].join(eol));
 
         check(funky.indent(1).toString(noTabOpts), [
             "  function g() { \t ",
             "           return this;  ",
             "     } "
-        ].join("\n"));
+        ].join(eol));
 
         check(funky.indent(2).toString(noTabOpts), [
             "   function g() { \t ",
             "            return this;  ",
             "      } "
-        ].join("\n"));
+        ].join(eol));
 
         // Test that '\v' characters are ignored for the purposes of indentation,
         // but preserved when printing untouched lines.
@@ -475,7 +478,7 @@ describe("lines", function() {
             "\vfunction f() {\v",
             " \v   return \vthis;\v",
             "\v} \v "
-        ].join("\n");
+        ].join(eol);
 
         lines = fromString(code, tabOpts);
 
@@ -485,13 +488,13 @@ describe("lines", function() {
             "    function f() {\v",
             "        return \vthis;\v",
             "    } \v "
-        ].join("\n"));
+        ].join(eol));
 
         check(lines.indent(5).toString(tabOpts), [
             "\t function f() {\v",
             "\t\t return \vthis;\v",
             "\t } \v "
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("GuessTabWidth", function(done) {
@@ -502,7 +505,7 @@ describe("lines", function() {
             "function identity(x) {",
             "  return x;",
             "}"
-        ].join("\n"));
+        ].join(eol));
         assert.strictEqual(lines.guessTabWidth(), 2);
         assert.strictEqual(lines.indent(5).guessTabWidth(), 2);
         assert.strictEqual(lines.indent(-4).guessTabWidth(), 2);

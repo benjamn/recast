@@ -9,6 +9,7 @@ var fromString = require("../lib/lines").fromString;
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var Mapping = require("../lib/mapping");
+var eol = require("os").EOL;
 
 describe("source maps", function() {
     it("should generate correct mappings", function() {
@@ -16,7 +17,7 @@ describe("source maps", function() {
             "function foo(bar) {",
             "  return 1 + bar;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var lines = fromString(code);
         var ast = parse(code, {
@@ -118,7 +119,7 @@ describe("source maps", function() {
             "  console.log(a, b);",
             "  return sum;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code, {
             sourceFileName: "original.js"
@@ -174,7 +175,7 @@ describe("source maps", function() {
         var code = [
             "for (var i = 0; false; i++)",
             "  log(i);"
-        ].join("\n");
+        ].join(eol);
         var ast = parse(code);
         var path = new NodePath(ast);
 
@@ -187,7 +188,7 @@ describe("source maps", function() {
         assert.strictEqual(printed.code, [
             "for (var i = 0; false; )",
             "  log(i);"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should tolerate programs that become empty", function() {
