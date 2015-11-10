@@ -4,6 +4,7 @@ var namedTypes = types.namedTypes;
 var builders = types.builders;
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
+var eol = require("os").EOL;
 
 var lines = [
     "// file comment",
@@ -16,7 +17,7 @@ var lines = [
 
 describe("types.visit", function() {
     it("replacement", function() {
-        var source = lines.join("\n");
+        var source = lines.join(eol);
         var printer = new Printer;
         var ast = parse(source);
         var withThis = printer.print(ast).code;
@@ -94,7 +95,7 @@ describe("types.visit", function() {
             "})));"
         ];
 
-        var source = lines.join("\n");
+        var source = lines.join(eol);
         var ast = parse(source);
         var printer = new Printer;
 
@@ -127,11 +128,11 @@ describe("types.visit", function() {
 
             visitObjectExpression: function() {
                 return funExpr;
-            }            
+            }
         });
 
         assert.strictEqual(
-            altered.join("\n"),
+            altered.join(eol),
             printer.print(ast).code
         );
     });

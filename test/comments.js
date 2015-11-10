@@ -5,6 +5,7 @@ var Printer = require("../lib/printer").Printer;
 var fromString = require("../lib/lines").fromString;
 var assert = require("assert");
 var printer = new Printer;
+var eol = require("os").EOL;
 
 var annotated = [
     "function dup(/* string */ s,",
@@ -18,7 +19,7 @@ var annotated = [
 
 describe("comments", function() {
     it("attachment and reprinting", function() {
-        var code = annotated.join("\n");
+        var code = annotated.join(eol);
         var ast = recast.parse(code);
 
         var dup = ast.program.body[0];
@@ -42,13 +43,13 @@ describe("comments", function() {
 
         assert.strictEqual(
             recast.print(dup.body).code,
-            ["/* string */"].concat(annotated.slice(2)).join("\n")
+            ["/* string */"].concat(annotated.slice(2)).join(eol)
         );
 
         var retStmt = dup.body.body[0];
         n.ReturnStatement.assert(retStmt);
 
-        var indented = annotated.slice(3, 6).join("\n");
+        var indented = annotated.slice(3, 6).join(eol);
         var flush = fromString(indented).indent(-2);
 
         assert.strictEqual(
@@ -65,7 +66,7 @@ describe("comments", function() {
         assert.strictEqual(recast.print(one).code, [
             "/*",
             " * off-by-*/ 1"
-        ].join("\n"));
+        ].join(eol));
     });
 
     var trailing = [
@@ -116,7 +117,7 @@ describe("comments", function() {
     ];
 
     it("TrailingComments", function() {
-        var code = trailing.join("\n");
+        var code = trailing.join(eol);
         var ast = recast.parse(code);
         assert.strictEqual(recast.print(ast).code, code);
 
@@ -149,7 +150,7 @@ describe("comments", function() {
         ));
 
         var actual = recast.print(ast, { tabWidth: 2 }).code;
-        var expected = trailingExpected.join("\n");
+        var expected = trailingExpected.join(eol);
 
         // Check semantic equivalence:
         recast.types.astNodesAreEquivalent.assert(
@@ -175,7 +176,7 @@ describe("comments", function() {
     ];
 
     it("BodyTrailingComments", function() {
-        var code = bodyTrailing.join("\n");
+        var code = bodyTrailing.join(eol);
         var ast = recast.parse(code);
 
         // Drop all original source information to force reprinting.
@@ -187,7 +188,7 @@ describe("comments", function() {
         });
 
         var actual = recast.print(ast, { tabWidth: 2 }).code;
-        var expected = bodyTrailingExpected.join("\n");
+        var expected = bodyTrailingExpected.join(eol);
 
         assert.strictEqual(actual, expected);
     });
@@ -205,7 +206,7 @@ describe("comments", function() {
     ];
 
     it("ParamTrailingComments", function() {
-        var code = paramTrailing.join("\n");
+        var code = paramTrailing.join(eol);
         var ast = recast.parse(code);
 
         var func = ast.program.body[0];
@@ -214,7 +215,7 @@ describe("comments", function() {
         func.params.unshift(b.identifier("zxcv"));
 
         var actual = recast.print(ast, { tabWidth: 2 }).code;
-        var expected = paramTrailingExpected.join("\n");
+        var expected = paramTrailingExpected.join(eol);
 
         assert.strictEqual(actual, expected);
     });
@@ -231,7 +232,7 @@ describe("comments", function() {
     ];
 
     it("ProtoAssignComment", function() {
-        var code = protoAssign.join("\n");
+        var code = protoAssign.join(eol);
         var ast = recast.parse(code);
 
         var foo = ast.program.body[0];
@@ -266,7 +267,7 @@ describe("comments", function() {
     ];
 
     it("should correctly attach to concise methods", function() {
-        var code = conciseMethods.join("\n");
+        var code = conciseMethods.join(eol);
         var ast = recast.parse(code);
 
         var objExpr = ast.program.body[0].declarations[0].init;
@@ -334,7 +335,7 @@ describe("comments", function() {
             "var obj = {",
             "};",
         ];
-        var code = simpleCommentedCode.join("\n");
+        var code = simpleCommentedCode.join(eol);
         var ast = recast.parse(code);
 
         // When
@@ -352,7 +353,7 @@ describe("comments", function() {
             "foo;",
             "// bar",
             "bar;"
-        ].join("\n");
+        ].join(eol);
 
         var ast = recast.parse(code);
 
@@ -367,7 +368,7 @@ describe("comments", function() {
             "foo;",
             "// barbara",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         ast.program.body[0].comments = comments;
         delete ast.program.body[1].comments;
@@ -375,7 +376,7 @@ describe("comments", function() {
             "// barbara",
             "foo;",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         ast.program.body[0] = b.blockStatement([
             ast.program.body[0]
@@ -387,7 +388,7 @@ describe("comments", function() {
             "}",
             "",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         var comment = ast.program.body[0].body[0].comments[0];
         comment.type = "Block";
@@ -398,7 +399,7 @@ describe("comments", function() {
             "}",
             "",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         comment.value += "\n * babar\n ";
         assert.strictEqual(recast.print(ast).code, [
@@ -410,7 +411,7 @@ describe("comments", function() {
             "}",
             "",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         ast.program.body[1].comments = [comment];
         assert.strictEqual(recast.print(ast).code, [
@@ -425,7 +426,7 @@ describe("comments", function() {
             " * babar",
             " */",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         delete ast.program.body[0].body[0].comments;
         ast.program.comments = [b.line(" program comment")];
@@ -439,7 +440,7 @@ describe("comments", function() {
             " * babar",
             " */",
             "bar;"
-        ].join("\n"));
+        ].join(eol));
 
         ast.program.body.push(
             ast.program.body.shift()
@@ -454,7 +455,7 @@ describe("comments", function() {
             "{",
             "  foo;",
             "}"
-        ].join("\n"));
+        ].join(eol));
 
         recast.visit(ast, {
             visitNode: function(path) {
@@ -468,13 +469,13 @@ describe("comments", function() {
             "{",
             "  foo;",
             "}"
-        ].join("\n"));
+        ].join(eol));
 
         ast.program.body[1] = ast.program.body[1].body[0];
         assert.strictEqual(recast.print(ast).code, [
             "bar;",
             "foo;"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should preserve stray non-comment syntax", function() {
@@ -486,7 +487,7 @@ describe("comments", function() {
             "  , /* comma */",
             "  bar",
             "]"
-        ].join("\n");
+        ].join(eol);
 
         var ast = recast.parse(code);
         assert.strictEqual(recast.print(ast).code, code);
@@ -502,13 +503,13 @@ describe("comments", function() {
             "  , /* comma */",
             "  bar",
             "]"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should be reprinted even if dangling", function() {
         var code = [
             "[/*dangling*/] // array literal"
-        ].join("\n");
+        ].join(eol);
 
         var ast = recast.parse(code);
         var array = ast.program.body[0].expression;
@@ -524,12 +525,12 @@ describe("comments", function() {
         danglingComment.value = " neither leading nor trailing ";
         assert.strictEqual(recast.print(ast).code, [
             "[/* neither leading nor trailing */] // array literal"
-        ].join("\n"));
+        ].join(eol));
 
         trailingComment.value = " trailing";
         assert.strictEqual(recast.print(ast).code, [
             "[/* neither leading nor trailing */] // trailing"
-        ].join("\n"));
+        ].join(eol));
 
         // Unfortuantely altering the elements of the array leads to
         // reprinting which blows away the dangling comment.
@@ -586,7 +587,7 @@ describe("comments", function() {
             "  ) /*after*/ {",
             "  },",
             "};",
-        ].join('\n');
+        ].join(eol);
 
         var ast = recast.parse(code);
         var printer = new Printer({
@@ -604,7 +605,7 @@ describe("comments", function() {
             "var sum = function /*anonymous*/(/*...args*/) /*int*/ {",
             "  // TODO",
             "};"
-        ].join("\n");
+        ].join(eol);
 
         var ast = recast.parse(code);
         var funExp = ast.program.body[0].declarations[0].init;

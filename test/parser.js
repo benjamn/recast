@@ -9,6 +9,7 @@ var concat = linesModule.concat;
 var types = require("../lib/types");
 var namedTypes = types.namedTypes;
 var FastPath = require("../lib/fast-path");
+var eol = require("os").EOL;
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -70,7 +71,7 @@ describe("parser", function() {
             "    a()",
             "    b()",
             "}"
-        ].join("\n");
+        ].join(eol);
         var ast = parse(code);
         var printer = new Printer;
 

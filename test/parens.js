@@ -7,6 +7,7 @@ var types = require("../lib/types");
 var n = types.namedTypes;
 var b = types.builders;
 var printer = new Printer;
+var eol = require("os").EOL;
 
 function parseExpression(expr) {
     var ast = esprima.parse(expr);
@@ -188,7 +189,7 @@ describe("parens", function() {
             "for (var i = 0; i < 10; ++i) {",
             "  console.log(i);",
             "}"
-        ].join("\n"))
+        ].join(eol))
 
         var loop = ast.program.body[0];
         var test = loop.test;
@@ -205,7 +206,7 @@ describe("parens", function() {
             "for (var i = 0; !(i < 10); ++i) {",
             "  console.log(i);",
             "}"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("MisleadingExistingParens", function() {
@@ -216,7 +217,7 @@ describe("parens", function() {
             'if (key === "oyez") {',
             "  throw new Error(key);",
             "}"
-        ].join("\n"));
+        ].join(eol));
 
         var ifStmt = ast.program.body[0];
         ifStmt.test = b.unaryExpression("!", ifStmt.test);
@@ -230,7 +231,7 @@ describe("parens", function() {
             'if (!(key === "oyez")) {',
             "  throw new Error(key);",
             "}"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("DiscretionaryParens", function() {
@@ -238,7 +239,7 @@ describe("parens", function() {
             "if (info.line && (i > 0 || !skipFirstLine)) {",
             "  info = copyLineInfo(info);",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -258,7 +259,7 @@ describe("parens", function() {
             "    c",
             "  );",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
         var printer = new Printer({

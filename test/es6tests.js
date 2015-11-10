@@ -4,6 +4,7 @@ var Printer = require("../lib/printer").Printer;
 var types = require("../lib/types");
 var n = types.namedTypes;
 var b = types.builders;
+var eol = require("os").EOL;
 
 describe("ES6 Compatability", function() {
     function convertShorthandMethod() {
@@ -15,7 +16,7 @@ describe("ES6 Compatability", function() {
             "  name,",
             "  func() { return 'value'; }",
             "};"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
         n.VariableDeclaration.assert(ast.program.body[1]);
@@ -280,7 +281,7 @@ describe("import/export syntax", function() {
             'var noun = "fool";',
             'var s = `I am a ${noun}`;',
             'var t = tag`You said: ${s}!`;'
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 

@@ -5,6 +5,7 @@ var Printer = require("../lib/printer").Printer;
 var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
 var fromString = require("../lib/lines").fromString;
+var eol = require("os").EOL;
 
 describe("printer", function() {
     it("Printer", function testPrinter(done) {
@@ -35,7 +36,7 @@ describe("printer", function() {
         'function b() {',
         '  return "b";',
         '};'
-    ].join("\n");
+    ].join(eol);
 
     it("EmptyStatements", function() {
         var ast = parse(uselessSemicolons);
@@ -54,7 +55,7 @@ describe("printer", function() {
     var importantSemicolons = [
         "var a = {};", // <--- this trailing semi-colon is very important
         "(function() {})();"
-    ].join("\n");
+    ].join(eol);
 
     it("IffeAfterVariableDeclarationEndingInObjectLiteral", function() {
         var ast = parse(importantSemicolons);
@@ -121,7 +122,7 @@ describe("printer", function() {
     });
 
     var objectExprWithTrailingComma = '({x: 1, y: 2,});';
-    var objectExprWithoutTrailingComma = '({\n  x: 1,\n  y: 2\n});';
+    var objectExprWithoutTrailingComma = '({' + eol + '  x: 1,' + eol + '  y: 2' + eol + '});';
 
     it("ArrayExpressionWithTrailingComma", function() {
         var ast = parse(objectExprWithTrailingComma);
@@ -156,7 +157,7 @@ describe("printer", function() {
         "  case b:",
         "    break;",
         "}",
-    ].join("\n");
+    ].join(eol);
 
     var switchCaseReprinted = [
         "if (test) {",
@@ -167,7 +168,7 @@ describe("printer", function() {
         "    break;",
         "  }",
         "}"
-    ].join("\n");
+    ].join(eol);
 
     var switchCaseGeneric = [
         "if (test) {",
@@ -179,7 +180,7 @@ describe("printer", function() {
         "    break;",
         "  }",
         "}"
-    ].join("\n");
+    ].join(eol);
 
     it("SwitchCase", function() {
         var ast = parse(switchCase);
@@ -216,7 +217,7 @@ describe("printer", function() {
         "} catch (e) {",
         "  b(e);",
         "}"
-    ].join("\n");
+    ].join(eol);
 
     it("IndentTryCatch", function() {
         var ast = parse(tryCatch);
@@ -253,7 +254,7 @@ describe("printer", function() {
     ];
 
     it("MethodPrinting", function() {
-        var code = classBody.join("\n");
+        var code = classBody.join(eol);
         try {
             var ast = parse(code);
         } catch (e) {
@@ -269,7 +270,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(ast).code,
-            classBodyExpected.join("\n")
+            classBodyExpected.join(eol)
         );
     });
 
@@ -299,7 +300,7 @@ describe("printer", function() {
     ];
 
     it("MultiLineParams", function() {
-        var code = multiLineParams.join("\n");
+        var code = multiLineParams.join(eol);
         var ast = parse(code);
         var printer = new Printer({ tabWidth: 2 });
 
@@ -312,7 +313,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(ast).code,
-            multiLineParamsExpected.join("\n")
+            multiLineParamsExpected.join(eol)
         );
     });
 
@@ -358,7 +359,7 @@ describe("printer", function() {
             "      why: \"not\"",
             "    },",
             "    z;"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("ForLoopPrinting", function() {
@@ -376,7 +377,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(loop).code,
-            "for (var i = 0; i < 3; i++)\n" +
+            "for (var i = 0; i < 3; i++)" + eol +
             "  log(i);"
         );
     });
@@ -394,7 +395,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(loop).code,
-            "for (var i = 0; i < 3; i++)\n" +
+            "for (var i = 0; i < 3; i++)" + eol +
             "  ;"
         );
     });
@@ -414,7 +415,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(loop).code,
-            "for (var key in obj)\n" +
+            "for (var key in obj)" + eol +
             "  log(key);"
         );
     });
@@ -424,21 +425,21 @@ describe("printer", function() {
             "function identity(x) {",
             "  return x;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var guessedTwo = [
             "function identity(x) {",
             "  log(x);",
             "  return x;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var explicitFour = [
             "function identity(x) {",
             "    log(x);",
             "    return x;",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -559,7 +560,7 @@ describe("printer", function() {
         "console.log(x, y, z);",
         "",
         ""
-    ].join("\n");
+    ].join(eol);
 
     var stmtListSpacesExpected = [
         "",
@@ -578,7 +579,7 @@ describe("printer", function() {
         "debugger;",
         "",
         ""
-    ].join("\n");
+    ].join(eol);
 
     it("Statement list whitespace reuse", function() {
         var ast = parse(stmtListSpaces);
@@ -605,11 +606,11 @@ describe("printer", function() {
         assert.strictEqual(
             printer.print(funDecl).code,
             linesModule.concat([
-                "function foo() {\n",
+                "function foo() {" + eol,
                 linesModule.fromString(
                     stmtListSpacesExpected.replace(/^\s+|\s+$/g, "")
                 ).indent(2),
-                "\n}"
+                eol + "}"
             ]).toString()
         );
     });
@@ -620,7 +621,7 @@ describe("printer", function() {
             "class A {",
             "  static foo() {}",
             "}"
-        ].join("\n"));
+        ].join(eol));
 
         var classBody = ast.program.body[0].body;
         n.ClassBody.assert(classBody);
@@ -637,7 +638,7 @@ describe("printer", function() {
             "    static formerlyFoo() {}",
             "    static formerlyFoo() {}",
             "}"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should print string literals with the specified delimiter", function() {
@@ -646,7 +647,7 @@ describe("printer", function() {
             "    \"foo's\": 'bar',",
             "    '\"bar\\'s\"': /regex/m",
             "};"
-        ].join("\n"));
+        ].join(eol));
 
         var variableDeclaration = ast.program.body[0];
         n.VariableDeclaration.assert(variableDeclaration);
@@ -657,7 +658,7 @@ describe("printer", function() {
             "    'foo\\'s': 'bar',",
             "    '\"bar\\'s\"': /regex/m",
             "};"
-        ].join("\n"));
+        ].join(eol));
 
         var printer2 = new Printer({ quote: "double" });
         assert.strictEqual(printer2.printGenerically(ast).code, [
@@ -665,7 +666,7 @@ describe("printer", function() {
             "    \"foo's\": \"bar\",",
             '    "\\"bar\'s\\"": /regex/m',
             "};"
-        ].join("\n"));
+        ].join(eol));
 
         var printer3 = new Printer({ quote: "auto" });
         assert.strictEqual(printer3.printGenerically(ast).code, [
@@ -673,7 +674,7 @@ describe("printer", function() {
             '    "foo\'s": "bar",',
             '    \'"bar\\\'s"\': /regex/m',
             "};"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should print block comments at head of class once", function() {
@@ -684,7 +685,7 @@ describe("printer", function() {
             " */",
             "function SimpleClass() {",
             "};"
-        ].join("\n"));
+        ].join(eol));
 
         var classIdentifier = b.identifier('SimpleClass');
         var exportsExpression = b.memberExpression(b.identifier('module'), b.identifier('exports'), false);
@@ -704,7 +705,7 @@ describe("printer", function() {
             "function SimpleClass() {",
             "}",
             "module.exports = SimpleClass;"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("should support computed properties", function() {
@@ -735,7 +736,7 @@ describe("printer", function() {
             '  static set [0](x) {}',
             '  static set [ID(1)](x) {}',
             '}'
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -767,7 +768,7 @@ describe("printer", function() {
             '  set [0](x) {},',
             '  set [ID(1)](x) {}',
             '};'
-        ].join("\n");
+        ].join(eol);
 
         ast = parse(code);
 
@@ -781,7 +782,7 @@ describe("printer", function() {
             "  // This foo will become a computed method name.",
             "  foo() { return bar }",
             "};"
-        ].join("\n"));
+        ].join(eol));
 
         var objExpr = ast.program.body[0].declarations[0].init;
         n.ObjectExpression.assert(objExpr);
@@ -795,7 +796,7 @@ describe("printer", function() {
             "  // This foo will become a computed method name.",
             "  get [foo]() { return bar }",
             "};"
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("prints trailing commas in object literals", function() {
@@ -804,7 +805,7 @@ describe("printer", function() {
             "  foo: bar,",
             "  bar: foo,",
             "});"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -823,7 +824,7 @@ describe("printer", function() {
             "  1,",
             "  2,",
             ");"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -843,7 +844,7 @@ describe("printer", function() {
             "  1,",
             "  2,",
             "];"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -863,7 +864,7 @@ describe("printer", function() {
             "  a,",
             "  b,",
             ") {}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
 
@@ -882,7 +883,7 @@ describe("printer", function() {
             "function foo(a, [b, c]=d(a), ...[e, f, ...rest]) {",
             "  return [a, b, c, e, f, rest];",
             "}"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
         var printer = new Printer({
@@ -979,7 +980,7 @@ describe("printer", function() {
             "class A {",
             "  foo: Type = Bar;",
             "}",
-        ].join("\n");
+        ].join(eol);
 
         var ast = b.program([
             b.classDeclaration(
@@ -1009,7 +1010,7 @@ describe("printer", function() {
             "class A {",
             "  static foo = Bar;",
             "}",
-        ].join("\n");
+        ].join(eol);
 
         var ast = b.program([
             b.classDeclaration(
@@ -1036,7 +1037,7 @@ describe("printer", function() {
     it("prints template expressions correctly", function() {
         var code = [
             "graphql`query`;",
-        ].join("\n");
+        ].join(eol);
 
         var ast = b.program([
             b.taggedTemplateStatement(
@@ -1057,7 +1058,7 @@ describe("printer", function() {
 
         code = [
             "graphql`query${foo.getQuery()}field${bar}`;",
-        ].join("\n");
+        ].join(eol);
 
         ast = b.program([
             b.taggedTemplateStatement(
@@ -1103,7 +1104,7 @@ describe("printer", function() {
             "    ${bar},",
             "  }",
             "`;",
-        ].join("\n");
+        ].join(eol);
 
         ast = parse(code);
         pretty = printer.printGenerically(ast).code;
@@ -1115,7 +1116,7 @@ describe("printer", function() {
             "",
             "f();",
             ""
-        ].join("\n");
+        ].join(eol);
 
         var lines = fromString(code);
         var ast = parse(code, {
@@ -1144,7 +1145,7 @@ describe("printer", function() {
             "debugger;",
             "f();",
             ""
-        ].join("\n"));
+        ].join(eol));
     });
 
     it("respects options.lineTerminator", function() {
