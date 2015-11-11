@@ -1,4 +1,4 @@
-var recast = require("../main");
+var recast = require("..");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
 var Printer = require("../lib/printer").Printer;

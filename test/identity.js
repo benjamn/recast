@@ -2,7 +2,7 @@ var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
 var types = require("../lib/types");
-var main = require("../main");
+var main = require("..");
 
 function testFile(path) {
     fs.readFile(path, "utf-8", function(err, source) {

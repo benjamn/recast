@@ -1,6 +1,6 @@
-var types = require("./lib/types");
-var parse = require("./lib/parser").parse;
-var Printer = require("./lib/printer").Printer;
+var types = require("./types");
+var parse = require("./parser").parse;
+var Printer = require("./printer").Printer;
 
 function print(node, options) {
     return new Printer(options).print(node);
