@@ -1163,4 +1163,25 @@ describe("printer", function() {
             lines.join("\r\n")
         );
     });
+
+    it("preserves indentation in template expressions", function() {
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var code = [
+            "var x = {",
+            "  y: () => Relay.QL`",
+            "    query {",
+            "      ${foo},",
+            "      field,",
+            "    }",
+            "  `",
+            "};",
+        ].join("\n");
+
+        var ast = parse(code);
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
