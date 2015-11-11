@@ -59,8 +59,8 @@ describe("lines", function() {
         assert.strictEqual(fromString(longerLines), longerLines);
     });
 
-    it("ToString", function() {
-        var code = arguments.callee + "",
+    it("ToString", function callee() {
+        var code = callee + "",
             lines = fromString(code);
 
         check(lines, code);
@@ -108,8 +108,8 @@ describe("lines", function() {
         assert.strictEqual(joined, withoutSpaces);
     }
 
-    it("EachPos", function() {
-        var code = (arguments.callee + "");
+    it("EachPos", function callee() {
+        var code = (callee + "");
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
@@ -124,10 +124,10 @@ describe("lines", function() {
         testEachPosHelper(lines, code);
     });
 
-    it("CharAt", function() {
+    it("CharAt", function callee() {
         // Function.prototype.toString uses \r\n line endings on non-*NIX
         // systems, so normalize those to \n characters.
-        var code = (arguments.callee + "").replace(/\r\n/g, "\n");
+        var code = (callee + "").replace(/\r\n/g, "\n");
         var lines = fromString(code);
 
         function compare(pos) {
@@ -269,8 +269,8 @@ describe("lines", function() {
         });
     });
 
-    it("Slice", function() {
-        var code = arguments.callee + "",
+    it("Slice", function callee() {
+        var code = callee + "",
             lines = fromString(code);
         checkAllSlices(lines);
     });
@@ -291,8 +291,8 @@ describe("lines", function() {
                  end: lines.lastPos() };
     }
 
-    it("GetSourceLocation", function() {
-        var code = arguments.callee + "",
+    it("GetSourceLocation", function callee() {
+        var code = callee + "",
             lines = fromString(code);
 
         function verify(indent) {
@@ -497,8 +497,8 @@ describe("lines", function() {
         ].join(eol));
     });
 
-    it("GuessTabWidth", function(done) {
-        var lines = fromString(arguments.callee + "");
+    it("GuessTabWidth", function callee(done) {
+        var lines = fromString(callee + "");
         assert.strictEqual(lines.guessTabWidth(), 4);
 
         lines = fromString([
