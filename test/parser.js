@@ -15,6 +15,23 @@ var eol = require("os").EOL;
 // test functions with names and then export them later.
 
 describe("parser", function() {
+  it("empty source", function () {
+    var printer = new Printer;
+
+    function check(code) {
+      var ast = parse(code);
+      assert.strictEqual(printer.print(ast).code, code);
+    }
+
+    check("");
+    check("/* block comment */");
+    check("// line comment");
+    check("\t\t\t");
+    check("\n");
+    check("\n\n");
+    check("    ");
+  });
+
   it("Parser", function testParser(done) {
     var code = testParser + "";
     var ast = parse(code);
