@@ -7,7 +7,7 @@ var SourceMapConsumer = sourceMap.SourceMapConsumer;
 var SourceMapGenerator = sourceMap.SourceMapGenerator;
 var hasOwn = Object.prototype.hasOwnProperty;
 
-function getUnionOfKeys() {
+export function getUnionOfKeys() {
   var result = {};
   var argc = arguments.length;
   for (var i = 0; i < argc; ++i) {
@@ -19,22 +19,19 @@ function getUnionOfKeys() {
   }
   return result;
 }
-exports.getUnionOfKeys = getUnionOfKeys;
 
-function comparePos(pos1, pos2) {
+export function comparePos(pos1, pos2) {
   return (pos1.line - pos2.line) || (pos1.column - pos2.column);
 }
-exports.comparePos = comparePos;
 
-function copyPos(pos) {
+export function copyPos(pos) {
   return {
     line: pos.line,
     column: pos.column
   };
 }
-exports.copyPos = copyPos;
 
-exports.composeSourceMaps = function(formerMap, latterMap) {
+export function composeSourceMaps(formerMap, latterMap) {
   if (formerMap) {
     if (!latterMap) {
       return formerMap;
@@ -81,9 +78,9 @@ exports.composeSourceMaps = function(formerMap, latterMap) {
   });
 
   return smg.toJSON();
-};
+}
 
-exports.getTrueLoc = function(node, lines) {
+export function getTrueLoc(node, lines) {
   // It's possible that node is newly-created (not parsed by Esprima),
   // in which case it probably won't have a .loc property (or an
   // .original property for that matter). That's fine; we'll just
@@ -125,9 +122,9 @@ exports.getTrueLoc = function(node, lines) {
   }
 
   return { start: start, end: end };
-};
+}
 
-exports.fixFaultyLocations = function(node) {
+export function fixFaultyLocations(node) {
   if ((n.MethodDefinition && n.MethodDefinition.check(node)) ||
       (n.Property.check(node) && (node.method || node.shorthand))) {
     // If the node is a MethodDefinition or a .method or .shorthand
@@ -155,4 +152,4 @@ exports.fixFaultyLocations = function(node) {
       loc.end.line = 1;
     }
   }
-};
+}
