@@ -142,10 +142,10 @@ describe("parser", function() {
     }
   });
 
-  it("AlternateEsprima", function() {
+  it("AlternateParser", function() {
     var types = require("../lib/types");
     var b = types.builders;
-    var esprima = {
+    var parser = {
       parse: function(code) {
         var program = b.program([
           b.expressionStatement(b.identifier("surprise"))
@@ -154,13 +154,19 @@ describe("parser", function() {
         return program;
       }
     };
-    var ast = parse("ignored", { esprima: esprima });
-    var printer = new Printer;
 
-    types.namedTypes.File.assert(ast, true);
-    assert.strictEqual(
-      printer.printGenerically(ast).code,
-      "surprise;"
-    );
+    function check(options) {
+      var ast = parse("ignored", options);
+      var printer = new Printer;
+
+      types.namedTypes.File.assert(ast, true);
+      assert.strictEqual(
+        printer.printGenerically(ast).code,
+        "surprise;"
+      );
+    }
+
+    check({ esprima: parser });
+    check({ parser: parser });
   });
 });
