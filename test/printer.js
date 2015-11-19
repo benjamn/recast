@@ -1164,7 +1164,7 @@ describe("printer", function() {
         );
     });
 
-    it("preserves indentation in template expressions", function() {
+    it("preserves indentation in unmodified template expressions", function() {
         var printer = new Printer({
             tabWidth: 2
         });
@@ -1183,5 +1183,52 @@ describe("printer", function() {
         var ast = parse(code);
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
+    });
+
+    it("preserves indentation in modified template expressions", function() {
+        var code = [
+            "const fragments = {",
+            "  viewer: Relay.QL`",
+            "    fragment on Viewer {   // 2 extraneous spaces.",
+            "      actor {              // 2 extraneous spaces.",
+            "        id,            // 2 extraneous spaces.",
+            "        ${foo},           // 3 extraneous spaces.",
+            "        ${bar},              // Correct!",
+            "        name,                // Correct!",
+            "        ${baz},              // Correct!",
+            "        address {          // 2 extraneous spaces.",
+            "          id,          // 2 extraneous spaces.",
+            "        },                 // 2 extraneous spaces.",
+            "      }                    // 2 extraneous spaces.",
+            "    }                      // 2 extraneous spaces.",
+            "<~ This line should not be indented.",
+            "  `,                       // 2 extraneous spaces.",
+            "};"
+        ].join("\n");
+
+        var ast = parse(code);
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        recast.visit(ast, {
+            visitTaggedTemplateExpression: function (path) {
+                function replaceIdWithNodeId(path) {
+                    path.replace(path.value.replace(/\bid\b/g, "nodeID"));
+                }
+
+                path.get("quasi", "quasis").each(function (quasiPath) {
+                    replaceIdWithNodeId(quasiPath.get("value", "cooked"));
+                    replaceIdWithNodeId(quasiPath.get("value", "raw"));
+                });
+
+                this.traverse(path);
+            }
+        });
+
+        var actual = printer.print(ast).code;
+        var expected = code.replace(/\bid\b/g, "nodeID");
+
+        assert.strictEqual(actual, expected);
     });
 });
