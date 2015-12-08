@@ -272,19 +272,8 @@ describe("parens", function() {
         );
     });
 
-    it("should be added to callee expressions of type ArrowFunctionExpression", function() {
-        var code = [
-            "(()=>{})()"
-        ].join(eol);
-
-        var ast = parse(code);
-        var printer = new Printer({
-            tabWidth: 2
-        });
-
-        assert.strictEqual(
-            printer.printGenerically(ast).code,
-            code
-        );
+    it("should be added to callees that are function expressions", function() {
+        check("(()=>{})()");
+        check("(function(){})()");
     });
 });
