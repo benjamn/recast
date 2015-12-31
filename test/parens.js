@@ -271,4 +271,9 @@ describe("parens", function() {
             code
         );
     });
+
+    it("should be added to callees that are function expressions", function() {
+        check("(()=>{})()");
+        check("(function(){})()");
+    });
 });
