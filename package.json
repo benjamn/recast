@@ -34,7 +34,7 @@
     "ast-types": "0.8.15"
   },
   "devDependencies": {
-    "babylon": "^6.4.2",
+    "babylon": "~6.4.2",
     "mocha": "~2.2.5"
   },
   "engines": {
