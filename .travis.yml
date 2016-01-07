@@ -7,5 +7,9 @@ node_js:
   - "0.10"
   - "0.8"
 
+matrix:
+  allow_failures:
+    - node_js: "0.8"
+
 # Allow Travis tests to run in containers.
 sudo: false
