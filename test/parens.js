@@ -1,5 +1,4 @@
 var assert = require("assert");
-var esprima = require("esprima");
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var NodePath = require("ast-types").NodePath;
@@ -10,7 +9,7 @@ var printer = new Printer;
 var eol = require("os").EOL;
 
 function parseExpression(expr) {
-    var ast = esprima.parse(expr);
+    var ast = parse(expr);
     n.Program.assert(ast);
     ast = ast.body[0];
     if (n.ExpressionStatement.check(ast))

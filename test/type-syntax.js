@@ -8,14 +8,11 @@ var eol = require("os").EOL;
 
 describe("type syntax", function() {
   var printer = new Printer({ tabWidth: 2, quote: 'single' });
-  var parseOptions = {
-    parser: require("esprima-fb")
-  };
 
   function check(source) {
-    var ast1 = parse(source, parseOptions);
+    var ast1 = parse(source);
     var code = printer.printGenerically(ast1).code;
-    var ast2 = parse(code, parseOptions);
+    var ast2 = parse(code);
     types.astNodesAreEquivalent.assert(ast1, ast2);
     assert.strictEqual(source, code);
   }
