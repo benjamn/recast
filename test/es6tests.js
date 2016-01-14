@@ -152,7 +152,7 @@ describe("import/export syntax", function() {
         // const variables must have an initializer
         checkInvalid(
             "export const bar;",
-            "Const must be initialized"
+            "Unexpected token ;"
         );
 
         // Unexpected token identifier, invalid named export syntax
@@ -188,7 +188,7 @@ describe("import/export syntax", function() {
         // Invalid module specifier
         checkInvalid(
             "import foo from bar;",
-            "Invalid module specifier"
+            "Unexpected token"
         );
 
         // Unexpected token default
@@ -224,7 +224,7 @@ describe("import/export syntax", function() {
         // Missing as after import *
         checkInvalid(
             "import * from 'foo';",
-            "Missing as after import *"
+            "Unexpected token"
         );
 
         // Unexpected token =

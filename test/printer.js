@@ -807,7 +807,10 @@ describe("printer", function() {
             "});"
         ].join(eol);
 
-        var ast = parse(code);
+        var ast = parse(code, {
+            // Supports trailing commas whereas plain esprima does not.
+            parser: require("esprima-fb")
+        });
 
         var printer = new Printer({
             tabWidth: 2,
@@ -826,7 +829,10 @@ describe("printer", function() {
             ");"
         ].join(eol);
 
-        var ast = parse(code);
+        var ast = parse(code, {
+            // Supports trailing commas whereas plain esprima does not.
+            parser: require("esprima-fb")
+        });
 
         var printer = new Printer({
             tabWidth: 2,
@@ -846,7 +852,10 @@ describe("printer", function() {
             "];"
         ].join(eol);
 
-        var ast = parse(code);
+        var ast = parse(code, {
+            // Supports trailing commas whereas plain esprima does not.
+            parser: require("esprima-fb")
+        });
 
         var printer = new Printer({
             tabWidth: 2,
@@ -866,7 +875,10 @@ describe("printer", function() {
             ") {}"
         ].join(eol);
 
-        var ast = parse(code);
+        var ast = parse(code, {
+            // Supports trailing commas whereas plain esprima does not.
+            parser: require("esprima-fb")
+        });
 
         var printer = new Printer({
             tabWidth: 2,
@@ -885,7 +897,12 @@ describe("printer", function() {
             "}"
         ].join(eol);
 
-        var ast = parse(code);
+        var ast = parse(code, {
+            // Supports rest parameter destructuring whereas plain esprima
+            // does not.
+            parser: require("esprima-fb")
+        });
+
         var printer = new Printer({
             tabWidth: 2
         });
@@ -1122,7 +1139,7 @@ describe("printer", function() {
         var ast = parse(code, {
             esprima: {
                 parse: function(source, options) {
-                    var program = require("esprima-fb").parse(source, options);
+                    var program = require("esprima").parse(source, options);
                     n.Program.assert(program);
                     // Expand ast.program.loc to include any
                     // leading/trailing whitespace, to simulate the
