@@ -992,6 +992,29 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("adds parenthesis around arrow functions with single arg and a type", function() {
+        var code = "(a: b) => {};";
+
+        var arg = b.identifier('a');
+        arg.typeAnnotation = b.typeAnnotation(
+            b.genericTypeAnnotation(b.identifier('b'), null)
+        );
+
+        var fn = b.arrowFunctionExpression(
+            [arg],
+            b.blockStatement([]),
+            false
+        );
+
+        var ast = b.program([
+            b.expressionStatement(fn)
+        ]);
+
+        var printer = new Printer();
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
     it("prints ClassProperty correctly", function() {
         var code = [
             "class A {",
