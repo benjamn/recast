@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
+// This script ensures that `if` statements and `for`, `for-in` and
+// `while` loops have braces wrapped around their bodies.
+
 var recast = require("recast");
 var types = recast.types;
 var n = types.namedTypes;
 var b = types.builders;
 
-require("recast").run(function(ast, callback) {
+recast.run(function(ast, callback) {
     recast.visit(ast, {
         visitIfStatement: function(path) {
             var stmt = path.node;
