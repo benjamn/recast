@@ -1,6 +1,7 @@
 var assert = require("assert");
 var recast = require("../main.js");
 var n = recast.types.namedTypes;
+var eol = require("os").EOL;
 
 describe("decorators", function () {
   var babylon = require("babylon");
@@ -50,7 +51,7 @@ describe("decorators", function () {
       '}',
       '',
       'export default DebugPanel;',
-    ].join("\n");
+    ].join(eol);
 
     var ast = recast.parse(code, parseOptions);
 
@@ -70,9 +71,9 @@ describe("decorators", function () {
 
     assert.strictEqual(
       reprinted,
-      code.split("\n").filter(function (line) {
+      code.split(eol).filter(function (line) {
         return ! line.match(/^import React from/);
-      }).join("\n")
+      }).join(eol)
     );
   });
 });

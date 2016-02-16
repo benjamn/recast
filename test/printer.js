@@ -1218,7 +1218,7 @@ describe("printer", function() {
             "    }",
             "  `",
             "};",
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
         var pretty = printer.printGenerically(ast).code;
@@ -1244,7 +1244,7 @@ describe("printer", function() {
             "<~ This line should not be indented.",
             "  `,                       // 2 extraneous spaces.",
             "};"
-        ].join("\n");
+        ].join(eol);
 
         var ast = parse(code);
         var printer = new Printer({
