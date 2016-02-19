@@ -220,6 +220,43 @@ describe("comments", function() {
         assert.strictEqual(actual, expected);
     });
 
+    var statementTrailing = [
+        "if (true) {",
+        "  f();",
+        "  // trailing 1",
+        "  /* trailing 2 */",
+        "  // trailing 3",
+        "  /* trailing 4 */",
+        "}"
+    ];
+
+    var statementTrailingExpected = [
+        "if (true) {",
+        "  e();",
+        "  f();",
+        "  // trailing 1",
+        "  /* trailing 2 */",
+        "  // trailing 3",
+        "  /* trailing 4 */",
+        "}"
+    ];
+
+    it("StatementTrailingComments", function() {
+        var code = statementTrailing.join(eol);
+        var ast = recast.parse(code);
+
+        var block = ast.program.body[0].consequent;
+        n.BlockStatement.assert(block);
+
+        block.body.unshift(b.expressionStatement(
+            b.callExpression(b.identifier("e"), [])));
+
+        var actual = recast.print(ast, { tabWidth: 2 }).code;
+        var expected = statementTrailingExpected.join(eol);
+
+        assert.strictEqual(actual, expected);
+    });
+
     var protoAssign = [
         "A.prototype.foo = function() {",
         "  return this.bar();",
