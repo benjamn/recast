@@ -47,4 +47,8 @@ describe("JSX Compatability", function() {
   it("should parse and print namespaced elements", function() {
     check("<Foo.Bar />");
   });
+
+  it('should parse and print string literal children with leading and trailing whitespace', function () {
+    check("<div>Hello, {name} and {name2}.</div>");
+  });
 });
