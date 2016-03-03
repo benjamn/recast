@@ -27,8 +27,8 @@ describe("parser", function() {
     check("/* block comment */");
     check("// line comment");
     check("\t\t\t");
-    check("\n");
-    check("\n\n");
+    check(eol);
+    check(eol + eol);
     check("    ");
   });
 
