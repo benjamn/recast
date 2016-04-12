@@ -50,6 +50,7 @@ describe("type syntax", function() {
     // Type aliases
     check("type A = B;");
     check("type A = B.C;");
+    check("type A = {optionalNumber?: number};")
 
     // Generic
     check("var a: Array<Foo>;");
