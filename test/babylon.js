@@ -161,4 +161,31 @@ describe("decorators", function () {
       ['import x from "x";'].concat(code.split(eol)).join(eol)
     );
   });
+
+  it("should not print delimiters with type annotations", function () {
+    var code = [
+      'type X = {',
+      '  a: number,',
+      '  b: number,',
+      '};',
+    ].join('\n');
+
+    var parseOptions = {
+      parser: {
+        parse: function (source) {
+          return babylon.parse(source, {plugins: ['flow']});
+        }
+      },
+    };
+
+    var ast = recast.parse(code, parseOptions)
+    var root = new recast.types.NodePath(ast);
+
+    root.get('program', 'body', 0, 'right', 'properties', 0).prune();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      "type X = {b: number};"
+    );
+  });
 });
