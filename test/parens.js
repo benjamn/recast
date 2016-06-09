@@ -184,6 +184,13 @@ describe("parens", function() {
         assert.strictEqual(objReprint, objCode);
     });
 
+    it("don't parenthesize return statements with sequence expressions", function() {
+        var objCode = "function foo() { return 1, 2; }";
+        var objAst = parse(objCode);
+        var objReprint = printer.print(objAst).code;
+        assert.strictEqual(objReprint, objCode);
+    });
+
     it("NegatedLoopCondition", function() {
         var ast = parse([
             "for (var i = 0; i < 10; ++i) {",
