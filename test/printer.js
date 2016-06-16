@@ -1015,6 +1015,73 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("adds parenthesis around arrow functions with single arg and a return type", function() {
+        var code = "(a): void => {};";
+
+        var arg = b.identifier('a');
+
+        var fn = b.arrowFunctionExpression(
+            [arg],
+            b.blockStatement([]),
+            false
+        );
+
+        fn.returnType = b.typeAnnotation(
+            b.voidTypeAnnotation()
+        );
+
+        var ast = b.program([
+            b.expressionStatement(fn)
+        ]);
+
+        var printer = new Printer();
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("prints class property initializers with type annotations correctly", function() {
+        var code = [
+            "class A {",
+            "  foo = (a: b): void => {};",
+            "}",
+        ].join(eol);
+
+        var arg = b.identifier('a');
+        arg.typeAnnotation = b.typeAnnotation(
+            b.genericTypeAnnotation(b.identifier('b'), null)
+        );
+
+        var fn = b.arrowFunctionExpression(
+            [arg],
+            b.blockStatement([]),
+            false
+        );
+        fn.returnType = b.typeAnnotation(
+            b.voidTypeAnnotation()
+        );
+
+        var ast = b.program([
+            b.classDeclaration(
+                b.identifier('A'),
+                b.classBody([
+                    b.classProperty(
+                        b.identifier('foo'),
+                        fn,
+                        null,
+                        false
+                    )
+                ])
+            )
+        ]);
+
+        var printer = new Printer({
+            tabWidth: 2
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
     it("prints ClassProperty correctly", function() {
         var code = [
             "class A {",
