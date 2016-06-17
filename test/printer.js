@@ -956,7 +956,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("adds parenthesis around single arrow function arg when options.singleArgumentArrowParenthesis is true", function() {
+    it("adds parenthesis around single arrow function arg when options.arrowParensAlways is true", function() {
       var code = "(a) => {};";
 
       var fn = b.arrowFunctionExpression(
@@ -970,7 +970,7 @@ describe("printer", function() {
       ]);
 
       var printer = new Printer({
-        singleArgumentArrowParenthesis: true
+        arrowParensAlways: true
       });
       var pretty = printer.printGenerically(ast).code;
       assert.strictEqual(pretty, code);
