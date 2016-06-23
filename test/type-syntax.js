@@ -7,7 +7,7 @@ var b = types.builders;
 var eol = require("os").EOL;
 
 describe("type syntax", function() {
-  var printer = new Printer({ tabWidth: 2, quote: 'single' });
+  var printer = new Printer({ tabWidth: 2, quote: 'single', flowUsesCommas: false });
   var parseOptions = {
     parser: require("esprima-fb")
   };
