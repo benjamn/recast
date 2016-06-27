@@ -1358,4 +1358,64 @@ describe("printer", function() {
 
         assert.strictEqual(actual, expected);
     });
+
+    it("prints commas for flow object types by default", function() {
+        var code = [
+            "type MyType = {",
+            "    message: string,",
+            "    isAwesome: boolean,",
+            "};"
+        ].join(eol);
+
+        var ast = b.typeAlias(
+            b.identifier("MyType"),
+            null,
+            b.objectTypeAnnotation([
+                b.objectTypeProperty(
+                    b.identifier("message"),
+                    b.stringTypeAnnotation(),
+                    false
+                ),
+                b.objectTypeProperty(
+                    b.identifier("isAwesome"),
+                    b.booleanTypeAnnotation(),
+                    false
+                )
+            ])
+        );
+
+        var printer = new Printer();
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
+    it("prints semicolons for flow object types when options.flowObjectCommas is falsy", function() {
+        var code = [
+            "type MyType = {",
+            "    message: string;",
+            "    isAwesome: boolean;",
+            "};"
+        ].join(eol);
+
+        var ast = b.typeAlias(
+            b.identifier("MyType"),
+            null,
+            b.objectTypeAnnotation([
+                b.objectTypeProperty(
+                    b.identifier("message"),
+                    b.stringTypeAnnotation(),
+                    false
+                ),
+                b.objectTypeProperty(
+                    b.identifier("isAwesome"),
+                    b.booleanTypeAnnotation(),
+                    false
+                )
+            ])
+        );
+
+        var printer = new Printer({ flowObjectCommas: false });
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
