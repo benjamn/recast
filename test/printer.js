@@ -956,6 +956,26 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("adds parenthesis around single arrow function arg when options.arrowParensAlways is true", function() {
+      var code = "(a) => {};";
+
+      var fn = b.arrowFunctionExpression(
+          [b.identifier('a')],
+          b.blockStatement([]),
+          false
+      );
+
+      var ast = b.program([
+          b.expressionStatement(fn)
+      ]);
+
+      var printer = new Printer({
+        arrowParensAlways: true
+      });
+      var pretty = printer.printGenerically(ast).code;
+      assert.strictEqual(pretty, code);
+    });
+
     it("adds parenthesis around async arrow functions with args", function() {
         var code = "async () => {};";
 
