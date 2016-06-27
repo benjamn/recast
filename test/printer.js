@@ -1389,7 +1389,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("prints semicolons for flow object types when options.flowUsesCommas is falsy", function() {
+    it("prints semicolons for flow object types when options.flowObjectCommas is falsy", function() {
         var code = [
             "type MyType = {",
             "    message: string;",
@@ -1414,7 +1414,7 @@ describe("printer", function() {
             ])
         );
 
-        var printer = new Printer({ flowUsesCommas: false });
+        var printer = new Printer({ flowObjectCommas: false });
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
