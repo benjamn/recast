@@ -1454,4 +1454,22 @@ describe("printer", function() {
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
+
+    it("prints parens for nullable union/intersection types", function() {
+        var code = "type MyType = ?(string | number);";
+
+        var ast = b.typeAlias(
+            b.identifier("MyType"),
+            null,
+            b.nullableTypeAnnotation(
+                b.unionTypeAnnotation(
+                    [b.stringTypeAnnotation(), b.numberTypeAnnotation()]
+                )
+            )
+        );
+
+        var printer = new Printer({});
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
 });
