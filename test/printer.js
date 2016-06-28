@@ -1389,6 +1389,42 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("shouldn't print a trailing comma for single-line flow object types", function() {
+        var code1 = "type MyType = {message: string};";
+        var code2 = "type MyType = {[key: string]: string};";
+
+        var ast1 = b.typeAlias(
+            b.identifier("MyType"),
+            null,
+            b.objectTypeAnnotation([
+                b.objectTypeProperty(
+                    b.identifier("message"),
+                    b.stringTypeAnnotation(),
+                    false
+                )
+            ])
+        );
+
+        var ast2 = b.typeAlias(
+            b.identifier("MyType"),
+            null,
+            b.objectTypeAnnotation([], [
+                b.objectTypeIndexer(
+                    b.identifier('key'),
+                    b.stringTypeAnnotation(),
+                    b.stringTypeAnnotation(),
+                    false
+                )
+            ])
+        );
+
+        var printer = new Printer({trailingComma: true});
+        var pretty1 = printer.printGenerically(ast1).code;
+        var pretty2 = printer.printGenerically(ast2).code;
+        assert.strictEqual(pretty1, code1);
+        assert.strictEqual(pretty2, code2);
+    });
+
     it("prints semicolons for flow object types when options.flowObjectCommas is falsy", function() {
         var code = [
             "type MyType = {",
