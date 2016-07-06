@@ -50,7 +50,7 @@ describe("type syntax", function() {
     // Type aliases
     check("type A = B;");
     check("type A = B.C;");
-    check("type A = {optionalNumber?: number};")
+    check("type A = { optionalNumber?: number };")
 
     // Generic
     check("var a: Array<Foo>;");
@@ -61,9 +61,9 @@ describe("type syntax", function() {
     check("var a: () => X = fn;");
 
     // Object
-    check("var a: {" + eol + "  b: number;" + eol + "  x: {y: A};" + eol + "};");
-    check("var b: {[key: string]: number};")
-    check("var c: {(): number};")
+    check("var a: {" + eol + "  b: number;" + eol + "  x: { y: A };" + eol + "};");
+    check("var b: { [key: string]: number };")
+    check("var c: { (): number };")
     check("var d: {" + eol + "  [key: string]: A;" + eol + "  [key: number]: B;" + eol + "  (): C;" + eol + "  a: D;" + eol + "};")
 
     // Casts
@@ -76,7 +76,7 @@ describe("type syntax", function() {
     check("declare function foo(c: C, b: B): void;");
     check("declare function foo(c: (e: Event) => void, b: B): void;");
     check("declare function foo(c: C, d?: Array<D>): void;");
-    check("declare class C {x: string}");
+    check("declare class C { x: string }");
     check("declare module M {" + eol + "  declare function foo(c: C): void;" + eol + "}");
 
     // Classes
@@ -92,7 +92,7 @@ describe("type syntax", function() {
     check("class A {" + eol + "  foo<T>(a: number): string {}" + eol + "}");
 
     // Interfaces
-    check("interface A<X> extends B<A>, C {a: number}");
+    check("interface A<X> extends B<A>, C { a: number }");
     check("class A extends B implements C<T>, Y {}");
 
     // Bounded polymorphism
