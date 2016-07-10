@@ -169,4 +169,9 @@ describe("parser", function() {
     check({ esprima: parser });
     check({ parser: parser });
   });
+
+  it("Flow annotation parse", function() {
+    var code = '(props: Props) => {}';
+    assert.doesNotThrow(function() { parse(code) })
+  });
 });

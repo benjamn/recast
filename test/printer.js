@@ -1454,4 +1454,19 @@ describe("printer", function() {
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
+
+    it("print arrowFunctionExpression with single argument and typeAnnotation will added parens", function() {
+        var ast = parse(`props => {}`)
+        var propsParam = b.identifier('props')
+        propsParam.typeAnnotation = b.typeAnnotation(b.genericTypeAnnotation(b.identifier('Props'), null))
+        var arrowFunc = b.arrowFunctionExpression(
+            [propsParam],
+            b.blockStatement([])
+        )
+        ast.program.body[0].expression = arrowFunc
+
+        var printer = new Printer();
+        var pretty = printer.print(ast).code;
+        assert.strictEqual(pretty, '(props: Props) => {}');
+    });
 });
