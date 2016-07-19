@@ -538,12 +538,6 @@ describe("printer", function() {
         ast = parse(code);
 
         assert.strictEqual(printer.print(ast).code, code);
-        assert.strictEqual(printer.printGenerically(ast).code, code + ";");
-
-        code = "export function foo() {};";
-        ast = parse(code);
-
-        assert.strictEqual(printer.print(ast).code, code);
         assert.strictEqual(printer.printGenerically(ast).code, code);
     });
 
