@@ -105,10 +105,10 @@ describe("import/export syntax", function() {
         check("export default {};");
         check("export default [];");
         check("export default foo;");
-        check("export default function () {};");
-        check("export default class {};");
-        check("export default function foo () {};");
-        check("export default class foo {};");
+        check("export default function () {}");
+        check("export default class {}");
+        check("export default function foo () {}");
+        check("export default class foo {}");
 
         // variables exports
         check("export var foo = 1;");
@@ -117,8 +117,8 @@ describe("import/export syntax", function() {
         check("export let foo = 2;");
         check("export let bar;"); // lazy initialization
         check("export const foo = 3;");
-        check("export function foo () {};");
-        check("export class foo {};");
+        check("export function foo () {}");
+        check("export class foo {}");
 
         // named exports
         check("export {foo};");
