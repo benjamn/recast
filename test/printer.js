@@ -280,7 +280,8 @@ describe("printer", function() {
         "              param */ a,",
         "  // other params",
         "  b, c, // see?",
-        "  d) {",
+        "  d",
+        ") {",
         "  return a + b + c + d;",
         "}"
     ];
@@ -294,7 +295,8 @@ describe("printer", function() {
         "  b,",
         "  // see?",
         "  c,",
-        "  d) {",
+        "  d",
+        ") {",
         "  return a + b + c + d;",
         "}"
     ];
