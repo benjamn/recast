@@ -489,7 +489,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(funExpr).code,
-            "function a(b, c=1, ...d) {}"
+            "function a(b, c = 1, ...d) {}"
         );
 
         var arrowFunExpr = b.arrowFunctionExpression(
@@ -505,7 +505,7 @@ describe("printer", function() {
 
         assert.strictEqual(
             printer.print(arrowFunExpr).code,
-            "(b, c=1, ...d) => {}"
+            "(b, c = 1, ...d) => {}"
         );
     });
 
@@ -888,7 +888,7 @@ describe("printer", function() {
 
     it("should support AssignmentPattern and RestElement", function() {
         var code = [
-            "function foo(a, [b, c]=d(a), ...[e, f, ...rest]) {",
+            "function foo(a, [b, c] = d(a), ...[e, f, ...rest]) {",
             "  return [a, b, c, e, f, rest];",
             "}"
         ].join(eol);
