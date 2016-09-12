@@ -4,13 +4,10 @@ var types = require("../lib/types");
 
 describe("JSX Compatability", function() {
   var printer = new Printer({ tabWidth: 2 });
-  var parseOptions = {
-    parser: require("esprima-fb")
-  };
 
   function check(source) {
-    var ast1 = parse(source, parseOptions);
-    var ast2 = parse(printer.printGenerically(ast1).code, parseOptions);
+    var ast1 = parse(source);
+    var ast2 = parse(printer.printGenerically(ast1).code);
     types.astNodesAreEquivalent.assert(ast1, ast2);
   }
 
