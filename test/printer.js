@@ -815,6 +815,15 @@ describe("printer", function() {
 
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
+
+        // It should also work when using the `trailingComma` option as an object.
+        printer = new Printer({
+          tabWidth: 2,
+          trailingComma: { objects: true },
+        });
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
     });
 
     it("prints trailing commas in function calls", function() {
@@ -837,6 +846,16 @@ describe("printer", function() {
         });
 
         var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // It should also work when using the `trailingComma` option as an object.
+        printer = new Printer({
+          tabWidth: 2,
+          wrapColumn: 1,
+          trailingComma: { parameters: true },
+        });
+
+        pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
 
@@ -861,6 +880,16 @@ describe("printer", function() {
 
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
+
+        // It should also work when using the `trailingComma` option as an object.
+        printer = new Printer({
+          tabWidth: 2,
+          wrapColumn: 1,
+          trailingComma: { arrays: true },
+        });
+
+        pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
     });
 
     it("prints trailing commas in function definitions", function() {
@@ -883,6 +912,16 @@ describe("printer", function() {
         });
 
         var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+
+        // It should also work when using the `trailingComma` option as an object.
+        printer = new Printer({
+          tabWidth: 2,
+          wrapColumn: 1,
+          trailingComma: { parameters: true },
+        });
+
+        pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
 
