@@ -151,7 +151,6 @@ describe("decorators", function () {
 
     var ast = recast.parse(code, parseOptions);
     var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
-    console.log(output);
     assert.strictEqual(output, code);
   });
 
