@@ -1425,8 +1425,8 @@ describe("printer", function() {
     });
 
     it("shouldn't print a trailing comma for single-line flow object types", function() {
-        var code1 = "type MyType = {message: string};";
-        var code2 = "type MyType = {[key: string]: string};";
+        var code1 = "type MyType = { message: string };";
+        var code2 = "type MyType = { [key: string]: string };";
 
         var ast1 = b.typeAlias(
             b.identifier("MyType"),

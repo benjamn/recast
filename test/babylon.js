@@ -36,6 +36,124 @@ describe("decorators", function () {
     }
   };
 
+  it("babel 6 printing", function () {
+    var code = [
+      '"use strict";', // Directive, DirectiveLiteral in Program
+      '"use strict";', // Directive, DirectiveLiteral in BlockStatement
+      'function a() {',
+      '  "use strict";',
+      '}',
+      '',
+      'function a() {',
+      '  "use strict";',
+      '  b;',
+      '}',
+      '',
+      '() => {',
+      '  "use strict";',
+      '};',
+      '',
+      '() => {',
+      '  "use strict";',
+      '  b;',
+      '};',
+      '',
+      'var a = function a() {',
+      '  "use strict";',
+      '};',
+      '',
+      'var a = function a() {',
+      '  "use strict";',
+      '  b;',
+      '};',
+      '',
+      'null;', // NullLiteral
+      '"asdf";', // StringLiteral
+      '/a/;', // RegExpLiteral
+      'false;', // BooleanLiteral
+      '1;', // NumericLiteral
+      'const find2 = <X>() => {};', // typeParameters
+      '',
+      'class A<T> {',
+      '  a;',
+      '  a = 1;',
+      '  [a] = 1;', // computed in ClassProperty
+      '}',
+      '',
+      'function f<T>(x: empty): T {', // EmptyTypeAnnotation
+      '  return x;',
+      '}',
+      '',
+      'var a: {| numVal: number |};', // exact
+      'const bar1 = (x: number): string => {};',
+      'declare module.exports: { foo: string }', // DeclareModuleExports
+      'type Maybe<T> = _Maybe<T, *>;', // ExistentialTypeParam
+      // 'declare class B { foo: () => number }', // interesting failure ref https://github.com/babel/babel/pull/3663
+      'declare function foo(): number;',
+      'var A: (a: B) => void;',
+      '',
+      'async function* a() {', // async in Function
+      '  for await (let x of y) {', // ForAwaitStatement
+      '    x;',
+      '  }',
+      '}',
+      '',
+      'class C2<+T, -U> {', // variance
+      '  +p: T = e;',
+      '}',
+      '',
+      'type T = { -p: T };',
+      'type T = { +[k: K]: V };',
+      '',
+      'class A {',
+      '  static async *z(a, b): number {', // ClassMethod
+      '    b;',
+      '  }',
+      '',
+      '  static get y(): number {',
+      '    return 1;',
+      '  }',
+      '',
+      '  static set x(a): void {',
+      '    return 1;',
+      '  }',
+      '',
+      '  static async *[d](a, b): number {',
+      '    return 1;',
+      '  }',
+      '}',
+      '',
+      '({',
+      '  async *a() {', // ObjectMethod
+      '    b;',
+      '  },',
+      '',
+      '  get a() {',
+      '    return 1;',
+      '  },',
+      '',
+      '  set a(b) {',
+      '    return 1;',
+      '  },',
+      '',
+      '  async *[d](c) {',
+      '    return 1;',
+      '  },',
+      '',
+      '  a: 3,',
+      '  [a]: 3,',
+      '  1: 3,',
+      '  "1": 3,',
+      '  1() {},',
+      '  "1"() {}',
+      '});',
+    ].join(eol);
+
+    var ast = recast.parse(code, parseOptions);
+    var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+    assert.strictEqual(output, code);
+  });
+
   it("should not disappear when surrounding code changes", function () {
     var code = [
       'import foo from "foo";',
@@ -185,7 +303,7 @@ describe("decorators", function () {
 
     assert.strictEqual(
       recast.print(ast).code,
-      "type X = {b: number};"
+      "type X = { b: number };"
     );
   });
 
