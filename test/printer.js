@@ -1507,4 +1507,78 @@ describe("printer", function() {
         var pretty = printer.printGenerically(ast).code;
         assert.strictEqual(pretty, code);
     });
+
+    it("uses the `spacing` option to determine whether it should print spaces", function() {
+      var babylon = require("babylon");
+      var parseOptions = {
+        parser: {
+          parse: function (source) {
+            return babylon.parse(source, {
+              sourceType: 'module',
+              plugins: ['flow'],
+            });
+          }
+        }
+      };
+
+      var testCaseList = [{
+        printerConfig: {spacing: false},
+        code: [
+          'import {java, script} from "javascript";',
+          '',
+          'function foo(a) {',
+          '    type MyType = {message: string};',
+          '    return [1, 2, 3];',
+          '}',
+          '',
+          'export {foo};'
+        ].join(eol)
+      }, {
+        printerConfig: {spacing: {arrays: true}},
+        code: [
+          'import {java, script} from "javascript";',
+          '',
+          'function foo(a) {',
+          '    type MyType = {message: string};',
+          '    return [ 1, 2, 3 ];',
+          '}',
+          '',
+          'export {foo};'
+        ].join(eol)
+      }, {
+        printerConfig: {spacing: {objects: true}},
+        code: [
+          'import { java, script } from "javascript";',
+          '',
+          'function foo(a) {',
+          '    type MyType = { message: string };',
+          '    return [1, 2, 3];',
+          '}',
+          '',
+          'export { foo };'
+        ].join(eol)
+      }, {
+        printerConfig: {spacing: true},
+        code: [
+          'import { java, script } from "javascript";',
+          '',
+          'function foo(a) {',
+          '    type MyType = { message: string };',
+          '    return [ 1, 2, 3 ];',
+          '}',
+          '',
+          'export { foo };'
+        ].join(eol)
+      }];
+
+      testCaseList.forEach(function(testCase) {
+        var code = testCase.code;
+        var printer = new Printer(testCase.printerConfig);
+
+        var ast = parse(code, parseOptions);
+        var pretty = printer.printGenerically(ast).code;
+
+        assert.strictEqual(pretty, code);
+      });
+    });
 });
