@@ -1508,7 +1508,7 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
-    it("uses the `spacing` option to determine whether it should print spaces", function() {
+    it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
       var babylon = require("babylon");
       var parseOptions = {
         parser: {
@@ -1522,7 +1522,7 @@ describe("printer", function() {
       };
 
       var testCaseList = [{
-        printerConfig: {spacing: false},
+        printerConfig: {arrayBracketSpacing: false, objectCurlySpacing: false},
         code: [
           'import {java, script} from "javascript";',
           '',
@@ -1534,7 +1534,7 @@ describe("printer", function() {
           'export {foo};'
         ].join(eol)
       }, {
-        printerConfig: {spacing: {arrays: true}},
+        printerConfig: {arrayBracketSpacing: true, objectCurlySpacing: false},
         code: [
           'import {java, script} from "javascript";',
           '',
@@ -1546,7 +1546,7 @@ describe("printer", function() {
           'export {foo};'
         ].join(eol)
       }, {
-        printerConfig: {spacing: {objects: true}},
+        printerConfig: {arrayBracketSpacing: false, objectCurlySpacing: true},
         code: [
           'import { java, script } from "javascript";',
           '',
@@ -1558,7 +1558,7 @@ describe("printer", function() {
           'export { foo };'
         ].join(eol)
       }, {
-        printerConfig: {spacing: true},
+        printerConfig: {arrayBracketSpacing: true, objectCurlySpacing: true},
         code: [
           'import { java, script } from "javascript";',
           '',
