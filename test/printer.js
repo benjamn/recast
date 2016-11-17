@@ -925,6 +925,30 @@ describe("printer", function() {
         assert.strictEqual(pretty, code);
     });
 
+    it("shouldn't print a trailing comma for a RestElement", function() {
+        var code = [
+            "function foo(",
+            "  a,",
+            "  b,",
+            "  ...rest",
+            ") {}"
+        ].join(eol);
+
+        var ast = parse(code, {
+            // The flow parser and Babylon recognize `...rest` as a `RestElement`
+            parser: require("babylon")
+        });
+
+        var printer = new Printer({
+            tabWidth: 2,
+            wrapColumn: 1,
+            trailingComma: true,
+        });
+
+        var pretty = printer.printGenerically(ast).code;
+        assert.strictEqual(pretty, code);
+    });
+
     it("should support AssignmentPattern and RestElement", function() {
         var code = [
             "function foo(a, [b, c] = d(a), ...[e, f, ...rest]) {",
