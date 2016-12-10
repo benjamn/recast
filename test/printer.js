@@ -1035,6 +1035,31 @@ describe("printer", function() {
       assert.strictEqual(pretty, code);
     });
 
+    it("adds parenthesis around arrow function when binding", function() {
+      var code = "var a = (x => y).bind(z);";
+
+      var fn = b.arrowFunctionExpression(
+          [b.identifier("x")],
+          b.identifier("y")
+      );
+
+      var declaration = b.variableDeclaration("var", [
+          b.variableDeclarator(
+              b.identifier("a"),
+              b.callExpression(
+                  b.memberExpression(fn, b.identifier("bind"), false),
+                  [b.identifier("z")]
+              )
+          )
+      ]);
+
+      var ast = b.program([declaration]);
+
+      var printer = new Printer();
+      var pretty = printer.printGenerically(ast).code;
+      assert.strictEqual(pretty, code);
+    });
+
     it("adds parenthesis around async arrow functions with args", function() {
         var code = "async () => {};";
 
