@@ -364,6 +364,32 @@ describe("printer", function() {
         ].join(eol));
     });
 
+    it("MultiLineVarWithObjPrinting", function() {
+        var printer = new Printer({ tabWidth: 2 });
+        var varDecl = b.variableDeclaration("var", [
+            b.variableDeclarator(b.identifier("x"), null),
+            b.variableDeclarator(
+                b.identifier("y"),
+                b.objectExpression([
+                    b.property("init", b.identifier("why"), b.literal("not")),
+                    b.property("init", b.identifier("options"), b.objectExpression([b.property("init", b.identifier("what"), b.literal("else"))]))
+                ])
+            ),
+            b.variableDeclarator(b.identifier("z"), null)
+        ]);
+
+        assert.strictEqual(printer.print(b.program([varDecl])).code, [
+            "var x,",
+            "    y = {",
+            "      why: \"not\",",
+            "      options: {",
+            "        what: \"else\"",
+            "      }",
+            "    },",
+            "    z;"
+        ].join(eol));
+    });
+
     it("ForLoopPrinting", function() {
         var printer = new Printer({ tabWidth: 2 });
         var loop = b.forStatement(
