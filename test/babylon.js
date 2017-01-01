@@ -334,4 +334,39 @@ describe("decorators", function () {
       'x * y ** (x / y);'
     );
   });
+
+  it("should be able to replace top-level statements with leading empty lines", function () {
+    var code = [
+      '',
+      'if (test) {',
+      '  console.log(test);',
+      '}',
+    ].join('\n');
+
+    var ast = recast.parse(code, parseOptions);
+
+    var replacement = b.expressionStatement(
+      b.callExpression(
+        b.identifier('fn'),
+        [b.identifier('test'), b.literal(true)]
+      )
+    );
+
+    recast.types.visit(ast, {
+      visitIfStatement: function(path) {
+        path.replace(replacement);
+        return false;
+      }
+    });
+
+    // This also doesn't work:
+    // ast.program.body[0] = replacement;
+
+    // The `ast` contains the correct replacement nodes but the printed code
+    // is still the same as the original.
+    assert.strictEqual(
+      recast.print(ast).code,
+      'fn(test, true);'
+    );
+  });
 });
