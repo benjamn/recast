@@ -283,4 +283,8 @@ describe("parens", function() {
         check("(()=>{})()");
         check("(function(){})()");
     });
+
+    it("should be added to bound arrow function expressions", function() {
+        check("(()=>{}).bind(x)");
+    });
 });
