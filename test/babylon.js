@@ -314,24 +314,24 @@ describe("decorators", function () {
   it("should parenthesize ** operator arguments when lower precedence", function () {
     var ast = recast.parse('a ** b;', parseOptions);
 
-    ast.program.body[0].expression.left = parseExpression('x + y');
+    ast.program.body[0].expression.left = parseExpression('x * y');
     ast.program.body[0].expression.right = parseExpression('x || y');
 
     assert.strictEqual(
       recast.print(ast).code,
-      '(x + y) ** (x || y);'
+      '(x * y) ** (x || y);'
     );
   });
 
   it("should parenthesize ** operator arguments as needed when same precedence", function () {
     var ast = recast.parse('a ** b;', parseOptions);
 
-    ast.program.body[0].expression.left = parseExpression('x * y');
-    ast.program.body[0].expression.right = parseExpression('x / y');
+    ast.program.body[0].expression.left = parseExpression('x ** y');
+    ast.program.body[0].expression.right = parseExpression('x ** y');
 
     assert.strictEqual(
       recast.print(ast).code,
-      'x * y ** (x / y);'
+      'x ** y ** (x ** y);'
     );
   });
 
