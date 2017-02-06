@@ -10,22 +10,7 @@ describe("decorators", function () {
     sourceType: 'module',
     allowImportExportEverywhere: false,
     allowReturnOutsideFunction: false,
-    plugins: [
-      'asyncFunctions',
-      'asyncGenerators',
-      'classConstructorCall',
-      'classProperties',
-      'decorators',
-      'doExpressions',
-      'exponentiationOperator',
-      'exportExtensions',
-      'flow',
-      'functionSent',
-      'functionBind',
-      'jsx',
-      'objectRestSpread',
-      'trailingFunctionCommas'
-    ]
+    plugins: ["*", "jsx", "flow"]
   };
 
   var parseOptions = {
