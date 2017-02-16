@@ -116,7 +116,7 @@ describe("patcher", function() {
         returnStmt.argument = b.literal(null);
         assert.strictEqual(
             recast.print(strAST).code,
-            "return null" // Instead of returnnull.
+            "return null;" // Instead of returnnull.
         );
 
         var arrAST = parse("throw[1,2,3]");

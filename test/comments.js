@@ -661,4 +661,94 @@ describe("comments", function() {
             code
         );
     });
+
+    it("should preserve correctness when a return expression has a comment", function () {
+        var code = [
+            "function f() {",
+            "  return 3;",
+            "}"
+        ].join(eol);
+
+        var ast = recast.parse(code);
+        ast.program.body[0].body.body[0].argument.comments = [b.line('Foo')];
+
+        assert.strictEqual(recast.print(ast).code, [
+            "function f() {",
+            "  return (",
+            "    //Foo",
+            "    3",
+            "  );",
+            "}"
+        ].join(eol));
+    });
+
+  it("should wrap in parens when the return expression has nested leftmost comment", function () {
+    var code = [
+      "function f() {",
+      "  return 1 + 2;",
+      "}"
+    ].join(eol);
+
+    var ast = recast.parse(code);
+    ast.program.body[0].body.body[0].argument.left.comments = [b.line('Foo')];
+
+    assert.strictEqual(recast.print(ast).code, [
+      "function f() {",
+      "  return (",
+      "    //Foo",
+      "    1 + 2",
+      "  );",
+      "}"
+    ].join(eol));
+  });
+
+    it("should not wrap in parens when the return expression has an interior comment", function () {
+        var code = [
+            "function f() {",
+            "  return 1 + 2;",
+            "}"
+        ].join(eol);
+
+        var ast = recast.parse(code);
+        ast.program.body[0].body.body[0].argument.right.comments = [b.line('Foo')];
+
+        assert.strictEqual(recast.print(ast).code, [
+            "function f() {",
+            "  return 1 + //Foo",
+            "  2;",
+            "}"
+        ].join(eol));
+    });
+
+    it("should not reformat a return statement that is not modified", function () {
+        var code = [
+            "function f() {",
+            "  return      {",
+            "    a:     1,",
+            "    b: 2,",
+            "  };",
+            "}"
+        ].join(eol);
+
+        var ast = recast.parse(code);
+
+        assert.strictEqual(recast.print(ast).code, code);
+    });
+
+    it("should correctly handle a removing the argument from a return", function () {
+        var code = [
+            "function f() {",
+            "  return 'foo';",
+            "}"
+        ].join(eol);
+
+        var ast = recast.parse(code);
+        ast.program.body[0].body.body[0].argument = null;
+
+        assert.strictEqual(recast.print(ast).code, [
+            "function f() {",
+            "  return;",
+            "}"
+        ].join(eol));
+    });
 });
