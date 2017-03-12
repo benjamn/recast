@@ -363,4 +363,20 @@ describe("decorators", function () {
       code
     );
   });
+
+  it("tolerates circular references", function () {
+    var code = "function foo(bar = true) {}";
+    var ast = recast.parse(code, {
+      parser: {
+        parse: function (source) {
+          return require("babel-core").transform(source, {
+            code: false,
+            ast: true,
+            sourceMap: false,
+            presets: [require("babel-preset-es2015")]
+          }).ast;
+        }
+      }
+    });
+  });
 });
