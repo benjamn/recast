@@ -5,6 +5,8 @@ var b = recast.types.builders;
 var eol = require("os").EOL;
 
 describe("decorators", function () {
+  var babelTransform = require("babel-core").transform;
+  var babelPresetES2015 = require("babel-preset-es2015");
   var parseOptions = {
     parser: require("reify/lib/parsers/babylon.js")
   };
@@ -349,11 +351,11 @@ describe("decorators", function () {
     var ast = recast.parse(code, {
       parser: {
         parse: function (source) {
-          return require("babel-core").transform(source, {
+          return babelTransform(source, {
             code: false,
             ast: true,
             sourceMap: false,
-            presets: [require("babel-preset-es2015")]
+            presets: [babelPresetES2015]
           }).ast;
         }
       }
