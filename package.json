@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "ast-types": "0.9.6",
+    "core-js": "^2.4.1",
     "esprima": "~3.1.0",
     "private": "~0.1.5",
     "source-map": "~0.5.0"
