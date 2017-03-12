@@ -1375,6 +1375,41 @@ describe("printer", function() {
         );
     });
 
+    it("correctly guesses lineTerminator", function() {
+        ['\n', '\r\n'].forEach(function(term) {
+            var lines = [
+                "var first = 1;",
+                "var second = 2;"
+            ];
+            var code = lines.join(term);
+            var ast = parse(code);
+
+            assert.strictEqual(
+                new Printer().print(ast).code,
+                lines.join(term)
+            );
+        });
+    });
+
+    it("correctly guesses lineTerminator with mixed endings", function() {
+        var code =
+            "var first = 1\n" +
+            "var second = 2\n" +
+            "var third = 3\r\n" +
+            "var fourth = 4\n" +
+            "var fifth = 5\r\n";
+        var ast = parse(code);
+
+        assert.strictEqual(
+            new Printer().print(ast).code,
+            "var first = 1\n" +
+            "var second = 2\n" +
+            "var third = 3\n" +
+            "var fourth = 4\n" +
+            "var fifth = 5\n"
+        );
+    });
+
     it("preserves indentation in unmodified template expressions", function() {
         var printer = new Printer({
             tabWidth: 2
