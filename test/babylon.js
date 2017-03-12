@@ -5,20 +5,8 @@ var b = recast.types.builders;
 var eol = require("os").EOL;
 
 describe("decorators", function () {
-  var babylon = require("babylon");
-  var babylonOptions = {
-    sourceType: 'module',
-    allowImportExportEverywhere: false,
-    allowReturnOutsideFunction: false,
-    plugins: ["*", "jsx", "flow"]
-  };
-
   var parseOptions = {
-    parser: {
-      parse: function (source) {
-        return babylon.parse(source, babylonOptions);
-      }
-    }
+    parser: require("reify/lib/parsers/babylon.js")
   };
 
   it("babel 6 printing", function () {
@@ -272,14 +260,6 @@ describe("decorators", function () {
       '  b: number,',
       '};',
     ].join('\n');
-
-    var parseOptions = {
-      parser: {
-        parse: function (source) {
-          return babylon.parse(source, {plugins: ['flow']});
-        }
-      },
-    };
 
     var ast = recast.parse(code, parseOptions)
     var root = new recast.types.NodePath(ast);
