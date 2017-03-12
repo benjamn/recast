@@ -1630,4 +1630,44 @@ describe("printer", function() {
       assert.strictEqual(pretty, code);
     });
   });
+
+  it("prints no extra semicolons in for-loop heads (#377)", function () {
+    function check(head, parser) {
+      var source = "for (" + head + ") console.log(i);";
+      var ast = recast.parse(source, { parser: parser });
+      var loop = ast.program.body[0];
+      assert.strictEqual(loop.type, "ForStatement");
+      loop.body = b.blockStatement([]);
+
+      var reprinted = recast.print(ast).code;
+
+      var openParenIndex = reprinted.indexOf("(");
+      assert.notStrictEqual(openParenIndex, -1);
+
+      var closeParenIndex = reprinted.indexOf(")", openParenIndex);
+      assert.notStrictEqual(closeParenIndex, -1);
+
+      var newHead = reprinted.slice(
+        openParenIndex + 1,
+        closeParenIndex
+      );
+
+      assert.strictEqual(newHead.split(";").length, 3);
+    }
+
+    function checkWith(parser) {
+      check("let i = 0; i < 1; i++", parser);
+      check("let i = 0 ; i < 1; i++", parser);
+      check("let i = 0; ; i++", parser);
+      check("let i = 0 ; ; i++", parser);
+      check("let i = 0; i < 1; ", parser);
+      check("let i = 0 ; i < 1; ", parser);
+      check("let i = 0; ; ", parser);
+      check("let i = 0 ; ; ", parser);
+    }
+
+    checkWith(require("esprima"));
+    checkWith(require("reify/lib/parsers/acorn.js"));
+    checkWith(require("reify/lib/parsers/babylon.js"));
+  });
 });
