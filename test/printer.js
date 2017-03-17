@@ -1015,6 +1015,37 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
+  it("keeps trailing parenthesis in a parenthesized unary expression", function() {
+      var printer = new Printer({ tabWidth: 2 });
+
+      var code = "function pem() { return !(broke && welsh); }";
+
+      // This only broke under flow.
+      var ast = parse(code, {
+          parser: require("flow-parser")
+      });
+
+      var funDecl = ast.program.body[0];
+      n.FunctionDeclaration.assert(funDecl);
+
+      var returnStmt = funDecl.body.body[0];
+      n.ReturnStatement.assert(returnStmt);
+
+      var unaryExp = returnStmt.argument;
+      n.UnaryExpression.assert(unaryExp);
+
+      var logExp = unaryExp.argument;
+      n.LogicalExpression.assert(logExp);
+
+      // Replace with new identifier node.
+      logExp.left = b.identifier(logExp.left.name);
+
+      assert.strictEqual(
+          printer.print(returnStmt).code,
+          "return !(broke && welsh);"
+      );
+  });
+
   it("adds parenthesis around single arrow function arg when options.arrowParensAlways is true", function() {
     var code = "(a) => {};";
 
