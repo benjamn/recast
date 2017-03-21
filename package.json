@@ -40,7 +40,7 @@
     "babylon": "~6.16.1",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "mocha": "~3.2.0",
-    "reify": "^0.5.3"
+    "reify": "^0.6.0"
   },
   "engines": {
     "node": ">= 0.8"
