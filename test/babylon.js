@@ -7,9 +7,16 @@ var eol = require("os").EOL;
 describe("decorators", function () {
   var babelTransform = require("babel-core").transform;
   var babelPresetES2015 = require("babel-preset-es2015");
-  var parseOptions = {
-    parser: require("reify/lib/parsers/babylon.js")
-  };
+  var parseOptions = {};
+
+  try {
+    parseOptions.parser = require("reify/lib/parsers/babylon.js");
+  } catch (e) {
+    if (require("semver").gte(process.version, "4.0.0")) {
+      throw e;
+    }
+    return;
+  }
 
   it("babel 6 printing", function () {
     var code = [

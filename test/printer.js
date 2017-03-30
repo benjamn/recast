@@ -1667,7 +1667,14 @@ describe("printer", function() {
     }
 
     checkWith(require("esprima"));
-    checkWith(require("reify/lib/parsers/acorn.js"));
-    checkWith(require("reify/lib/parsers/babylon.js"));
+
+    try {
+      checkWith(require("reify/lib/parsers/acorn.js"));
+      checkWith(require("reify/lib/parsers/babylon.js"));
+    } catch (e) {
+      if (require("semver").gte(process.version, "4.0.0")) {
+        throw e;
+      }
+    }
   });
 });
