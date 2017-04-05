@@ -1677,4 +1677,26 @@ describe("printer", function() {
       }
     }
   });
+
+  it("parenthesizes NumericLiteral MemberExpression objects", function () {
+    var nonBabelNode = b.memberExpression(
+      b.literal(1),
+      b.identifier('foo')
+    );
+
+    var babelNode = b.memberExpression(
+      b.numericLiteral(1),
+      b.identifier('foo')
+    );
+
+    assert.strictEqual(
+      recast.print(nonBabelNode).code,
+      "(1).foo"
+    );
+
+    assert.strictEqual(
+      recast.print(babelNode).code,
+      "(1).foo"
+    );
+  });
 });
