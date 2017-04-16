@@ -4,9 +4,6 @@ node_js:
   - 6
   - 5
   - 4
-  - 0.12
-  - 0.11
-  - 0.10
   - stable
 
 # Allow Travis tests to run in containers.
