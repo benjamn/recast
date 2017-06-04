@@ -136,6 +136,18 @@ describe("decorators", function () {
     assert.strictEqual(output, code);
   });
 
+  it("babel 6: should not wrap IIFE when reusing nodes", function () {
+    var code = [
+      '(function(...c) {',
+      '  c();',
+      '})();',
+    ].join(eol);
+
+    var ast = recast.parse(code, parseOptions);
+    var output = recast.print(ast, { tabWidth: 2 }).code;
+    assert.strictEqual(output, code);
+  });
+
   it("should not disappear when surrounding code changes", function () {
     var code = [
       'import foo from "foo";',
