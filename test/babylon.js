@@ -5,21 +5,18 @@ var b = recast.types.builders;
 var eol = require("os").EOL;
 
 describe("decorators", function () {
-  var babylon = require("babylon");
-  var babylonOptions = {
-    sourceType: 'module',
-    allowImportExportEverywhere: false,
-    allowReturnOutsideFunction: false,
-    plugins: ["*", "jsx", "flow"]
-  };
+  var babelTransform = require("babel-core").transform;
+  var babelPresetES2015 = require("babel-preset-es2015");
+  var parseOptions = {};
 
-  var parseOptions = {
-    parser: {
-      parse: function (source) {
-        return babylon.parse(source, babylonOptions);
-      }
+  try {
+    parseOptions.parser = require("reify/lib/parsers/babylon.js");
+  } catch (e) {
+    if (require("semver").gte(process.version, "4.0.0")) {
+      throw e;
     }
-  };
+    return;
+  }
 
   it("babel 6 printing", function () {
     var code = [
@@ -136,6 +133,18 @@ describe("decorators", function () {
 
     var ast = recast.parse(code, parseOptions);
     var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+    assert.strictEqual(output, code);
+  });
+
+  it("babel 6: should not wrap IIFE when reusing nodes", function () {
+    var code = [
+      '(function(...c) {',
+      '  c();',
+      '})();',
+    ].join(eol);
+
+    var ast = recast.parse(code, parseOptions);
+    var output = recast.print(ast, { tabWidth: 2 }).code;
     assert.strictEqual(output, code);
   });
 
@@ -273,14 +282,6 @@ describe("decorators", function () {
       '};',
     ].join('\n');
 
-    var parseOptions = {
-      parser: {
-        parse: function (source) {
-          return babylon.parse(source, {plugins: ['flow']});
-        }
-      },
-    };
-
     var ast = recast.parse(code, parseOptions)
     var root = new recast.types.NodePath(ast);
 
@@ -362,5 +363,21 @@ describe("decorators", function () {
       recast.prettyPrint(ast).code,
       code
     );
+  });
+
+  it("tolerates circular references", function () {
+    var code = "function foo(bar = true) {}";
+    var ast = recast.parse(code, {
+      parser: {
+        parse: function (source) {
+          return babelTransform(source, {
+            code: false,
+            ast: true,
+            sourceMap: false,
+            presets: [babelPresetES2015]
+          }).ast;
+        }
+      }
+    });
   });
 });

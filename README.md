@@ -1,4 +1,4 @@
-# recast, _v_. [![Build Status](https://travis-ci.org/benjamn/recast.svg?branch=master)](https://travis-ci.org/benjamn/recast) [![Join the chat at https://gitter.im/benjamn/recast](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/benjamn/recast?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# recast, _v_. [![Build Status](https://travis-ci.org/benjamn/recast.svg?branch=master)](https://travis-ci.org/benjamn/recast) [![Join the chat at https://gitter.im/benjamn/recast](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/benjamn/recast?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Greenkeeper badge](https://badges.greenkeeper.io/benjamn/recast.svg)](https://greenkeeper.io/)
 
 1. to give (a metal object) a different form by melting it down and reshaping it.
 1. to form, fashion, or arrange again.

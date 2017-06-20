@@ -79,10 +79,8 @@ describe("source maps", function() {
 
         check(1, 0, 1, 0, null); // function
         check(1, 18, 1, 18, null); // {
-        check(2, 2, 2, 2, null); // return
         check(2, 13, 2, 9, null); // bar
         check(2, 9, 2, 15, null); // 1
-        check(2, 16, 2, 16, null); // ;
         check(3, 0, 3, 0, null); // }
     });
 

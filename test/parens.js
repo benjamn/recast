@@ -287,4 +287,9 @@ describe("parens", function() {
     it("should be added to bound arrow function expressions", function() {
         check("(()=>{}).bind(x)");
     });
+
+    it("should be added to object destructuring assignment expressions", function() {
+        check("({x}={x:1})");
+    });
+
 });
