@@ -152,7 +152,7 @@ describe("import/export syntax", function() {
     // const variables must have an initializer
     checkInvalid(
       "export const bar;",
-      "Unexpected token ;"
+      "Missing initializer in const declaration"
     );
 
     // Unexpected token identifier, invalid named export syntax
