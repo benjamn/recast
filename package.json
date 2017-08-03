@@ -28,7 +28,7 @@
     "fs": false
   },
   "dependencies": {
-    "ast-types": "0.9.12",
+    "ast-types": "GerHobbelt/ast-types#master",
     "core-js": "2.4.1",
     "esprima": "4.0.0",
     "private": "0.1.7",
@@ -39,7 +39,7 @@
     "babel-preset-es2015": "6.24.1",
     "babylon": "6.17.4",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
-    "flow-parser": "0.51.1",
+    "flow-parser": "0.52.0",
     "mocha": "3.5.0",
     "reify": "0.12.0",
     "semver": "5.4.1"
