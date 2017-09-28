@@ -15,8 +15,7 @@ describe("type syntax", function() {
     parser: require("flow-parser")
   };
 
-  function check(source, useFlowParser) {
-    var parseOptions = useFlowParser ? flowParserParseOptions : esprimaParserParseOptions;
+  function check(source, parseOptions = esprimaParserParseOptions) {
     var ast1 = parse(source, parseOptions);
     var code = printer.printGenerically(ast1).code;
     var ast2 = parse(code, parseOptions);
@@ -55,9 +54,9 @@ describe("type syntax", function() {
     check("type A = B;");
     check("type A = B.C;");
     check("type A = { optionalNumber?: number };");
-    check("type A = {" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "};", true);
-    check("type A = {| optionalNumber?: number |};", true);
-    check("type A = {|" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "|};", true);
+    check("type A = {" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "};", flowParserParseOptions);
+    check("type A = {| optionalNumber?: number |};", flowParserParseOptions);
+    check("type A = {|" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "|};", flowParserParseOptions);
 
     // Generic
     check("var a: Array<Foo>;");
