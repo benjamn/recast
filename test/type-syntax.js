@@ -8,11 +8,15 @@ var eol = require("os").EOL;
 
 describe("type syntax", function() {
   var printer = new Printer({ tabWidth: 2, quote: 'single', flowObjectCommas: false });
-  var parseOptions = {
+  var esprimaParserParseOptions = {
     parser: require("esprima-fb")
   };
+  var flowParserParseOptions = {
+    parser: require("flow-parser")
+  };
 
-  function check(source) {
+  function check(source, useFlowParser) {
+    var parseOptions = useFlowParser ? flowParserParseOptions : esprimaParserParseOptions;
     var ast1 = parse(source, parseOptions);
     var code = printer.printGenerically(ast1).code;
     var ast2 = parse(code, parseOptions);
@@ -50,7 +54,10 @@ describe("type syntax", function() {
     // Type aliases
     check("type A = B;");
     check("type A = B.C;");
-    check("type A = { optionalNumber?: number };")
+    check("type A = { optionalNumber?: number };");
+    check("type A = {" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "};", true);
+    check("type A = {| optionalNumber?: number |};", true);
+    check("type A = {|" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "|};", true);
 
     // Generic
     check("var a: Array<Foo>;");
