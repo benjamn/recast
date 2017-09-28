@@ -15,7 +15,8 @@ describe("type syntax", function() {
     parser: require("flow-parser")
   };
 
-  function check(source, parseOptions = esprimaParserParseOptions) {
+  function check(source, parseOptions) {
+    parseOptions = parseOptions || esprimaParserParseOptions;
     var ast1 = parse(source, parseOptions);
     var code = printer.printGenerically(ast1).code;
     var ast2 = parse(code, parseOptions);
