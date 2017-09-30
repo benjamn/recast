@@ -41,8 +41,8 @@
     "babylon": "6.18.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.53.1",
-    "mocha": "3.5.0",
-    "reify": "0.12.0",
+    "mocha": "3.5.3",
+    "reify": "0.12.3",
     "semver": "5.4.1"
   },
   "engines": {
