@@ -29,18 +29,18 @@
     "fs": false
   },
   "dependencies": {
-    "@gerhobbelt/ast-types": "0.9.13-4",
-    "core-js": "2.5.0",
+    "@gerhobbelt/ast-types": "0.9.13-5",
+    "core-js": "2.5.1",
     "esprima": "4.0.0",
     "private": "0.1.7",
-    "source-map": "0.5.7"
+    "source-map": "0.6.1"
   },
   "devDependencies": {
     "babel-core": "6.26.0",
     "babel-preset-es2015": "6.24.1",
     "babylon": "6.18.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
-    "flow-parser": "0.53.1",
+    "flow-parser": "0.56.0",
     "mocha": "3.5.3",
     "reify": "0.12.3",
     "semver": "5.4.1"
