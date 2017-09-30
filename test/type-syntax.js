@@ -63,9 +63,12 @@ describe("type syntax", function() {
     check("opaque type A = B;", flowParserParseOptions);
     check("opaque type A = B.C;", flowParserParseOptions);
     check("opaque type A = { optionalNumber?: number };", flowParserParseOptions);
-    check("opaque type A : X = B;", flowParserParseOptions);
-    check("opaque type A : X.Y = B.C;", flowParserParseOptions);
-    check("opaque type A : { stringProperty: string } = {" + eol + "  stringProperty: string;" + eol + "  optionalNumber?: number;" + eol + "};", flowParserParseOptions);
+    check("opaque type A: X = B;", flowParserParseOptions);
+    check("opaque type A: X.Y = B.C;", flowParserParseOptions);
+    check("opaque type A: { stringProperty: string } = {" + eol + "  stringProperty: string;" + eol + "  optionalNumber?: number;" + eol + "};", flowParserParseOptions);
+    check("opaque type A<T>: X<T> = B<T>;", flowParserParseOptions);
+    check("opaque type A<T>: X.Y<T> = B.C<T>;", flowParserParseOptions);
+    check("opaque type A<T>: { optional?: T } = {" + eol + "  stringProperty: string;" + eol + "  optional?: T;" + eol + "};", flowParserParseOptions);
 
     // Generic
     check("var a: Array<Foo>;");
@@ -95,9 +98,12 @@ describe("type syntax", function() {
     check("declare module M {" + eol + "  declare function foo(c: C): void;" + eol + "}");
 
     check("declare opaque type A;", flowParserParseOptions);
-    check("declare opaque type A : X;", flowParserParseOptions);
-    check("declare opaque type A : X.Y;", flowParserParseOptions);
-    check("declare opaque type A : { stringProperty: string };", flowParserParseOptions);
+    check("declare opaque type A: X;", flowParserParseOptions);
+    check("declare opaque type A: X.Y;", flowParserParseOptions);
+    check("declare opaque type A: { stringProperty: string };", flowParserParseOptions);
+    check("declare opaque type A<T>: X<T>;", flowParserParseOptions);
+    check("declare opaque type A<T>: X.Y<T>;", flowParserParseOptions);
+    check("declare opaque type A<T>: { property: T };", flowParserParseOptions);
 
     // Classes
     check("class A {" + eol + "  a: number;" + eol + "}");
