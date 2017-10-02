@@ -29,7 +29,7 @@
     "fs": false
   },
   "dependencies": {
-    "@gerhobbelt/ast-types": "0.9.13-6",
+    "@gerhobbelt/ast-types": "0.9.13-7",
     "core-js": "2.5.1",
     "esprima": "4.0.0",
     "private": "0.1.7",
