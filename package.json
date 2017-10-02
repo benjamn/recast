@@ -21,8 +21,8 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha --reporter spec --full-trace",
-    "debug": "node ./node_modules/mocha/bin/mocha --inspect-brk --reporter spec",
+    "test": "node ./node_modules/mocha/bin/mocha --check-leaks --reporter spec --full-trace",
+    "debug": "node ./node_modules/mocha/bin/mocha --check-leaks --inspect-brk --reporter spec",
     "pub": "npm publish --access public"
   },
   "browser": {
