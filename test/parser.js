@@ -2,7 +2,6 @@ var assert = require("assert");
 var parse = require("../lib/parser").parse;
 var getReprinter = require("../lib/patcher").getReprinter;
 var Printer = require("../lib/printer").Printer;
-var printComments = require("../lib/comments").printComments;
 var linesModule = require("../lib/lines");
 var fromString = linesModule.fromString;
 var concat = linesModule.concat;
