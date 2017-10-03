@@ -97,6 +97,27 @@ case 145:       // === NO_ACTION[1] :: ensures that anyone (but us) using this n
 
 
 ===
+bug (fixed): trailing comments in class
+---
+Foo.prototype = {
+// Copyright (c) 2013 Ben Newman <bn@cs.stanford.edu>
+
+  /**
+   * Leading comment.
+   */
+  constructor: Foo, // Important for instanceof
+                    // to work in all browsers.
+  bar: "baz", // Just in case we need it.
+  qux: { // Here is an object literal.
+    zxcv: 42
+    // Put more properties here when you think of them.
+    asdf: 43
+  } // There was an object literal...
+    // ... and here I am continuing this comment.
+,
+  extra: "property"
+};
+===
 feature (implemented): empty line between cases in switch
 ---
 switch (yystate) {
