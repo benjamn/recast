@@ -113,7 +113,7 @@ case 145:
   break;
 }
 ===
-feature-bug: no empty line between case labels which share the same code block
+feature-bug (fixed): no empty line between case labels which share the same code block
 ---
 switch (yystate) {
 case 0:
