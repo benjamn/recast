@@ -39,8 +39,8 @@
     "babel-preset-es2015": "^6.22.0",
     "babylon": "~6.18.0",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
+    "mocha": "~4.0.1",
     "flow-parser": "^0.55.0",
-    "mocha": "~3.5.3",
     "reify": "^0.12.3",
     "semver": "^5.3.0"
   },
