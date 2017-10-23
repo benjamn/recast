@@ -29,10 +29,10 @@
     "fs": false
   },
   "dependencies": {
-    "@gerhobbelt/ast-types": "0.9.13-7",
+    "@gerhobbelt/ast-types": "0.9.14-9",
     "core-js": "2.5.1",
     "esprima": "4.0.0",
-    "private": "0.1.7",
+    "private": "0.1.8",
     "source-map": "0.6.1"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "babylon": "6.18.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "mocha": "4.0.1",
-    "flow-parser": "0.56.0",
+    "flow-parser": "0.57.3",
     "reify": "0.12.3",
     "semver": "5.4.1"
   },
