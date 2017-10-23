@@ -682,25 +682,25 @@ describe("comments", function() {
         ].join(eol));
     });
 
-  it("should wrap in parens when the return expression has nested leftmost comment", function () {
-    var code = [
-      "function f() {",
-      "  return 1 + 2;",
-      "}"
-    ].join(eol);
+    it("should wrap in parens when the return expression has nested leftmost comment", function () {
+        var code = [
+            "function f() {",
+            "  return 1 + 2;",
+            "}"
+        ].join(eol);
 
-    var ast = recast.parse(code);
-    ast.program.body[0].body.body[0].argument.left.comments = [b.line('Foo')];
+        var ast = recast.parse(code);
+        ast.program.body[0].body.body[0].argument.left.comments = [b.line('Foo')];
 
-    assert.strictEqual(recast.print(ast).code, [
-      "function f() {",
-      "  return (",
-      "    //Foo",
-      "    1 + 2",
-      "  );",
-      "}"
-    ].join(eol));
-  });
+        assert.strictEqual(recast.print(ast).code, [
+            "function f() {",
+            "  return (",
+            "    //Foo",
+            "    1 + 2",
+            "  );",
+            "}"
+        ].join(eol));
+    });
 
     it("should not wrap in parens when the return expression has an interior comment", function () {
         var code = [
@@ -749,6 +749,54 @@ describe("comments", function() {
             "function f() {",
             "  return;",
             "}"
+        ].join(eol));
+    });
+
+    it("should correctly handle a lonesome comment (alt 1)", function () {
+        var code = [
+            "",
+            "// boo",
+            ""
+        ].join(eol);
+
+        var ast = recast.parse(code);
+
+        assert.strictEqual(recast.print(ast).code, [
+            "",
+            "// boo",
+            ""
+        ].join(eol));
+    });
+
+    it("should correctly handle a not-so-lonesome comment (alt 2 - trailing whitespace)", function () {
+        var code = [
+            "",
+            "// boo ",
+            ";"
+        ].join(eol);
+
+        var ast = recast.parse(code);
+
+        assert.strictEqual(recast.print(ast).code, [
+            "",
+            "// boo ",
+            ";"
+        ].join(eol));
+    });
+
+    it("should correctly handle a lonesome comment (alt 3 - trailing whitespace)", function () {
+        var code = [
+            "",
+            "// boo ",
+            ""
+        ].join(eol);
+
+        var ast = recast.parse(code);
+
+        assert.strictEqual(recast.print(ast).code, [
+            "",
+            "// boo ",
+            ""
         ].join(eol));
     });
 });
