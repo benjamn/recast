@@ -31,7 +31,7 @@
   "dependencies": {
     "@gerhobbelt/ast-types": "0.9.14-9",
     "core-js": "2.5.1",
-    "esprima": "4.0.0",
+    "@gerhobbelt/esprima": "4.0.1-10",
     "private": "0.1.8",
     "source-map": "0.6.1"
   },

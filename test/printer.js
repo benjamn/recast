@@ -1364,7 +1364,7 @@ describe("printer", function() {
     var ast = parse(code, {
       esprima: {
         parse: function(source, options) {
-          var program = require("esprima").parse(source, options);
+          var program = require("@gerhobbelt/esprima").parse(source, options);
           n.Program.assert(program);
           // Expand ast.program.loc to include any
           // leading/trailing whitespace, to simulate the
@@ -1697,7 +1697,7 @@ describe("printer", function() {
       check("let i = 0 ; ; ", parser);
     }
 
-    checkWith(require("esprima"));
+    checkWith(require("@gerhobbelt/esprima"));
 
     try {
       checkWith(require("reify/lib/parsers/acorn.js"));
