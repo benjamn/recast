@@ -495,9 +495,9 @@ esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
 
-flow-parser@^0.55.0:
-  version "0.55.0"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.55.0.tgz#0692c45521c2f17ee31e1f3992e587968db911ff"
+flow-parser@^0.57.3:
+  version "0.57.3"
+  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.57.3.tgz#b8d241a1b1cbae043afa7976e39f269988d8fe34"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
