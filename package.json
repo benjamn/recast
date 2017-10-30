@@ -28,7 +28,7 @@
     "fs": false
   },
   "dependencies": {
-    "ast-types": "0.9.12",
+    "ast-types": "0.9.14",
     "core-js": "^2.4.1",
     "esprima": "~4.0.0",
     "private": "~0.1.5",
