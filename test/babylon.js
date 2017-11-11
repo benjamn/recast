@@ -4,7 +4,7 @@ var n = recast.types.namedTypes;
 var b = recast.types.builders;
 var eol = require("os").EOL;
 
-describe("decorators", function () {
+describe("Babel", function () {
   var babelTransform = require("babel-core").transform;
   var babelPresetES2015 = require("babel-preset-es2015");
   var parseOptions = {};
@@ -18,54 +18,79 @@ describe("decorators", function () {
     return;
   }
 
-  it("babel 6 printing", function () {
-    var code = [
+  it("basic printing", function () {
+    function check(lines) {
+      var code = lines.join(eol);
+      var ast = recast.parse(code, parseOptions);
+      var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+      assert.strictEqual(output, code);
+    }
+
+    check([
       '"use strict";', // Directive, DirectiveLiteral in Program
       '"use strict";', // Directive, DirectiveLiteral in BlockStatement
       'function a() {',
       '  "use strict";',
       '}',
-      '',
+    ]);
+
+    check([
       'function a() {',
       '  "use strict";',
       '  b;',
       '}',
-      '',
+    ]);
+
+    check([
       '() => {',
       '  "use strict";',
       '};',
-      '',
+    ]);
+
+    check([
       '() => {',
       '  "use strict";',
       '  b;',
       '};',
-      '',
+    ]);
+
+    check([
       'var a = function a() {',
       '  "use strict";',
       '};',
-      '',
+    ]);
+
+    check([
       'var a = function a() {',
       '  "use strict";',
       '  b;',
       '};',
-      '',
+    ]);
+
+    check([
       'null;', // NullLiteral
       '"asdf";', // StringLiteral
       '/a/;', // RegExpLiteral
       'false;', // BooleanLiteral
       '1;', // NumericLiteral
       'const find2 = <X>() => {};', // typeParameters
-      '',
+    ]);
+
+    check([
       'class A<T> {',
       '  a;',
       '  a = 1;',
       '  [a] = 1;', // computed in ClassProperty
       '}',
-      '',
+    ]);
+
+    check([
       'function f<T>(x: empty): T {', // EmptyTypeAnnotation
       '  return x;',
       '}',
-      '',
+    ]);
+
+    check([
       'var a: {| numVal: number |};', // exact
       'const bar1 = (x: number): string => {};',
       'declare module.exports: { foo: string }', // DeclareModuleExports
@@ -73,20 +98,28 @@ describe("decorators", function () {
       // 'declare class B { foo: () => number }', // interesting failure ref https://github.com/babel/babel/pull/3663
       'declare function foo(): number;',
       'var A: (a: B) => void;',
-      '',
+    ]);
+
+    check([
       'async function* a() {', // async in Function
       '  for await (let x of y) {', // ForAwaitStatement
       '    x;',
       '  }',
       '}',
-      '',
+    ]);
+
+    check([
       'class C2<+T, -U> {', // variance
       '  +p: T = e;',
       '}',
-      '',
+    ]);
+
+    check([
       'type T = { -p: T };',
       'type T = { +[k: K]: V };',
-      '',
+    ]);
+
+    check([
       'class A {',
       '  static async *z(a, b): number {', // ClassMethod
       '    b;',
@@ -104,7 +137,9 @@ describe("decorators", function () {
       '    return 1;',
       '  }',
       '}',
-      '',
+    ]);
+
+    check([
       '({',
       '  async *a() {', // ObjectMethod
       '    b;',
@@ -129,11 +164,7 @@ describe("decorators", function () {
       '  1() {},',
       '  "1"() {}',
       '});',
-    ].join(eol);
-
-    var ast = recast.parse(code, parseOptions);
-    var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
-    assert.strictEqual(output, code);
+    ]);
   });
 
   it("babel 6: should not wrap IIFE when reusing nodes", function () {
