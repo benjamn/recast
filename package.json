@@ -22,7 +22,7 @@
   "main": "main.js",
   "scripts": {
     "test": "node ./node_modules/mocha/bin/mocha --reporter spec --full-trace",
-    "debug": "node ./node_modules/mocha/bin/mocha --debug-brk --reporter spec"
+    "debug": "node ./node_modules/mocha/bin/mocha --inspect-brk --reporter spec --full-trace"
   },
   "browser": {
     "fs": false
