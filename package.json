@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "ast-types": "0.10.1",
-    "core-js": "^2.4.1",
     "esprima": "~4.0.0",
     "private": "~0.1.5",
     "source-map": "~0.6.1"
@@ -45,6 +44,6 @@
     "semver": "^5.3.0"
   },
   "engines": {
-    "node": ">= 0.8"
+    "node": ">= 4"
   }
 }
