@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@gerhobbelt/ast-types": "0.10.1-15",
-    "@gerhobbelt/esprima": "4.0.1-13",
+    "@gerhobbelt/esprima": "4.0.1-15",
     "core-js": "2.5.3",
     "private": "0.1.8",
     "source-map": "0.6.1"
@@ -43,7 +43,7 @@
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.61.0",
     "mocha": "4.0.1",
-    "reify": "0.13.3",
+    "reify": "0.13.5",
     "semver": "5.4.1"
   },
   "engines": {
