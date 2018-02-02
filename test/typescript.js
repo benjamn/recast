@@ -31,5 +31,13 @@ describe("TypeScript", function() {
     check([
       'type A<T, U> = {x: number, y: T, z: U};'
     ]);
+
+    check([
+      'class C<T> extends B {',
+      '  f(a: T) {',
+      '    c(a);',
+      '  }',
+      '}'
+    ]);
   });
 });
