@@ -33,9 +33,13 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'const a = b as U as V;'
+    ]);
+
+    check([
       'class C<T> extends B {',
       '  f(a: T) {',
-      '    c(a);',
+      '    c(a as D);',
       '  }',
       '}'
     ]);
