@@ -43,9 +43,9 @@ describe("TypeScript", function() {
       'type A<T, U> = {x: number, y: T, z: U};'
     ]);
 
-    // check([
-    //   'type F = (a: string, b: {x: "cat", y: number}) => void;'
-    // ]);
+    check([
+      'type F = (a: string, b: {x: "cat", y: number}) => void;'
+    ]);
 
     check([
       'const a = b as U as V;'
