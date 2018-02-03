@@ -40,11 +40,11 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'type A<T, U> = {x: number, y: T, z: U};'
+      'type A<T, U> = {u: "cat", x: number, y: T, z: U};'
     ]);
 
     check([
-      'type F = (a: string, b: {x: "cat", y: number}) => void;'
+      'type F = <T, U>(a: string, b: {y: T, z: U}) => void;'
     ]);
 
     check([
