@@ -29,8 +29,23 @@ describe("TypeScript", function() {
     }
 
     check([
+      'type A = number;',
+      'type A = string;',
+      'type A = never;',
+      'type A = any;'
+    ]);
+
+    check([
+      'type A = "cat" | "dog" | "bird";'
+    ]);
+
+    check([
       'type A<T, U> = {x: number, y: T, z: U};'
     ]);
+
+    // check([
+    //   'type F = (a: string, b: {x: "cat", y: number}) => void;'
+    // ]);
 
     check([
       'const a = b as U as V;'
