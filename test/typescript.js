@@ -33,7 +33,9 @@ describe("TypeScript", function() {
       'type B = string;',
       'type C = never;',
       'type D = any;',
-      'type E = [string, number];'
+      'type E = [string, number];',
+      'type F = void;',
+      'type G = undefined;'
     ]);
 
     check([
@@ -53,7 +55,10 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'enum Color {Red, Green, Blue};'
+      'enum Color {Red, Green, Blue};',
+      'enum Color {Red = 1, Green = 2, Blue = 3};',
+      'enum Color {Red = 1, Green};',
+      'enum Color {Red = "RED", Green = "GREEN", Blue = "BLUE"};'
     ]);
 
     check([
