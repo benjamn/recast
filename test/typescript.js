@@ -53,6 +53,10 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'enum Color {Red, Green, Blue};'
+    ]);
+
+    check([
       'class C<T> extends B {',
       '  f(a: T) {',
       '    c(a as D);',
