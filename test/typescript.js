@@ -30,9 +30,10 @@ describe("TypeScript", function() {
 
     check([
       'type A = number;',
-      'type A = string;',
-      'type A = never;',
-      'type A = any;'
+      'type B = string;',
+      'type C = never;',
+      'type D = any;',
+      'type E = [string, number];'
     ]);
 
     check([
