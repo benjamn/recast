@@ -9,7 +9,7 @@ var babylon = require("babylon");
 
 describe("TypeScript", function() {
   var babylonOptions = {
-    plugins: ['jsx', 'typescript']
+    plugins: ['typescript']
   }
 
   var parser = {
@@ -25,15 +25,18 @@ describe("TypeScript", function() {
       var code = lines.join(eol);
       var ast = recast.parse(code, parseOptions);
       var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
-      assert.strictEqual(output, code);
+      assert.strictEqual(code, output);
     }
 
     check([
+      'let color: string = "blue";',
       'let isDone: boolean = false;',
       'let decimal: number = 6;',
       'let hex: number = 0xf00d;',
       'let binary: number = 0b1010;',
-      'let octal: number = 0o744;'
+      'let octal: number = 0o744;',
+      'let list: number[] = [1, 2, 3];',
+      'let x: [string, number];'
     ]);
 
     check([
@@ -47,6 +50,10 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'let list: Array<number> = [1, 2, 3];'
+    ]);
+
+    check([
       'type A = "cat" | "dog" | "bird";'
     ]);
 
@@ -56,6 +63,19 @@ describe("TypeScript", function() {
 
     check([
       'type F = <T, U>(a: string, b: {y: T, z: U}) => void;'
+    ]);
+
+    check([
+      'let strLength: string = (<string>someValue).length;',
+      'let strLength: string = <string>someValue;',
+      'let strLength: number = (someValue as string).length;',
+      'let strLength: number = someValue as string;'
+    ]);
+
+    check([
+      'function f<T, U>(a: T, b: U): void {',
+      '  let c: number;',
+      '}'
     ]);
 
     check([
