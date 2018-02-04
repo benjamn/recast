@@ -86,7 +86,8 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'let myAdd: <T, U>(x: T, y?: number) => U = function(x: number, y?: number): number {};'
+      'let myAdd: <T, U>(x: T, y?: number) => U = function(x: number, y?: number): number {};',
+      'function buildName(firstName: string, ...restOfName: string[]): void {}'
     ]);
 
     check([
