@@ -87,7 +87,12 @@ describe("TypeScript", function() {
 
     check([
       'let myAdd: <T, U>(x: T, y?: number) => U = function(x: number, y?: number): number {};',
-      'function buildName(firstName: string, ...restOfName: string[]): void {}'
+      'function bb(f: string, ...r: string[]): void {}',
+      'function f(this: void) {}',
+      'function l<T extends L>(arg: T): T {}',
+      'function l<T extends A.B.C>(arg: T): T {}',
+      'function l<T extends keyof U>(obj: T) {}',
+      'function create<T>(c: {new<U>(a: U): T;}): void {}'
     ]);
 
     check([
@@ -121,6 +126,7 @@ describe("TypeScript", function() {
       '  (source: string, subString: string): boolean;',
       '  (start: number): string;',
       '  reset(): void;',
+      '  a(c: (this: void, e: E) => void): void;',
       '}'
     ]);
 
