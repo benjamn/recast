@@ -1699,4 +1699,18 @@ describe("printer", function() {
       "(1).foo"
     );
   });
+
+  it("prints numbers in bases other than 10 without converting them", function() {
+    var code = [
+      'let decimal = 6;',
+      'let hex = 0xf00d;',
+      'let binary = 0b1010;',
+      'let octal = 0o744;'
+    ].join(eol);
+    var ast = parse(code);
+    var printer = new Printer({});
+    var pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+  });
 });
