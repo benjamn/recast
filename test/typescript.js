@@ -100,10 +100,15 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'enum Color {Red, Green, Blue};',
-      'enum Color {Red = 1, Green = 2, Blue = 3};',
-      'enum Color {Red = 1, Green};',
-      'enum Color {Red = "RED", Green = "GREEN", Blue = "BLUE"};'
+      'enum Color {Red, Green, Blue}',
+      'enum Color {Red = 1, Green = 2, Blue = 3}',
+      'enum Color {Red = 1, Green}',
+      'enum Color {Red = "RED", Green = "GREEN", Blue = "BLUE"}',
+      'enum Color {Red = init(), Green = "GREEN"}',
+      'enum E {A = 1, B, C}',
+      'enum F {A = 1 << 1, B = C | D.G, E = "1".length}',
+      'const enum G {A = 1}',
+      'declare enum H {A = 1}'
     ]);
 
     check([
