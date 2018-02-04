@@ -36,6 +36,7 @@ describe("TypeScript", function() {
       'let binary: number = 0b1010;',
       'let octal: number = 0o744;',
       'let list: number[] = [1, 2, 3];',
+      'let matrix: number[][];',
       'let x: [string, number];'
     ]);
 
@@ -46,7 +47,8 @@ describe("TypeScript", function() {
       'type D = any;',
       'type E = [string, number];',
       'type F = void;',
-      'type G = undefined;'
+      'type G = undefined;',
+      'type C = {a: string, b?: number};'
     ]);
 
     check([
@@ -68,8 +70,13 @@ describe("TypeScript", function() {
     check([
       'let strLength: string = (<string>someValue).length;',
       'let strLength: string = <string>someValue;',
+      'let square = <Square>{};',
       'let strLength: number = (someValue as string).length;',
       'let strLength: number = someValue as string;'
+    ]);
+
+    check([
+      'let counter = <Counter>function(start: number) {};'
     ]);
 
     check([
@@ -94,6 +101,27 @@ describe("TypeScript", function() {
       '  f(a: T) {',
       '    c(a as D);',
       '  }',
+      '}'
+    ]);
+
+    check([
+      'interface LabelledContainer<T> {',
+      '  label: string;',
+      '  content: T;',
+      '  option?: boolean;',
+      '  readonly x: number;',
+      '  [index: number]: string;',
+      '  [propName: string]: any;',
+      '  readonly [index: number]: string;',
+      '  (source: string, subString: string): boolean;',
+      '  (start: number): string;',
+      '  reset(): void;',
+      '}'
+    ]);
+
+    check([
+      'interface Square<T, U> extends Shape<T, U>, Visible<T, U> {',
+      '  sideLength: number;',
       '}'
     ]);
   });
