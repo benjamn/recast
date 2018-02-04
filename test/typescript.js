@@ -9,7 +9,7 @@ var babylon = require("babylon");
 
 describe("TypeScript", function() {
   var babylonOptions = {
-    plugins: ['typescript']
+    plugins: ['classProperties', 'typescript']
   }
 
   var parser = {
@@ -124,5 +124,29 @@ describe("TypeScript", function() {
       '  sideLength: number;',
       '}'
     ]);
+
+    check([
+      'class Button extends Control<T, U> implements SelectableControl<T, U>, ClickableControl<U> {',
+      '  select() {}',
+      '}'
+    ]);
+
+    check([
+      'class Animal {',
+      '  static className: string = "Animal";',
+      '',
+      '  constructor(theName: string) {',
+      '    this.name = theName;',
+      '  }',
+      '',
+      '  private name: string;',
+      '  public furr: boolean;',
+      '  protected sound: string;',
+      '  private getName() {}',
+      '  public talk() {}',
+      '  protected getSound() {}',
+      '  static createAnimal() {}',
+      '}'
+    ])
   });
 });
