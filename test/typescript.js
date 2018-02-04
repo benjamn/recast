@@ -37,7 +37,9 @@ describe("TypeScript", function() {
       'let octal: number = 0o744;',
       'let list: number[] = [1, 2, 3];',
       'let matrix: number[][];',
-      'let x: [string, number];'
+      'let x: [string, number];',
+      'let f: <E>(e: E) => void;',
+      'let sn: string | null = "isNull";'
     ]);
 
     check([
@@ -52,7 +54,15 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'type c = T & U & V;'
+    ]);
+
+    check([
       'let list: Array<number> = [1, 2, 3];'
+    ]);
+
+    check([
+      'let n = a!.c();'
     ]);
 
     check([
@@ -80,8 +90,25 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'if ((<F>p).s) {',
+      '  (<F>p).s();',
+      '}'
+    ]);
+
+    check([
+      'function i(p): p is F {}',
+      'function i(p): p is string | number {}'
+    ]);
+
+    check([
       'function f<T, U>(a: T, b: U): void {',
       '  let c: number;',
+      '}'
+    ]);
+
+    check([
+      'function pluck<T, K extends keyof T>(o: T, names: K[]): T[K][] {',
+      '  console.log(o);',
       '}'
     ]);
 
