@@ -389,7 +389,7 @@ describe("Babel", function () {
 
   it("should parse and print dynamic import(...)", function () {
     var code = 'wait(import("oyez"));';
-    var ast = recast.parse(code, parseOptions);
+  var ast = recast.parse(code, parseOptions);
     assert.strictEqual(
       recast.prettyPrint(ast).code,
       code
