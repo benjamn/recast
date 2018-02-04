@@ -86,6 +86,10 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'let myAdd: <T, U>(x: T, y?: number) => U = function(x: number, y?: number): number {};'
+    ]);
+
+    check([
       'const a = b as U as V;'
     ]);
 
