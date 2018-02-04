@@ -29,6 +29,14 @@ describe("TypeScript", function() {
     }
 
     check([
+      'let isDone: boolean = false;',
+      'let decimal: number = 6;',
+      'let hex: number = 0xf00d;',
+      'let binary: number = 0b1010;',
+      'let octal: number = 0o744;'
+    ]);
+
+    check([
       'type A = number;',
       'type B = string;',
       'type C = never;',
