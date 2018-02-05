@@ -78,6 +78,12 @@ describe("TypeScript", function() {
     ]);
 
     check([
+      'type Readonly<T> = {',
+      '  readonly [P in keyof T]: T[P];',
+      '};'
+    ]);
+
+    check([
       'let strLength: string = (<string>someValue).length;',
       'let strLength: string = <string>someValue;',
       'let square = <Square>{};',
