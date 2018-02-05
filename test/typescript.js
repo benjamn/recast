@@ -9,6 +9,7 @@ var babylon = require("babylon");
 
 describe("TypeScript", function() {
   var babylonOptions = {
+    sourceType: "module",
     plugins: ['classProperties', 'typescript']
   }
 
@@ -193,13 +194,39 @@ describe("TypeScript", function() {
       '  }',
       '',
       '  private name: string;',
-      '  public furr: boolean;',
+      '  public fur: boolean;',
       '  protected sound: string;',
       '  private getName() {}',
       '  public talk() {}',
       '  protected getSound() {}',
       '  static createAnimal() {}',
       '}'
-    ])
+    ]);
+
+    check([
+      'export interface S {',
+      '  i(s: string): boolean;',
+      '}',
+    ]);
+
+    check([
+      'namespace Validation {',
+      '  export interface S {',
+      '    i(j: string): boolean;',
+      '  }',
+      '}'
+    ]);
+
+    check([
+      'export interface S {',
+      '  i(j: string): boolean;',
+      '}'
+    ]);
+
+    check([
+      'declare namespace D3 {',
+      '  export const f: number = 2;',
+      '}'
+    ]);
   });
 });
