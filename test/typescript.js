@@ -80,6 +80,10 @@ describe("TypeScript", function() {
     check([
       'type Readonly<T> = {',
       '  readonly [P in keyof T]: T[P];',
+      '};',
+      '',
+      'type Pick<T, K extends keyof T> = {',
+      '  [P in K]: T[P];',
       '};'
     ]);
 
