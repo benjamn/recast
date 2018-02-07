@@ -39,7 +39,7 @@
     "babylon": "~7.0.0-beta.31",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "mocha": "~4.0.1",
-    "flow-parser": "^0.59.0",
+    "flow-parser": "^0.65.0",
     "reify": "^0.13.0",
     "semver": "^5.3.0"
   },
