@@ -7,11 +7,14 @@ var concat = linesModule.concat;
 var eol = require("os").EOL;
 
 function check(a, b) {
-    assert.strictEqual(a.toString(), b.toString());
+    assert.strictEqual(a.toString({
+        lineTerminator: eol
+    }), b.toString({
+        lineTerminator: eol
+    }));
 }
 
 describe("lines", function() {
-
     describe('line terminators', function() {
         var source = [
             'foo;',
@@ -25,6 +28,7 @@ describe("lines", function() {
             '\u2029',
             '\u000D\u000A',
         ];
+
         terminators.forEach(function(t) {
             it('can handle ' + escape(t) + ' as line terminator', function() {
                 var lines = fromString(source.join(t));
@@ -33,7 +37,6 @@ describe("lines", function() {
             });
         });
     });
-
 
     it("FromString", function() {
         function checkIsCached(s) {
@@ -59,19 +62,9 @@ describe("lines", function() {
         assert.strictEqual(fromString(longerLines), longerLines);
     });
 
-    it("ToString", function() {
-        var code = [
-          'f("argument", function(x, y, z) {',
-          '    var foo = z',
-          '',
-          '    foo(y).',
-          '      bar(z)',
-          '      bar(z);',
-          '',
-          '}',
-        ].join(eol);
+    it("ToString", function ToStringTest() {
+        var code = String(ToStringTest);
         var lines = fromString(code);
-
         check(lines, code);
         check(lines.indentTail(5)
                    .indentTail(-7)
@@ -117,17 +110,8 @@ describe("lines", function() {
         assert.strictEqual(joined, withoutSpaces);
     }
 
-    it("EachPos", function() {
-        var code = [
-            'f("argument", function(x, y, z) {',
-            '    var foo = z',
-            '',
-            '    foo(y).',
-            '      bar(z)',
-            '      bar(z);',
-            '',
-            '}',
-          ].join(eol);
+    it("EachPos", function EachPosTest() {
+        var code = String(EachPosTest);
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
@@ -142,10 +126,10 @@ describe("lines", function() {
         testEachPosHelper(lines, code);
     });
 
-    it("CharAt", function() {
+    it("CharAt", function CharAtTest() {
         // Function.prototype.toString uses \r\n line endings on non-*NIX
         // systems, so normalize those to \n characters.
-        var code = (arguments.callee + "").replace(/\r\n/g, "\n");
+        var code = String(CharAtTest).replace(/\r\n/g, "\n");
         var lines = fromString(code);
 
         function compare(pos) {
@@ -287,8 +271,8 @@ describe("lines", function() {
         });
     });
 
-    it("Slice", function() {
-        var code = arguments.callee + "",
+    it("Slice", function SliceTest() {
+        var code = String(SliceTest),
             lines = fromString(code);
         checkAllSlices(lines);
     });
@@ -309,8 +293,8 @@ describe("lines", function() {
                  end: lines.lastPos() };
     }
 
-    it("GetSourceLocation", function() {
-        var code = arguments.callee + "",
+    it("GetSourceLocation", function GetSourceLocationTest() {
+        var code = String(GetSourceLocationTest),
             lines = fromString(code);
 
         function verify(indent) {
@@ -515,8 +499,8 @@ describe("lines", function() {
         ].join(eol));
     });
 
-    it("GuessTabWidth", function(done) {
-        var lines = fromString(arguments.callee + "");
+    it("GuessTabWidth", function GuessTabWidthTest(done) {
+        var lines = fromString(String(GuessTabWidthTest));
         assert.strictEqual(lines.guessTabWidth(), 4);
 
         lines = fromString([
