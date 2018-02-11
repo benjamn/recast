@@ -60,8 +60,17 @@ describe("lines", function() {
     });
 
     it("ToString", function() {
-        var code = arguments.callee + "",
-            lines = fromString(code);
+        var code = [
+          'f("argument", function(x, y, z) {',
+          '    var foo = z',
+          '',
+          '    foo(y).',
+          '      bar(z)',
+          '      bar(z);',
+          '',
+          '}',
+        ].join(eol);
+        var lines = fromString(code);
 
         check(lines, code);
         check(lines.indentTail(5)
@@ -109,7 +118,16 @@ describe("lines", function() {
     }
 
     it("EachPos", function() {
-        var code = (arguments.callee + "");
+        var code = [
+            'f("argument", function(x, y, z) {',
+            '    var foo = z',
+            '',
+            '    foo(y).',
+            '      bar(z)',
+            '      bar(z);',
+            '',
+            '}',
+          ].join(eol);
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
