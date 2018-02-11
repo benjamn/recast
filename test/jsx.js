@@ -4,10 +4,16 @@ var types = require("../lib/types");
 
 describe("JSX Compatability", function() {
   var printer = new Printer({ tabWidth: 2 });
+  var parseOptions = {
+    parser: require("reify/lib/parsers/babylon")
+  };
 
   function check(source) {
-    var ast1 = parse(source);
-    var ast2 = parse(printer.printGenerically(ast1).code);
+    var ast1 = parse(source, parseOptions);
+    var ast2 = parse(
+      printer.printGenerically(ast1).code,
+      parseOptions
+    );
     types.astNodesAreEquivalent.assert(ast1, ast2);
   }
 
@@ -43,5 +49,14 @@ describe("JSX Compatability", function() {
 
   it("should parse and print namespaced elements", function() {
     check("<Foo.Bar />");
+  });
+
+  it("should parse and print fragments", function() {
+    check([
+      "<>",
+      "  <td>Hello</td>",
+      "  <td>world!</td>",
+      "</>",
+    ].join("\n"));
   });
 });
