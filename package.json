@@ -31,7 +31,7 @@
     "ast-types": "0.10.2",
     "esprima": "~4.0.0",
     "private": "~0.1.5",
-    "source-map": "~0.6.1"
+    "source-map": "~0.7.1"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
