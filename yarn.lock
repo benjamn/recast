@@ -14,9 +14,9 @@ ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
-ast-types@0.9.14:
-  version "0.9.14"
-  resolved "https://registry.yarnpkg.com/ast-types/-/ast-types-0.9.14.tgz#d34ba5dffb9d15a44351fd2a9d82e4ab2838b5ba"
+ast-types@0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/ast-types/-/ast-types-0.10.1.tgz#f52fca9715579a14f841d67d7f8d25432ab6a3dd"
 
 babel-code-frame@^6.26.0:
   version "6.26.0"
@@ -412,9 +412,13 @@ babel-types@^6.19.0, babel-types@^6.24.1, babel-types@^6.26.0:
     lodash "^4.17.4"
     to-fast-properties "^1.0.3"
 
-babylon@^6.18.0, babylon@~6.18.0:
+babylon@^6.18.0:
   version "6.18.0"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.18.0.tgz#af2f3b88fa6f5c1e4c634d1a0f8eac4f55b395e3"
+
+babylon@~7.0.0-beta.31:
+  version "7.0.0-beta.40"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.40.tgz#91fc8cd56d5eb98b28e6fde41045f2957779940a"
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -453,7 +457,7 @@ convert-source-map@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.0.tgz#9acd70851c6d5dfdd93d9282e5edf94a03ff46b5"
 
-core-js@^2.4.0, core-js@^2.4.1, core-js@^2.5.0:
+core-js@^2.4.0, core-js@^2.5.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.1.tgz#ae6874dc66937789b80754ff5428df66819ca50b"
 
@@ -495,9 +499,9 @@ esutils@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.2.tgz#0abf4f1caa5bcb1f7a9d8acc6dea4faaa04bac9b"
 
-flow-parser@^0.57.3:
-  version "0.57.3"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.57.3.tgz#b8d241a1b1cbae043afa7976e39f269988d8fe34"
+flow-parser@^0.59.0:
+  version "0.59.0"
+  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.59.0.tgz#f6ebcae61ffa187e420999d40ce0a801f39b2635"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -602,17 +606,17 @@ minimist@0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
 
-minipass@^2.0.0:
+minipass@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.2.1.tgz#5ada97538b1027b4cf7213432428578cb564011f"
   dependencies:
     yallist "^3.0.0"
 
 minizlib@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-1.0.3.tgz#d5c1abf77be154619952e253336eccab9b2a32f5"
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-1.1.0.tgz#11e13658ce46bc3a70a267aac58359d1e0c29ceb"
   dependencies:
-    minipass "^2.0.0"
+    minipass "^2.2.1"
 
 mkdirp@0.5.1, mkdirp@^0.5.1:
   version "0.5.1"
