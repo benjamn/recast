@@ -1713,4 +1713,17 @@ describe("printer", function() {
 
     assert.strictEqual(pretty, code);
   });
+
+  it("reprints modified numeric literals", function () {
+    const code = '3 + 4;';
+    const ast = parse(code);
+    const expr = ast.program.body[0].expression;
+    const left = expr.left;
+    const right = expr.right;
+
+    left.value++;
+    right.value++;
+
+    assert.strictEqual(recast.print(ast).code, '4 + 5;');
+  });
 });
