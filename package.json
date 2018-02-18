@@ -21,8 +21,8 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha --reporter spec --full-trace",
-    "debug": "node ./node_modules/mocha/bin/mocha --inspect-brk --reporter spec --full-trace"
+    "test": "test/run.sh",
+    "debug": "test/run.sh --inspect-brk"
   },
   "browser": {
     "fs": false
