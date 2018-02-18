@@ -228,5 +228,9 @@ describe("TypeScript", function() {
       '  export const f: number = 2;',
       '}'
     ]);
+
+    check([
+      'declare function foo<K, V>(arg: T = getDefault()): R'
+    ]);
   });
 });
