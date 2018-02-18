@@ -94,20 +94,20 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'let strLength: string = (<string>someValue).length;',
-      'let strLength: string = <string>someValue;',
-      'let square = <Square>{};',
+      'let strLength: string = (<string> someValue).length;',
+      'let strLength: string = <string> someValue;',
+      'let square = <Square> {};',
       'let strLength: number = (someValue as string).length;',
       'let strLength: number = someValue as string;'
     ]);
 
     check([
-      'let counter = <Counter>function(start: number) {};'
+      'let counter = <Counter> function(start: number) {};'
     ]);
 
     check([
-      'if ((<F>p).s) {',
-      '  (<F>p).s();',
+      'if ((<F> p).s) {',
+      '  (<F> p).s();',
       '}'
     ]);
 
