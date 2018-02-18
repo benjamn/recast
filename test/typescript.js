@@ -10,7 +10,11 @@ var babylon = require("babylon");
 describe("TypeScript", function() {
   var babylonOptions = {
     sourceType: "module",
-    plugins: ['classProperties', 'typescript']
+    plugins: [
+      'typescript',
+      'classProperties',
+      'asyncGenerators',
+    ]
   }
 
   var parser = {
@@ -231,6 +235,12 @@ describe("TypeScript", function() {
 
     check([
       'declare function foo<K, V>(arg: T = getDefault()): R'
+    ]);
+
+    check([
+      'class Animal {',
+      '  public static async *[name]<T>(arg: U): V',
+      '}'
     ]);
   });
 });
