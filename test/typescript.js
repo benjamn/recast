@@ -1,35 +1,36 @@
-var assert = require("assert");
-var recast = require("../main.js");
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var types = require("../lib/types");
-var eol = require("os").EOL;
+"use strict";
 
-var babylon = require("babylon");
+const assert = require("assert");
+const path = require("path");
+const fs = require("fs");
+const recast = require("../main.js");
+const parse = require("../lib/parser").parse;
+const Printer = require("../lib/printer").Printer;
+const types = require("../lib/types");
+const eol = require("os").EOL;
+const babylon = require("babylon");
+const babylonOptions = {
+  sourceType: "module",
+  plugins: [
+    'typescript',
+    'classProperties',
+    'asyncGenerators',
+    'decorators',
+  ]
+};
+
+const parser = {
+  parse(source) {
+    return babylon.parse(source, babylonOptions);
+  }
+};
 
 describe("TypeScript", function() {
-  var babylonOptions = {
-    sourceType: "module",
-    plugins: [
-      'typescript',
-      'classProperties',
-      'asyncGenerators',
-    ]
-  }
-
-  var parser = {
-    parse(source) {
-      return babylon.parse(source, babylonOptions);
-    }
-  }
-
-  var parseOptions = { parser };
-
   it('basic printing', function() {
     function check(lines) {
-      var code = lines.join(eol);
-      var ast = recast.parse(code, parseOptions);
-      var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+      const code = lines.join(eol);
+      const ast = recast.parse(code, { parser });
+      const output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
       assert.strictEqual(code, output);
     }
 
@@ -244,3 +245,47 @@ describe("TypeScript", function() {
     ]);
   });
 });
+
+require("glob")("data/babylon-typescript-fixtures/**/input.js", {
+  cwd: __dirname
+}, function (error, files) {
+  describe("Reprinting Babylon TypeScript test fixtures", function () {
+    if (error) {
+      throw error;
+    }
+
+    files.forEach(file => {
+      const absPath = path.join(__dirname, file);
+      const source = fs.readFileSync(absPath, "utf8");
+      const ast = tryToParseFile(source, absPath);
+
+      (ast ? it : xit)(file, function () {
+        assert.strictEqual(recast.print(ast).code, source);
+        // Call prettyPrint just to test that it doesn't throw, for now.
+        recast.prettyPrint(ast);
+      });
+    });
+  });
+});
+
+function tryToParseFile(source, absPath) {
+  try {
+    return recast.parse(source, { parser });
+  } catch (e1) {
+    try {
+      var options = JSON.parse(fs.readFileSync(
+        path.join(path.dirname(absPath), "options.json")));
+    } catch (e2) {
+      if (e2.code !== "ENOENT") {
+        console.error(e2);
+      }
+      throw e1;
+    }
+
+    if (options.throws === e1.message) {
+      return null;
+    }
+
+    throw e1;
+  }
+}
