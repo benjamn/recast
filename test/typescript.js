@@ -278,7 +278,7 @@ describe("TypeScript", function() {
 
     check([
       'class Animal {',
-      '  public static async *[name]<T>(arg: U): V',
+      '  public static async *[name]<T>(arg: U): V;',
       '}'
     ]);
   });
