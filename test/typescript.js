@@ -135,7 +135,7 @@ describe("TypeScript", function() {
       'function l<T extends L>(arg: T): T {}',
       'function l<T extends A.B.C>(arg: T): T {}',
       'function l<T extends keyof U>(obj: T) {}',
-      'function create<T>(c: {new<U>(a: U): T;}): void {}'
+      'function create<T>(c: {new<U>(a: U): T}): void {}'
     ]);
 
     check([
