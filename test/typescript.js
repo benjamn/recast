@@ -259,10 +259,16 @@ require("glob")("data/babylon-typescript-fixtures/**/input.js", {
       const source = fs.readFileSync(absPath, "utf8");
       const ast = tryToParseFile(source, absPath);
 
-      (ast ? it : xit)(file, function () {
+      if (ast === null) {
+        xit(file);
+        return;
+      }
+
+      it(file, function () {
         assert.strictEqual(recast.print(ast).code, source);
-        // Call prettyPrint just to test that it doesn't throw, for now.
-        recast.prettyPrint(ast);
+        const reprintedCode = recast.prettyPrint(ast).code;
+        const reparsedAST = recast.parse(reprintedCode, { parser });
+        types.astNodesAreEquivalent(ast, reparsedAST);
       });
     });
   });
