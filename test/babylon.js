@@ -5,8 +5,8 @@ var b = recast.types.builders;
 var eol = require("os").EOL;
 
 describe("Babel", function () {
-  var babelTransform = require("babel-core").transform;
-  var babelPresetES2015 = require("babel-preset-es2015");
+  var babelTransform = require("@babel/core").transform;
+  var babelPresetES2015 = require("@babel/preset-es2015");
   var parseOptions = {};
 
   try {
@@ -389,7 +389,7 @@ describe("Babel", function () {
 
   it("should parse and print dynamic import(...)", function () {
     var code = 'wait(import("oyez"));';
-    var ast = recast.parse(code, parseOptions);
+  var ast = recast.parse(code, parseOptions);
     assert.strictEqual(
       recast.prettyPrint(ast).code,
       code
