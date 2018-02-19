@@ -56,7 +56,11 @@ describe("TypeScript", function() {
       'type E = [string, number];',
       'type F = void;',
       'type G = undefined;',
-      'type C = {a: string, b?: number};'
+      '',
+      'type C = {',
+      '  a: string,',
+      '  b?: number',
+      '};'
     ]);
 
     check([
@@ -76,11 +80,22 @@ describe("TypeScript", function() {
     ]);
 
     check([
-      'type A<T, U> = {u: "cat", x: number, y: T, z: U};'
+      'type A<T, U> = {',
+      '  u: "cat",',
+      '  x: number,',
+      '  y: T,',
+      '  z: U',
+      '};'
     ]);
 
     check([
-      'type F = <T, U>(a: string, b: {y: T, z: U}) => void;'
+      'type F = <T, U>(',
+      '  a: string,',
+      '  b: {',
+      '    y: T,',
+      '    z: U',
+      '  }',
+      ') => void;'
     ]);
 
     check([
@@ -135,7 +150,12 @@ describe("TypeScript", function() {
       'function l<T extends L>(arg: T): T {}',
       'function l<T extends A.B.C>(arg: T): T {}',
       'function l<T extends keyof U>(obj: T) {}',
-      'function create<T>(c: {new<U>(a: U): T}): void {}'
+      '',
+      'function create<T>(',
+      '  c: {',
+      '    new<U>(a: U): T',
+      '  }',
+      '): void {}'
     ]);
 
     check([
