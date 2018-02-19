@@ -5,8 +5,8 @@ var b = recast.types.builders;
 var eol = require("os").EOL;
 
 describe("Babel", function () {
-  var babelTransform = require("babel-core").transform;
-  var babelPresetES2015 = require("babel-preset-es2015");
+  var babelTransform = require("@babel/core").transform;
+  var babelPresetES2015 = require("@babel/preset-es2015");
   var parseOptions = {};
 
   try {

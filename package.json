@@ -34,9 +34,9 @@
     "source-map": "~0.6.1"
   },
   "devDependencies": {
-    "babel-core": "^6.23.1",
-    "babel-preset-es2015": "^6.22.0",
-    "babylon": "~7.0.0-beta.39",
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/preset-es2015": "^7.0.0-beta.40",
+    "babylon": "^7.0.0-beta.40",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "flow-parser": "^0.66.0",
     "glob": "^7.1.2",
