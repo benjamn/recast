@@ -12,6 +12,14 @@ then
     rm -rf babel
 fi
 
+if [ ! -d graphql-tools-src ]
+then
+    git clone --depth 1 https://github.com/apollographql/graphql-tools.git
+    mv graphql-tools/src \
+       graphql-tools-src
+    rm -rf graphql-tools
+fi
+
 cd .. # back to the recast/test/ directory
 
 exec mocha --reporter spec --full-trace $@ run.js
