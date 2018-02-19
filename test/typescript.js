@@ -333,6 +333,8 @@ function testReprinting(pattern, description) {
         return;
       }
 
+      this.timeout(20000);
+
       assert.strictEqual(recast.print(ast).code, source);
       const reprintedCode = recast.prettyPrint(ast).code;
       const reparsedAST = recast.parse(reprintedCode, { parser });
