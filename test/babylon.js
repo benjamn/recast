@@ -10,7 +10,7 @@ describe("Babel", function () {
   var parseOptions = {};
 
   try {
-    parseOptions.parser = require("reify/lib/parsers/babylon.js");
+    parseOptions.parser = require("../parsers/babylon");
   } catch (e) {
     if (require("semver").gte(process.version, "4.0.0")) {
       throw e;
