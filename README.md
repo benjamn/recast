@@ -98,6 +98,45 @@ var add = function(b, a) {
 ```
 Note that the weird formatting was discarded, yet the behavior and abstract structure of the code remain the same.
 
+Using a different parser
+---
+
+By default, Recast uses the [Esprima JavaScript parser](https://www.npmjs.com/package/esprima) when you call `recast.parse(code)`. While Esprima supports almost all modern ECMAScript syntax, you may want to use a different parser to enable TypeScript or Flow syntax, or just because you want to match other compilation tools you might be using.
+
+In order to get any benefits from Recast's conservative pretty-printing, **it is very important that you continue to call `recast.parse`** (rather than parsing the AST yourself using a different parser), and simply instruct `recast.parse` to use a different parser:
+
+```js
+const acornAst = recast.parse(source, {
+  parser: require("acorn")
+});
+```
+
+Why is this so important? When you call `recast.parse`, it makes a shadow copy of the AST before returning it to you, giving every copied AST node a reference back to the original through a special `.original` property. This information is what enables `recast.print` to detect where the AST has been modified, so that it can preserve formatting for parts of the AST that were not modified.
+
+Any `parser` object that supports a `parser.parse(source)` method will work here; however, if your parser requires additional options, you can always implement your own `parse` method that invokes your parser with custom options:
+
+```js
+const acornAst = recast.parse(source, {
+  parser: {
+    parse(source) {
+      return require("acorn").parse(source, {
+        // additional options
+      });
+    }
+  }
+});
+```
+
+To take some of the guesswork out of configuring common parsers, Recast provides [several preconfigured parsers](https://github.com/benjamn/recast/tree/master/parsers), so you can parse TypeScript (for example) without worrying about the configuration details:
+
+```js
+const tsAst = recast.parse(source, {
+  parser: require("recast/parsers/typescript")
+});
+```
+
+**Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install babylon@next` to use the `typescript`, `flow`, or `babylon` parsers, or `npm install acorn` to use the `acorn` parser. Only Esprima is installed by default when Recast is installed.
+
 Source maps
 ---
 
