@@ -1,3 +1,5 @@
+"use strict";
+
 var recast = require("../main");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
@@ -18,9 +20,25 @@ var annotated = [
 ];
 
 describe("comments", function() {
-  it("attachment and reprinting", function() {
+  ["../parsers/acorn",
+   "../parsers/babylon",
+   "../parsers/esprima",
+   "../parsers/flow",
+   "../parsers/typescript",
+  ].forEach(runTestsForParser);
+});
+
+function runTestsForParser(parserId) {
+  const parserName = parserId.split("/").pop();
+  const parser = require(parserId);
+
+  function pit(message, callback) {
+    it("[" + parserName + "] " + message, callback);
+  }
+
+  pit("attachment and reprinting", function() {
     var code = annotated.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var dup = ast.program.body[0];
     n.FunctionDeclaration.assert(dup);
@@ -116,9 +134,9 @@ describe("comments", function() {
     "};"
   ];
 
-  it("TrailingComments", function() {
+  pit("TrailingComments", function() {
     var code = trailing.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     assert.strictEqual(recast.print(ast).code, code);
 
     // Drop all original source information to force reprinting.
@@ -132,21 +150,53 @@ describe("comments", function() {
     var assign = ast.program.body[0].expression;
     n.AssignmentExpression.assert(assign);
 
-    var props = assign.right.properties;
-    n.Property.arrayOf().assert(props);
+    const esprimaInfo = {
+      Property: n.Property,
+      propBuilder(key, value) {
+        return b.property("init", key, value);
+      },
+      literalBuilder(value) {
+        return b.literal(value);
+      }
+    };
 
-    props.push(b.property(
-      "init",
+    const babylonInfo = {
+      Property: n.ObjectProperty,
+      propBuilder(key, value) {
+        return b.objectProperty(key, value);
+      },
+      literalBuilder(value) {
+        if (typeof value === "string") {
+          return b.stringLiteral(value);
+        }
+        if (typeof value === "number") {
+          return b.numericLiteral(value);
+        }
+        throw new Error("unexpected literal: " + value);
+      }
+    };
+
+    const info = {
+      acorn: esprimaInfo,
+      babylon: babylonInfo,
+      esprima: esprimaInfo,
+      flow: babylonInfo,
+      typescript: babylonInfo
+    }[parserName];
+
+    var props = assign.right.properties;
+    info.Property.arrayOf().assert(props);
+
+    props.push(info.propBuilder(
       b.identifier("extra"),
-      b.literal("property")
+      info.literalBuilder("property")
     ));
 
     var quxVal = props[2].value;
     n.ObjectExpression.assert(quxVal);
-    quxVal.properties.push(b.property(
-      "init",
+    quxVal.properties.push(info.propBuilder(
       b.identifier("asdf"),
-      b.literal(43)
+      info.literalBuilder(43)
     ));
 
     var actual = recast.print(ast, { tabWidth: 2 }).code;
@@ -155,7 +205,7 @@ describe("comments", function() {
     // Check semantic equivalence:
     recast.types.astNodesAreEquivalent.assert(
       ast,
-      recast.parse(actual)
+      recast.parse(actual, { parser })
     );
 
     assert.strictEqual(actual, expected);
@@ -175,9 +225,9 @@ describe("comments", function() {
     " */"
   ];
 
-  it("BodyTrailingComments", function() {
+  pit("BodyTrailingComments", function() {
     var code = bodyTrailing.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     // Drop all original source information to force reprinting.
     recast.visit(ast, {
@@ -205,9 +255,9 @@ describe("comments", function() {
     "}"
   ];
 
-  it("ParamTrailingComments", function() {
+  pit("ParamTrailingComments", function() {
     var code = paramTrailing.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var func = ast.program.body[0];
     n.FunctionDeclaration.assert(func);
@@ -241,9 +291,9 @@ describe("comments", function() {
     "}"
   ];
 
-  it("StatementTrailingComments", function() {
+  pit("StatementTrailingComments", function() {
     var code = statementTrailing.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var block = ast.program.body[0].consequent;
     n.BlockStatement.assert(block);
@@ -268,9 +318,9 @@ describe("comments", function() {
     "}"
   ];
 
-  it("ProtoAssignComment", function() {
+  pit("ProtoAssignComment", function() {
     var code = protoAssign.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var foo = ast.program.body[0];
     var bar = ast.program.body[1];
@@ -303,9 +353,9 @@ describe("comments", function() {
     "};",
   ];
 
-  it("should correctly attach to concise methods", function() {
+  pit("should correctly attach to concise methods", function() {
     var code = conciseMethods.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var objExpr = ast.program.body[0].declarations[0].init;
     n.ObjectExpression.assert(objExpr);
@@ -314,13 +364,13 @@ describe("comments", function() {
     n.Identifier.assert(a.key);
     assert.strictEqual(a.key.name, "a");
 
-    var aComments = a.value.params[0].comments;
+    var aComments = (a.value || a).params[0].comments;
     assert.strictEqual(aComments.length, 1);
 
     var aComment = aComments[0];
     assert.strictEqual(aComment.leading, true);
     assert.strictEqual(aComment.trailing, false);
-    assert.strictEqual(aComment.type, "Block");
+    assert.ok(aComment.type.endsWith("Block"));
     assert.strictEqual(aComment.value, "before");
 
     assert.strictEqual(
@@ -332,13 +382,13 @@ describe("comments", function() {
     n.Identifier.assert(b.key);
     assert.strictEqual(b.key.name, "b");
 
-    var bComments = b.value.params[0].comments;
+    var bComments = (b.value || b).params[0].comments;
     assert.strictEqual(bComments.length, 1);
 
     var bComment = bComments[0];
     assert.strictEqual(bComment.leading, false);
     assert.strictEqual(bComment.trailing, true);
-    assert.strictEqual(bComment.type, "Block");
+    assert.ok(bComment.type.endsWith("Block"));
     assert.strictEqual(bComment.value, "after");
 
     assert.strictEqual(
@@ -350,13 +400,13 @@ describe("comments", function() {
     n.Identifier.assert(c.key);
     assert.strictEqual(c.key.name, "c");
 
-    var cComments = c.value.body.comments;
+    var cComments = (c.value || c).body.comments;
     assert.strictEqual(cComments.length, 1);
 
     var cComment = cComments[0];
     assert.strictEqual(cComment.leading, true);
     assert.strictEqual(cComment.trailing, false);
-    assert.strictEqual(cComment.type, "Block");
+    assert.ok(cComment.type.endsWith("Block"));
     assert.strictEqual(cComment.value, "body");
 
     assert.strictEqual(
@@ -365,7 +415,7 @@ describe("comments", function() {
     );
   });
 
-  it("should attach comments as configurable", function() {
+  pit("should attach comments as configurable", function() {
     // Given
     var simpleCommentedCode = [
       "// A comment",
@@ -373,7 +423,7 @@ describe("comments", function() {
       "};",
     ];
     var code = simpleCommentedCode.join(eol);
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     // When
     Object.defineProperty(ast.program, 'comments', {
@@ -385,19 +435,19 @@ describe("comments", function() {
     // An exception will be thrown if `comments` aren't configurable.
   });
 
-  it("should be reprinted when modified", function() {
+  pit("should be reprinted when modified", function() {
     var code = [
       "foo;",
       "// bar",
       "bar;"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     var comments = ast.program.body[1].comments;
     assert.strictEqual(comments.length, 1);
     var comment = comments[0];
-    assert.strictEqual(comment.type, "Line");
+    assert.ok(comment.type.endsWith("Line"));
     assert.strictEqual(comment.value, " bar");
 
     comment.value = " barbara";
@@ -515,7 +565,7 @@ describe("comments", function() {
     ].join(eol));
   });
 
-  it("should preserve stray non-comment syntax", function() {
+  pit("should preserve stray non-comment syntax", function() {
     var code = [
       "[",
       "  foo",
@@ -526,7 +576,7 @@ describe("comments", function() {
       "]"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     assert.strictEqual(recast.print(ast).code, code);
 
     var elems = ast.program.body[0].expression.elements;
@@ -543,15 +593,24 @@ describe("comments", function() {
     ].join(eol));
   });
 
-  it("should be reprinted even if dangling", function() {
-    var code = [
-      "[/*dangling*/] // array literal"
-    ].join(eol);
+  pit("should be reprinted even if dangling", function() {
+    const code = "[/*dangling*/] // array literal";
+    const ast = recast.parse(code, { parser });
+    const array = ast.program.body[0].expression;
+    const stmt = ast.program.body[0];
+    let danglingComment;
+    let trailingComment;
 
-    var ast = recast.parse(code);
-    var array = ast.program.body[0].expression;
-    var danglingComment = array.comments[0];
-    var trailingComment = array.comments[1];
+    function handleComment(comment) {
+      if (comment.trailing) {
+        trailingComment = comment;
+      } else if (! comment.leading) {
+        danglingComment = comment;
+      }
+    }
+
+    (stmt.comments || []).forEach(handleComment);
+    (stmt.expression.comments || []).forEach(handleComment);
 
     assert.strictEqual(danglingComment.leading, false);
     assert.strictEqual(danglingComment.trailing, false);
@@ -578,7 +637,7 @@ describe("comments", function() {
     );
   });
 
-  it("should attach to program.body[0] instead of program", function() {
+  pit("should attach to program.body[0] instead of program", function() {
     var code = [
       "// comment 1",
       "var a;",
@@ -590,7 +649,7 @@ describe("comments", function() {
       "}"
     ].join('\n');
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     assert.ok(!ast.program.comments);
 
@@ -616,7 +675,7 @@ describe("comments", function() {
     assert.strictEqual(cDecl.comments[0].value, " comment 3");
   });
 
-  it("should not collapse multi line function definitions", function() {
+  pit("should not collapse multi line function definitions", function() {
     var code = [
       "var obj = {",
       "  a(",
@@ -626,7 +685,7 @@ describe("comments", function() {
       "};",
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     var printer = new Printer({
       tabWidth: 2
     });
@@ -637,14 +696,14 @@ describe("comments", function() {
     );
   });
 
-  it("should be pretty-printable in illegal positions", function() {
+  pit("should be pretty-printable in illegal positions", function() {
     var code = [
       "var sum = function /*anonymous*/(/*...args*/) /*int*/ {",
       "  // TODO",
       "};"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     var funExp = ast.program.body[0].declarations[0].init;
     n.FunctionExpression.assert(funExp);
 
@@ -662,14 +721,14 @@ describe("comments", function() {
     );
   });
 
-  it("should preserve correctness when a return expression has a comment", function () {
+  pit("should preserve correctness when a return expression has a comment", function () {
     var code = [
       "function f() {",
       "  return 3;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -682,14 +741,14 @@ describe("comments", function() {
     ].join(eol));
   });
 
-  it("should wrap in parens when the return expression has nested leftmost comment", function () {
+  pit("should wrap in parens when the return expression has nested leftmost comment", function () {
     var code = [
       "function f() {",
       "  return 1 + 2;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.left.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -702,14 +761,14 @@ describe("comments", function() {
     ].join(eol));
   });
 
-  it("should not wrap in parens when the return expression has an interior comment", function () {
+  pit("should not wrap in parens when the return expression has an interior comment", function () {
     var code = [
       "function f() {",
       "  return 1 + 2;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.right.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -720,7 +779,7 @@ describe("comments", function() {
     ].join(eol));
   });
 
-  it("should not reformat a return statement that is not modified", function () {
+  pit("should not reformat a return statement that is not modified", function () {
     var code = [
       "function f() {",
       "  return      {",
@@ -730,19 +789,19 @@ describe("comments", function() {
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
 
     assert.strictEqual(recast.print(ast).code, code);
   });
 
-  it("should correctly handle a removing the argument from a return", function () {
+  pit("should correctly handle a removing the argument from a return", function () {
     var code = [
       "function f() {",
       "  return 'foo';",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code);
+    var ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument = null;
 
     assert.strictEqual(recast.print(ast).code, [
@@ -751,4 +810,4 @@ describe("comments", function() {
       "}"
     ].join(eol));
   });
-});
+}

@@ -8,23 +8,7 @@ const parse = require("../lib/parser").parse;
 const Printer = require("../lib/printer").Printer;
 const types = require("../lib/types");
 const eol = require("os").EOL;
-const babylon = require("babylon");
-const babylonOptions = {
-  sourceType: "module",
-  plugins: [
-    'typescript',
-    'classProperties',
-    'asyncGenerators',
-    'decorators',
-    'objectRestSpread',
-  ]
-};
-
-const parser = {
-  parse(source) {
-    return babylon.parse(source, babylonOptions);
-  }
-};
+const parser = require("../parsers/typescript");
 
 describe("TypeScript", function() {
   it('basic printing', function() {
