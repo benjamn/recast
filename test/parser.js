@@ -55,7 +55,7 @@ function runTestsForParser(parserId) {
   const parserName = parserId.split("/").pop();
   const parser = require(parserId);
 
-  it("empty source (" + parserName + ")", function () {
+  it("[" + parserName + "] empty source", function () {
     var printer = new Printer;
 
     function check(code) {
@@ -80,7 +80,7 @@ function runTestsForParser(parserId) {
     typescript: "CommentLine"
   };
 
-  it("parser basics (" + parserName + ")", function testParser(done) {
+  it("[" + parserName + "] parser basics", function testParser(done) {
     var code = testParser + "";
     var ast = parse(code, { parser });
 
@@ -140,7 +140,7 @@ function runTestsForParser(parserId) {
     done();
   });
 
-  it("LocationFixer (" + parserName + ")", function() {
+  it("[" + parserName + "] LocationFixer", function() {
     var code = [
       "function foo() {",
       "    a()",
@@ -165,7 +165,7 @@ function runTestsForParser(parserId) {
     assert.strictEqual(altered, printer.print(ast).code);
   });
 
-  it("TabHandling (" + parserName + ")", function() {
+  it("[" + parserName + "] TabHandling", function() {
     function check(code, tabWidth) {
       var lines = fromString(code, { tabWidth: tabWidth });
       assert.strictEqual(lines.length, 1);
