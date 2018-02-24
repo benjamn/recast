@@ -202,4 +202,35 @@ function runTestsForParser(parserId) {
       check("\t \ti \t=\t 10;\t ", tabWidth);
     }
   });
+
+  it("[" + parserName + "] Only comment followed by space", function () {
+    const printer = new Printer;
+
+    function check(code) {
+      const ast = parse(code, { parser });
+      assert.strictEqual(
+        printer.print(ast).code,
+        code
+      );
+    }
+
+    check("// comment");
+    check("// comment ");
+    check("// comment\n");
+    check("// comment\n\n");
+    check(" // comment\n");
+    check(" // comment\n ");
+    check(" // comment \n ");
+
+    check("/* comment */");
+    check("/* comment */ ");
+    check(" /* comment */");
+    check("\n/* comment */");
+    check("\n/* comment */\n");
+    check("\n /* comment */\n ");
+    check("/* comment */\n ");
+    check("/* com\n\nment */");
+    check("/* com\n\nment */ ");
+    check(" /* com\n\nment */ ");
+  });
 }
