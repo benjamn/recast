@@ -38,7 +38,7 @@
     "@babel/preset-es2015": "^7.0.0-beta.40",
     "babylon": "^7.0.0-beta.40",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
-    "flow-parser": "^0.66.0",
+    "flow-parser": "^0.67.1",
     "glob": "^7.1.2",
     "mocha": "~5.0.0",
     "reify": "^0.14.1",
