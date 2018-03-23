@@ -426,4 +426,16 @@ describe("Babel", function () {
     var output = recast.print(ast, { tabWidth: 2 }).code;
     assert.strictEqual(output, code);
   });
+
+  it("prints the export-default-from syntax", function () {
+    var code = 'export { default as foo, bar } from "foo";';
+    var ast = recast.parse(code, parseOptions);
+
+    var replacement = b.exportDefaultSpecifier(b.identifier('foo'));
+    ast.program.body[0].specifiers[0] = replacement;
+    assert.strictEqual(
+        recast.print(ast).code,
+        'export foo, { bar } from "foo";'
+    );
+  });
 });
