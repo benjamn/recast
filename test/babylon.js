@@ -428,14 +428,29 @@ describe("Babel", function () {
   });
 
   it("prints the export-default-from syntax", function () {
-    var code = 'export { default as foo, bar } from "foo";';
+    var code = [
+      'export { default as foo, bar } from "foo";',
+      'export { default as veryLongIdentifier1, veryLongIdentifier2, veryLongIdentifier3, veryLongIdentifier4, veryLongIdentifier5 } from "long-identifiers";'
+    ].join(eol);
     var ast = recast.parse(code, parseOptions);
 
-    var replacement = b.exportDefaultSpecifier(b.identifier('foo'));
-    ast.program.body[0].specifiers[0] = replacement;
+    var replacement1 = b.exportDefaultSpecifier(b.identifier('foo'));
+    var replacement2 = b.exportDefaultSpecifier(
+      b.identifier('veryLongIdentifier1')
+    );
+    ast.program.body[0].specifiers[0] = replacement1;
+    ast.program.body[1].specifiers[0] = replacement2;
     assert.strictEqual(
         recast.print(ast).code,
-        'export foo, { bar } from "foo";'
+        [
+          'export foo, { bar } from "foo";',
+          'export veryLongIdentifier1, {',
+          '  veryLongIdentifier2,',
+          '  veryLongIdentifier3,',
+          '  veryLongIdentifier4,',
+          '  veryLongIdentifier5,',
+          '} from "long-identifiers";'
+        ].join(eol)
     );
   });
 });
