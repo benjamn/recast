@@ -545,7 +545,7 @@ describe("printer", function() {
 
   it("empty ExportDeclaration", function() {
     var printer = new Printer();
-    var code = "export {  };";
+    var code = "export {};";
     var ast = parse(code);
 
     assert.strictEqual(printer.print(ast).code, code);
