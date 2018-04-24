@@ -1721,4 +1721,35 @@ describe("printer", function() {
 
     assert.strictEqual(recast.print(ast).code, '4 + 5;');
   });
+
+  it("prints flow tuple type annotations correctly, respecting array options", function () {
+    var code = [
+      'type MyTupleType = [',
+      '  "tuple element 1",',
+      '  "tuple element 2",',
+      '  "tuple element 3",',
+      '];',
+    ].join(eol);
+
+    var ast = b.program([
+      b.typeAlias(
+        b.identifier('MyTupleType'),
+        null,
+        b.tupleTypeAnnotation([
+          b.stringLiteralTypeAnnotation('tuple element 1', 'tuple element 1'),
+          b.stringLiteralTypeAnnotation('tuple element 2', 'tuple element 2'),
+          b.stringLiteralTypeAnnotation('tuple element 3', 'tuple element 3'),
+        ])
+      ),
+    ]);
+
+    var printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
