@@ -6,6 +6,7 @@ node_js:
   - "6"
   - "5"
   - "4"
+  - "10"
 
 # Allow Travis tests to run in containers.
 sudo: false
