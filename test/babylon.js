@@ -393,6 +393,13 @@ describe("Babel", function () {
       )
     );
 
+    ast.program.body[0] = replacement;
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      '\nfn(test, true);'
+    );
+
     recast.types.visit(ast, {
       visitIfStatement: function(path) {
         path.replace(replacement);
@@ -400,14 +407,9 @@ describe("Babel", function () {
       }
     });
 
-    // This also doesn't work:
-    // ast.program.body[0] = replacement;
-
-    // The `ast` contains the correct replacement nodes but the printed code
-    // is still the same as the original.
     assert.strictEqual(
       recast.print(ast).code,
-      'fn(test, true);'
+      '\nfn(test, true);'
     );
   });
 

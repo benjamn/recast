@@ -54,7 +54,7 @@ function runTestsForParser(parserId) {
   const parserName = parserId.split("/").pop();
   const parser = require(parserId);
 
-  it("empty source (" + parserName + ")", function () {
+  it("[" + parserName + "] empty source", function () {
     var printer = new Printer;
 
     function check(code) {
@@ -79,7 +79,7 @@ function runTestsForParser(parserId) {
     typescript: "CommentLine"
   };
 
-  it("parser basics (" + parserName + ")", function testParser(done) {
+  it("[" + parserName + "] parser basics", function testParser(done) {
     var code = testParser + "";
     var ast = parse(code, { parser });
 
@@ -139,7 +139,7 @@ function runTestsForParser(parserId) {
     done();
   });
 
-  it("LocationFixer (" + parserName + ")", function() {
+  it("[" + parserName + "] LocationFixer", function() {
     var code = [
       "function foo() {",
       "    a()",
@@ -164,7 +164,7 @@ function runTestsForParser(parserId) {
     assert.strictEqual(altered, printer.print(ast).code);
   });
 
-  it("TabHandling (" + parserName + ")", function() {
+  it("[" + parserName + "] TabHandling", function() {
     function check(code, tabWidth) {
       var lines = fromString(code, { tabWidth: tabWidth });
       assert.strictEqual(lines.length, 1);
@@ -200,5 +200,36 @@ function runTestsForParser(parserId) {
       check("\t \ti \t=\t 10;\t", tabWidth);
       check("\t \ti \t=\t 10;\t ", tabWidth);
     }
+  });
+
+  it("[" + parserName + "] Only comment followed by space", function () {
+    const printer = new Printer;
+
+    function check(code) {
+      const ast = parse(code, { parser });
+      assert.strictEqual(
+        printer.print(ast).code,
+        code
+      );
+    }
+
+    check("// comment");
+    check("// comment ");
+    check("// comment\n");
+    check("// comment\n\n");
+    check(" // comment\n");
+    check(" // comment\n ");
+    check(" // comment \n ");
+
+    check("/* comment */");
+    check("/* comment */ ");
+    check(" /* comment */");
+    check("\n/* comment */");
+    check("\n/* comment */\n");
+    check("\n /* comment */\n ");
+    check("/* comment */\n ");
+    check("/* com\n\nment */");
+    check("/* com\n\nment */ ");
+    check(" /* com\n\nment */ ");
   });
 }
