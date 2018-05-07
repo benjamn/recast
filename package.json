@@ -21,8 +21,8 @@
   "license": "MIT",
   "main": "main.js",
   "scripts": {
-    "test": "test/run.sh",
-    "debug": "test/run.sh --inspect-brk",
+    "test": "bash -c test/run.sh",
+    "debug": "bash -c -- test/run.sh --inspect-brk",
     "pub": "npm publish --access public"
   },
   "browser": {
