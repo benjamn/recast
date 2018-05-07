@@ -1,13 +1,20 @@
 language: node_js
 node_js:
+  - 10
   - 9
   - 8
   - 7
   - 6
   - 5
   - 4
-  - stable
+  - node
 
 # Allow Travis tests to run in containers.
 sudo: false
 
+# Update package-lock.json after test runs:
+before_install:
+  - npm install -g npm
+  - npm install -g greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
