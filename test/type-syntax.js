@@ -28,6 +28,10 @@ describe("type syntax", function() {
     // Import type annotations
     check("import type foo from 'foo';");
     check("import typeof foo from 'foo';");
+    check("import { type foo } from 'foo';", flowParserParseOptions);
+
+    // Export type annotations
+    check("export type { foo };");
 
     // Scalar type annotations
     check("var a: number;");
