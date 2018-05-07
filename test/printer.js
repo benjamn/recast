@@ -1697,16 +1697,11 @@ describe("printer", function() {
       check("let i = 0 ; ; ", parser);
     }
 
-    checkWith(require("@gerhobbelt/esprima"));
-
-    try {
-      checkWith(require("reify/lib/parsers/acorn.js"));
-      checkWith(require("reify/lib/parsers/babylon.js"));
-    } catch (e) {
-      if (require("semver").gte(process.version, "4.0.0")) {
-        throw e;
-      }
-    }
+    checkWith(require("../parsers/esprima"));
+    checkWith(require("../parsers/acorn"));
+    checkWith(require("../parsers/babylon"));
+    checkWith(require("../parsers/typescript"));
+    checkWith(require("../parsers/flow"));
   });
 
   it("parenthesizes NumericLiteral MemberExpression objects", function () {

@@ -5,7 +5,7 @@ var types = require("../lib/types");
 describe("JSX Compatability", function() {
   var printer = new Printer({ tabWidth: 2 });
   var parseOptions = {
-    parser: require("reify/lib/parsers/babylon")
+    parser: require("../parsers/babylon")
   };
 
   function check(source) {

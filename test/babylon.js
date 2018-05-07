@@ -1,5 +1,4 @@
 var assert = require("assert");
-var babylon = require("babylon");
 var recast = require("../main.js");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
@@ -11,31 +10,7 @@ describe("Babel", function () {
   var parseOptions = {};
 
   try {
-    parseOptions.parser = {
-      parse(code) {
-        return babylon.parse(code, {
-          allowImportExportEverywhere: true,
-          allowReturnOutsideFunction: true,
-          plugins: [
-            "*", "flow", "jsx",
-            // The "*" glob no longer seems to include the following plugins:
-            "asyncGenerators",
-            "classProperties",
-            "decorators",
-            "doExpressions",
-            "dynamicImport",
-            "exportExtensions",
-            "functionBind",
-            "functionSent",
-            "objectRestSpread",
-            // Other experimental plugins that we could enable:
-            // https://github.com/babel/babylon#plugins
-          ],
-          sourceType: "module",
-          strictMode: false
-        });
-      }
-    };
+    parseOptions.parser = require("../parsers/babylon");
   } catch (e) {
     if (require("semver").gte(process.version, "4.0.0")) {
       throw e;
