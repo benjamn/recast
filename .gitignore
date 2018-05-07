@@ -1,1 +1,3 @@
 /node_modules
+/test/data/babylon-typescript-fixtures
+/test/data/graphql-tools-src
