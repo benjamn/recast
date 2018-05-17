@@ -1,11 +1,13 @@
 var assert = require("assert");
 var fs = require("fs");
 var path = require("path");
+var eol = require("os").EOL;
 var types = require("../lib/types");
 var main = require("../main");
 
 function testFile(path, done) {
     fs.readFile(path, "utf-8", function(err, source) {
+        source = source.replace(/\r?\n/g, eol);
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
 
