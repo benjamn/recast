@@ -4,7 +4,7 @@ var path = require("path");
 var types = require("../lib/types");
 var main = require("../main");
 
-function testFile(path) {
+function testFile(path, done) {
     fs.readFile(path, "utf-8", function(err, source) {
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
@@ -13,12 +13,14 @@ function testFile(path) {
         types.astNodesAreEquivalent.assert(ast.original, ast);
         var code = main.print(ast).code;
         assert.strictEqual(source, code);
+        
+        done();
     });
 }
 
 function addTest(name) {
-    it(name, function() {
-        testFile(path.join(__dirname, "..", name + ".js"));
+    it(name, function(done) {
+        testFile(path.join(__dirname, "..", name + ".js"), done);
     });
 }
 
