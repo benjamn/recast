@@ -13,11 +13,17 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
 // test functions with names and then export them later.
 
 describe("parser", function() {
-  ["../parsers/acorn",
-   "../parsers/babel",
-   "../parsers/esprima",
-   "../parsers/flow",
-   "../parsers/typescript",
+  [{id: "../parsers/acorn"},
+   {id: "../parsers/babel"},
+   {id: "../parsers/esprima", factory(p: any) {
+    return {
+      parse: function(source: string, options: any) {
+        return p.__parseInternal(source, options, {range: true});
+      }
+    }
+  }},
+   {id: "../parsers/flow"},
+   {id: "../parsers/typescript"},
   ].forEach(runTestsForParser);
 
   it("AlternateParser", function() {
@@ -49,7 +55,8 @@ describe("parser", function() {
   });
 });
 
-function runTestsForParser(parserId: string) {
+function runTestsForParser(opts: {id: string, factory?: Function}) {
+  const {id: parserId, factory: parserFactory} = opts;
   const parserName = parserId.split("/").pop();
 
   if (nodeMajorVersion < 6 &&
@@ -64,7 +71,10 @@ function runTestsForParser(parserId: string) {
     return;
   }
 
-  const parser = require(parserId);
+  let parser = require(parserId);
+  if(parserFactory) {
+    parser = parserFactory(parser);
+  }
 
   it("[" + parserName + "] empty source", function () {
     var printer = new Printer;
@@ -245,5 +255,23 @@ function runTestsForParser(parserId: string) {
     check("/* com\n\nment */");
     check("/* com\n\nment */ ");
     check(" /* com\n\nment */ ");
+  });
+
+  it("[" + parserName + "] node locations use specified lineTerminator", function () {
+
+    check('\n', '\n');
+    check('\r\n', '\n');
+    check('\n', '\r\n');
+    check('\r\n', '\r\n');
+
+    function check(parsedLineTerminator: string, inputLineTerminator: string) {
+      const codeLines = [
+        "", // single leading newline (either \n or \r\n)
+        "foo;"
+      ];
+      const code = codeLines.join(inputLineTerminator);
+      const ast = parse(code, { parser, parsedLineTerminator });
+      assert.strictEqual(ast.program.body[0].start || ast.program.body[0].range[0], parsedLineTerminator.length);
+    }
   });
 }
