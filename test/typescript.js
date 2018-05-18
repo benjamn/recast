@@ -329,6 +329,11 @@ function testReprinting(pattern, description) {
 
       assert.strictEqual(recast.print(ast).code, source);
       const reprintedCode = recast.prettyPrint(ast).code;
+      try {
+        recast.parse(reprintedCode, { parser });
+      } catch(e) {
+        console.dir(reprintedCode.slice(0, 400));
+      }
       const reparsedAST = recast.parse(reprintedCode, { parser });
       types.astNodesAreEquivalent(ast, reparsedAST);
     }));
