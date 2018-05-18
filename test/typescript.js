@@ -313,8 +313,9 @@ function testReprinting(pattern, description) {
 
       const absPath = path.join(__dirname, file);
       const source = fs.readFileSync(absPath, "utf8");
+      let ast;
       try {
-        const ast = tryToParseFile(source, absPath);
+        ast = tryToParseFile(source, absPath);
       } catch(e) {
         failedToParse.push([e, absPath]);
         return;
@@ -332,13 +333,15 @@ function testReprinting(pattern, description) {
       types.astNodesAreEquivalent(ast, reparsedAST);
     }));
 
-    // If more than 20% of codebase failed to parse, consider it failure and throw first error.
-    // (as would have otherwise happened)
-    // Otherwise, we probably parsed enough code to have a good test, so pass.
-    // Some parsing failures are due to syntax errors in external codebase; not recast bugs.
-    if(failedToParse.length > sourcePaths.length * 0.2) {
-      throw failedToParse[0][0];
-    }
+    it('was not forced to skip too many source files', function() {
+      // If more than 20% of codebase failed to parse, consider it failure and throw first error.
+      // (as would have otherwise happened)
+      // Otherwise, we probably parsed enough code to have a good test, so pass.
+      // Some parsing failures are due to syntax errors in external codebase; not recast bugs.
+      if(failedToParse.length > sourcePaths.length * 0.2) {
+        throw failedToParse[0][0];
+      }
+    });
   });
 }
 
