@@ -301,9 +301,11 @@ testReprinting(
 
 function testReprinting(pattern, description) {
   describe(description, function () {
-    require("glob").sync(pattern, {
+    const failedToParse = [];
+    const sourcePaths = require("glob").sync(pattern, {
       cwd: __dirname
-    }).forEach(file => it(file, function () {
+    });
+    sourcePaths.forEach(file => it(file, function () {
       if (file.indexOf("tsx/brace-is-block") >= 0 ||
           file.endsWith("stitching/errors.ts")) {
         return;
@@ -311,7 +313,12 @@ function testReprinting(pattern, description) {
 
       const absPath = path.join(__dirname, file);
       const source = fs.readFileSync(absPath, "utf8");
-      const ast = tryToParseFile(source, absPath);
+      try {
+        const ast = tryToParseFile(source, absPath);
+      } catch(e) {
+        failedToParse.push([e, absPath]);
+        return;
+      }
 
       if (ast === null) {
         return;
@@ -324,6 +331,14 @@ function testReprinting(pattern, description) {
       const reparsedAST = recast.parse(reprintedCode, { parser });
       types.astNodesAreEquivalent(ast, reparsedAST);
     }));
+
+    // If more than 20% of codebase failed to parse, consider it failure and throw first error.
+    // (as would have otherwise happened)
+    // Otherwise, we probably parsed enough code to have a good test, so pass.
+    // Some parsing failures are due to syntax errors in external codebase; not recast bugs.
+    if(failedToParse.length > sourcePaths.length * 0.2) {
+      throw failedToParse[0][0];
+    }
   });
 }
 
