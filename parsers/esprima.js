@@ -10,6 +10,11 @@
 const getOption = require("../lib/util.js").getOption;
 
 exports.parse = function (source, options) {
+  return exports.__parseInternal(source, options);
+};
+
+// required by unit tests to pass additional options to esprima
+exports.__parseInternal = function (source, options, extraOptions) {
   const comments = [];
   const ast = require("esprima").parse(source, {
     loc: true,
@@ -17,7 +22,8 @@ exports.parse = function (source, options) {
     comment: true,
     onComment: comments,
     tolerant: getOption(options, "tolerant", true),
-    tokens: getOption(options, "tokens", true)
+    tokens: getOption(options, "tokens", true),
+    ...extraOptions
   });
 
   if (! Array.isArray(ast.comments)) {
