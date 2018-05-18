@@ -332,7 +332,7 @@ function testReprinting(pattern, description) {
       try {
         recast.parse(reprintedCode, { parser });
       } catch(e) {
-        console.dir(reprintedCode.slice(0, 400));
+        console.dir(reprintedCode.slice(0, 2000));
       }
       const reparsedAST = recast.parse(reprintedCode, { parser });
       types.astNodesAreEquivalent(ast, reparsedAST);
