@@ -14,11 +14,17 @@ var eol = require("os").EOL;
 // test functions with names and then export them later.
 
 describe("parser", function() {
-  ["../parsers/acorn",
-   "../parsers/babylon",
-   "../parsers/esprima",
-   "../parsers/flow",
-   "../parsers/typescript",
+  [["../parsers/acorn"],
+   ["../parsers/babylon"],
+   ["../parsers/esprima", function(p) {
+    return {
+      parse: function(source, options) {
+        return p.__parseInternal(source, options, {range: true});
+      }
+    }
+  }],
+   ["../parsers/flow"],
+   ["../parsers/typescript"],
   ].forEach(runTestsForParser);
 
   it("AlternateParser", function() {
@@ -50,9 +56,10 @@ describe("parser", function() {
   });
 });
 
-function runTestsForParser(parserId) {
+function runTestsForParser([parserId, parserFactory]) {
   const parserName = parserId.split("/").pop();
-  const parser = require(parserId);
+  let parser = require(parserId);
+  if(parserFactory) parser = parserFactory(parser);
 
   it("[" + parserName + "] empty source", function () {
     var printer = new Printer;
@@ -231,5 +238,23 @@ function runTestsForParser(parserId) {
     check("/* com\n\nment */");
     check("/* com\n\nment */ ");
     check(" /* com\n\nment */ ");
+  });
+
+  it("[" + parserName + "] node locations use specified lineTerminator", function() {
+
+    check('\n', '\n');
+    check('\r\n', '\n');
+    check('\n', '\r\n');
+    check('\r\n', '\r\n');
+
+    function check(lineTerminator, inputLineTerminator) {
+      const codeLines = [
+        "", // single leading newline (either \n or \r\n)
+        "foo;"
+      ];
+      const code = codeLines.join(inputLineTerminator);
+      const ast = parse(code, { parser, lineTerminator });
+      assert.strictEqual(ast.program.body[0].start || ast.program.body[0].range[0], lineTerminator.length);
+    }
   });
 }
