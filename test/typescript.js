@@ -10,6 +10,8 @@ const types = require("../lib/types");
 const eol = require("os").EOL;
 const parser = require("../parsers/typescript");
 
+const devDebug = 0;    // set to truthy value to have the TypeScript tests dump reprinted-test-crashes contexts to files for checking...
+
 describe("TypeScript", function() {
   it('basic printing', function() {
     function check(lines) {
@@ -332,7 +334,18 @@ function testReprinting(pattern, description) {
       try {
         recast.parse(reprintedCode, { parser });
       } catch(e) {
-        console.dir(reprintedCode.slice(0, 2000));
+        if (0) {
+          console.error('-------------\n' + reprintedCode.slice(0, 2000) + '\n-----------------');
+        }
+        // save both original and reprinted code for further analysis:
+        if (devDebug) {
+          var srcPath = file.replace(/[^-a-z0-9_.~$()@+=]/g, '_');
+          fs.writeFileSync('check-' + srcPath + '.1src.js', source, "utf8");
+          fs.writeFileSync('check-' + srcPath + '.2rw.js', reprintedCode + '\n-------------------\n' + e.message + '\n' + String(e.stack) + '\n' + JSON.stringify(e, null, 2) + '\n------------\n', "utf8");
+          console.error('files related to the fault dumped here: ', 'check-' + srcPath + '.*.js');
+        }
+        failedToParse.push([e, absPath]);
+        return;
       }
       const reparsedAST = recast.parse(reprintedCode, { parser });
       types.astNodesAreEquivalent(ast, reparsedAST);
