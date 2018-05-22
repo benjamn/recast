@@ -276,7 +276,7 @@ describe("lines", function() {
     });
 
     it("Slice", function SliceTest() {
-        var code = functionToString(SliceTest);
+        var code = functionToString(SliceTest),
             lines = fromString(code);
         checkAllSlices(lines);
     });
