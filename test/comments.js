@@ -113,22 +113,19 @@ function runTestsForParser(parserId) {
     "  /**",
     "   * Leading comment.",
     "   */",
-    "  // Important for instanceof",
-    "  // to work in all browsers.",
-    "  constructor: Foo,",
+    "  constructor: Foo, // Important for instanceof",
+    "                    // to work in all browsers.",
     "",
-    "  // Just in case we need it.",
-    '  bar: "baz",',
+    '  bar: "baz", // Just in case we need it.',
     "",
-    "  // There was an object literal...",
-    "  // ... and here I am continuing this comment.",
     "  qux: {",
     "    // Here is an object literal.",
-    "    // Put more properties here when you think of them.",
     "    zxcv: 42,",
+    "    // Put more properties here when you think of them.",
     "",
     "    asdf: 43",
-    "  },",
+    "  } // There was an object literal...",
+    "    // ... and here I am continuing this comment.",
     "",
     '  extra: "property"',
     "};"
@@ -208,7 +205,7 @@ function runTestsForParser(parserId) {
       recast.parse(actual, { parser })
     );
 
-    assert.strictEqual(actual, expected);
+    assert.strictEqual(actual.replace(/\r\n/g, '\n'), expected.replace(/\r\n/g, '\n'));
   });
 
   var bodyTrailing = [
@@ -304,7 +301,7 @@ function runTestsForParser(parserId) {
     var actual = recast.print(ast, { tabWidth: 2 }).code;
     var expected = statementTrailingExpected.join(eol);
 
-    assert.strictEqual(actual, expected);
+    assert.strictEqual(actual.replace(/\r\n/g, '\n'), expected.replace(/\r\n/g, '\n'));
   });
 
   var protoAssign = [

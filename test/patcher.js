@@ -162,6 +162,7 @@ describe("patcher", function() {
 
         var twoLineAST = parse(twoLineCode);
 
+        console.error('use strict test @ 165:', recast.print(twoLineAST).code, twoLineAST.program.body);
         assert.strictEqual(twoLineAST.program.body.length, 2);
         var useStrict = twoLineAST.program.body[1];
         n.ExpressionStatement.assert(useStrict);
@@ -169,8 +170,8 @@ describe("patcher", function() {
         assert.strictEqual(useStrict.expression.value, "use strict");
 
         assert.strictEqual(
-            recast.print(twoLineAST).code,
-            twoLineCode
+            recast.print(twoLineAST).code.replace(/\r\n/g, '\n'),
+            twoLineCode.replace(/\r\n/g, '\n')
         );
 
         useStrict.expression = b.identifier("sloppy");

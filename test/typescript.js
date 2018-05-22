@@ -319,7 +319,7 @@ function testReprinting(pattern, description) {
 
       this.timeout(20000);
 
-      assert.strictEqual(recast.print(ast).code, source);
+      assert.strictEqual(recast.print(ast).code.replace(/\r\n/g, '\n'), source.replace(/\r\n/g, '\n'));
       const reprintedCode = recast.prettyPrint(ast).code;
       const reparsedAST = recast.parse(reprintedCode, { parser });
       types.astNodesAreEquivalent(ast, reparsedAST);

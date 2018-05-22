@@ -396,7 +396,7 @@ describe("Babel", function () {
     ast.program.body[0] = replacement;
 
     assert.strictEqual(
-      recast.print(ast).code,
+      recast.print(ast).code.replace(/\r\n/g, '\n'),
       '\nfn(test, true);'
     );
 
@@ -408,7 +408,7 @@ describe("Babel", function () {
     });
 
     assert.strictEqual(
-      recast.print(ast).code,
+      recast.print(ast).code.replace(/\r\n/g, '\n'),
       '\nfn(test, true);'
     );
   });

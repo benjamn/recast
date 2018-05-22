@@ -208,8 +208,8 @@ function runTestsForParser(parserId) {
     function check(code) {
       const ast = parse(code, { parser });
       assert.strictEqual(
-        printer.print(ast).code,
-        code
+        printer.print(ast).code.replace(/\r\n/g, '\n'),
+        code.replace(/\r\n/g, '\n')
       );
     }
 
