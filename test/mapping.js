@@ -54,6 +54,16 @@ describe("source maps", function() {
         );
 
         var smc = new sourceMap.SourceMapConsumer(printed.map);
+        // fix for source-map 0.7x breaking change:
+        // 
+        // * **Breaking change:** `new SourceMapConsumer` now returns a `Promise` object
+        // that resolves to the newly constructed `SourceMapConsumer` instance, rather
+        // than returning the new instance immediately.
+        if (0) {
+            smc.then(function (map) {
+                smc = map;
+            });
+        }
 
         function check(origLine, origCol, genLine, genCol, lastColumn) {
             assert.deepEqual(smc.originalPositionFor({
