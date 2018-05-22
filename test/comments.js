@@ -808,52 +808,68 @@ function runTestsForParser(parserId) {
     ].join(eol));
   });
 
-    pit("should correctly handle a lonesome comment (alt 1)", function () {
-        var code = [
-            "",
-            "// boo",
-            ""
-        ].join(eol);
+  pit("should correctly handle a lonesome comment (alt 1)", function () {
+    var code = [
+      "",
+      "// boo",
+      ""
+    ].join(eol);
 
-        var ast = recast.parse(code, { parser });
+    var ast = recast.parse(code, { parser });
 
-        assert.strictEqual(recast.print(ast).code, [
-            "",
-            "// boo",
-            ""
-        ].join(eol));
-    });
+    assert.strictEqual(recast.print(ast).code, [
+      "",
+      "// boo",
+      ""
+    ].join(eol));
+  });
 
-    pit("should correctly handle a not-so-lonesome comment (alt 2 - trailing whitespace)", function () {
-        var code = [
-            "",
-            "// boo ",
-            ";"
-        ].join(eol);
+  pit("should correctly handle a not-so-lonesome comment (alt 2 - trailing whitespace)", function () {
+    var code = [
+      "",
+      "// boo ",
+      ";"
+    ].join(eol);
 
-        var ast = recast.parse(code, { parser });
+    var ast = recast.parse(code, { parser });
 
-        assert.strictEqual(recast.print(ast).code, [
-            "",
-            "// boo ",
-            ";"
-        ].join(eol));
-    });
+    assert.strictEqual(recast.print(ast).code, [
+      "",
+      "// boo ",
+      ";"
+    ].join(eol));
+  });
 
-    pit("should correctly handle a lonesome comment (alt 3 - trailing whitespace)", function () {
-        var code = [
-            "",
-            "// boo ",
-            ""
-        ].join(eol);
+  pit("should correctly handle a lonesome comment (alt 3 - trailing whitespace)", function () {
+    var code = [
+      "",
+      "// boo ",
+      ""
+    ].join(eol);
 
-        var ast = recast.parse(code, { parser });
+    var ast = recast.parse(code, { parser });
 
-        assert.strictEqual(recast.print(ast).code, [
-            "",
-            "// boo ",
-            ""
-        ].join(eol));
-    });
+    assert.strictEqual(recast.print(ast).code, [
+      "",
+      "// boo ",
+      ""
+    ].join(eol));
+  });
+
+  pit("should preserve comments attached to EmptyStatement", function() {
+    var code = [
+      "removeThisStatement;",
+      "// comment",
+      ";(function() {})();"
+    ].join(eol);
+
+    var ast = recast.parse(code, { parser });
+    ast.program.body.shift();
+
+    assert.strictEqual(recast.print(ast).code, [
+      "// comment",
+      ";(function() {})();"
+    ].join(eol));
+  });
 }
 
