@@ -276,8 +276,8 @@ describe("lines", function() {
     });
 
     it("Slice", function SliceTest() {
-        var code = functionToString(SliceTest),
-            lines = fromString(code);
+        var code = functionToString(SliceTest);
+        var lines = fromString(code);
         checkAllSlices(lines);
     });
 
@@ -299,7 +299,7 @@ describe("lines", function() {
 
     it("GetSourceLocation", function GetSourceLocationTest() {
         var code = functionToString(GetSourceLocationTest);
-            lines = fromString(code);
+        var lines = fromString(code);
 
         function verify(indent) {
             var indented = lines.indentTail(indent),
