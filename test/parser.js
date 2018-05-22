@@ -213,6 +213,7 @@ function runTestsForParser([parserId, parserFactory]) {
     const printer = new Printer;
 
     function check(code) {
+      code = code.replace(/\r?\n/g, eol);
       const ast = parse(code, { parser });
       assert.strictEqual(
         printer.print(ast).code.replace(/\r\n/g, '\n'),

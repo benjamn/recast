@@ -382,7 +382,7 @@ describe("Babel", function () {
       'if (test) {',
       '  console.log(test);',
       '}',
-    ].join('\n');
+    ].join(eol);
 
     var ast = recast.parse(code, parseOptions);
 
@@ -396,8 +396,8 @@ describe("Babel", function () {
     ast.program.body[0] = replacement;
 
     assert.strictEqual(
-      recast.print(ast).code.replace(/\r\n/g, '\n'),
-      '\nfn(test, true);'
+      recast.print(ast).code,
+      eol + 'fn(test, true);'
     );
 
     recast.types.visit(ast, {
@@ -408,8 +408,8 @@ describe("Babel", function () {
     });
 
     assert.strictEqual(
-      recast.print(ast).code.replace(/\r\n/g, '\n'),
-      '\nfn(test, true);'
+      recast.print(ast).code,
+      eol + 'fn(test, true);'
     );
   });
 
