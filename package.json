@@ -36,7 +36,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.40",
     "@babel/preset-es2015": "^7.0.0-beta.40",
-    "babylon": "^7.0.0-beta.42",
+    "babylon": "^7.0.0-beta.47",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "flow-parser": "^0.68.0",
     "glob": "^7.1.2",

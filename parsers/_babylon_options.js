@@ -18,7 +18,7 @@ module.exports = function (options) {
       "classPrivateMethods",
       "classPrivateProperties",
       "classProperties",
-      "decorators",
+      "decorators-legacy",
       "doExpressions",
       "dynamicImport",
       "exportDefaultFrom",
