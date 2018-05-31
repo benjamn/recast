@@ -1,3 +1,4 @@
 /node_modules
 /test/data/babylon
+/test/data/babel-parser
 /test/data/graphql-tools-src

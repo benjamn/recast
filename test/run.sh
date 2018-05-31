@@ -4,13 +4,13 @@ set -ex
 
 cd $(dirname $0)/data
 
-BAB_TAG=v$(node -p 'require("babylon/package.json").version')
+BAB_TAG=v$(node -p 'require("@babel/parser/package.json").version')
 
-if [ ! -d babylon ]
+if [ ! -d babel-parser ]
 then
     git clone --branch "$BAB_TAG" --depth 1 \
         https://github.com/babel/babel.git
-    mv babel/packages/babylon .
+    mv babel/packages/babel-parser .
     rm -rf babel
 fi
 

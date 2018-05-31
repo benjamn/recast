@@ -936,7 +936,7 @@ describe("printer", function() {
 
     var ast = parse(code, {
       // The flow parser and Babylon recognize `...rest` as a `RestElement`
-      parser: require("babylon")
+      parser: require("@babel/parser")
     });
 
     var printer = new Printer({
@@ -1558,7 +1558,7 @@ describe("printer", function() {
   });
 
   it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    var babylon = require("babylon");
+    var babylon = require("@babel/parser");
     var parseOptions = {
       parser: {
         parse: function (source) {

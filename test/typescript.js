@@ -290,7 +290,7 @@ describe("TypeScript", function() {
 });
 
 testReprinting(
-  "data/babylon/test/fixtures/typescript/**/input.js",
+  "data/babel-parser/test/fixtures/typescript/**/input.js",
   "Reprinting Babylon TypeScript test fixtures"
 );
 
