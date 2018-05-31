@@ -1,5 +1,7 @@
 "use strict";
 
+const parser = require("./babylon.js").parser;
+
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process Flow code:
 //
@@ -10,5 +12,5 @@
 exports.parse = function parse(source, options) {
   options = require("./_babylon_options.js")(options);
   options.plugins.push("jsx", "flow");
-  return require("babylon").parse(source, options);
+  return parser.parse(source, options);
 };
