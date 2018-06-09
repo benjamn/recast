@@ -1,6 +1,14 @@
 "use strict";
 
-var babylon = require("babylon");
+// Prefer the new @babel/parser package, but fall back to babylon if
+// that's what's available.
+const parser = exports.parser = function () {
+  try {
+    return require("@babel/parser");
+  } catch (e) {
+    return require("babylon");
+  }
+}();
 
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process JavaScript code with Babel:
@@ -12,5 +20,5 @@ var babylon = require("babylon");
 exports.parse = function (source, options) {
   options = require("./_babylon_options.js")(options);
   options.plugins.push("*", "jsx", "flow");
-  return babylon.parse(source, options);
+  return parser.parse(source, options);
 };

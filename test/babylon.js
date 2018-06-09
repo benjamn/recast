@@ -3,20 +3,19 @@ var recast = require("../main.js");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
 var eol = require("os").EOL;
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
-  var babelTransform = require("@babel/core").transform;
-  var babelPresetES2015 = require("@babel/preset-es2015");
-  var parseOptions = {};
-
-  try {
-    parseOptions.parser = require("../parsers/babylon");
-  } catch (e) {
-    if (require("semver").gte(process.version, "4.0.0")) {
-      throw e;
-    }
+  // Babel no longer supports Node 4 or 5.
+  if (nodeMajorVersion < 6) {
     return;
   }
+
+  var babelTransform = require("@babel/core").transform;
+  var babelPresetES2015 = require("@babel/preset-es2015");
+  var parseOptions = {
+    parser: require("../parsers/babylon")
+  };
 
   it("basic printing", function () {
     function check(lines) {
