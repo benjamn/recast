@@ -25,6 +25,10 @@ then
     	rm -rf /tmp/graphql-tools
     fi
     git clone --depth 1 https://github.com/apollographql/graphql-tools.git /tmp/graphql-tools
+    pushd /tmp/graphql-tools
+    git fetch origin refs/pull/807/merge:pull/807/merge
+    git checkout pull/807/merge
+    popd
     mv /tmp/graphql-tools/src \
        graphql-tools-src
     rm -rf /tmp/graphql-tools
