@@ -51,7 +51,6 @@ describe("parser", function() {
       );
     }
 
-    check({ esprima: parser });
     check({ parser: parser });
   });
 });
@@ -59,7 +58,7 @@ describe("parser", function() {
 function runTestsForParser([parserId, parserFactory]) {
   const parserName = parserId.split("/").pop();
   let parser = require(parserId);
-  if(parserFactory) parser = parserFactory(parser);
+  if (parserFactory) parser = parserFactory(parser);
 
   it("[" + parserName + "] empty source", function () {
     var printer = new Printer;

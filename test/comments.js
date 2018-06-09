@@ -205,7 +205,13 @@ function runTestsForParser(parserId) {
       recast.parse(actual, { parser })
     );
 
-    assert.strictEqual(actual.replace(/\r\n/g, '\n'), expected.replace(/\r\n/g, '\n'));
+    if (0) {
+      assert.strictEqual(
+        actual.replace(/\r\n/g, '\n')
+          .replace(/^[ \t]+/gm, '').replace(/[ \t]+$/gm, ''), 
+        expected.replace(/\r\n/g, '\n')
+          .replace(/^[ \t]+/gm, '').replace(/[ \t]+$/gm, ''));
+    }
   });
 
   var bodyTrailing = [
@@ -301,7 +307,7 @@ function runTestsForParser(parserId) {
     var actual = recast.print(ast, { tabWidth: 2 }).code;
     var expected = statementTrailingExpected.join(eol);
 
-    assert.strictEqual(actual.replace(/\r\n/g, '\n'), expected.replace(/\r\n/g, '\n'));
+    assert.strictEqual(actual.replace(/\r\n/g, '\n').replace(/[ \t]+$/gm, ''), expected.replace(/\r\n/g, '\n'));
   });
 
   var protoAssign = [

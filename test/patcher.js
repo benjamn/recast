@@ -28,7 +28,23 @@ function loc(sl, sc, el, ec) {
 }
 
 describe("patcher", function() {
-    it("Patcher", function() {
+  [
+    // "../parsers/acorn",
+    "../parsers/babylon",
+    "../parsers/esprima",
+    // "../parsers/flow",
+    // "../parsers/typescript",
+  ].forEach(runTestsForParser);
+
+  function runTestsForParser(parserId) {
+    const parserName = parserId.split("/").pop();
+    const parser = require(parserId);
+
+    function pit(message, callback) {
+      it("[" + parserName + "] " + message, callback);
+    }
+
+    pit("Patcher", function() {
         var lines = fromString(code.join(eol)),
             patcher = new Patcher(lines),
             selfLoc = loc(5, 9, 5, 13);
@@ -76,10 +92,10 @@ describe("patcher", function() {
         "    }"
     ].join(eol);
 
-    it("GetIndent", function() {
+    pit("GetIndent", function() {
         function check(indent) {
             var lines = fromString(trickyCode).indent(indent);
-            var file = parse(lines.toString());
+            var file = parse(lines.toString(), { parser });
             var reprinter = FastPath.from(file).call(function(bodyPath) {
                 return getReprinter(bodyPath);
             }, "program", "body", 0, "body");
@@ -104,8 +120,8 @@ describe("patcher", function() {
         }
     });
 
-    it("should patch return/throw/etc. arguments correctly", function() {
-        var strAST = parse('return"foo"');
+    pit("should patch return/throw/etc. arguments correctly", function() {
+        var strAST = parse('return"foo"', { parser });
         var returnStmt = strAST.program.body[0];
         n.ReturnStatement.assert(returnStmt);
         assert.strictEqual(
@@ -119,7 +135,7 @@ describe("patcher", function() {
             "return null;" // Instead of returnnull.
         );
 
-        var arrAST = parse("throw[1,2,3]");
+        var arrAST = parse("throw[1,2,3]", { parser });
         var throwStmt = arrAST.program.body[0];
         n.ThrowStatement.assert(throwStmt);
         assert.strictEqual(
@@ -133,7 +149,7 @@ describe("patcher", function() {
             "throw false" // Instead of throwfalse.
         );
 
-        var inAST = parse('"foo"in bar');
+        var inAST = parse('"foo"in bar', { parser });
         var inExpr = inAST.program.body[0].expression;
 
         n.BinaryExpression.assert(inExpr);
@@ -154,13 +170,13 @@ describe("patcher", function() {
         );
     });
 
-    it("should not add spaces to the beginnings of lines", function() {
+    pit("should not add spaces to the beginnings of lines", function() {
         var twoLineCode = [
             "return",      // Because of ASI rules, these two lines will
             '"use strict"' // parse as separate statements.
         ].join(eol);
 
-        var twoLineAST = parse(twoLineCode);
+        var twoLineAST = parse(twoLineCode, { parser });
 
         console.error('use strict test @ 165:', recast.print(twoLineAST).code, twoLineAST.program.body);
         assert.strictEqual(twoLineAST.program.body.length, 2);
@@ -190,7 +206,8 @@ describe("patcher", function() {
         var withFooCall = recast.print(twoLineAST).code;
         assert.strictEqual(withFooCall, [
             "return",
-            "foo()"
+            (parserName === "babylon" ? "foo();" : "foo()")
         ].join(eol));
     });
+  }
 });
