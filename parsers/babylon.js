@@ -4,7 +4,7 @@
 // that's what's available.
 const parser = exports.parser = function () {
   try {
-    return require("@babel/parser");
+    return require("@gerhobbelt/babel-parser");
   } catch (e) {
     return require("babylon");
   }

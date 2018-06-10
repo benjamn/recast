@@ -4,7 +4,7 @@ set -ex
 
 cd $(dirname $0)/data
 
-BAB_TAG=v$(node -p 'require("@babel/parser/package.json").version')
+BAB_TAG=v$(node -p 'require("@gerhobbelt/babel-parser/package.json").version')
 
 if [ ! -d babel-parser ]
 then
@@ -13,7 +13,7 @@ then
     	rm -rf /tmp/babel
 	fi
     git clone --branch "$BAB_TAG" --depth 1 \
-        https://github.com/babel/babel.git /tmp/babel
+        https://github.com/GerHobbelt/babel.git /tmp/babel
     mv /tmp/babel/packages/babel-parser .
     rm -rf /tmp/babel
 fi
