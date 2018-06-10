@@ -178,7 +178,6 @@ describe("patcher", function() {
 
         var twoLineAST = parse(twoLineCode, { parser });
 
-        console.error('use strict test @ 165:', recast.print(twoLineAST).code, twoLineAST.program.body);
         assert.strictEqual(twoLineAST.program.body.length, 2);
         var useStrict = twoLineAST.program.body[1];
         n.ExpressionStatement.assert(useStrict);
