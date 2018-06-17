@@ -310,7 +310,7 @@ function testReprinting(pattern, description) {
       }
 
       const absPath = path.join(__dirname, file);
-      const source = fs.readFileSync(absPath, "utf8");
+      const source = fs.readFileSync(absPath, "utf8").replace(/\r?\n/g, eol);
       const ast = tryToParseFile(source, absPath);
 
       if (ast === null) {

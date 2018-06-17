@@ -63,7 +63,7 @@ describe("lines", function() {
     });
 
     it("ToString", function ToStringTest() {
-        var code = String(ToStringTest);
+        var code = String(ToStringTest).replace(/\r?\n/g, eol);
         var lines = fromString(code);
         check(lines, code);
         check(lines.indentTail(5)
@@ -111,7 +111,7 @@ describe("lines", function() {
     }
 
     it("EachPos", function EachPosTest() {
-        var code = String(EachPosTest);
+        var code = String(EachPosTest).replace(/\r?\n/g, eol);
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
