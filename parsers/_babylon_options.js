@@ -32,7 +32,7 @@ module.exports = function (options) {
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      "pipelineOperator",
+      ["pipelineOperator", { proposal: "minimal" }],
       "throwExpressions",
     ]
   };
