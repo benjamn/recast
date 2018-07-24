@@ -1,18 +1,27 @@
 language: node_js
-node_js:
-  - "9"
-  - "8"
-  - "7"
-  - "6"
-  - "5"
-  - "4"
+matrix:
+  include:
+  - node_js: "10"
+    env: NPM_VERSION=""
+  - node_js: "9"
+    env: NPM_VERSION=""
+  - node_js: "8"
+    env: NPM_VERSION=""
+  - node_js: "7"
+    env: NPM_VERSION=""
+  - node_js: "6"
+    env: NPM_VERSION=""
+  - node_js: "5"
+    env: NPM_VERSION="@5"
+  - node_js: "4"
+    env: NPM_VERSION="@5"
 
 # Allow Travis tests to run in containers.
 sudo: false
 
 # Update package-lock.json after test runs:
 before_install:
-  - npm install -g npm
+  - npm install -g npm$NPM_VERSION
   - npm install -g greenkeeper-lockfile@1
 before_script: greenkeeper-lockfile-update
 after_script: greenkeeper-lockfile-upload

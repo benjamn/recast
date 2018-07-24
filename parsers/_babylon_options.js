@@ -18,7 +18,7 @@ module.exports = function (options) {
       "classPrivateMethods",
       "classPrivateProperties",
       "classProperties",
-      "decorators",
+      "decorators-legacy",
       "doExpressions",
       "dynamicImport",
       "exportDefaultFrom",
@@ -32,7 +32,7 @@ module.exports = function (options) {
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      "pipelineOperator",
+      ["pipelineOperator", { proposal: "minimal" }],
       "throwExpressions",
     ]
   };

@@ -543,6 +543,25 @@ describe("printer", function() {
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
+  it("export default of IIFE", function() {
+    var printer = new Printer();
+    var ast = b.exportDefaultDeclaration(
+      b.callExpression(
+        b.functionExpression(
+          null,
+          [],
+          b.blockStatement([])
+        ),
+        []
+      )
+    );
+    var code = printer.print(ast).code;
+    ast = parse(code);
+
+    assert.strictEqual(printer.print(ast).code, code);
+    assert.strictEqual(printer.printGenerically(ast).code, code);
+  });
+
   var stmtListSpaces = [
     "",
     "var x = 1;",
@@ -936,7 +955,7 @@ describe("printer", function() {
 
     var ast = parse(code, {
       // The flow parser and Babylon recognize `...rest` as a `RestElement`
-      parser: require("babylon")
+      parser: require("@babel/parser")
     });
 
     var printer = new Printer({
@@ -1558,7 +1577,7 @@ describe("printer", function() {
   });
 
   it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    var babylon = require("babylon");
+    var babylon = require("@babel/parser");
     var parseOptions = {
       parser: {
         parse: function (source) {
@@ -1720,5 +1739,36 @@ describe("printer", function() {
     right.value++;
 
     assert.strictEqual(recast.print(ast).code, '4 + 5;');
+  });
+
+  it("prints flow tuple type annotations correctly, respecting array options", function () {
+    var code = [
+      'type MyTupleType = [',
+      '  "tuple element 1",',
+      '  "tuple element 2",',
+      '  "tuple element 3",',
+      '];',
+    ].join(eol);
+
+    var ast = b.program([
+      b.typeAlias(
+        b.identifier('MyTupleType'),
+        null,
+        b.tupleTypeAnnotation([
+          b.stringLiteralTypeAnnotation('tuple element 1', 'tuple element 1'),
+          b.stringLiteralTypeAnnotation('tuple element 2', 'tuple element 2'),
+          b.stringLiteralTypeAnnotation('tuple element 3', 'tuple element 3'),
+        ])
+      ),
+    ]);
+
+    var printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
   });
 });
