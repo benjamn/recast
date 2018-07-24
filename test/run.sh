@@ -18,7 +18,7 @@ if [ ! -d graphql-tools-src ]
 then
     git clone https://github.com/apollographql/graphql-tools.git
     pushd graphql-tools
-    git reset --hard d3073987a4e00ed1bf59f709232e0a614f1b7edb
+    git reset --hard 90e37c477225e56edfacc9f2a1a8336c766de93b
     popd
     mv graphql-tools/src \
        graphql-tools-src
