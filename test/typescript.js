@@ -304,7 +304,7 @@ function testReprinting(pattern, description) {
     require("glob").sync(pattern, {
       cwd: __dirname
     }).forEach(file => it(file, function () {
-      if (file.indexOf("tsx/brace-is-block") >= 0 ||
+      if (file.indexOf("/tsx/") >= 0 ||
           file.endsWith("stitching/errors.ts")) {
         return;
       }
