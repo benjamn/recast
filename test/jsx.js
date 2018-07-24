@@ -1,8 +1,12 @@
+"use strict";
+
 var parse = require("../lib/parser").parse;
 var Printer = require("../lib/printer").Printer;
 var types = require("../lib/types");
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
-describe("JSX Compatability", function() {
+(nodeMajorVersion >= 6 ? describe : xdescribe)
+("JSX Compatability", function() {
   var printer = new Printer({ tabWidth: 2 });
   var parseOptions = {
     parser: require("../parsers/babylon")

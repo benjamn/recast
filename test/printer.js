@@ -6,6 +6,7 @@ var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
 var fromString = require("../lib/lines").fromString;
 var eol = require("os").EOL;
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("printer", function() {
   it("Printer", function testPrinter(done) {
@@ -944,7 +945,8 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  it("shouldn't print a trailing comma for a RestElement", function() {
+  (nodeMajorVersion >= 6 ? it : xit)
+  ("shouldn't print a trailing comma for a RestElement", function() {
     var code = [
       "function foo(",
       "  a,",
@@ -1576,7 +1578,8 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
+  (nodeMajorVersion >= 6 ? it : xit)
+  ("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
     var babylon = require("@babel/parser");
     var parseOptions = {
       parser: {
@@ -1687,9 +1690,12 @@ describe("printer", function() {
 
     checkWith(require("../parsers/esprima"));
     checkWith(require("../parsers/acorn"));
-    checkWith(require("../parsers/babylon"));
-    checkWith(require("../parsers/typescript"));
-    checkWith(require("../parsers/flow"));
+
+    if (nodeMajorVersion >= 6) {
+      checkWith(require("../parsers/babylon"));
+      checkWith(require("../parsers/typescript"));
+      checkWith(require("../parsers/flow"));
+    }
   });
 
   it("parenthesizes NumericLiteral MemberExpression objects", function () {
