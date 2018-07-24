@@ -40,8 +40,8 @@
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "flow-parser": "^0.68.0",
     "glob": "^7.1.2",
-    "mocha": "~5.0.0",
-    "reify": "^0.16.2"
+    "mocha": "~5.2.0",
+    "reify": "^0.16.4"
   },
   "engines": {
     "node": ">= 4"
