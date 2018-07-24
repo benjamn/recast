@@ -16,10 +16,9 @@ fi
 
 if [ ! -d graphql-tools-src ]
 then
-    git clone --depth 1 https://github.com/apollographql/graphql-tools.git
+    git clone https://github.com/apollographql/graphql-tools.git
     pushd graphql-tools
-    git fetch origin refs/pull/807/merge:pull/807/merge
-    git checkout pull/807/merge
+    git reset --hard d3073987a4e00ed1bf59f709232e0a614f1b7edb
     popd
     mv graphql-tools/src \
        graphql-tools-src
