@@ -12,7 +12,7 @@ describe("Babel", function () {
   }
 
   var babelTransform = require("@babel/core").transform;
-  var babelPresetES2015 = require("@babel/preset-es2015");
+  var babelPresetEnv = require("@babel/preset-env");
   var parseOptions = {
     parser: require("../parsers/babylon")
   };
@@ -406,7 +406,7 @@ describe("Babel", function () {
             code: false,
             ast: true,
             sourceMap: false,
-            presets: [babelPresetES2015]
+            presets: [babelPresetEnv]
           }).ast;
         }
       }
