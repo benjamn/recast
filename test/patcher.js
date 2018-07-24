@@ -156,29 +156,29 @@ describe("patcher", function() {
 
   it("should not add spaces to the beginnings of lines", function() {
     var twoLineCode = [
-      "return",      // Because of ASI rules, these two lines will
-      '"use strict"' // parse as separate statements.
+      "return", // Because of ASI rules, these two lines will
+      'xxx'     // parse as separate statements.
     ].join(eol);
 
     var twoLineAST = parse(twoLineCode);
 
     assert.strictEqual(twoLineAST.program.body.length, 2);
-    var useStrict = twoLineAST.program.body[1];
-    n.ExpressionStatement.assert(useStrict);
-    n.Literal.assert(useStrict.expression);
-    assert.strictEqual(useStrict.expression.value, "use strict");
+    var xxx = twoLineAST.program.body[1];
+    n.ExpressionStatement.assert(xxx);
+    n.Identifier.assert(xxx.expression);
+    assert.strictEqual(xxx.expression.name, "xxx");
 
     assert.strictEqual(
       recast.print(twoLineAST).code,
       twoLineCode
     );
 
-    useStrict.expression = b.identifier("sloppy");
+    xxx.expression = b.identifier("expression");
 
-    var withSloppyIdentifier = recast.print(twoLineAST).code;
-    assert.strictEqual(withSloppyIdentifier, [
+    var withExpression = recast.print(twoLineAST).code;
+    assert.strictEqual(withExpression, [
       "return",
-      "sloppy" // The key is that no space should be added to the
+      "expression" // The key is that no space should be added to the
       // beginning of this line.
     ].join(eol));
 
