@@ -1,5 +1,11 @@
 "use strict";
 
+const nodeMajorVersion = parseInt(process.versions.node, 10);
+if (nodeMajorVersion < 6) {
+  // Babel 7 no longer supports Node 4 or 5.
+  return;
+}
+
 const assert = require("assert");
 const path = require("path");
 const fs = require("fs");
@@ -304,7 +310,7 @@ function testReprinting(pattern, description) {
     require("glob").sync(pattern, {
       cwd: __dirname
     }).forEach(file => it(file, function () {
-      if (file.indexOf("tsx/brace-is-block") >= 0 ||
+      if (file.indexOf("/tsx/") >= 0 ||
           file.endsWith("stitching/errors.ts")) {
         return;
       }

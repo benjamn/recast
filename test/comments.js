@@ -19,6 +19,8 @@ var annotated = [
   "}"
 ];
 
+var nodeMajorVersion = parseInt(process.versions.node, 10);
+
 describe("comments", function() {
   ["../parsers/acorn",
    "../parsers/babylon",
@@ -29,6 +31,16 @@ describe("comments", function() {
 });
 
 function runTestsForParser(parserId) {
+  if (nodeMajorVersion < 6) {
+    const parser = parserId.split("/").pop();
+    if (parser === "babylon" ||
+        parser === "flow" ||
+        parser === "typescript") {
+      // Babel 7 no longer supports Node 4 and 5.
+      return;
+    }
+  }
+
   const parserName = parserId.split("/").pop();
   const parser = require(parserId);
 
