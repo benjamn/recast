@@ -1343,6 +1343,15 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
+  
+  it("preserves parenthesis around single arrow function arg", function() {
+    var code = "const b = (a) => {};";
+    var ast = parse(code);
+    var printer = new Printer();
+    var result = printer.printGenerically(ast).code;
+    assert.strictEqual(result, code);
+  });
+
   it("preserves newlines at the beginning/end of files", function() {
     var code = [
       "",
