@@ -11,6 +11,6 @@ const parser = require("./babylon.js").parser;
 //
 exports.parse = function parse(source, options) {
   options = require("./_babylon_options.js")(options);
-  options.plugins.push("typescript");
+  options.plugins.push("jsx", "typescript");
   return parser.parse(source, options);
 };
