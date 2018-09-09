@@ -11,7 +11,7 @@ module.exports = function (options) {
     allowImportExportEverywhere: true,
     allowReturnOutsideFunction: true,
     startLine: 1,
-    tokens: getOption(options, "tokens", true),
+    tokens: true,
     plugins: [
       "asyncGenerators",
       "bigInt",
