@@ -292,4 +292,30 @@ describe("parens", function () {
   it("should be added to object destructuring assignment expressions", function () {
     check("({x}={x:1})");
   });
+
+  it("regression test for issue #327", function () {
+    const expr = "(function(){}())";
+    check(expr);
+
+    const ast = parse(expr);
+    const callExpression = ast.program.body[0].expression;
+    assert.strictEqual(callExpression.type, "CallExpression");
+    callExpression.callee.type = "ArrowFunctionExpression";
+    assert.strictEqual(
+      printer.print(ast).code,
+      "((() => {})())"
+    );
+    // Print just the callExpression without its enclosing AST context.
+    assert.strictEqual(
+      printer.print(callExpression).code,
+      "(() => {})()"
+    );
+    // Trigger pretty-printing of the callExpression to remove the outer
+    // layer of parentheses.
+    callExpression.original = null;
+    assert.strictEqual(
+      printer.print(ast).code,
+      "(() => {})();"
+    );
+  });
 });
