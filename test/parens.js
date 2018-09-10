@@ -17,13 +17,16 @@ function parseExpression(expr) {
 }
 
 function check(expr) {
-  var ast1 = parseExpression(expr);
-  var printed = printer.printGenerically(ast1).code;
-  try {
-    var ast2 = parseExpression(printed);
-  } finally {
-    types.astNodesAreEquivalent.assert(ast1, ast2);
-  }
+  const ast = parse(expr);
+  const reprinted = printer.print(ast).code;
+  assert.strictEqual(reprinted, expr);
+
+  const expressionAst = parseExpression(expr);
+  const generic = printer.printGenerically(expressionAst).code;
+  types.astNodesAreEquivalent.assert(
+    expressionAst,
+    parseExpression(generic)
+  );
 }
 
 var operators = [
