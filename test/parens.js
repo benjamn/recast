@@ -285,6 +285,14 @@ describe("parens", function () {
     check("(function (){})()");
   });
 
+  it("issues #504 and #512", function () {
+    check("() => ({})['foo']");
+    check("() => ({ foo: 123 }[foo] + 2) * 3");
+    check("() => ({ foo: 123 }['foo'] + 1 - 2 - 10)");
+    check("() => (function () { return 123 })()");
+    check("() => (function () { return 456 }())");
+  });
+
   it("should be added to bound arrow function expressions", function () {
     check("(()=>{}).bind(x)");
   });
