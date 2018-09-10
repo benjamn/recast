@@ -291,6 +291,8 @@ describe("parens", function () {
 
   it("should be added to object destructuring assignment expressions", function () {
     check("({x}={x:1})");
+    // Issue #533
+    check("({ foo } = bar)");
   });
 
   it("regression test for issue #327", function () {
