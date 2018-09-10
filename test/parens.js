@@ -328,4 +328,19 @@ describe("parens", function () {
       "(() => {})();"
     );
   });
+
+  it("regression test for issue #366", function () {
+    const code = "typeof a ? b : c";
+    check(code);
+
+    const ast = parse(code);
+    const exprStmt = ast.program.body[0];
+    const callee = exprStmt.expression;
+    exprStmt.expression = b.callExpression(callee, []);
+
+    assert.strictEqual(
+      printer.print(ast).code,
+      "(typeof a ? b : c)()"
+    );
+  });
 });
