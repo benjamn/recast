@@ -41,7 +41,7 @@
     "flow-parser": "^0.80.0",
     "glob": "^7.1.2",
     "mocha": "~5.2.0",
-    "reify": "^0.16.4"
+    "reify": "^0.17.3"
   },
   "engines": {
     "node": ">= 4"
