@@ -1799,7 +1799,7 @@ describe("printer", function() {
   });
 
   it("adds parenthesis around conditional", function() {
-    var code = 'new ((typeof a ? b : c))();';
+    var code = 'new (typeof a ? b : c)();';
     var callee = recast.parse("typeof a ? b : c").program.body[0].expression;
 
     var newExpression = b.newExpression(callee, []);
