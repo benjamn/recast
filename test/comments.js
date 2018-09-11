@@ -822,4 +822,20 @@ function runTestsForParser(parserId) {
       "}"
     ].join(eol));
   });
+
+  pit("should preserve comments attached to EmptyStatement", function() {
+    var code = [
+      "removeThisStatement;",
+      "// comment",
+      ";(function() {})();"
+    ].join(eol);
+
+    var ast = recast.parse(code, { parser });
+    ast.program.body.shift();
+
+    assert.strictEqual(recast.print(ast).code, [
+      "// comment",
+      ";(function() {})();"
+    ].join(eol));
+  });
 }
