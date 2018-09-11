@@ -1777,4 +1777,41 @@ describe("printer", function() {
     var pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("adds parenthesis around object expression", function() {
+    var code = "({}).x = 1;";
+
+    var assignment = b.assignmentExpression(
+      '=',
+      b.memberExpression(b.objectExpression([]), b.identifier('x'), false),
+      b.literal(1)
+    );
+
+    var ast = b.program([
+      b.expressionStatement(assignment)
+    ]);
+
+    var printer = new Printer({
+      arrowParensAlways: true
+    });
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("adds parenthesis around conditional", function() {
+    var code = 'new (typeof a ? b : c)();';
+    var callee = recast.parse("typeof a ? b : c").program.body[0].expression;
+
+    var newExpression = b.newExpression(callee, []);
+
+    var ast = b.program([
+      b.expressionStatement(newExpression)
+    ]);
+
+    var printer = new Printer({
+      arrowParensAlways: true
+    });
+    var pretty = printer.print(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
