@@ -10,6 +10,7 @@ var types = require("../lib/types");
 var namedTypes = types.namedTypes;
 var FastPath = require("../lib/fast-path");
 var eol = require("os").EOL;
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -53,6 +54,15 @@ describe("parser", function() {
 
 function runTestsForParser(parserId) {
   const parserName = parserId.split("/").pop();
+
+  if (nodeMajorVersion < 6 &&
+      (parserName === "babylon" ||
+       parserName === "flow" ||
+       parserName === "typescript")) {
+    // Babel 7 no longer supports Node 4 or 5.
+    return;
+  }
+
   const parser = require(parserId);
 
   it("[" + parserName + "] empty source", function () {

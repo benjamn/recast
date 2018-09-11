@@ -6,6 +6,7 @@ var n = require("../lib/types").namedTypes;
 var b = require("../lib/types").builders;
 var fromString = require("../lib/lines").fromString;
 var eol = require("os").EOL;
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("printer", function() {
   it("Printer", function testPrinter(done) {
@@ -547,6 +548,25 @@ describe("printer", function() {
     var printer = new Printer();
     var code = "export {};";
     var ast = parse(code);
+    
+    assert.strictEqual(printer.print(ast).code, code);
+    assert.strictEqual(printer.printGenerically(ast).code, code);
+  });
+
+  it("export default of IIFE", function() {
+    var printer = new Printer();
+    var ast = b.exportDefaultDeclaration(
+      b.callExpression(
+        b.functionExpression(
+          null,
+          [],
+          b.blockStatement([])
+        ),
+        []
+      )
+    );
+    var code = printer.print(ast).code;
+    ast = parse(code);
 
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
@@ -934,7 +954,8 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  it("shouldn't print a trailing comma for a RestElement", function() {
+  (nodeMajorVersion >= 6 ? it : xit)
+  ("shouldn't print a trailing comma for a RestElement", function() {
     var code = [
       "function foo(",
       "  a,",
@@ -945,7 +966,7 @@ describe("printer", function() {
 
     var ast = parse(code, {
       // The flow parser and Babylon recognize `...rest` as a `RestElement`
-      parser: require("babylon")
+      parser: require("@babel/parser")
     });
 
     var printer = new Printer({
@@ -1566,8 +1587,9 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    var babylon = require("babylon");
+  (nodeMajorVersion >= 6 ? it : xit)
+  ("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
+    var babylon = require("@babel/parser");
     var parseOptions = {
       parser: {
         parse: function (source) {
@@ -1677,9 +1699,12 @@ describe("printer", function() {
 
     checkWith(require("../parsers/esprima"));
     checkWith(require("../parsers/acorn"));
-    checkWith(require("../parsers/babylon"));
-    checkWith(require("../parsers/typescript"));
-    checkWith(require("../parsers/flow"));
+
+    if (nodeMajorVersion >= 6) {
+      checkWith(require("../parsers/babylon"));
+      checkWith(require("../parsers/typescript"));
+      checkWith(require("../parsers/flow"));
+    }
   });
 
   it("parenthesizes NumericLiteral MemberExpression objects", function () {
@@ -1729,5 +1754,73 @@ describe("printer", function() {
     right.value++;
 
     assert.strictEqual(recast.print(ast).code, '4 + 5;');
+  });
+
+  it("prints flow tuple type annotations correctly, respecting array options", function () {
+    var code = [
+      'type MyTupleType = [',
+      '  "tuple element 1",',
+      '  "tuple element 2",',
+      '  "tuple element 3",',
+      '];',
+    ].join(eol);
+
+    var ast = b.program([
+      b.typeAlias(
+        b.identifier('MyTupleType'),
+        null,
+        b.tupleTypeAnnotation([
+          b.stringLiteralTypeAnnotation('tuple element 1', 'tuple element 1'),
+          b.stringLiteralTypeAnnotation('tuple element 2', 'tuple element 2'),
+          b.stringLiteralTypeAnnotation('tuple element 3', 'tuple element 3'),
+        ])
+      ),
+    ]);
+
+    var printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("adds parenthesis around object expression", function() {
+    var code = "({}).x = 1;";
+
+    var assignment = b.assignmentExpression(
+      '=',
+      b.memberExpression(b.objectExpression([]), b.identifier('x'), false),
+      b.literal(1)
+    );
+
+    var ast = b.program([
+      b.expressionStatement(assignment)
+    ]);
+
+    var printer = new Printer({
+      arrowParensAlways: true
+    });
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("adds parenthesis around conditional", function() {
+    var code = 'new (typeof a ? b : c)();';
+    var callee = recast.parse("typeof a ? b : c").program.body[0].expression;
+
+    var newExpression = b.newExpression(callee, []);
+
+    var ast = b.program([
+      b.expressionStatement(newExpression)
+    ]);
+
+    var printer = new Printer({
+      arrowParensAlways: true
+    });
+    var pretty = printer.print(ast).code;
+    assert.strictEqual(pretty, code);
   });
 });

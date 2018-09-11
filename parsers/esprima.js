@@ -16,6 +16,7 @@ exports.parse = function (source, options) {
     locations: true,
     comment: true,
     onComment: comments,
+    range: getOption(options, "range", false),
     tolerant: getOption(options, "tolerant", true),
     tokens: getOption(options, "tokens", true)
   });

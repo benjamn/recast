@@ -3,20 +3,19 @@ var recast = require("../main.js");
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
 var eol = require("os").EOL;
+var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
-  var babelTransform = require("@babel/core").transform;
-  var babelPresetES2015 = require("@babel/preset-es2015");
-  var parseOptions = {};
-
-  try {
-    parseOptions.parser = require("../parsers/babylon");
-  } catch (e) {
-    if (require("semver").gte(process.version, "4.0.0")) {
-      throw e;
-    }
+  // Babel no longer supports Node 4 or 5.
+  if (nodeMajorVersion < 6) {
     return;
   }
+
+  var babelTransform = require("@babel/core").transform;
+  var babelPresetEnv = require("@babel/preset-env");
+  var parseOptions = {
+    parser: require("../parsers/babylon")
+  };
 
   it("basic printing", function () {
     function check(lines) {
@@ -407,7 +406,7 @@ describe("Babel", function () {
             code: false,
             ast: true,
             sourceMap: false,
-            presets: [babelPresetES2015]
+            presets: [babelPresetEnv]
           }).ast;
         }
       }
@@ -425,5 +424,32 @@ describe("Babel", function () {
     var ast = recast.parse(code, parseOptions);
     var output = recast.print(ast, { tabWidth: 2 }).code;
     assert.strictEqual(output, code);
+  });
+
+  it("prints the export-default-from syntax", function () {
+    var code = [
+      'export { default as foo, bar } from "foo";',
+      'export { default as veryLongIdentifier1, veryLongIdentifier2, veryLongIdentifier3, veryLongIdentifier4, veryLongIdentifier5 } from "long-identifiers";'
+    ].join(eol);
+    var ast = recast.parse(code, parseOptions);
+
+    var replacement1 = b.exportDefaultSpecifier(b.identifier('foo'));
+    var replacement2 = b.exportDefaultSpecifier(
+      b.identifier('veryLongIdentifier1')
+    );
+    ast.program.body[0].specifiers[0] = replacement1;
+    ast.program.body[1].specifiers[0] = replacement2;
+    assert.strictEqual(
+        recast.print(ast).code,
+        [
+          'export foo, { bar } from "foo";',
+          'export veryLongIdentifier1, {',
+          '  veryLongIdentifier2,',
+          '  veryLongIdentifier3,',
+          '  veryLongIdentifier4,',
+          '  veryLongIdentifier5,',
+          '} from "long-identifiers";'
+        ].join(eol)
+    );
   });
 });
