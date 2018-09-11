@@ -544,6 +544,15 @@ describe("printer", function() {
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
+  it("empty ExportDeclaration", function() {
+    var printer = new Printer();
+    var code = "export {};";
+    var ast = parse(code);
+    
+    assert.strictEqual(printer.print(ast).code, code);
+    assert.strictEqual(printer.printGenerically(ast).code, code);
+  });
+
   it("export default of IIFE", function() {
     var printer = new Printer();
     var ast = b.exportDefaultDeclaration(
