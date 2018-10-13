@@ -18,7 +18,7 @@ exports.parse = function (source, options) {
     onComment: comments,
     range: getOption(options, "range", false),
     tolerant: getOption(options, "tolerant", true),
-    tokens: getOption(options, "tokens", true)
+    tokens: true
   });
 
   if (! Array.isArray(ast.comments)) {
