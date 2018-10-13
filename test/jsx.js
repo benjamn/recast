@@ -9,7 +9,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
 ("JSX Compatability", function() {
   var printer = new Printer({ tabWidth: 2 });
   var parseOptions = {
-    parser: require("../parsers/babylon")
+    parser: require("../parsers/babel")
   };
 
   function check(source) {

@@ -14,7 +14,7 @@ describe("Babel", function () {
   var babelTransform = require("@babel/core").transform;
   var babelPresetEnv = require("@babel/preset-env");
   var parseOptions = {
-    parser: require("../parsers/babylon")
+    parser: require("../parsers/babel")
   };
 
   it("basic printing", function () {

@@ -17,7 +17,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("parser", function() {
   ["../parsers/acorn",
-   "../parsers/babylon",
+   "../parsers/babel",
    "../parsers/esprima",
    "../parsers/flow",
    "../parsers/typescript",
@@ -56,7 +56,7 @@ function runTestsForParser(parserId) {
   const parserName = parserId.split("/").pop();
 
   if (nodeMajorVersion < 6 &&
-      (parserName === "babylon" ||
+      (parserName === "babel" ||
        parserName === "flow" ||
        parserName === "typescript")) {
     // Babel 7 no longer supports Node 4 or 5.
@@ -84,7 +84,7 @@ function runTestsForParser(parserId) {
 
   const lineCommentTypes = {
     acorn: "Line",
-    babylon: "CommentLine",
+    babel: "CommentLine",
     esprima: "Line",
     flow: "CommentLine",
     typescript: "CommentLine"

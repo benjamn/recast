@@ -23,7 +23,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("comments", function() {
   ["../parsers/acorn",
-   "../parsers/babylon",
+   "../parsers/babel",
    "../parsers/esprima",
    "../parsers/flow",
    "../parsers/typescript",
@@ -33,7 +33,7 @@ describe("comments", function() {
 function runTestsForParser(parserId) {
   if (nodeMajorVersion < 6) {
     const parser = parserId.split("/").pop();
-    if (parser === "babylon" ||
+    if (parser === "babel" ||
         parser === "flow" ||
         parser === "typescript") {
       // Babel 7 no longer supports Node 4 and 5.
@@ -172,7 +172,7 @@ function runTestsForParser(parserId) {
       }
     };
 
-    const babylonInfo = {
+    const babelInfo = {
       Property: n.ObjectProperty,
       propBuilder(key, value) {
         return b.objectProperty(key, value);
@@ -190,10 +190,10 @@ function runTestsForParser(parserId) {
 
     const info = {
       acorn: esprimaInfo,
-      babylon: babylonInfo,
+      babel: babelInfo,
       esprima: esprimaInfo,
-      flow: babylonInfo,
-      typescript: babylonInfo
+      flow: babelInfo,
+      typescript: babelInfo
     }[parserName];
 
     var props = assign.right.properties;

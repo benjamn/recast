@@ -1589,11 +1589,11 @@ describe("printer", function() {
 
   (nodeMajorVersion >= 6 ? it : xit)
   ("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    var babylon = require("@babel/parser");
+    var babelParser = require("@babel/parser");
     var parseOptions = {
       parser: {
         parse: function (source) {
-          return babylon.parse(source, {
+          return babelParser.parse(source, {
             sourceType: 'module',
             plugins: ['flow'],
           });
@@ -1701,7 +1701,7 @@ describe("printer", function() {
     checkWith(require("../parsers/acorn"));
 
     if (nodeMajorVersion >= 6) {
-      checkWith(require("../parsers/babylon"));
+      checkWith(require("../parsers/babel"));
       checkWith(require("../parsers/typescript"));
       checkWith(require("../parsers/flow"));
     }

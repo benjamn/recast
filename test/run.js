@@ -1,4 +1,4 @@
-require("./babylon.js");
+require("./babel.js");
 require("./comments.js");
 require("./es6tests.js");
 require("./identity.js");
