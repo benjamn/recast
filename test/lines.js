@@ -14,6 +14,12 @@ function check(a, b) {
     }));
 }
 
+// Function.prototype.toString returns the same newlines as the source on disk
+// (possibly \r\n, possibly \n even on Windows), so normalize them.
+function functionToString(fn) {
+    return fn.toString().replace(/\r?\n/g, eol);
+}
+
 describe("lines", function() {
     describe('line terminators', function() {
         var source = [
@@ -63,7 +69,7 @@ describe("lines", function() {
     });
 
     it("ToString", function ToStringTest() {
-        var code = String(ToStringTest);
+        var code = functionToString(ToStringTest);
         var lines = fromString(code);
         check(lines, code);
         check(lines.indentTail(5)
@@ -93,7 +99,7 @@ describe("lines", function() {
         // lastPos) should be the only empty string.
         assert.strictEqual(emptyCount, 1);
 
-        // Function.prototype.toString uses \r\n line endings on non-*NIX
+        // Function.prototype.toString might return \r\n line endings on non-*NIX
         // systems, so normalize those to \n characters.
         code = code.replace(/\r\n/g, "\n");
 
@@ -111,7 +117,7 @@ describe("lines", function() {
     }
 
     it("EachPos", function EachPosTest() {
-        var code = String(EachPosTest);
+        var code = functionToString(EachPosTest);
         var lines = fromString(code);
 
         testEachPosHelper(lines, code);
@@ -127,9 +133,7 @@ describe("lines", function() {
     });
 
     it("CharAt", function CharAtTest() {
-        // Function.prototype.toString uses \r\n line endings on non-*NIX
-        // systems, so normalize those to \n characters.
-        var code = String(CharAtTest).replace(/\r\n/g, "\n");
+        var code = functionToString(CharAtTest);
         var lines = fromString(code);
 
         function compare(pos) {
@@ -272,7 +276,7 @@ describe("lines", function() {
     });
 
     it("Slice", function SliceTest() {
-        var code = String(SliceTest),
+        var code = functionToString(SliceTest);
             lines = fromString(code);
         checkAllSlices(lines);
     });
@@ -294,7 +298,7 @@ describe("lines", function() {
     }
 
     it("GetSourceLocation", function GetSourceLocationTest() {
-        var code = String(GetSourceLocationTest),
+        var code = functionToString(GetSourceLocationTest);
             lines = fromString(code);
 
         function verify(indent) {
