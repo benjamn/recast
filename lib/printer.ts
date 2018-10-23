@@ -714,6 +714,21 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             }, field);
         });
 
+        if (n.inexact) {
+          var line = fromString("...", options);
+          if (!oneLine) {
+            parts.push("\n");
+            line = line.indent(options.tabWidth);
+            parts.push(line);
+            // No trailing separator after ... to maintain parity with prettier
+          } else {
+            if (len > 0) {
+              parts.push(separator);
+              parts.push(" ");
+            }
+            parts.push(line);
+          }
+        }
         parts.push(oneLine ? rightBrace : "\n" + rightBrace);
 
         if (i !== 0 && oneLine && options.objectCurlySpacing) {
