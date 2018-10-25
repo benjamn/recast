@@ -38,7 +38,7 @@
     "@babel/parser": "^7.0.0-beta.54",
     "@babel/preset-env": "^7.0.0-beta.54",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
-    "flow-parser": "^0.83.0",
+    "flow-parser": "^0.84.0",
     "glob": "^7.1.2",
     "mocha": "~5.2.0",
     "reify": "^0.18.0"
