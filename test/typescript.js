@@ -292,6 +292,14 @@ describe("TypeScript", function() {
       '  public static async *[name]<T>(arg: U): V;',
       '}'
     ]);
+
+    check([
+      'function myFunction(',
+      '  {',
+      '    param1',
+      '  }: Params',
+      ') {}'
+    ]);
   });
 });
 
