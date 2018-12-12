@@ -2005,4 +2005,35 @@ describe("printer", function() {
     var pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("prints an interface type annotation correctly", function() {
+    var code = [
+      'let myVar: interface extends MyOtherInterface { myProperty: any };',
+    ].join(eol);
+
+    var ast = b.program([
+      b.variableDeclaration("let", [
+        b.variableDeclarator(
+          b.identifier.from({
+            name: "myVar",
+            typeAnnotation: b.typeAnnotation(
+              b.interfaceTypeAnnotation(
+                b.objectTypeAnnotation([
+                  b.objectTypeProperty(
+                    b.identifier("myProperty"),
+                    b.anyTypeAnnotation(),
+                    false,
+                  )
+                ]),
+                [b.interfaceExtends(b.identifier("MyOtherInterface"))],
+              )
+            )
+          }),
+        )
+      ])
+    ]);
+
+    var pretty = new Printer().printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });

@@ -1539,6 +1539,17 @@ function genericPrintNoParens(path, options, print) {
         assert.strictEqual(typeof n.value, "boolean");
         return fromString("" + n.value, options);
 
+    case "InterfaceTypeAnnotation":
+        parts.push("interface");
+        if (n.extends && n.extends.length > 0) {
+            parts.push(
+                " extends ",
+                fromString(", ").join(path.map(print, "extends"))
+            );
+        }
+        parts.push(" ", path.call(print, "body"));
+        return concat(parts);
+
     case "DeclareClass":
         return printFlowDeclaration(path, [
             "class ",
