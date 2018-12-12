@@ -1823,4 +1823,122 @@ describe("printer", function() {
     var pretty = printer.print(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("prints flow object type internal slots correctly", function() {
+    var code = [
+      'type MyObjectType = {',
+      '  [myIndexer: string]: any,',
+      '  (myParameter: any): any,',
+      '  (myOptionalParameter?: any): any,',
+      '  (myParameterWithRest: any, ...rest: any[]): any,',
+      '  [[myInternalSlot]]: any,',
+      '  static [[myStaticOptionalInternalSlot]]?: (arg: any) => any,',
+      '  static [[myStaticMethodOptionalInternalSlot]]?(arg: any): any,',
+      '  myProperty: any,',
+      '};',
+    ].join(eol);
+
+    var ast = b.program([
+      b.typeAlias(
+        b.identifier('MyObjectType'),
+        null,
+        b.objectTypeAnnotation.from({
+          properties: [
+            b.objectTypeProperty(b.identifier("myProperty"), b.anyTypeAnnotation(), false)
+          ],
+          indexers: [
+            b.objectTypeIndexer(
+              b.identifier("myIndexer"),
+              b.stringTypeAnnotation(),
+              b.anyTypeAnnotation()
+            )
+          ],
+          callProperties: [
+            b.objectTypeCallProperty(
+              b.functionTypeAnnotation(
+                [
+                  b.functionTypeParam(
+                    b.identifier("myParameter"),
+                    b.anyTypeAnnotation(),
+                    false,
+                  )
+                ],
+                b.anyTypeAnnotation(),
+                null,
+                null
+              )
+            ),
+            b.objectTypeCallProperty(
+              b.functionTypeAnnotation(
+                [
+                  b.functionTypeParam(
+                    b.identifier("myOptionalParameter"),
+                    b.anyTypeAnnotation(),
+                    true,
+                  )
+                ],
+                b.anyTypeAnnotation(),
+                null,
+                null
+              )
+            ),
+            b.objectTypeCallProperty(
+              b.functionTypeAnnotation(
+                [
+                  b.functionTypeParam(
+                    b.identifier("myParameterWithRest"),
+                    b.anyTypeAnnotation(),
+                    false,
+                  )
+                ],
+                b.anyTypeAnnotation(),
+                b.functionTypeParam(
+                  b.identifier("rest"),
+                  b.arrayTypeAnnotation(b.anyTypeAnnotation()),
+                  false
+                ),
+                null
+              )
+            )
+          ],
+          internalSlots: [
+            b.objectTypeInternalSlot.from({
+              id: b.identifier("myInternalSlot"),
+              value: b.anyTypeAnnotation(),
+              static: false,
+              method: false,
+              optional: false,
+            }),
+            b.objectTypeInternalSlot.from({
+              id: b.identifier("myStaticOptionalInternalSlot"),
+              value: b.functionTypeAnnotation([
+                b.functionTypeParam(b.identifier("arg"), b.anyTypeAnnotation(), false)
+              ], b.anyTypeAnnotation(), null, null),
+              static: true,
+              method: false,
+              optional: true,
+            }),
+            b.objectTypeInternalSlot.from({
+              id: b.identifier("myStaticMethodOptionalInternalSlot"),
+              value: b.functionTypeAnnotation([
+                b.functionTypeParam(b.identifier("arg"), b.anyTypeAnnotation(), false)
+              ], b.anyTypeAnnotation(), null, null),
+              static: true,
+              method: true,
+              optional: true,
+            }),
+          ],
+        })
+      ),
+    ]);
+
+    var printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });

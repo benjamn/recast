@@ -647,6 +647,9 @@ function genericPrintNoParens(path, options, print) {
 
         if (isTypeAnnotation) {
             fields.push("indexers", "callProperties");
+            if (n.internalSlots != null) {
+                fields.push("internalSlots");
+            }
         }
 
         fields.push("properties");
@@ -1567,6 +1570,7 @@ function genericPrintNoParens(path, options, print) {
         var parent = path.getParentNode(0);
         var isArrowFunctionTypeAnnotation = !(
             namedTypes.ObjectTypeCallProperty.check(parent) ||
+            (namedTypes.ObjectTypeInternalSlot.check(parent) && parent.method) ||
             namedTypes.DeclareFunction.check(path.getParentNode(2))
         );
 
@@ -1580,8 +1584,8 @@ function genericPrintNoParens(path, options, print) {
 
         parts.push(
             "(",
-            fromString(", ").join(path.map(print, "params")),
-            ")"
+            printFunctionParams(path, options, print),
+            ")",
         );
 
         // The returnType is not wrapped in a TypeAnnotation, so the colon
@@ -1685,6 +1689,17 @@ function genericPrintNoParens(path, options, print) {
             path.call(print, "key"),
             n.optional ? "?" : "",
             ": ",
+            path.call(print, "value")
+        ]);
+
+    case "ObjectTypeInternalSlot":
+        return concat([
+            n.static ? "static " : "",
+            "[[",
+            path.call(print, "id"),
+            "]]",
+            n.optional ? "?" : "",
+            n.value.type !== "FunctionTypeAnnotation" ? ": " : "",
             path.call(print, "value")
         ]);
 
