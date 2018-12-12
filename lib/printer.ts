@@ -737,8 +737,12 @@ function genericPrintNoParens(path, options, print) {
 
     case "ClassMethod": // Babel 6
     case "ObjectMethod": // Babel 6
+    case "ClassPrivateMethod":
     case "TSDeclareMethod":
         return printMethod(path, options, print);
+
+    case "PrivateName":
+        return concat(["#", path.call(print, "id")]);
 
     case "Decorator":
         return concat(["@", path.call(print, "expression")]);
@@ -1313,6 +1317,24 @@ function genericPrintNoParens(path, options, print) {
         if (n.optional) {
             parts.push("?");
         }
+
+        if (n.typeAnnotation) {
+            parts.push(path.call(print, "typeAnnotation"));
+        }
+
+        if (n.value) {
+            parts.push(" = ", path.call(print, "value"));
+        }
+
+        parts.push(";");
+        return concat(parts);
+
+    case "ClassPrivateProperty":
+        if (n.static) {
+            parts.push("static ");
+        }
+
+        parts.push(path.call(print, "key"));
 
         if (n.typeAnnotation) {
             parts.push(path.call(print, "typeAnnotation"));

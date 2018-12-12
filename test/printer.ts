@@ -1941,4 +1941,46 @@ describe("printer", function() {
     var pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("prints class private methods and properties correctly", function() {
+    var code = [
+      'class MyClassWithPrivate {',
+      '  #myPrivateProperty: any;',
+      '  #myPrivatePropertyWithValue: any = value;',
+      '  #myPrivateMethod() {}',
+      '}',
+    ].join(eol);
+
+    var ast = b.program([
+      b.classDeclaration(
+        b.identifier("MyClassWithPrivate"),
+        b.classBody([
+          b.classPrivateProperty.from({
+            key: b.privateName(b.identifier("myPrivateProperty")),
+            typeAnnotation: b.typeAnnotation(b.anyTypeAnnotation()),
+            value: null,
+          }),
+          b.classPrivateProperty.from({
+            key: b.privateName(b.identifier("myPrivatePropertyWithValue")),
+            typeAnnotation: b.typeAnnotation(b.anyTypeAnnotation()),
+            value: b.identifier("value"),
+          }),
+          b.classPrivateMethod(
+            b.privateName(b.identifier("myPrivateMethod")),
+            [],
+            b.blockStatement([]),
+          ),
+        ])
+      ),
+    ]);
+
+    var printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
