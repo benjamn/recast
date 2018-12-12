@@ -548,7 +548,7 @@ describe("printer", function() {
     var printer = new Printer();
     var code = "export {};";
     var ast = parse(code);
-    
+
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
@@ -1981,6 +1981,28 @@ describe("printer", function() {
     });
 
     var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints an interpreter directive correctly", function() {
+    var code = [
+      '#!/usr/bin/env node',
+      'console.log("Hello, world!");'
+    ].join(eol);
+
+    var ast = b.program.from({
+      interpreter: b.interpreterDirective("/usr/bin/env node"),
+      body: [
+        b.expressionStatement(
+          b.callExpression(
+            b.memberExpression(b.identifier("console"), b.identifier("log")),
+            [b.stringLiteral("Hello, world!")]
+          )
+        )
+      ],
+    });
+
+    var pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 });

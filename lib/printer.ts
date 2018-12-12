@@ -233,6 +233,10 @@ function genericPrintNoParens(path, options, print) {
             }, "directives");
         }
 
+        if (n.interpreter) {
+            parts.push(path.call(print, "interpreter"));
+        }
+
         parts.push(path.call(function(bodyPath) {
             return printStatementSequence(bodyPath, options, print);
         }, "body"));
@@ -850,6 +854,9 @@ function genericPrintNoParens(path, options, print) {
 
     case "DirectiveLiteral": // Babel 6
         return fromString(nodeStr(n.value, options));
+
+    case "InterpreterDirective":
+        return fromString(`#!${n.value}\n`);
 
     case "ModuleSpecifier":
         if (n.local) {
