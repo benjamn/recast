@@ -109,6 +109,7 @@ describe("import/export syntax", function() {
     check("export default class {}");
     check("export default function foo () {}");
     check("export default class foo {}");
+    check("export default `hello world`");
 
     // variables exports
     check("export var foo = 1;");
