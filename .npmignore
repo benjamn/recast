@@ -1,3 +1,7 @@
 /node_modules
 /test
+/types
 yarn.lock
+
+*.ts
+!*.d.ts

@@ -2,3 +2,9 @@
 /test/data/babylon
 /test/data/babel-parser
 /test/data/graphql-tools-src
+
+# Ignore TypeScript-emitted files
+*.js
+*.d.ts
+# Except...
+!/types/**/*.d.ts
