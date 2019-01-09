@@ -1,0 +1,16 @@
+import "./babel";
+import "./comments";
+import "./es6tests";
+import "./identity";
+import "./jsx";
+import "./lines";
+import "./mapping";
+import "./parens";
+import "./parser";
+import "./patcher";
+import "./perf";
+import "./printer";
+import "./syntax";
+import "./type-syntax";
+import "./typescript";
+import "./visit";

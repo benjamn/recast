@@ -1,0 +1,193 @@
+import assert from "assert";
+import recast from "../main";
+import types from "../lib/types";
+var n = types.namedTypes;
+var b = types.builders;
+import { getReprinter, Patcher } from "../lib/patcher";
+import { fromString } from "../lib/lines";
+import { parse } from "../lib/parser";
+import FastPath from "../lib/fast-path";
+import { EOL as eol } from "os";
+
+var code = [
+  "// file comment",
+  "exports.foo({",
+  "    // some comment",
+  "    bar: 42,",
+  "    baz: this",
+  "});"
+];
+
+function loc(sl: number, sc: number, el: number, ec: number) {
+  return {
+    start: { line: sl, column: sc },
+    end: { line: el, column: ec }
+  };
+}
+
+describe("patcher", function() {
+  it("Patcher", function() {
+    var lines = fromString(code.join(eol)),
+    patcher = new Patcher(lines),
+    selfLoc = loc(5, 9, 5, 13);
+
+    assert.strictEqual(patcher.get(selfLoc).toString(), "this");
+
+    patcher.replace(selfLoc, "self");
+
+    assert.strictEqual(patcher.get(selfLoc).toString(), "self");
+
+    var got = patcher.get().toString();
+    assert.strictEqual(got, code.join(eol).replace("this", "self"));
+
+    // Make sure comments are preserved.
+    assert.ok(got.indexOf("// some") >= 0);
+
+    var oyezLoc = loc(2, 12, 6, 1),
+    beforeOyez = patcher.get(oyezLoc).toString();
+    assert.strictEqual(beforeOyez.indexOf("exports"), -1);
+    assert.ok(beforeOyez.indexOf("comment") >= 0);
+
+    patcher.replace(oyezLoc, "oyez");
+
+    assert.strictEqual(patcher.get().toString(), [
+      "// file comment",
+      "exports.foo(oyez);"
+    ].join(eol));
+
+    // "Reset" the patcher.
+    patcher = new Patcher(lines);
+    patcher.replace(oyezLoc, "oyez");
+    patcher.replace(selfLoc, "self");
+
+    assert.strictEqual(patcher.get().toString(), [
+      "// file comment",
+      "exports.foo(oyez);"
+    ].join(eol));
+  });
+
+  var trickyCode = [
+    "    function",
+    "      foo(bar,",
+    "  baz) {",
+    "        qux();",
+    "    }"
+  ].join(eol);
+
+  it("GetIndent", function() {
+    function check(indent: number) {
+      var lines = fromString(trickyCode).indent(indent);
+      var file = parse(lines.toString());
+      var reprinter = FastPath.from(file).call(function(bodyPath: any) {
+        return getReprinter(bodyPath);
+      }, "program", "body", 0, "body");
+
+      var reprintedLines = reprinter(function() {
+        assert.ok(false, "should not have called print function");
+      });
+
+      assert.strictEqual(reprintedLines.length, 3);
+      assert.strictEqual(reprintedLines.getIndentAt(1), 0);
+      assert.strictEqual(reprintedLines.getIndentAt(2), 4);
+      assert.strictEqual(reprintedLines.getIndentAt(3), 0);
+      assert.strictEqual(reprintedLines.toString(), [
+        "{",
+        "    qux();",
+        "}"
+      ].join(eol));
+    }
+
+    for (var indent = -4; indent <= 4; ++indent) {
+      check(indent);
+    }
+  });
+
+  it("should patch return/throw/etc. arguments correctly", function() {
+    var strAST = parse('return"foo"');
+    var returnStmt = strAST.program.body[0];
+    n.ReturnStatement.assert(returnStmt);
+    assert.strictEqual(
+      recast.print(strAST).code,
+      'return"foo"'
+    );
+
+    returnStmt.argument = b.literal(null);
+    assert.strictEqual(
+      recast.print(strAST).code,
+      "return null;" // Instead of returnnull.
+    );
+
+    var arrAST = parse("throw[1,2,3]");
+    var throwStmt = arrAST.program.body[0];
+    n.ThrowStatement.assert(throwStmt);
+    assert.strictEqual(
+      recast.print(arrAST).code,
+      "throw[1,2,3]"
+    );
+
+    throwStmt.argument = b.literal(false);
+    assert.strictEqual(
+      recast.print(arrAST).code,
+      "throw false" // Instead of throwfalse.
+    );
+
+    var inAST = parse('"foo"in bar');
+    var inExpr = inAST.program.body[0].expression;
+
+    n.BinaryExpression.assert(inExpr);
+    assert.strictEqual(inExpr.operator, "in");
+
+    n.Literal.assert(inExpr.left);
+    assert.strictEqual(inExpr.left.value, "foo");
+
+    assert.strictEqual(
+      recast.print(inAST).code,
+      '"foo"in bar'
+    );
+
+    inExpr.left = b.identifier("x");
+    assert.strictEqual(
+      recast.print(inAST).code,
+      "x in bar" // Instead of xin bar.
+    );
+  });
+
+  it("should not add spaces to the beginnings of lines", function() {
+    var twoLineCode = [
+      "return", // Because of ASI rules, these two lines will
+      'xxx'     // parse as separate statements.
+    ].join(eol);
+
+    var twoLineAST = parse(twoLineCode);
+
+    assert.strictEqual(twoLineAST.program.body.length, 2);
+    var xxx = twoLineAST.program.body[1];
+    n.ExpressionStatement.assert(xxx);
+    n.Identifier.assert(xxx.expression);
+    assert.strictEqual(xxx.expression.name, "xxx");
+
+    assert.strictEqual(
+      recast.print(twoLineAST).code,
+      twoLineCode
+    );
+
+    xxx.expression = b.identifier("expression");
+
+    var withExpression = recast.print(twoLineAST).code;
+    assert.strictEqual(withExpression, [
+      "return",
+      "expression" // The key is that no space should be added to the
+      // beginning of this line.
+    ].join(eol));
+
+    twoLineAST.program.body[1] = b.expressionStatement(
+      b.callExpression(b.identifier("foo"), [])
+    );
+
+    var withFooCall = recast.print(twoLineAST).code;
+    assert.strictEqual(withFooCall, [
+      "return",
+      "foo()"
+    ].join(eol));
+  });
+});

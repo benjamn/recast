@@ -20,15 +20,22 @@
   },
   "license": "MIT",
   "main": "main.js",
+  "types": "main.d.ts",
   "scripts": {
-    "test": "test/run.sh",
-    "debug": "test/run.sh --inspect-brk"
+    "tsc": "tsc --noEmit",
+    "mocha": "test/run.sh",
+    "debug": "test/run.sh --inspect-brk",
+    "test": "npm run tsc && npm run mocha",
+    "build": "tsc && ts-add-module-exports",
+    "clean": "ts-emit-clean",
+    "prepack": "npm run clean && npm run build",
+    "postpack": "npm run clean"
   },
   "browser": {
     "fs": false
   },
   "dependencies": {
-    "ast-types": "0.11.7",
+    "ast-types": "0.12.0",
     "esprima": "~4.0.0",
     "private": "~0.1.5",
     "source-map": "~0.6.1"
@@ -37,11 +44,19 @@
     "@babel/core": "^7.0.0-beta.54",
     "@babel/parser": "^7.0.0-beta.54",
     "@babel/preset-env": "^7.0.0-beta.54",
+    "@types/esprima": "^4.0.2",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.9",
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "flow-parser": "^0.83.0",
     "glob": "^7.1.2",
     "mocha": "~5.2.0",
-    "reify": "^0.18.0"
+    "reify": "^0.18.0",
+    "ts-add-module-exports": "^1.0.0",
+    "ts-emit-clean": "^1.0.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.6"
   },
   "engines": {
     "node": ">= 4"
