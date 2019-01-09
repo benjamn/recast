@@ -872,7 +872,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         return fromString(nodeStr(n.value, options));
 
     case "InterpreterDirective":
-        return fromString(`#!${n.value}\n`);
+        return fromString(`#!${n.value}\n`, options);
 
     case "ModuleSpecifier":
         if (n.local) {
