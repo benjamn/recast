@@ -1,2 +1,1 @@
-"use strict";
-Object.assign(exports, require("./babel.js"));
+export * from "./babel";

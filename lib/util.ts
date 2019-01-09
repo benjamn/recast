@@ -1,26 +1,23 @@
-var assert = require("assert");
-var types = require("./types");
-var getFieldValue = types.getFieldValue;
+import assert from "assert";
+import types from "./types";
 var n = types.namedTypes;
-var sourceMap = require("source-map");
+import sourceMap from "source-map";
 var SourceMapConsumer = sourceMap.SourceMapConsumer;
 var SourceMapGenerator = sourceMap.SourceMapGenerator;
 var hasOwn = Object.prototype.hasOwnProperty;
-var util = exports;
 
-function getOption(options, key, defaultValue) {
+export function getOption(options: any, key: any, defaultValue: any) {
   if (options && hasOwn.call(options, key)) {
     return options[key];
   }
   return defaultValue;
 }
-util.getOption = getOption;
 
-function getUnionOfKeys() {
-  var result = {};
-  var argc = arguments.length;
+export function getUnionOfKeys(...args: any[]) {
+  var result: any = {};
+  var argc = args.length;
   for (var i = 0; i < argc; ++i) {
-    var keys = Object.keys(arguments[i]);
+    var keys = Object.keys(args[i]);
     var keyCount = keys.length;
     for (var j = 0; j < keyCount; ++j) {
       result[keys[j]] = true;
@@ -28,22 +25,19 @@ function getUnionOfKeys() {
   }
   return result;
 }
-util.getUnionOfKeys = getUnionOfKeys;
 
-function comparePos(pos1, pos2) {
+export function comparePos(pos1: any, pos2: any) {
   return (pos1.line - pos2.line) || (pos1.column - pos2.column);
 }
-util.comparePos = comparePos;
 
-function copyPos(pos) {
+export function copyPos(pos: any) {
   return {
     line: pos.line,
     column: pos.column
   };
 }
-util.copyPos = copyPos;
 
-util.composeSourceMaps = function(formerMap, latterMap) {
+export function composeSourceMaps(formerMap: any, latterMap: any) {
   if (formerMap) {
     if (!latterMap) {
       return formerMap;
@@ -59,7 +53,7 @@ util.composeSourceMaps = function(formerMap, latterMap) {
     sourceRoot: latterMap.sourceRoot
   });
 
-  var sourcesToContents = {};
+  var sourcesToContents: any = {};
 
   smcLatter.eachMapping(function(mapping) {
     var origPos = smcFormer.originalPositionFor({
@@ -89,10 +83,10 @@ util.composeSourceMaps = function(formerMap, latterMap) {
     }
   });
 
-  return smg.toJSON();
+  return (smg as any).toJSON();
 };
 
-util.getTrueLoc = function(node, lines) {
+export function getTrueLoc(node: any, lines: any) {
   // It's possible that node is newly-created (not parsed by Esprima),
   // in which case it probably won't have a .loc property (or an
   // .original property for that matter). That's fine; we'll just
@@ -106,7 +100,7 @@ util.getTrueLoc = function(node, lines) {
     end: node.loc.end
   };
 
-  function include(node) {
+  function include(node: any) {
     expandLoc(result, node.loc);
   }
 
@@ -115,7 +109,7 @@ util.getTrueLoc = function(node, lines) {
   // positions of the export declaration node.
   if (node.declaration &&
       node.declaration.decorators &&
-      util.isExportDeclaration(node)) {
+      isExportDeclaration(node)) {
     node.declaration.decorators.forEach(include);
   }
 
@@ -141,7 +135,7 @@ util.getTrueLoc = function(node, lines) {
   return result;
 };
 
-function expandLoc(parentLoc, childLoc) {
+function expandLoc(parentLoc: any, childLoc: any) {
   if (parentLoc && childLoc) {
     if (comparePos(childLoc.start, parentLoc.start) < 0) {
       parentLoc.start = childLoc.start;
@@ -153,7 +147,7 @@ function expandLoc(parentLoc, childLoc) {
   }
 }
 
-util.fixFaultyLocations = function(node, lines) {
+export function fixFaultyLocations(node: any, lines: any) {
   var loc = node.loc;
   if (loc) {
     if (loc.start.line < 1) {
@@ -178,11 +172,11 @@ util.fixFaultyLocations = function(node, lines) {
   if (loc && node.decorators) {
     // Expand the .loc of the node responsible for printing the decorators
     // (here, the decorated node) so that it includes node.decorators.
-    node.decorators.forEach(function (decorator) {
+    node.decorators.forEach(function (decorator: any) {
       expandLoc(loc, decorator.loc);
     });
 
-  } else if (node.declaration && util.isExportDeclaration(node)) {
+  } else if (node.declaration && isExportDeclaration(node)) {
     // Nullify .loc information for the child declaration so that we never
     // try to reprint it without also reprinting the export declaration.
     node.declaration.loc = null;
@@ -191,7 +185,7 @@ util.fixFaultyLocations = function(node, lines) {
     // (here, the export declaration) so that it includes node.decorators.
     var decorators = node.declaration.decorators;
     if (decorators) {
-      decorators.forEach(function (decorator) {
+      decorators.forEach(function (decorator: any) {
         expandLoc(loc, decorator.loc);
       });
     }
@@ -229,12 +223,12 @@ util.fixFaultyLocations = function(node, lines) {
   }
 };
 
-function fixForLoopHead(node, lines) {
+function fixForLoopHead(node: any, lines: any) {
   if (node.type !== "ForStatement") {
     return;
   }
 
-  function fix(child) {
+  function fix(child: any) {
     var loc = child && child.loc;
     var start = loc && loc.start;
     var end = loc && copyPos(loc.end);
@@ -256,7 +250,7 @@ function fixForLoopHead(node, lines) {
   fix(node.update);
 }
 
-function fixTemplateLiteral(node, lines) {
+function fixTemplateLiteral(node: any, lines: any) {
   if (node.type !== "TemplateLiteral") {
     return;
   }
@@ -291,7 +285,7 @@ function fixTemplateLiteral(node, lines) {
 
   // Now we need to exclude ${ and } characters from the .loc's of all
   // quasi elements, since some parsers accidentally include them.
-  node.expressions.forEach(function (expr, i) {
+  node.expressions.forEach(function (expr: any, i: any) {
     // Rewind from expr.loc.start over any whitespace and the ${ that
     // precedes the expression. The position of the $ should be the same
     // as the .loc.end of the preceding quasi element, but some parsers
@@ -321,7 +315,7 @@ function fixTemplateLiteral(node, lines) {
   });
 }
 
-util.isExportDeclaration = function (node) {
+export function isExportDeclaration(node: any) {
   if (node) switch (node.type) {
   case "ExportDeclaration":
   case "ExportDefaultDeclaration":
@@ -335,17 +329,17 @@ util.isExportDeclaration = function (node) {
   return false;
 };
 
-util.getParentExportDeclaration = function (path) {
+export function getParentExportDeclaration(path: any) {
   var parentNode = path.getParentNode();
   if (path.getName() === "declaration" &&
-      util.isExportDeclaration(parentNode)) {
+      isExportDeclaration(parentNode)) {
     return parentNode;
   }
 
   return null;
 };
 
-util.isTrailingCommaEnabled = function(options, context) {
+export function isTrailingCommaEnabled(options: any, context: any) {
   var trailingComma = options.trailingComma;
   if (typeof trailingComma === "object") {
     return !!trailingComma[context];

@@ -1,11 +1,13 @@
-var assert = require("assert");
-var recast = require("..");
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var n = require("../lib/types").namedTypes;
-var b = require("../lib/types").builders;
-var fromString = require("../lib/lines").fromString;
-var eol = require("os").EOL;
+import assert from "assert";
+import recast from "../main";
+import { parse } from "../lib/parser";
+import { Printer } from "../lib/printer";
+import types from "../lib/types";
+var n = types.namedTypes;
+var b = types.builders;
+import { fromString } from "../lib/lines";
+import { EOL as eol } from "os";
+var linesModule = require("../lib/lines");
 var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("printer", function() {
@@ -333,7 +335,7 @@ describe("printer", function() {
       "var x, y, z;"
     );
 
-    var z = varDecl.declarations.pop();
+    var z: any = varDecl.declarations.pop();
     varDecl.declarations.pop();
     varDecl.declarations.push(z);
 
@@ -481,11 +483,9 @@ describe("printer", function() {
       b.blockStatement([]),
       false,
       false,
-      false,
-      undefined
     );
 
-    funExpr.defaults = [undefined, b.literal(1)];
+    funExpr.defaults = [null, b.literal(1)];
     funExpr.rest = b.identifier('d');
 
     assert.strictEqual(
@@ -496,12 +496,9 @@ describe("printer", function() {
     var arrowFunExpr = b.arrowFunctionExpression(
       [b.identifier('b'), b.identifier('c')],
       b.blockStatement([]),
-      false,
-      false,
-      false,
-      undefined);
+      false);
 
-    arrowFunExpr.defaults = [undefined, b.literal(1)];
+    arrowFunExpr.defaults = [null, b.literal(1)];
     arrowFunExpr.rest = b.identifier('d');
 
     assert.strictEqual(
@@ -625,8 +622,6 @@ describe("printer", function() {
       [],
       b.blockStatement(ast.program.body)
     );
-
-    var linesModule = require("../lib/lines");
 
     assert.strictEqual(
       printer.print(funDecl).code,
@@ -1362,7 +1357,7 @@ describe("printer", function() {
     var lines = fromString(code);
     var ast = parse(code, {
       esprima: {
-        parse: function(source, options) {
+        parse: function(source: string, options?: any) {
           var program = require("esprima").parse(source, options);
           n.Program.assert(program);
           // Expand ast.program.loc to include any
@@ -1454,11 +1449,11 @@ describe("printer", function() {
 
     recast.visit(ast, {
       visitTaggedTemplateExpression: function (path) {
-        function replaceIdWithNodeId(path) {
+        function replaceIdWithNodeId(path: any) {
           path.replace(path.value.replace(/\bid\b/g, "nodeID"));
         }
 
-        path.get("quasi", "quasis").each(function (quasiPath) {
+        path.get("quasi", "quasis").each(function (quasiPath: any) {
           replaceIdWithNodeId(quasiPath.get("value", "cooked"));
           replaceIdWithNodeId(quasiPath.get("value", "raw"));
         });
@@ -1527,7 +1522,6 @@ describe("printer", function() {
           b.identifier('key'),
           b.stringTypeAnnotation(),
           b.stringTypeAnnotation(),
-          false
         )
       ])
     );
@@ -1592,7 +1586,7 @@ describe("printer", function() {
     var babelParser = require("@babel/parser");
     var parseOptions = {
       parser: {
-        parse: function (source) {
+        parse: function (source: string) {
           return babelParser.parse(source, {
             sourceType: 'module',
             plugins: ['flow'],
@@ -1663,7 +1657,7 @@ describe("printer", function() {
   });
 
   it("prints no extra semicolons in for-loop heads (#377)", function () {
-    function check(head, parser) {
+    function check(head: any, parser: any) {
       var source = "for (" + head + ") console.log(i);";
       var ast = recast.parse(source, { parser: parser });
       var loop = ast.program.body[0];
@@ -1686,7 +1680,7 @@ describe("printer", function() {
       assert.strictEqual(newHead.split(";").length, 3);
     }
 
-    function checkWith(parser) {
+    function checkWith(parser: any) {
       check("let i = 0; i < 1; i++", parser);
       check("let i = 0 ; i < 1; i++", parser);
       check("let i = 0; ; i++", parser);

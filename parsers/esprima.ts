@@ -7,10 +7,10 @@
 //     parser: require("recast/parsers/esprima")
 //   });
 //
-const getOption = require("../lib/util.js").getOption;
+import { getOption } from "../lib/util";
 
-exports.parse = function (source, options) {
-  const comments = [];
+export function parse(source: string, options?: any) {
+  const comments: any[] = [];
   const ast = require("esprima").parse(source, {
     loc: true,
     locations: true,
@@ -21,7 +21,7 @@ exports.parse = function (source, options) {
     tokens: true
   });
 
-  if (! Array.isArray(ast.comments)) {
+  if (!Array.isArray(ast.comments)) {
     ast.comments = comments;
   }
 

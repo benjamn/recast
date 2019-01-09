@@ -1,8 +1,11 @@
-"use strict";
+import { parse as babelParse } from "@babel/parser";
+import getBabelOptions, { Overrides } from "./_babel_options";
+
+type BabelParser = { parse: typeof babelParse };
 
 // Prefer the new @babel/parser package, but fall back to babylon if
 // that's what's available.
-const parser = exports.parser = function () {
+export const parser = function (): BabelParser {
   try {
     return require("@babel/parser");
   } catch (e) {
@@ -17,8 +20,8 @@ const parser = exports.parser = function () {
 //     parser: require("recast/parsers/babel")
 //   });
 //
-exports.parse = function (source, options) {
-  options = require("./_babel_options.js")(options);
-  options.plugins.push("jsx", "flow");
-  return parser.parse(source, options);
+export function parse(source: string, options?: Overrides) {
+  const babelOptions = getBabelOptions(options);
+  babelOptions.plugins.push("jsx", "flow");
+  return parser.parse(source, babelOptions);
 };

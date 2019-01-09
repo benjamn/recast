@@ -1,12 +1,10 @@
-var assert = require("assert");
-var fs = require("fs");
-var path = require("path");
-var linesModule = require("../lib/lines");
-var fromString = linesModule.fromString;
-var concat = linesModule.concat;
-var eol = require("os").EOL;
+import assert from "assert";
+import fs from "fs";
+import path from "path";
+import { fromString, concat, countSpaces, LinesType } from "../lib/lines";
+import { EOL as eol } from "os";
 
-function check(a, b) {
+function check(a: any, b: any) {
     assert.strictEqual(a.toString({
         lineTerminator: eol
     }), b.toString({
@@ -39,7 +37,7 @@ describe("lines", function() {
     });
 
     it("FromString", function() {
-        function checkIsCached(s) {
+        function checkIsCached(s: any) {
             assert.strictEqual(fromString(s), fromString(s));
             check(fromString(s), s);
         }
@@ -72,15 +70,13 @@ describe("lines", function() {
               code);
     });
 
-    function testEachPosHelper(lines, code) {
-        var lengths = [];
-
+    function testEachPosHelper(lines: any, code: any) {
         check(lines, code);
 
-        var chars = [];
+        var chars: any[] = [];
         var emptyCount = 0;
 
-        function iterator(pos) {
+        function iterator(pos: any) {
             var ch = lines.charAt(pos);
             if (ch === "")
                 emptyCount += 1;
@@ -132,7 +128,7 @@ describe("lines", function() {
         var code = String(CharAtTest).replace(/\r\n/g, "\n");
         var lines = fromString(code);
 
-        function compare(pos) {
+        function compare(pos: any) {
             assert.strictEqual(
                 lines.charAt(pos),
                 lines.bootstrapCharAt(pos));
@@ -148,7 +144,7 @@ describe("lines", function() {
             indented = original.indentTail(4),
             reference = fromString("  ab" + eol + "      c");
 
-        function compareIndented(pos) {
+        function compareIndented(pos: any) {
             var c = indented.charAt(pos);
             check(c, reference.charAt(pos));
             check(c, indented.bootstrapCharAt(pos));
@@ -217,7 +213,7 @@ describe("lines", function() {
     });
 
     it("Empty", function() {
-        function c(s) {
+        function c(s: any) {
             var lines = fromString(s);
             check(lines, s);
             assert.strictEqual(
@@ -277,9 +273,9 @@ describe("lines", function() {
         checkAllSlices(lines);
     });
 
-    function checkAllSlices(lines) {
-        lines.eachPos(function(start) {
-            lines.eachPos(function(end) {
+    function checkAllSlices(lines: any) {
+        lines.eachPos(function(start: any) {
+            lines.eachPos(function(end: any) {
                 check(lines.slice(start, end),
                       lines.bootstrapSlice(start, end));
                 check(lines.sliceString(start, end),
@@ -288,7 +284,7 @@ describe("lines", function() {
         });
     }
 
-    function getSourceLocation(lines) {
+    function getSourceLocation(lines: any) {
         return { start: lines.firstPos(),
                  end: lines.lastPos() };
     }
@@ -297,7 +293,7 @@ describe("lines", function() {
         var code = String(GetSourceLocationTest),
             lines = fromString(code);
 
-        function verify(indent) {
+        function verify(indent: any) {
             var indented = lines.indentTail(indent),
                 loc = getSourceLocation(indented),
                 string = indented.toString(),
@@ -319,9 +315,9 @@ describe("lines", function() {
     it("Trim", function() {
         var string = "  xxx " + eol + " ";
         var options = { tabWidth: 4 };
-        var lines = fromString(string);
+        fromString(string);
 
-        function test(string) {
+        function test(string: string) {
             var lines = fromString(string, options);
             check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), options));
             check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), options));
@@ -351,14 +347,14 @@ describe("lines", function() {
     });
 
     it("CountSpaces", function() {
-        var count = linesModule.countSpaces;
+        var count = countSpaces;
 
         assert.strictEqual(count(""), 0);
         assert.strictEqual(count(" "), 1);
         assert.strictEqual(count("  "), 2);
         assert.strictEqual(count("   "), 3);
 
-        function check(s, tabWidth, result) {
+        function check(s: string, tabWidth: number, result: number) {
             assert.strictEqual(count(s, tabWidth), result);
         }
 
@@ -407,7 +403,7 @@ describe("lines", function() {
             "}"
         ].join(eol);
 
-        function checkUnchanged(lines, code) {
+        function checkUnchanged(lines: LinesType, code: string) {
             check(lines.toString(tabOpts), code);
             check(lines.toString(noTabOpts), code);
             check(lines.indent(3).indent(-5).indent(2).toString(tabOpts), code);
@@ -500,7 +496,12 @@ describe("lines", function() {
     });
 
     it("GuessTabWidth", function GuessTabWidthTest(done) {
-        var lines = fromString(String(GuessTabWidthTest));
+        var lines;
+        lines = fromString([
+            "function identity(x) {",
+            "    return x;",
+            "}"
+        ].join(eol));
         assert.strictEqual(lines.guessTabWidth(), 4);
 
         lines = fromString([

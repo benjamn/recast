@@ -1,22 +1,23 @@
-var assert = require("assert");
-var esprima = require("esprima");
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var NodePath = require("ast-types").NodePath;
-var types = require("../lib/types");
+import assert from "assert";
+import * as esprima from "esprima";
+import { parse } from "../lib/parser";
+import { Printer } from "../lib/printer";
+import astTypes from "ast-types";
+var NodePath = astTypes.NodePath;
+import types from "../lib/types";
 var n = types.namedTypes;
 var b = types.builders;
 var printer = new Printer;
-var eol = require("os").EOL;
+import { EOL as eol } from "os";
 
-function parseExpression(expr) {
-  var ast = esprima.parse(expr);
+function parseExpression(expr: any) {
+  var ast: any = esprima.parse(expr);
   n.Program.assert(ast);
   ast = ast.body[0];
   return n.ExpressionStatement.check(ast) ? ast.expression : ast;
 }
 
-function check(expr) {
+function check(expr: any) {
   const ast = parse(expr);
   const reprinted = printer.print(ast).code;
   assert.strictEqual(reprinted, expr);

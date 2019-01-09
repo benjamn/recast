@@ -1,13 +1,26 @@
-var assert = require("assert");
-var types = require("./types");
-var isString = types.builtInTypes.string;
+import assert from "assert";
+import types from "./types";
 var isNumber = types.builtInTypes.number;
 var SourceLocation = types.namedTypes.SourceLocation;
 var Position = types.namedTypes.Position;
-var linesModule = require("./lines");
-var comparePos = require("./util").comparePos;
+import * as linesModule from "./lines";
+import { comparePos } from "./util";
 
-function Mapping(sourceLines, sourceLoc, targetLoc) {
+interface MappingType {
+    sourceLines: any;
+    sourceLoc: any;
+    targetLoc: any;
+    slice(lines: any, start: any, end: any): MappingType | null;
+    add(line: number, column: number): MappingType;
+    subtract(line: number, column: number): MappingType;
+    indent(by: any, skipFirstLine: any, noNegativeColumns: any): MappingType;
+}
+
+interface MappingConstructor {
+    new(sourceLines: any, sourceLoc: any, targetLoc?: any): MappingType;
+}
+
+const Mapping = function Mapping(this: MappingType, sourceLines: any, sourceLoc: any, targetLoc?: any) {
     assert.ok(this instanceof Mapping);
     assert.ok(sourceLines instanceof linesModule.Lines);
     SourceLocation.assert(sourceLoc);
@@ -32,10 +45,10 @@ function Mapping(sourceLines, sourceLoc, targetLoc) {
         sourceLoc: { value: sourceLoc },
         targetLoc: { value: targetLoc }
     });
-}
+} as any as MappingConstructor;
 
-var Mp = Mapping.prototype;
-module.exports = Mapping;
+var Mp: MappingType = Mapping.prototype;
+export default Mapping;
 
 Mp.slice = function(lines, start, end) {
     assert.ok(lines instanceof linesModule.Lines);
@@ -51,7 +64,7 @@ Mp.slice = function(lines, start, end) {
     var sourceLoc = this.sourceLoc;
     var targetLoc = this.targetLoc;
 
-    function skip(name) {
+    function skip(name: string) {
         var sourceFromPos = sourceLoc[name];
         var targetFromPos = targetLoc[name];
         var targetToPos = start;
@@ -134,7 +147,7 @@ Mp.add = function(line, column) {
     });
 };
 
-function addPos(toPos, line, column) {
+function addPos(toPos: any, line: number, column: number) {
     return {
         line: toPos.line + line - 1,
         column: (toPos.line === 1)
@@ -150,7 +163,7 @@ Mp.subtract = function(line, column) {
     });
 };
 
-function subtractPos(fromPos, line, column) {
+function subtractPos(fromPos: any, line: number, column: number) {
     return {
         line: fromPos.line - line + 1,
         column: (fromPos.line === line)
@@ -201,8 +214,8 @@ Mp.indent = function(by, skipFirstLine, noNegativeColumns) {
 };
 
 function skipChars(
-    sourceLines, sourceFromPos,
-    targetLines, targetFromPos, targetToPos
+    sourceLines: any, sourceFromPos: any,
+    targetLines: any, targetFromPos: any, targetToPos: any
 ) {
     assert.ok(sourceLines instanceof linesModule.Lines);
     assert.ok(targetLines instanceof linesModule.Lines);

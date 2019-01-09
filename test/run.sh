@@ -27,4 +27,4 @@ fi
 
 cd .. # back to the recast/test/ directory
 
-exec mocha --reporter spec --full-trace $@ run.js
+exec mocha --require ts-node/register/transpile-only --reporter spec --full-trace $@ run.ts

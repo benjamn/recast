@@ -1,24 +1,17 @@
-"use strict";
+import assert from "assert";
+import path from "path";
+import fs from "fs";
+import recast from "../main";
+import types from "../lib/types";
+import {EOL as eol} from "os";
+import * as parser from "../parsers/typescript";
 
-const nodeMajorVersion = parseInt(process.versions.node, 10);
-if (nodeMajorVersion < 6) {
-  // Babel 7 no longer supports Node 4 or 5.
-  return;
-}
-
-const assert = require("assert");
-const path = require("path");
-const fs = require("fs");
-const recast = require("../main.js");
-const parse = require("../lib/parser").parse;
-const Printer = require("../lib/printer").Printer;
-const types = require("../lib/types");
-const eol = require("os").EOL;
-const parser = require("../parsers/typescript");
-
-describe("TypeScript", function() {
+// Babel 7 no longer supports Node 4 or 5.
+var nodeMajorVersion = parseInt(process.versions.node, 10);
+(nodeMajorVersion >= 6 ? describe : xdescribe)
+("TypeScript", function() {
   it('basic printing', function() {
-    function check(lines) {
+    function check(lines: any) {
       const code = lines.join(eol);
       const ast = recast.parse(code, { parser });
       const output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
@@ -313,11 +306,16 @@ testReprinting(
   "Reprinting GraphQL-Tools TypeScript files"
 );
 
-function testReprinting(pattern, description) {
+function testReprinting(pattern: any, description: any) {
+  // Babel no longer supports Node 4 or 5.
+  if (nodeMajorVersion < 6) {
+    return;
+  }
+
   describe(description, function () {
     require("glob").sync(pattern, {
       cwd: __dirname
-    }).forEach(file => it(file, function () {
+    }).forEach((file: any) => it(file, function () {
       if (file.indexOf("/tsx/") >= 0 ||
           file.endsWith("stitching/errors.ts") ||
           file.endsWith("decorators/type-arguments-invalid/input.js")) {
@@ -342,13 +340,13 @@ function testReprinting(pattern, description) {
   });
 }
 
-function tryToParseFile(source, absPath) {
+function tryToParseFile(source: any, absPath: any) {
   try {
     return recast.parse(source, { parser });
   } catch (e1) {
     try {
       var options = JSON.parse(fs.readFileSync(
-        path.join(path.dirname(absPath), "options.json")));
+        path.join(path.dirname(absPath), "options.json")).toString());
     } catch (e2) {
       if (e2.code !== "ENOENT") {
         console.error(e2);

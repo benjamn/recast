@@ -2,4 +2,6 @@
 // custom types to the AST type system (in particular, the File type), but
 // those types are now incorporated into ast-types, so this module doesn't
 // have much to do anymore. Still, it might prove useful in the future.
-module.exports = require("ast-types");
+import astTypes from "ast-types";
+export default astTypes;
+export * from "ast-types";

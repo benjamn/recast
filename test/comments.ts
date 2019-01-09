@@ -1,13 +1,12 @@
 "use strict";
 
-var recast = require("../main");
+import recast from "../main";
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
-var Printer = require("../lib/printer").Printer;
-var fromString = require("../lib/lines").fromString;
-var assert = require("assert");
-var printer = new Printer;
-var eol = require("os").EOL;
+import { Printer } from "../lib/printer";
+import { fromString } from "../lib/lines";
+import assert from "assert";
+import { EOL as eol } from "os";
 
 var annotated = [
   "function dup(/* string */ s,",
@@ -30,7 +29,7 @@ describe("comments", function() {
   ].forEach(runTestsForParser);
 });
 
-function runTestsForParser(parserId) {
+function runTestsForParser(parserId: any) {
   if (nodeMajorVersion < 6) {
     const parser = parserId.split("/").pop();
     if (parser === "babel" ||
@@ -44,7 +43,7 @@ function runTestsForParser(parserId) {
   const parserName = parserId.split("/").pop();
   const parser = require(parserId);
 
-  function pit(message, callback) {
+  function pit(message: any, callback: any) {
     it("[" + parserName + "] " + message, callback);
   }
 
@@ -164,20 +163,20 @@ function runTestsForParser(parserId) {
 
     const esprimaInfo = {
       Property: n.Property,
-      propBuilder(key, value) {
+      propBuilder(key: any, value: any) {
         return b.property("init", key, value);
       },
-      literalBuilder(value) {
+      literalBuilder(value: any) {
         return b.literal(value);
       }
     };
 
     const babelInfo = {
       Property: n.ObjectProperty,
-      propBuilder(key, value) {
+      propBuilder(key: any, value: any) {
         return b.objectProperty(key, value);
       },
-      literalBuilder(value) {
+      literalBuilder(value: any) {
         if (typeof value === "string") {
           return b.stringLiteral(value);
         }
@@ -188,13 +187,13 @@ function runTestsForParser(parserId) {
       }
     };
 
-    const info = {
+    const info = ({
       acorn: esprimaInfo,
       babel: babelInfo,
       esprima: esprimaInfo,
       flow: babelInfo,
       typescript: babelInfo
-    }[parserName];
+    } as any)[parserName];
 
     var props = assign.right.properties;
     info.Property.arrayOf().assert(props);
@@ -610,10 +609,10 @@ function runTestsForParser(parserId) {
     const ast = recast.parse(code, { parser });
     const array = ast.program.body[0].expression;
     const stmt = ast.program.body[0];
-    let danglingComment;
-    let trailingComment;
+    let danglingComment: any;
+    let trailingComment: any;
 
-    function handleComment(comment) {
+    function handleComment(comment: any) {
       if (comment.trailing) {
         trailingComment = comment;
       } else if (! comment.leading) {

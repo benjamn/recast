@@ -1,8 +1,8 @@
-var assert = require("assert");
-var recast = require("../main.js");
+import assert from "assert";
+import recast from "../main";
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
-var eol = require("os").EOL;
+import { EOL as eol } from "os";
 var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
@@ -18,7 +18,7 @@ describe("Babel", function () {
   };
 
   it("basic printing", function () {
-    function check(lines) {
+    function check(lines: any) {
       var code = lines.join(eol);
       var ast = recast.parse(code, parseOptions);
       var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
@@ -323,7 +323,7 @@ describe("Babel", function () {
     );
   });
 
-  function parseExpression(code) {
+  function parseExpression(code: any) {
     return recast.parse(code, parseOptions).program.body[0].expression;
   }
 
@@ -376,7 +376,7 @@ describe("Babel", function () {
     );
 
     recast.types.visit(ast, {
-      visitIfStatement: function(path) {
+      visitIfStatement: function(path: any) {
         path.replace(replacement);
         return false;
       }
@@ -399,9 +399,9 @@ describe("Babel", function () {
 
   it("tolerates circular references", function () {
     var code = "function foo(bar = true) {}";
-    var ast = recast.parse(code, {
+    recast.parse(code, {
       parser: {
-        parse: function (source) {
+        parse: function (source: any) {
           return babelTransform(source, {
             code: false,
             ast: true,

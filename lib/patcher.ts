@@ -1,26 +1,34 @@
-var assert = require("assert");
-var linesModule = require("./lines");
-var types = require("./types");
-var getFieldValue = types.getFieldValue;
-var Node = types.namedTypes.Node;
+import assert from "assert";
+import * as linesModule from "./lines";
+import types from "./types";
 var Printable = types.namedTypes.Printable;
 var Expression = types.namedTypes.Expression;
 var ReturnStatement = types.namedTypes.ReturnStatement;
 var SourceLocation = types.namedTypes.SourceLocation;
-var util = require("./util");
-var comparePos = util.comparePos;
-var FastPath = require("./fast-path");
+import { comparePos, copyPos, getUnionOfKeys } from "./util";
+import FastPath from "./fast-path";
 var isObject = types.builtInTypes.object;
 var isArray = types.builtInTypes.array;
 var isString = types.builtInTypes.string;
 var riskyAdjoiningCharExp = /[0-9a-z_$]/i;
 
-function Patcher(lines) {
+interface PatcherType {
+  replace(loc: any, lines: any): any;
+  get(loc?: any): any;
+  tryToReprintComments(newNode: any, oldNode: any, print: any): any;
+  deleteComments(node: any): any;
+}
+
+interface PatcherConstructor {
+  new(lines: any): PatcherType;
+}
+
+const Patcher = function Patcher(this: PatcherType, lines: any) {
   assert.ok(this instanceof Patcher);
   assert.ok(lines instanceof linesModule.Lines);
 
   var self = this,
-  replacements = [];
+  replacements: any[] = [];
 
   self.replace = function(loc, lines) {
     if (isString.check(lines))
@@ -42,9 +50,9 @@ function Patcher(lines) {
     };
 
     var sliceFrom = loc.start,
-    toConcat = [];
+    toConcat: any[] = [];
 
-    function pushSlice(from, to) {
+    function pushSlice(from: any, to: any) {
       assert.ok(comparePos(from, to) <= 0);
       toConcat.push(lines.slice(from, to));
     }
@@ -65,10 +73,10 @@ function Patcher(lines) {
 
     return linesModule.concat(toConcat);
   };
-}
-exports.Patcher = Patcher;
+} as any as PatcherConstructor;
+export { Patcher };
 
-var Pp = Patcher.prototype;
+var Pp: PatcherType = Patcher.prototype;
 
 Pp.tryToReprintComments = function(newNode, oldNode, print) {
   var patcher = this;
@@ -85,7 +93,7 @@ Pp.tryToReprintComments = function(newNode, oldNode, print) {
   newPath.stack.push("comments", getSurroundingComments(newNode));
   oldPath.stack.push("comments", getSurroundingComments(oldNode));
 
-  var reprints = [];
+  var reprints: any[] = [];
   var ableToReprintComments =
     findArrayReprints(newPath, oldPath, reprints);
 
@@ -111,11 +119,11 @@ Pp.tryToReprintComments = function(newNode, oldNode, print) {
 // Get all comments that are either leading or trailing, ignoring any
 // comments that occur inside node.loc. Returns an empty array for nodes
 // with no leading or trailing comments.
-function getSurroundingComments(node) {
-  var result = [];
+function getSurroundingComments(node: any) {
+  var result: any[] = [];
   if (node.comments &&
       node.comments.length > 0) {
-    node.comments.forEach(function(comment) {
+    node.comments.forEach(function(comment: any) {
       if (comment.leading || comment.trailing) {
         result.push(comment);
       }
@@ -131,7 +139,7 @@ Pp.deleteComments = function(node) {
 
   var patcher = this;
 
-  node.comments.forEach(function(comment) {
+  node.comments.forEach(function(comment: any) {
     if (comment.leading) {
       // Delete leading comments along with any trailing whitespace they
       // might have.
@@ -153,7 +161,7 @@ Pp.deleteComments = function(node) {
   });
 };
 
-exports.getReprinter = function(path) {
+export function getReprinter(path: any) {
   assert.ok(path instanceof FastPath);
 
   // Make sure that this path refers specifically to a Node, rather than
@@ -162,15 +170,15 @@ exports.getReprinter = function(path) {
   if (!Printable.check(node))
     return;
 
-  var orig = node.original;
+  var orig = (node as any).original;
   var origLoc = orig && orig.loc;
   var lines = origLoc && origLoc.lines;
-  var reprints = [];
+  var reprints: any[] = [];
 
   if (!lines || !findReprints(path, reprints))
     return;
 
-  return function(print) {
+  return function(print: any) {
     var patcher = new Patcher(lines);
 
     reprints.forEach(function(reprint) {
@@ -235,8 +243,8 @@ exports.getReprinter = function(path) {
 // If the last character before oldLoc and the first character of newLines
 // are both identifier characters, they must be separated by a space,
 // otherwise they will most likely get fused together into a single token.
-function needsLeadingSpace(oldLines, oldLoc, newLines) {
-  var posBeforeOldLoc = util.copyPos(oldLoc.start);
+function needsLeadingSpace(oldLines: any, oldLoc: any, newLines: any) {
+  var posBeforeOldLoc = copyPos(oldLoc.start);
 
   // The character just before the location occupied by oldNode.
   var charBeforeOldLoc =
@@ -255,7 +263,7 @@ function needsLeadingSpace(oldLines, oldLoc, newLines) {
 // If the last character of newLines and the first character after oldLoc
 // are both identifier characters, they must be separated by a space,
 // otherwise they will most likely get fused together into a single token.
-function needsTrailingSpace(oldLines, oldLoc, newLines) {
+function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
   // The character just after the location occupied by oldNode.
   var charAfterOldLoc = oldLines.charAt(oldLoc.end);
 
@@ -271,7 +279,7 @@ function needsTrailingSpace(oldLines, oldLoc, newLines) {
     riskyAdjoiningCharExp.test(charAfterOldLoc);
 }
 
-function findReprints(newPath, reprints) {
+function findReprints(newPath: any, reprints: any) {
   var newNode = newPath.getValue();
   Printable.assert(newNode);
 
@@ -296,7 +304,7 @@ function findReprints(newPath, reprints) {
   return canReprint;
 }
 
-function findAnyReprints(newPath, oldPath, reprints) {
+function findAnyReprints(newPath: any, oldPath: any, reprints: any) {
   var newNode = newPath.getValue();
   var oldNode = oldPath.getValue();
 
@@ -312,7 +320,7 @@ function findAnyReprints(newPath, oldPath, reprints) {
   return false;
 }
 
-function findArrayReprints(newPath, oldPath, reprints) {
+function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
   var newNode = newPath.getValue();
   var oldNode = oldPath.getValue();
 
@@ -343,7 +351,7 @@ function findArrayReprints(newPath, oldPath, reprints) {
   return true;
 }
 
-function findObjectReprints(newPath, oldPath, reprints) {
+function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
   var newNode = newPath.getValue();
   isObject.assert(newNode);
 
@@ -370,8 +378,8 @@ function findObjectReprints(newPath, oldPath, reprints) {
     // Here we need to decide whether the reprinted code for newNode is
     // appropriate for patching into the location of oldNode.
 
-    if (newNode.type === oldNode.type) {
-      var childReprints = [];
+    if ((newNode as any).type === (oldNode as any).type) {
+      var childReprints: any[] = [];
 
       if (findChildReprints(newPath, oldPath, childReprints)) {
         reprints.push.apply(reprints, childReprints);
@@ -415,7 +423,7 @@ function findObjectReprints(newPath, oldPath, reprints) {
   return findChildReprints(newPath, oldPath, reprints);
 }
 
-function findChildReprints(newPath, oldPath, reprints) {
+function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   var newNode = newPath.getValue();
   var oldNode = oldPath.getValue();
 
@@ -435,7 +443,7 @@ function findChildReprints(newPath, oldPath, reprints) {
     return false;
   }
 
-  var keys = util.getUnionOfKeys(oldNode, newNode);
+  var keys = getUnionOfKeys(oldNode, newNode);
 
   if (oldNode.type === "File" ||
       newNode.type === "File") {

@@ -1,5 +1,3 @@
-"use strict";
-
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process JavaScript code with Acorn:
 //
@@ -7,11 +5,11 @@
 //     parser: require("recast/parsers/acorn")
 //   });
 //
-const getOption = require("../lib/util.js").getOption;
+import { getOption } from "../lib/util";
 
-exports.parse = function parse(source, options) {
-  const comments = [];
-  const tokens = [];
+export function parse(source: string, options?: any) {
+  const comments: any[] = [];
+  const tokens: any[] = [];
   const ast = require("acorn").parse(source, {
     allowHashBang: true,
     allowImportExportEverywhere: true,

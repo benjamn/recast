@@ -1,6 +1,12 @@
-const getOption = require("../lib/util.js").getOption;
+import { ParserOptions, ParserPlugin } from "@babel/parser";
+import { getOption } from "../lib/util";
 
-module.exports = function (options) {
+export type Overrides = Partial<{
+  sourceType: ParserOptions["sourceType"];
+  strictMode: ParserOptions["strictMode"];
+}>;
+
+export default function getBabelOptions(options?: Overrides): ParserOptions & { plugins: ParserPlugin[] } {
   // The goal here is to tolerate as much syntax as possible, since Recast
   // is not in the business of forbidding anything. If you want your
   // parser to be more restrictive for some reason, you can always pass
@@ -22,7 +28,7 @@ module.exports = function (options) {
       "doExpressions",
       "dynamicImport",
       "exportDefaultFrom",
-      "exportExtensions",
+      "exportExtensions" as any as ParserPlugin,
       "exportNamespaceFrom",
       "functionBind",
       "functionSent",
@@ -32,7 +38,7 @@ module.exports = function (options) {
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      ["pipelineOperator", { proposal: "minimal" }],
+      ["pipelineOperator", { proposal: "minimal" }] as any as ParserPlugin,
       "throwExpressions",
     ]
   };

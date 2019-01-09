@@ -1,15 +1,14 @@
-var assert = require("assert");
-var sourceMap = require("source-map");
-var recast = require("..");
-var types = require("../lib/types");
+import assert from "assert";
+import sourceMap from "source-map";
+import recast from "../main";
+import types from "../lib/types";
 var n = types.namedTypes;
 var b = types.builders;
 var NodePath = types.NodePath;
-var fromString = require("../lib/lines").fromString;
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var Mapping = require("../lib/mapping");
-var eol = require("os").EOL;
+import { fromString } from "../lib/lines";
+import { parse } from "../lib/parser";
+import { Printer } from "../lib/printer";
+import { EOL as eol } from "os";
 
 describe("source maps", function() {
     it("should generate correct mappings", function() {
@@ -19,7 +18,7 @@ describe("source maps", function() {
             "}"
         ].join(eol);
 
-        var lines = fromString(code);
+        fromString(code);
         var ast = parse(code, {
             sourceFileName: "source.js"
         });
@@ -55,7 +54,7 @@ describe("source maps", function() {
 
         var smc = new sourceMap.SourceMapConsumer(printed.map);
 
-        function check(origLine, origCol, genLine, genCol, lastColumn) {
+        function check(origLine: any, origCol: any, genLine: any, genCol: any, lastColumn: any) {
             assert.deepEqual(smc.originalPositionFor({
                 line: genLine,
                 column: genCol
@@ -85,7 +84,7 @@ describe("source maps", function() {
     });
 
     it("should compose with inputSourceMap", function() {
-        function addUseStrict(ast) {
+        function addUseStrict(ast: any) {
             return recast.visit(ast, {
                 visitFunction: function(path) {
                     path.get("body", "body").unshift(
@@ -96,7 +95,7 @@ describe("source maps", function() {
             });
         }
 
-        function stripConsole(ast) {
+        function stripConsole(ast: any) {
             return recast.visit(ast, {
                 visitCallExpression: function(path) {
                     var node = path.value;
@@ -107,6 +106,7 @@ describe("source maps", function() {
                         path.parent.replace();
                         return false;
                     }
+                    return;
                 }
             });
         }

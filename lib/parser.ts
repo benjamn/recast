@@ -1,19 +1,15 @@
-"use strict";
-
-var assert = require("assert");
-var types = require("./types");
-var n = types.namedTypes;
+import assert from "assert";
+import types from "./types";
 var b = types.builders;
 var isObject = types.builtInTypes.object;
 var isArray = types.builtInTypes.array;
-var isFunction = types.builtInTypes.function;
-var Patcher = require("./patcher").Patcher;
-var normalizeOptions = require("./options").normalize;
-var fromString = require("./lines").fromString;
-var attachComments = require("./comments").attach;
-var util = require("./util");
+import { normalize as normalizeOptions } from "./options";
+import { fromString } from "./lines";
+import { attach as attachComments } from "./comments";
+import * as util from "./util";
+import { Options } from "./options";
 
-exports.parse = function parse(source, options) {
+export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
 
   const lines = fromString(source, options);
@@ -24,7 +20,7 @@ exports.parse = function parse(source, options) {
     useTabs: false
   });
 
-  let comments = [];
+  let comments: any[] = [];
   const ast = options.parser.parse(sourceWithoutTabs, {
     jsx: true,
     loc: true,
@@ -41,7 +37,7 @@ exports.parse = function parse(source, options) {
   // tokenizer. All the preconfigured ../parsers/* expose ast.tokens
   // automatically, but custom parsers might need additional configuration
   // to avoid this fallback.
-  const tokens = Array.isArray(ast.tokens)
+  const tokens: any[] = Array.isArray(ast.tokens)
     ? ast.tokens
     : require("esprima").tokenize(sourceWithoutTabs, {
         loc: true
@@ -90,7 +86,7 @@ exports.parse = function parse(source, options) {
       end: lines.lastPos(),
       lines: lines,
       indent: 0
-    };
+    } as any;
   } else if (ast.type === "File") {
     file = ast;
     program = file.program;
@@ -106,7 +102,7 @@ exports.parse = function parse(source, options) {
   // well), since sometimes program.loc.{start,end} will coincide with the
   // .loc.{start,end} of the first and last *statements*, mistakenly
   // excluding comments that fall outside that region.
-  var trueProgramLoc = util.getTrueLoc({
+  var trueProgramLoc: any = util.getTrueLoc({
     type: program.type,
     loc: program.loc,
     body: [],
@@ -128,7 +124,22 @@ exports.parse = function parse(source, options) {
   return new TreeCopier(lines, tokens).copy(file);
 };
 
-function TreeCopier(lines, tokens) {
+interface TreeCopierType {
+  lines: any;
+  tokens: any[];
+  startTokenIndex: number;
+  endTokenIndex: number;
+  indent: number;
+  seen: Map<any, any>;
+  copy(node: any): any;
+  findTokenRange(loc: any): any;
+}
+
+interface TreeCopierConstructor {
+  new(lines: any, tokens: any): TreeCopierType;
+}
+
+const TreeCopier = function TreeCopier(this: TreeCopierType, lines: any, tokens: any) {
   assert.ok(this instanceof TreeCopier);
   this.lines = lines;
   this.tokens = tokens;
@@ -136,9 +147,9 @@ function TreeCopier(lines, tokens) {
   this.endTokenIndex = tokens.length;
   this.indent = 0;
   this.seen = new Map;
-}
+} as any as TreeCopierConstructor;
 
-var TCp = TreeCopier.prototype;
+var TCp: TreeCopierType = TreeCopier.prototype;
 
 TCp.copy = function(node) {
   if (this.seen.has(node)) {
@@ -146,9 +157,9 @@ TCp.copy = function(node) {
   }
 
   if (isArray.check(node)) {
-    var copy = new Array(node.length);
+    var copy: any = new Array(node.length);
     this.seen.set(node, copy);
-    node.forEach(function (item, i) {
+    node.forEach(function (this: any, item: any, i: any) {
       copy[i] = this.copy(item);
     }, this);
     return copy;
@@ -160,7 +171,7 @@ TCp.copy = function(node) {
 
   util.fixFaultyLocations(node, this.lines);
 
-  var copy = Object.create(Object.getPrototypeOf(node), {
+  var copy: any = Object.create(Object.getPrototypeOf(node), {
     original: { // Provide a link from the copy to the original.
       value: node,
       configurable: false,

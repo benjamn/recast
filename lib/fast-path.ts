@@ -1,18 +1,41 @@
-var assert = require("assert");
-var types = require("./types");
+import assert from "assert";
+import types from "./types";
 var n = types.namedTypes;
-var Node = n.Node;
 var isArray = types.builtInTypes.array;
 var isNumber = types.builtInTypes.number;
-var util = require("./util.js");
+import * as util from "./util";
 
-function FastPath(value) {
-  assert.ok(this instanceof FastPath);
-  this.stack = [value];
+interface FastPathType {
+  stack: any[];
+  copy(): any;
+  getName(): any;
+  getValue(): any;
+  valueIsDuplicate (): any;
+  getNode(count?: number): any;
+  getParentNode(count?: number): any;
+  getRootValue(): any;
+  call(callback: any, ...names: any[]): any;
+  each(callback: any, ...names: any[]): any;
+  map(callback: any, ...names: any[]): any;
+  hasParens (): any;
+  getPrevToken (node: any): any;
+  getNextToken (node: any): any;
+  needsParens(assumeExpressionContext: any): any;
+  canBeFirstInStatement(): any;
+  firstInStatement(): any;
 }
 
-var FPp = FastPath.prototype;
-module.exports = FastPath;
+interface FastPathConstructor {
+  new(value: any): FastPathType;
+  from(obj: any): any;
+}
+
+const FastPath = function FastPath(this: FastPathType, value: any) {
+  assert.ok(this instanceof FastPath);
+  this.stack = [value];
+} as any as FastPathConstructor;
+
+var FPp: FastPathType = FastPath.prototype;
 
 // Static convenience function for coercing a value to a FastPath.
 FastPath.from = function(obj) {
@@ -68,7 +91,7 @@ FPp.valueIsDuplicate = function () {
   return s.lastIndexOf(s[valueIndex], valueIndex - 1) >= 0;
 };
 
-function getNodeHelper(path, count) {
+function getNodeHelper(path: any, count: number) {
   var s = path.stack;
 
   for (var i = s.length - 1; i >= 0; i -= 2) {
@@ -81,11 +104,11 @@ function getNodeHelper(path, count) {
   return null;
 }
 
-FPp.getNode = function getNode(count) {
+FPp.getNode = function getNode(count = 0) {
   return getNodeHelper(this, ~~count);
 };
 
-FPp.getParentNode = function getParentNode(count) {
+FPp.getParentNode = function getParentNode(count = 0) {
   return getNodeHelper(this, ~~count + 1);
 };
 
@@ -474,12 +497,13 @@ FPp.needsParens = function(assumeExpressionContext) {
   return false;
 };
 
-function isBinary(node) {
+function isBinary(node: any) {
   return n.BinaryExpression.check(node)
     || n.LogicalExpression.check(node);
 }
 
-function isUnaryLike(node) {
+// @ts-ignore 'isUnaryLike' is declared but its value is never read. [6133]
+function isUnaryLike(node: any) {
   return n.UnaryExpression.check(node)
   // I considered making SpreadElement and SpreadProperty subtypes of
   // UnaryExpression, but they're not really Expression nodes.
@@ -487,7 +511,7 @@ function isUnaryLike(node) {
     || (n.SpreadProperty && n.SpreadProperty.check(node));
 }
 
-var PRECEDENCE = {};
+var PRECEDENCE: any = {};
 [["||"],
  ["&&"],
  ["|"],
@@ -504,7 +528,7 @@ var PRECEDENCE = {};
   });
 });
 
-function containsCallExpression(node) {
+function containsCallExpression(node: any): any {
   if (n.CallExpression.check(node)) {
     return true;
   }
@@ -514,7 +538,7 @@ function containsCallExpression(node) {
   }
 
   if (n.Node.check(node)) {
-    return types.someField(node, function(name, child) {
+    return types.someField(node, function(_name: any, child: any) {
       return containsCallExpression(child);
     });
   }
@@ -625,3 +649,5 @@ FPp.firstInStatement = function() {
 
   return true;
 };
+
+export default FastPath;

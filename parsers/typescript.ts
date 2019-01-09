@@ -1,6 +1,5 @@
-"use strict";
-
-const parser = require("./babel.js").parser;
+import { parser } from "./babel";
+import getBabelOptions, { Overrides } from "./_babel_options";
 
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process TypeScript code:
@@ -9,8 +8,8 @@ const parser = require("./babel.js").parser;
 //     parser: require("recast/parsers/typescript")
 //   });
 //
-exports.parse = function parse(source, options) {
-  options = require("./_babel_options.js")(options);
-  options.plugins.push("typescript");
-  return parser.parse(source, options);
+export function parse(source: string, options?: Overrides) {
+  const babelOptions = getBabelOptions(options);
+  babelOptions.plugins.push("typescript");
+  return parser.parse(source, babelOptions);
 };

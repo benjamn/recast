@@ -1,8 +1,8 @@
 "use strict";
 
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var types = require("../lib/types");
+import { parse } from "../lib/parser";
+import { Printer } from "../lib/printer";
+import types from "../lib/types";
 var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 (nodeMajorVersion >= 6 ? describe : xdescribe)
@@ -12,7 +12,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
     parser: require("../parsers/babel")
   };
 
-  function check(source) {
+  function check(source: string) {
     var ast1 = parse(source, parseOptions);
     var ast2 = parse(
       printer.printGenerically(ast1).code,

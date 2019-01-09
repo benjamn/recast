@@ -1,10 +1,8 @@
-var assert = require("assert");
-var parse = require("../lib/parser").parse;
-var Printer = require("../lib/printer").Printer;
-var types = require("../lib/types");
-var n = types.namedTypes;
-var b = types.builders;
-var eol = require("os").EOL;
+import assert from "assert";
+import { parse } from "../lib/parser";
+import { Printer } from "../lib/printer";
+import types from "../lib/types";
+import { EOL as eol } from "os";
 
 describe("type syntax", function() {
   var printer = new Printer({ tabWidth: 2, quote: 'single', flowObjectCommas: false });
@@ -15,7 +13,7 @@ describe("type syntax", function() {
     parser: require("flow-parser")
   };
 
-  function check(source, parseOptions) {
+  function check(source: string, parseOptions?: any) {
     parseOptions = parseOptions || esprimaParserParseOptions;
     var ast1 = parse(source, parseOptions);
     var code = printer.printGenerically(ast1).code;

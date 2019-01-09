@@ -1,19 +1,16 @@
-var assert = require("assert");
-var types = require("./types");
+import assert from "assert";
+import types from "./types";
 var n = types.namedTypes;
 var isArray = types.builtInTypes.array;
 var isObject = types.builtInTypes.object;
-var linesModule = require("./lines");
-var fromString = linesModule.fromString;
-var Lines = linesModule.Lines;
-var concat = linesModule.concat;
-var util = require("./util");
-var comparePos = util.comparePos;
-var childNodesCacheKey = require("private").makeUniqueKey();
+import { Lines, concat } from "./lines";
+import { comparePos, fixFaultyLocations } from "./util";
+import { makeUniqueKey } from "private";
+var childNodesCacheKey = makeUniqueKey();
 
 // TODO Move a non-caching implementation of this function into ast-types,
 // and implement a caching wrapper function here.
-function getSortedChildNodes(node, lines, resultArray) {
+function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
     if (!node) {
         return;
     }
@@ -22,7 +19,7 @@ function getSortedChildNodes(node, lines, resultArray) {
     // are fixed by this utility function. Specifically, if it decides to
     // set node.loc to null, indicating that the node's .loc information
     // is unreliable, then we don't want to add node to the resultArray.
-    util.fixFaultyLocations(node, lines);
+    fixFaultyLocations(node, lines);
 
     if (resultArray) {
         if (n.Node.check(node) &&
@@ -69,7 +66,7 @@ function getSortedChildNodes(node, lines, resultArray) {
 // As efficiently as possible, decorate the comment object with
 // .precedingNode, .enclosingNode, and/or .followingNode properties, at
 // least one of which is guaranteed to be defined.
-function decorateComment(node, comment, lines) {
+function decorateComment(node: any, comment: any, lines: any) {
     var childNodes = getSortedChildNodes(node, lines);
 
     // Time to dust off the old binary search robes and wizard hat.
@@ -117,12 +114,12 @@ function decorateComment(node, comment, lines) {
     }
 }
 
-exports.attach = function(comments, ast, lines) {
+export function attach(comments: any[], ast: any, lines: any) {
     if (!isArray.check(comments)) {
         return;
     }
 
-    var tiesToBreak = [];
+    var tiesToBreak: any[] = [];
 
     comments.forEach(function(comment) {
         comment.loc.lines = lines;
@@ -182,7 +179,7 @@ exports.attach = function(comments, ast, lines) {
     });
 };
 
-function breakTies(tiesToBreak, lines) {
+function breakTies(tiesToBreak: any[], lines: any) {
     var tieCount = tiesToBreak.length;
     if (tieCount === 0) {
         return;
@@ -232,30 +229,30 @@ function breakTies(tiesToBreak, lines) {
     tiesToBreak.length = 0;
 }
 
-function addCommentHelper(node, comment) {
+function addCommentHelper(node: any, comment: any) {
     var comments = node.comments || (node.comments = []);
     comments.push(comment);
 }
 
-function addLeadingComment(node, comment) {
+function addLeadingComment(node: any, comment: any) {
     comment.leading = true;
     comment.trailing = false;
     addCommentHelper(node, comment);
 }
 
-function addDanglingComment(node, comment) {
+function addDanglingComment(node: any, comment: any) {
     comment.leading = false;
     comment.trailing = false;
     addCommentHelper(node, comment);
 }
 
-function addTrailingComment(node, comment) {
+function addTrailingComment(node: any, comment: any) {
     comment.leading = false;
     comment.trailing = true;
     addCommentHelper(node, comment);
 }
 
-function printLeadingComment(commentPath, print) {
+function printLeadingComment(commentPath: any, print: any) {
     var comment = commentPath.getValue();
     n.Comment.assert(comment);
 
@@ -291,7 +288,7 @@ function printLeadingComment(commentPath, print) {
     return concat(parts);
 }
 
-function printTrailingComment(commentPath, print) {
+function printTrailingComment(commentPath: any, print: any) {
     var comment = commentPath.getValue(commentPath);
     n.Comment.assert(comment);
 
@@ -319,7 +316,7 @@ function printTrailingComment(commentPath, print) {
     return concat(parts);
 }
 
-exports.printComments = function(path, print) {
+export function printComments(path: any, print: any) {
     var value = path.getValue();
     var innerLines = print(path);
     var comments = n.Node.check(value) &&
@@ -329,10 +326,10 @@ exports.printComments = function(path, print) {
         return innerLines;
     }
 
-    var leadingParts = [];
+    var leadingParts: any[] = [];
     var trailingParts = [innerLines];
 
-    path.each(function(commentPath) {
+    path.each(function(commentPath: any) {
         var comment = commentPath.getValue();
         var leading = types.getFieldValue(comment, "leading");
         var trailing = types.getFieldValue(comment, "trailing");
