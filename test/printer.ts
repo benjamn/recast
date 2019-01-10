@@ -415,7 +415,6 @@ describe("printer", function() {
       b.expressionStatement(
         b.callExpression(b.identifier("log"), [b.identifier("key")])
       ),
-      /* each: */ false
     );
 
     assert.strictEqual(
