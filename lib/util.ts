@@ -177,10 +177,6 @@ export function fixFaultyLocations(node: any, lines: any) {
     });
 
   } else if (node.declaration && isExportDeclaration(node)) {
-    // Nullify .loc information for the child declaration so that we never
-    // try to reprint it without also reprinting the export declaration.
-    node.declaration.loc = null;
-
     // Expand the .loc of the node responsible for printing the decorators
     // (here, the export declaration) so that it includes node.decorators.
     var decorators = node.declaration.decorators;
