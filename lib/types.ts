@@ -5,3 +5,16 @@
 import astTypes from "ast-types";
 export default astTypes;
 export * from "ast-types";
+
+// TODO Get these types from ast-types.
+
+export type Position = {
+  line: number;
+  column: number;
+};
+
+export type SourceLocation = {
+  source?: string | null;
+  start: Position;
+  end: Position;
+};
