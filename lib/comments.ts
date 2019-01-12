@@ -268,7 +268,7 @@ function printLeadingComment(commentPath: any, print: any) {
   } else if (lines instanceof Lines) {
     var trailingSpace = lines.slice(
       loc.end,
-      lines.skipSpaces(loc.end)
+      lines.skipSpaces(loc.end) || lines.lastPos(),
     );
 
     if (trailingSpace.length === 1) {
