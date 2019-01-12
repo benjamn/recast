@@ -188,8 +188,10 @@ export class Lines {
 
     var lines = new Lines(this.infos.map(function(info: any, i: any) {
       if (info.line && (i > 0 || !skipFirstLine)) {
-        info = copyLineInfo(info);
-        info.indent = Math.max(0, info.indent - width);
+        info = {
+          ...info,
+          indent: Math.max(0, info.indent - width),
+        };
       }
       return info;
     }));
@@ -212,8 +214,10 @@ export class Lines {
 
     var lines = new Lines(this.infos.map(function(info: any) {
       if (info.line && ! info.locked) {
-        info = copyLineInfo(info);
-        info.indent += by;
+        info = {
+          ...info,
+          indent: info.indent + by,
+        };
       }
       return info
     }));
@@ -240,8 +244,10 @@ export class Lines {
 
     var lines = new Lines(this.infos.map(function(info: any, i: any) {
       if (i > 0 && info.line && ! info.locked) {
-        info = copyLineInfo(info);
-        info.indent += by;
+        info = {
+          ...info,
+          indent: info.indent + by,
+        };
       }
 
       return info;
@@ -264,9 +270,10 @@ export class Lines {
     }
 
     return new Lines(this.infos.map(function (info: any, i: any) {
-      info = copyLineInfo(info);
-      info.locked = i > 0;
-      return info;
+      return {
+        ...info,
+        locked: i > 0,
+      };
     }));
   }
 
@@ -665,7 +672,7 @@ export class Lines {
 
       linesOrNull.infos.forEach(function(info: any, i: any) {
         if (!prevInfo || i > 0) {
-          prevInfo = copyLineInfo(info);
+          prevInfo = { ...info };
           infos.push(prevInfo);
         }
       });
@@ -706,16 +713,6 @@ export class Lines {
     assert.strictEqual(list.length, args.length + 1);
     return emptyLines.join(list);
   }
-}
-
-function copyLineInfo(info: any) {
-  return {
-    line: info.line,
-    indent: info.indent,
-    locked: info.locked,
-    sliceStart: info.sliceStart,
-    sliceEnd: info.sliceEnd
-  };
 }
 
 var fromStringCache: any = {};
