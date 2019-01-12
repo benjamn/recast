@@ -1,7 +1,7 @@
 import assert from "assert";
 import fs from "fs";
 import path from "path";
-import { fromString, concat, countSpaces, LinesType } from "../lib/lines";
+import { fromString, concat, countSpaces, Lines } from "../lib/lines";
 import { EOL as eol } from "os";
 
 function check(a: any, b: any) {
@@ -403,7 +403,7 @@ describe("lines", function() {
             "}"
         ].join(eol);
 
-        function checkUnchanged(lines: LinesType, code: string) {
+        function checkUnchanged(lines: Lines, code: string) {
             check(lines.toString(tabOpts), code);
             check(lines.toString(noTabOpts), code);
             check(lines.indent(3).indent(-5).indent(2).toString(tabOpts), code);
