@@ -1,8 +1,6 @@
 import assert from "assert";
 import { printComments } from "./comments";
-import * as linesModule from "./lines";
-var fromString = linesModule.fromString;
-var concat = linesModule.concat;
+import { Lines, fromString, concat } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
 import types from "./types";
@@ -235,7 +233,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     namedTypes.Printable.assert(n);
 
-    var parts: any[] = [];
+    const parts: (string | Lines)[] = [];
 
     switch (n.type) {
     case "File":
@@ -646,7 +644,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "CallExpression":
     case "OptionalCallExpression":
-        var parts = [path.call(print, "callee")];
+        parts.push(path.call(print, "callee"));
 
         if (n.type === "OptionalCallExpression" &&
             n.callee.type !== "OptionalMemberExpression") {
@@ -973,8 +971,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         ]);
 
     case "IfStatement":
-        var con = adjustClause(path.call(print, "consequent"), options),
-            parts = ["if (", path.call(print, "test"), ")", con];
+        var con = adjustClause(path.call(print, "consequent"), options);
+        parts.push("if (", path.call(print, "test"), ")", con);
 
         if (n.alternate)
             parts.push(
@@ -994,8 +992,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
                 path.call(print, "update")
             ]).indentTail(forParen.length),
             head = concat([forParen, indented, ")"]),
-            clause = adjustClause(path.call(print, "body"), options),
-            parts = [head];
+            clause = adjustClause(path.call(print, "body"), options);
+
+        parts.push(head);
 
         if (head.length > 1) {
             parts.push("\n");
@@ -1048,7 +1047,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         var doBody = concat([
             "do",
             adjustClause(path.call(print, "body"), options)
-        ]), parts = [doBody];
+        ]);
+
+        parts.push(doBody);
 
         if (endsWithBrace(doBody))
             parts.push(" while");
@@ -2090,7 +2091,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSAsExpression": {
         var withParens = n.extra && n.extra.parenthesized === true;
-        parts = [];
         if (withParens) parts.push("(");
         parts.push(
             path.call(print, "expression"),
@@ -2748,7 +2748,7 @@ function printFunctionParams(path: any, options: any, print: any) {
 
 function printExportDeclaration(path: any, options: any, print: any) {
     var decl = path.getValue();
-    var parts = ["export "];
+    var parts: (string | Lines)[] = ["export "];
     if (decl.exportKind && decl.exportKind !== "value") {
         parts.push(decl.exportKind + " ");
     }
