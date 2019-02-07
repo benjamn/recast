@@ -1457,6 +1457,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "FlowPredicate": // Supertype of InferredPredicate and DeclaredPredicate
     case "MemberTypeAnnotation": // Flow
     case "Type": // Flow
+    case "TSHasOptionalTypeParameterInstantiation":
     case "TSHasOptionalTypeParameters":
     case "TSHasOptionalTypeAnnotation":
         throw new Error("unprintable type: " + JSON.stringify(n.type));
@@ -1880,6 +1881,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSNumberKeyword":
         return fromString("number", options);
+
+    case "TSBigIntKeyword":
+        return fromString("bigint", options);
 
     case "TSObjectKeyword":
         return fromString("object", options);
@@ -2317,6 +2321,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             lines.indent(options.tabWidth), ";",
             "\n}",
         ]);
+
+    case "TSImportType":
+        parts.push("import(", path.call(print, "argument"), ")");
+
+        if (n.qualifier) {
+            parts.push(".", path.call(print, "qualifier"));
+        }
+
+        if (n.typeParameters) {
+            parts.push(path.call(print, "typeParameters"));
+        }
+
+        return concat(parts);
 
     case "TSImportEqualsDeclaration":
         if (n.isExport) {

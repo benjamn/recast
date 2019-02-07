@@ -40,6 +40,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
       'type E = [string, number];',
       'type F = void;',
       'type G = undefined;',
+      'type H = bigint;',
       '',
       'type C = {',
       '  a: string,',
@@ -292,6 +293,14 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
       '    param1',
       '  }: Params',
       ') {}'
+    ]);
+
+    check([
+      'const unqualified: import("package") = 1;',
+      'const qualified: import("package").ns = 2;',
+      'const veryQualified: import("package").ns.foo.bar = 3;',
+      'const qualifiedWithParams: import("package").ns.foo<T, U> = 4;',
+      'const justParameterized: import("package")<T> = 5;',
     ]);
   });
 });
