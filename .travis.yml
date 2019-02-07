@@ -1,6 +1,8 @@
 language: node_js
 matrix:
   include:
+  - node_js: "11"
+    env: NPM_VERSION=""
   - node_js: "10"
     env: NPM_VERSION=""
   - node_js: "9"
