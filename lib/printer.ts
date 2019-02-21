@@ -510,7 +510,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         parts.push(
             " from ",
-            path.call(print, "source")
+            path.call(print, "source"),
+            ";"
         );
 
         return concat(parts);

@@ -538,6 +538,12 @@ describe("printer", function() {
 
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
+
+    code = 'export * from "./lib";';
+    ast = parse(code);
+
+    assert.strictEqual(printer.print(ast).code, code);
+    assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
   it("empty ExportDeclaration", function() {
