@@ -51,7 +51,7 @@
     "esprima-fb": "^15001.1001.0-dev-harmony-fb",
     "flow-parser": "^0.95.1",
     "glob": "^7.1.3",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "reify": "^0.18.1",
     "ts-add-module-exports": "^1.0.0",
     "ts-emit-clean": "^1.0.0",
