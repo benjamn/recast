@@ -11,6 +11,6 @@ import "./patcher";
 import "./perf";
 import "./printer";
 import "./syntax";
-import "./type-syntax";
+import "./flow";
 import "./typescript";
 import "./visit";

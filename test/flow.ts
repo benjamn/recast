@@ -125,5 +125,18 @@ describe("type syntax", function() {
 
     // Bounded polymorphism
     check("class A<T: number> {}");
+
+    // Inexact object types
+    check(
+      "type InexactFoo = { foo: number; ... };",
+      flowParserParseOptions,
+    );
+    check([
+      "type MultiLineInexact = {",
+      "  reallyLongPropertyNameOyezOyezOyezFiddlyFeeDiDumDeDoo: VeryLongTypeName<With, Generic, Type, Parameters>;",
+      "  somewhatShorterButStillNotVeryShortPropertyName: string;",
+      "  ...",
+      "};"
+    ].join(eol), flowParserParseOptions);
   });
 });

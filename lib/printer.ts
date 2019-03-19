@@ -714,6 +714,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             }, field);
         });
 
+        if (n.inexact) {
+            const line = fromString("...", options);
+            if (oneLine) {
+                if (len > 0) {
+                    parts.push(separator, " ");
+                }
+                parts.push(line);
+            } else {
+                // No trailing separator after ... to maintain parity with prettier.
+                parts.push("\n", line.indent(options.tabWidth));
+            }
+        }
+
         parts.push(oneLine ? rightBrace : "\n" + rightBrace);
 
         if (i !== 0 && oneLine && options.objectCurlySpacing) {
