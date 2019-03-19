@@ -324,13 +324,15 @@ function testReprinting(pattern: any, description: any) {
   describe(description, function () {
     require("glob").sync(pattern, {
       cwd: __dirname
-    }).forEach((file: any) => it(file, function () {
-      if (file.indexOf("/tsx/") >= 0 ||
-          file.endsWith("stitching/errors.ts") ||
-          file.endsWith("decorators/type-arguments-invalid/input.js")) {
-        return;
-      }
-
+    }).filter((file: string) => !(
+      // Skip the following files, because they have problems that are not due
+      // to any problems in Recast. TODO Revisit this list periodically.
+      file.indexOf("/tsx/") >= 0 ||
+      file.endsWith("stitching/errors.ts") ||
+      file.endsWith("decorators/type-arguments-invalid/input.js") ||
+      // @babel/parser can't handle naked arrow function expression statements:
+      file.endsWith("/optional-parameter/input.js")
+    )).forEach((file: string) => it(file, function () {
       const absPath = path.join(__dirname, file);
       const source = fs.readFileSync(absPath, "utf8");
       const ast = tryToParseFile(source, absPath);
