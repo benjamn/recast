@@ -1324,8 +1324,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         return concat(parts);
 
     case "ClassProperty":
-        if (typeof n.accessibility === "string") {
-            parts.push(n.accessibility, " ");
+        var access = n.accessibility || n.access;
+        if (typeof access === "string") {
+            parts.push(access, " ");
         }
 
         if (n.static) {
