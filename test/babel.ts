@@ -115,7 +115,7 @@ describe("Babel", function () {
 
     check([
       'type T = { -p: T };',
-      'type T = { +[k: K]: V };',
+      'type U = { +[k: K]: V };',
     ]);
 
     check([

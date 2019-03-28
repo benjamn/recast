@@ -94,11 +94,11 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
     ]);
 
     check([
-      'let strLength: string = (<string> someValue).length;',
-      'let strLength: string = <string> someValue;',
+      'let strLength1: string = (<string> someValue).length;',
+      'let strLength2: string = <string> someValue;',
       'let square = <Square> {};',
-      'let strLength: number = (someValue as string).length;',
-      'let strLength: number = someValue as string;'
+      'let strLength3: number = (someValue as string).length;',
+      'let strLength4: number = someValue as string;'
     ]);
 
     check([
@@ -330,6 +330,8 @@ function testReprinting(pattern: any, description: any) {
       file.indexOf("/tsx/") >= 0 ||
       file.endsWith("stitching/errors.ts") ||
       file.endsWith("decorators/type-arguments-invalid/input.js") ||
+      // Throws an error with a slightly different message than expected:
+      file.endsWith("types/tuple-rest-invalid/input.js") ||
       // @babel/parser can't handle naked arrow function expression statements:
       file.endsWith("/optional-parameter/input.js")
     )).forEach((file: string) => it(file, function () {
