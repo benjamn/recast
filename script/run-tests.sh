@@ -2,7 +2,9 @@
 
 set -ex
 
-cd $(dirname $0)/data
+PROJECTDIR="`cd $(dirname $0)/..; pwd`"
+
+cd $PROJECTDIR/src/test/data
 
 BAB_TAG=v$(node -p 'require("@babel/parser/package.json").version')
 
@@ -25,6 +27,7 @@ then
     rm -rf graphql-tools
 fi
 
-cd .. # back to the recast/test/ directory
+cd $PROJECTDIR/src/test
 
-exec mocha --require ts-node/register/transpile-only --reporter spec --full-trace $@ run.ts
+exec $PROJECTDIR/node_modules/.bin/mocha --require ts-node/register/transpile-only \
+     --reporter spec --full-trace $@ run.ts

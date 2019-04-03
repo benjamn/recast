@@ -14,7 +14,9 @@ function testFile(path: string, options: { parser?: any } = {}) {
         var ast = main.parse(source, options);
         types.astNodesAreEquivalent.assert(ast.original, ast);
         var code = main.print(ast).code;
-        assert.strictEqual(source, code);
+        // Convert Windows newlines to Unix
+        var normalizedSource = source.split('\r').join('');
+        assert.strictEqual(normalizedSource, code);
     });
 }
 

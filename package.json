@@ -23,7 +23,7 @@
   "types": "lib/main.d.ts",
   "scripts": {
     "tsc": "tsc --noEmit",
-    "mocha": "test/run.sh",
+    "mocha": "script/run-tests.sh",
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run tsc && npm run mocha",
     "build": "tsc && ts-add-module-exports",

@@ -520,6 +520,7 @@ describe("lines", function() {
             fs.readFile(path.join(
                 __dirname,
                 "..",
+                "..",
                 "package.json"
             ), "utf-8", function(err, source) {
                 assert.equal(err, null);
