@@ -19,8 +19,8 @@
     "url": "git://github.com/benjamn/recast.git"
   },
   "license": "MIT",
-  "main": "main.js",
-  "types": "main.d.ts",
+  "main": "lib/main.js",
+  "types": "lib/main.d.ts",
   "scripts": {
     "tsc": "tsc --noEmit",
     "mocha": "test/run.sh",

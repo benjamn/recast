@@ -1,10 +1,6 @@
 /node_modules
-/test/data/babylon
-/test/data/babel-parser
-/test/data/graphql-tools-src
+/lib
+/src/test/data
 
-# Ignore TypeScript-emitted files
-*.js
-*.d.ts
-# Except...
-!/types/**/*.d.ts
+# Ignore "npm pack" output
+/*.tgz
