@@ -1,7 +1,16 @@
-/node_modules
-/test
-/types
-yarn.lock
+# Ignore everything by default
+**
 
-*.ts
-!*.d.ts
+# Use negative patterns to bring back the specific things we want to publish
+!/example/**
+!/lib/**
+
+# But exclude test folders
+/lib/**/test
+
+# NOTE: These don't need to be specified, because NPM includes them automatically.
+#
+# package.json
+# README (and its variants)
+# CHANGELOG (and its variants)
+# LICENSE / LICENCE
