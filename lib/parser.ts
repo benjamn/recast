@@ -30,7 +30,8 @@ export function parse(source: string, options?: Partial<Options>) {
     onComment: comments,
     tolerant: util.getOption(options, "tolerant", true),
     ecmaVersion: 6,
-    sourceType: util.getOption(options, "sourceType", "module")
+    sourceType: util.getOption(options, "sourceType", "module"),
+    strictMode: util.getOption(options, "strictMode", false)
   });
 
   // Use ast.tokens if possible, and otherwise fall back to the Esprima
