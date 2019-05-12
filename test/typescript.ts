@@ -42,7 +42,7 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
       'type G = undefined;',
       'type H = bigint;',
       '',
-      'type C = {',
+      'type I = {',
       '  a: string,',
       '  b?: number',
       '};'
