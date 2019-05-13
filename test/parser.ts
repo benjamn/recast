@@ -183,24 +183,24 @@ function runTestsForParser(parserId: string) {
       var lines = fromString(code, { tabWidth: tabWidth });
       assert.strictEqual(lines.length, 1);
 
-      types.visit<{ check(s: any, loc: any): any }>(parse(code, {
+      function checkId(s: any, loc: types.namedTypes.SourceLocation) {
+        var sliced = lines.slice(loc.start, loc.end);
+        assert.strictEqual(s + "", sliced.toString());
+      }
+
+      types.visit(parse(code, {
         tabWidth: tabWidth,
         parser,
       }), {
-        check: function(s, loc) {
-          var sliced = lines.slice(loc.start, loc.end);
-          assert.strictEqual(s + "", sliced.toString());
-        },
-
-        visitIdentifier: function(path) {
+        visitIdentifier(path) {
           var ident = path.node;
-          this.check(ident.name, ident.loc);
+          checkId(ident.name, ident.loc!);
           this.traverse(path);
         },
 
-        visitLiteral: function(path) {
+        visitLiteral(path) {
           var lit = path.node;
-          this.check(lit.value, lit.loc);
+          checkId(lit.value, lit.loc!);
           this.traverse(path);
         }
       });

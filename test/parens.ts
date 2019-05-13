@@ -2,13 +2,15 @@ import assert from "assert";
 import * as esprima from "esprima";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
-import astTypes from "ast-types";
-var NodePath = astTypes.NodePath;
 import types from "../lib/types";
-var n = types.namedTypes;
-var b = types.builders;
-var printer = new Printer;
 import { EOL as eol } from "os";
+
+const printer = new Printer;
+const {
+  namedTypes: n,
+  builders: b,
+  NodePath,
+} = types;
 
 function parseExpression(expr: any) {
   var ast: any = esprima.parse(expr);
