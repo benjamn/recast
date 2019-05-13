@@ -59,7 +59,7 @@ interface Main {
     run: typeof run;
 }
 
-const main = {} as Main;
+const main = exports as Main;
 Object.defineProperties(main, {
     /**
      * Parse a string of code into an augmented syntax tree suitable for
