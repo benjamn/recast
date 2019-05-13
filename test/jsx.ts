@@ -2,7 +2,7 @@
 
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
-import types from "../lib/types";
+import * as types from "ast-types";
 var nodeMajorVersion = parseInt(process.versions.node, 10);
 
 (nodeMajorVersion >= 6 ? describe : xdescribe)

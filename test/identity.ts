@@ -1,7 +1,7 @@
 import assert from "assert";
 import fs from "fs";
 import path from "path";
-import types from "../lib/types";
+import * as types from "ast-types";
 import main from "../main";
 
 var nodeMajorVersion = parseInt(process.versions.node, 10);

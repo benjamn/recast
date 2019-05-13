@@ -1,5 +1,5 @@
 import assert from "assert";
-import types, { Visitor } from "../lib/types";
+import * as types from "ast-types";
 var namedTypes = types.namedTypes;
 var builders = types.builders;
 import { parse } from "../lib/parser";
@@ -37,7 +37,7 @@ describe("types.visit", function() {
         );
 
         var propNames: any[] = [];
-        var methods: Visitor = {
+        var methods: types.Visitor = {
             visitProperty: function(path) {
                 var key: any = path.node.key;
                 propNames.push(key.value || key.name);

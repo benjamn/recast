@@ -1,9 +1,11 @@
 import assert from "assert";
 import sourceMap from "source-map";
 import { normalize as normalizeOptions, Options } from "./options";
-import { Position as Pos } from "./types";
+import { namedTypes } from "ast-types";
 import { comparePos } from "./util";
 import Mapping from "./mapping";
+
+type Pos = namedTypes.Position;
 
 // Goals:
 // 1. Minimize new string creation.

@@ -2,7 +2,7 @@ import assert from "assert";
 import path from "path";
 import fs from "fs";
 import recast from "../main";
-import types from "../lib/types";
+import * as types from "ast-types";
 import {EOL as eol} from "os";
 import * as parser from "../parsers/typescript";
 

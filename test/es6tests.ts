@@ -1,7 +1,7 @@
 import assert from "assert";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
-import types from "../lib/types";
+import * as types from "ast-types";
 var n = types.namedTypes;
 var b = types.builders;
 import { EOL as eol } from "os";

@@ -1,23 +1,23 @@
 import fs from "fs";
-import types, { ASTNode, NodePath, Type } from "./lib/types";
+import * as types from "ast-types";
 import { parse } from "./lib/parser";
 import { Printer } from "./lib/printer";
 import { Options } from "./lib/options";
 
 export interface Parser {
-    parse(source: string, options?: any): ASTNode;
+    parse(source: string, options?: any): types.ASTNode;
 }
 
-function print(node: ASTNode, options?: Options) {
+function print(node: types.ASTNode, options?: Options) {
     return new Printer(options).print(node);
 }
 
-function prettyPrint(node: ASTNode, options?: Options) {
+function prettyPrint(node: types.ASTNode, options?: Options) {
     return new Printer(options).printGenerically(node);
 }
 
 interface Transformer {
-    (ast: ASTNode, callback: (ast: ASTNode) => void): void;
+    (ast: types.ASTNode, callback: (ast: types.ASTNode) => void): void;
 }
 
 interface RunOptions extends Options {
@@ -123,5 +123,4 @@ Object.defineProperties(main, {
 });
 
 export default main;
-export { ASTNode, NodePath, Type }
 export { Options } from "./lib/options";
