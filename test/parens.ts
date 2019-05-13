@@ -2,7 +2,7 @@ import assert from "assert";
 import * as esprima from "esprima";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
-import types from "../lib/types";
+import * as types from "ast-types";
 import { EOL as eol } from "os";
 
 const printer = new Printer;

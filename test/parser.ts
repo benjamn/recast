@@ -3,7 +3,7 @@ import { parse } from "../lib/parser";
 import { getReprinter } from "../lib/patcher";
 import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
-import types from "../lib/types";
+import * as types from "ast-types";
 var namedTypes = types.namedTypes;
 import FastPath from "../lib/fast-path";
 import { EOL as eol } from "os";
@@ -21,7 +21,6 @@ describe("parser", function() {
   ].forEach(runTestsForParser);
 
   it("AlternateParser", function() {
-    var types = require("../lib/types");
     var b = types.builders;
     var parser = {
       parse: function() {

@@ -1,6 +1,6 @@
 import assert from "assert";
-import recast from "../main";
-import types from "../lib/types";
+import * as recast from "../main";
+import * as types from "ast-types";
 var n = types.namedTypes;
 var b = types.builders;
 import { getReprinter, Patcher } from "../lib/patcher";

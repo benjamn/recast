@@ -1,7 +1,7 @@
 import assert from "assert";
 import fs from "fs";
 import path from "path";
-import types from "../lib/types";
+import * as types from "ast-types";
 import { parse } from "../lib/parser";
 var hasOwn = Object.prototype.hasOwnProperty;
 

@@ -1,8 +1,8 @@
 import assert from "assert";
 import fs from "fs";
 import path from "path";
-import types from "../lib/types";
-import main from "../main";
+import * as types from "ast-types";
+import * as recast from "../main";
 
 var nodeMajorVersion = parseInt(process.versions.node, 10);
 
@@ -11,9 +11,9 @@ function testFile(path: string, options: { parser?: any } = {}) {
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
 
-        var ast = main.parse(source, options);
+        var ast = recast.parse(source, options);
         types.astNodesAreEquivalent.assert(ast.original, ast);
-        var code = main.print(ast).code;
+        var code = recast.print(ast).code;
         assert.strictEqual(source, code);
     });
 }

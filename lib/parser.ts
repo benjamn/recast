@@ -1,5 +1,5 @@
 import assert from "assert";
-import types from "./types";
+import * as types from "ast-types";
 var b = types.builders;
 var isObject = types.builtInTypes.object;
 var isArray = types.builtInTypes.array;

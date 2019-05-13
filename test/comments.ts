@@ -1,6 +1,6 @@
 "use strict";
 
-import recast from "../main";
+import * as recast from "../main";
 var n = recast.types.namedTypes;
 var b = recast.types.builders;
 import { Printer } from "../lib/printer";

@@ -3,7 +3,7 @@ import { printComments } from "./comments";
 import { Lines, fromString, concat } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
-import types from "./types";
+import * as types from "ast-types";
 var namedTypes = types.namedTypes;
 var isString = types.builtInTypes.string;
 var isObject = types.builtInTypes.object;
