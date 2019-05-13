@@ -1,5 +1,5 @@
 import assert from "assert";
-import recast from "../main";
+import * as recast from "../main";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
 import * as types from "ast-types";

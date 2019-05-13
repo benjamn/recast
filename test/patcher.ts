@@ -1,5 +1,5 @@
 import assert from "assert";
-import recast from "../main";
+import * as recast from "../main";
 import * as types from "ast-types";
 var n = types.namedTypes;
 var b = types.builders;

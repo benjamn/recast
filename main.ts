@@ -30,7 +30,7 @@ export {
  *     }
  *   });
  */
-export const visit = types.visit;
+export { visit } from "ast-types";
 
 /**
  * Options shared between parsing and printing.
@@ -88,5 +88,3 @@ function runString(code: string, transformer: Transformer, options?: RunOptions)
     writeback(print(node, options).code);
   });
 }
-
-export default exports;
