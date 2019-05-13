@@ -26,7 +26,7 @@
     "mocha": "test/run.sh",
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run tsc && npm run mocha",
-    "build": "tsc && ts-add-module-exports",
+    "build": "tsc",
     "clean": "ts-emit-clean",
     "prepack": "npm run clean && npm run build",
     "postpack": "npm run clean"
@@ -53,7 +53,6 @@
     "glob": "7.1.4",
     "mocha": "6.1.4",
     "reify": "0.18.1",
-    "ts-add-module-exports": "1.0.0",
     "ts-emit-clean": "1.0.0",
     "ts-node": "7.0.1",
     "typescript": "3.4.5"
