@@ -1,5 +1,5 @@
 import fs from "fs";
-import types, { ASTNode } from "./lib/types";
+import types, { ASTNode, NodePath, Type } from "./lib/types";
 import { parse } from "./lib/parser";
 import { Printer } from "./lib/printer";
 import { Options } from "./lib/options";
@@ -123,13 +123,5 @@ Object.defineProperties(main, {
 });
 
 export default main;
-
-// Type exports
-export {
-    ASTNode,
-    NamedTypes,
-    Builders,
-    NodePath,
-    Type,
-} from "./lib/types";
+export { ASTNode, NodePath, Type }
 export { Options } from "./lib/options";
