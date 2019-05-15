@@ -34,7 +34,7 @@
     "fs": false
   },
   "dependencies": {
-    "ast-types": "0.13.0",
+    "ast-types": "0.13.1",
     "esprima": "~4.0.0",
     "private": "^0.1.8",
     "source-map": "~0.6.1"
