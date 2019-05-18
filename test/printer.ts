@@ -1729,7 +1729,6 @@ describe("printer", function() {
   });
 
   it("obeys 'optional' property of OptionalMemberExpression", function () {
-
     var node = b.optionalMemberExpression(
       b.identifier('foo'),
       b.identifier('bar')
