@@ -288,7 +288,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(path.call(print, "object"));
 
         var property = path.call(print, "property");
-        var optional = n.type === "OptionalMemberExpression";
+        var optional = n.type === "OptionalMemberExpression" && n.optional;
 
         if (n.computed) {
             parts.push(optional ? "?.[" : "[", property, "]");

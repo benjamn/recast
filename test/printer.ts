@@ -1728,6 +1728,30 @@ describe("printer", function() {
     );
   });
 
+  it("obeys 'optional' property of OptionalMemberExpression", function () {
+    var node = b.optionalMemberExpression(
+      b.identifier('foo'),
+      b.identifier('bar')
+    );
+
+    assert.strictEqual(
+      recast.print(node).code,
+      "foo?.bar"
+    );
+
+    var nonOptionalNode = b.optionalMemberExpression(
+      b.identifier('foo'),
+      b.identifier('bar'),
+      false,
+      false
+    );
+
+    assert.strictEqual(
+      recast.print(nonOptionalNode).code,
+      "foo.bar"
+    );
+  });
+
   it("prints numbers in bases other than 10 without converting them", function() {
     var code = [
       'let decimal = 6;',
