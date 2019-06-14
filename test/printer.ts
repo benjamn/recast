@@ -2059,4 +2059,55 @@ describe("printer", function() {
     var pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("object destructuring for function parameters", function() {
+    var code = [
+      'function myFunction(',
+      '    {',
+      '        yes = "y",',
+      '        no: no = "n",',
+      '        short,',
+      '        long: longHand',
+      '    }',
+      ') {}',
+    ].join(eol);
+
+    const simplifiedDefaultArgProperty = b.property(
+      'init',
+      b.identifier('yes'),
+      b.assignmentPattern(b.identifier('yes'), b.literal('y')),
+    );
+    simplifiedDefaultArgProperty.shorthand = true;
+
+    const notSimplifiedDefaultArgProperty = b.property(
+      'init',
+      b.identifier('no'),
+      b.assignmentPattern(b.identifier('no'), b.literal('n')),
+    );
+
+    const simplifiedProperty = b.property(
+      'init',
+      b.identifier('short'),
+      b.identifier('short'),
+    );
+    simplifiedProperty.shorthand = true;
+
+    const notSimplifiedProperty = b.property('init', b.identifier('long'), b.identifier('longHand'));
+
+    var ast = b.program([
+      b.functionDeclaration(
+        b.identifier('myFunction'),
+        [b.objectPattern([
+          simplifiedDefaultArgProperty,
+          notSimplifiedDefaultArgProperty,
+          simplifiedProperty,
+          notSimplifiedProperty
+        ])],
+        b.blockStatement([]),
+      )
+    ]);
+
+    var pretty = new Printer().printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
