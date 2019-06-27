@@ -755,8 +755,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
 
         var key = path.call(print, "key");
+        var value = path.call(print, "value");
+
         if (n.computed) {
             parts.push("[", key, "]");
+        } else if (n.shorthand && n.value.type === 'AssignmentPattern') {
+            parts.push(value);
         } else {
             parts.push(key);
         }
