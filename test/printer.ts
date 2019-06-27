@@ -2059,4 +2059,31 @@ describe("printer", function() {
     var pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+  
+  it("using AssignmentPattern in destructuring", function() {
+    var code = [
+        'var {',
+        '    a = "hi"',
+        '} = b;'
+    ].join(eol);
+
+    const init = b.identifier('b');
+    const assign =  b.assignmentPattern(b.identifier('a'), b.literal('hi'));
+    const property = b.property('init', b.identifier('a'), assign);
+    property.shorthand = true;
+    
+    const id = b.objectPattern([
+      property
+    ]);
+    
+    const ast = b.program([
+      b.variableDeclaration('var', [
+        b.variableDeclarator(id, init)
+      ])
+    ]);
+
+    var pretty = new Printer().printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
+
