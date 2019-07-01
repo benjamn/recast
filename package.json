@@ -51,7 +51,7 @@
     "flow-parser": "0.98.1",
     "glob": "7.1.4",
     "mocha": "6.1.4",
-    "reify": "0.20.6",
+    "reify": "0.20.7",
     "ts-emit-clean": "1.0.0",
     "ts-node": "7.0.1",
     "typescript": "3.4.5"
