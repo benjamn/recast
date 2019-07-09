@@ -651,6 +651,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "OptionalCallExpression":
         parts.push(path.call(print, "callee"));
 
+        if (n.typeParameters) {
+            parts.push(path.call(print, "typeParameters"));
+        }
+
         if (n.type === "OptionalCallExpression" &&
             n.callee.type !== "OptionalMemberExpression") {
             parts.push("?.");
