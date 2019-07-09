@@ -302,6 +302,10 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
       'const qualifiedWithParams: import("package").ns.foo<T, U> = 4;',
       'const justParameterized: import("package")<T> = 5;',
     ]);
+
+    check([
+      'const a = function<T>(a: T): void {};'
+    ]);
   });
 });
 

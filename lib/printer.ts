@@ -359,6 +359,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
                 path.call(print, "id"),
                 path.call(print, "typeParameters")
             );
+        } else {
+            if (n.typeParameters) {
+                parts.push(path.call(print, "typeParameters"));
+            }
         }
 
         parts.push(
