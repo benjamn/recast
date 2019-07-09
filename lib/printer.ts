@@ -928,6 +928,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "NewExpression":
         parts.push("new ", path.call(print, "callee"));
+        if (n.typeParameters) {
+            parts.push(path.call(print, "typeParameters"));
+        }
         var args = n.arguments;
         if (args) {
             parts.push(printArgumentsList(path, options, print));

@@ -306,6 +306,10 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
     check([
       'const a = function<T>(a: T): void {};'
     ]);
+
+    check([
+      'new A<number>();',
+    ]);
   });
 });
 
