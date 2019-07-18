@@ -98,8 +98,8 @@ describe("source maps", function() {
         function addUseStrict(ast) {
             return recast.visit(ast, {
                 visitFunction: function(path) {
-                    path.get("body", "body").unshift(
-                        b.expressionStatement(b.literal("use strict"))
+                    path.get("body", "directives").unshift(
+                        b.directive(b.directiveLiteral("use strict"))
                     );
                     this.traverse(path);
                 }
@@ -132,23 +132,34 @@ describe("source maps", function() {
         var ast = parse(code, {
             sourceFileName: "original.js"
         });
+    console.error('AST:', JSON.stringify(ast.program.body[0].body, null, 2));        
+    var fs = require('fs');
+    fs.writeFileSync('AST1.json', JSON.stringify(ast, null, 2));        
 
         var useStrictResult = new Printer({
             sourceMapName: "useStrict.map.json"
         }).print(addUseStrict(ast));
+        console.error('useStrictResult:', useStrictResult.code)
+    fs.writeFileSync('AST1B.json', JSON.stringify(ast, null, 2));        
 
         var useStrictAst = parse(useStrictResult.code, {
             sourceFileName: "useStrict.js"
         });
+    console.error('useStrictAst:', JSON.stringify(useStrictAst.program.body[0].body, null, 2));        
+    fs.writeFileSync('AST2.json', JSON.stringify(useStrictAst, null, 2));        
 
         var oneStepResult = new Printer({
             sourceMapName: "oneStep.map.json"
         }).print(stripConsole(ast));
+        console.error('oneStepResult:', oneStepResult.code)
+    fs.writeFileSync('AST3.json', JSON.stringify(ast, null, 2));        
 
         var twoStepResult = new Printer({
             sourceMapName: "twoStep.map.json",
             inputSourceMap: useStrictResult.map
         }).print(stripConsole(useStrictAst));
+        console.error('twoStepResult:', twoStepResult.code)
+    fs.writeFileSync('AST4.json', JSON.stringify(useStrictAst, null, 2));        
 
         assert.strictEqual(
             oneStepResult.code,

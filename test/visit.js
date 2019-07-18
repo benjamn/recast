@@ -38,7 +38,7 @@ describe("types.visit", function() {
 
         var propNames = [];
         var methods = {
-            visitProperty: function(path) {
+            visitObjectProperty: function(path) {
                 var key = path.node.key;
                 propNames.push(key.value || key.name);
                 this.traverse(path);
@@ -49,7 +49,7 @@ describe("types.visit", function() {
         assert.deepEqual(propNames, ["bar", "baz"]);
 
         types.visit(ast, {
-            visitProperty: function(path) {
+            visitObjectProperty: function(path) {
                 if (namedTypes.Identifier.check(path.node.value) &&
                     path.node.value.name === "self") {
                     path.replace();

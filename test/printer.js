@@ -632,7 +632,7 @@ describe("printer", function() {
     n.ClassBody.assert(classBody);
 
     var foo = classBody.body[0];
-    n.MethodDefinition.assert(foo);
+    n.ClassMethod.assert(foo);
 
     classBody.body.push(foo);
 

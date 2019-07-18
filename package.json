@@ -12,7 +12,7 @@
     "parsing",
     "pretty-printing"
   ],
-  "version": "0.15.0-31",
+  "version": "0.15.0-32",
   "homepage": "http://github.com/benjamn/recast",
   "repository": {
     "type": "git",
@@ -33,12 +33,12 @@
     "@gerhobbelt/ast-types": "0.11.5-23",
     "core-js": "2.5.7",
     "private": "0.1.8",
-    "source-map": "0.6.1"
+    "source-map": "0.7.3"
   },
   "devDependencies": {
-    "@babel/core": "7.0.0-beta.49",
+    "@babel/core": "7.0.0-beta.51",
     "babel-helper-annotate-as-pure": "7.0.0-beta.2",
-    "@babel/preset-es2015": "7.0.0-beta.49",
+    "@babel/preset-es2015": "7.0.0-beta.51",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.74.0",
     "@gerhobbelt/esprima": "4.0.1-24",

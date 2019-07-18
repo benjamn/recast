@@ -27,7 +27,7 @@ describe("syntax", function() {
               visitSwitchCase(path) {
                 var test = path.node.test;
                 if (test &&
-                    test.type === "Literal" &&
+                    test.type === "StringLiteral" &&
                     typeof test.value === "string") {
                   var name = test.value;
                   typeNames[name] = name;
