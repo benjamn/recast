@@ -31,6 +31,7 @@
   "dependencies": {
     "@gerhobbelt/babel-parser": "7.0.0-beta.49",
     "@gerhobbelt/ast-types": "0.11.5-23",
+    "@gerhobbelt/esprima": "4.0.1-24",
     "core-js": "2.5.7",
     "private": "0.1.8",
     "source-map": "0.7.3"
@@ -41,7 +42,6 @@
     "@babel/preset-es2015": "7.0.0-beta.51",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.74.0",
-    "@gerhobbelt/esprima": "4.0.1-24",
     "glob": "7.1.2",
     "mocha": "5.2.0",
     "reify": "0.16.2",
