@@ -161,11 +161,6 @@ describe("source maps", function() {
         console.error('twoStepResult:', twoStepResult.code)
     fs.writeFileSync('AST4.json', JSON.stringify(useStrictAst, null, 2));        
 
-        assert.strictEqual(
-            oneStepResult.code,
-            twoStepResult.code
-        );
-
         var smc1 = new sourceMap.SourceMapConsumer(oneStepResult.map);
         var smc2 = new sourceMap.SourceMapConsumer(twoStepResult.map);
 
@@ -187,6 +182,11 @@ describe("source maps", function() {
             // source instead of the intermediate source.
             assert.strictEqual(orig2.source, "original.js");
         });
+
+        assert.strictEqual(
+            oneStepResult.code,
+            twoStepResult.code
+        );
     });
 
     it("should work when a child node becomes null", function() {
