@@ -314,6 +314,10 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
     check([
       'createPlugin<number>();',
     ]);
+
+    check([
+      'type Class<T> = new (...args: any) => T;',
+    ]);
   });
 });
 
