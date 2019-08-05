@@ -790,6 +790,33 @@ function runTestsForParser(parserId: any) {
     ].join(eol));
   });
 
+  pit("should correctly handle a lonesome comment (alt 1)", function() {
+    var code = ["", "// boo", ""].join(eol);
+
+    var ast = recast.parse(code);
+
+    assert.strictEqual(recast.print(ast).code, ["", "// boo", ""].join(eol));
+  });
+
+  pit("should correctly handle a not-so-lonesome comment (alt 2 - trailing whitespace)", function() {
+    var code = ["", "// boo ", ";"].join(eol);
+
+    var ast = recast.parse(code);
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      ["", "// boo ", ";"].join(eol)
+    );
+  });
+
+  pit("should correctly handle a lonesome comment (alt 3 - trailing whitespace)", function() {
+    var code = ["", "// boo ", ""].join(eol);
+
+    var ast = recast.parse(code);
+
+    assert.strictEqual(recast.print(ast).code, ["", "// boo ", ""].join(eol));
+  });
+
   pit("should not reformat a return statement that is not modified", function () {
     var code = [
       "function f() {",
