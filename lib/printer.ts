@@ -359,6 +359,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
                 path.call(print, "id"),
                 path.call(print, "typeParameters")
             );
+        } else {
+            if (n.typeParameters) {
+                parts.push(path.call(print, "typeParameters"));
+            }
         }
 
         parts.push(
@@ -647,6 +651,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "OptionalCallExpression":
         parts.push(path.call(print, "callee"));
 
+        if (n.typeParameters) {
+            parts.push(path.call(print, "typeParameters"));
+        }
+
+        if (n.typeArguments) {
+            parts.push(path.call(print, "typeArguments"));
+        }
+
         if (n.type === "OptionalCallExpression" &&
             n.callee.type !== "OptionalMemberExpression") {
             parts.push("?.");
@@ -924,6 +936,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "NewExpression":
         parts.push("new ", path.call(print, "callee"));
+        if (n.typeParameters) {
+            parts.push(path.call(print, "typeParameters"));
+        }
+        if (n.typeArguments) {
+            parts.push(path.call(print, "typeArguments"));
+        }
         var args = n.arguments;
         if (args) {
             parts.push(printArgumentsList(path, options, print));

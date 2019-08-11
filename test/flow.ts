@@ -138,5 +138,9 @@ describe("type syntax", function() {
       "  ...",
       "};"
     ].join(eol), flowParserParseOptions);
+
+    // typeArguments
+    check('new A<string>();', flowParserParseOptions);
+    check('createPlugin<number>();', flowParserParseOptions);
   });
 });
