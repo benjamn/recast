@@ -177,10 +177,6 @@ export function fixFaultyLocations(node: any, lines: any) {
     });
 
   } else if (node.declaration && isExportDeclaration(node)) {
-    // Nullify .loc information for the child declaration so that we never
-    // try to reprint it without also reprinting the export declaration.
-    node.declaration.loc = null;
-
     // Expand the .loc of the node responsible for printing the decorators
     // (here, the export declaration) so that it includes node.decorators.
     var decorators = node.declaration.decorators;
@@ -260,27 +256,24 @@ function fixTemplateLiteral(node: any, lines: any) {
     return;
   }
   
-  // node.loc is not present when using export default with a template literal
-  if (node.loc) {
-    // First we need to exclude the opening ` from the .loc of the first
-    // quasi element, in case the parser accidentally decided to include it.
-    var afterLeftBackTickPos = copyPos(node.loc.start);
-    assert.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
-    assert.ok(lines.nextPos(afterLeftBackTickPos));
-    var firstQuasi = node.quasis[0];
-    if (comparePos(firstQuasi.loc.start, afterLeftBackTickPos) < 0) {
-      firstQuasi.loc.start = afterLeftBackTickPos;
-    }
-
-    // Next we need to exclude the closing ` from the .loc of the last quasi
-    // element, in case the parser accidentally decided to include it.
-    var rightBackTickPos = copyPos(node.loc.end);
-    assert.ok(lines.prevPos(rightBackTickPos));
-    assert.strictEqual(lines.charAt(rightBackTickPos), "`");
-    var lastQuasi = node.quasis[node.quasis.length - 1];
-    if (comparePos(rightBackTickPos, lastQuasi.loc.end) < 0) {
-      lastQuasi.loc.end = rightBackTickPos;
-    }
+  // First we need to exclude the opening ` from the .loc of the first
+  // quasi element, in case the parser accidentally decided to include it.
+  var afterLeftBackTickPos = copyPos(node.loc.start);
+  assert.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
+  assert.ok(lines.nextPos(afterLeftBackTickPos));
+  var firstQuasi = node.quasis[0];
+  if (comparePos(firstQuasi.loc.start, afterLeftBackTickPos) < 0) {
+    firstQuasi.loc.start = afterLeftBackTickPos;
+  }
+  
+  // Next we need to exclude the closing ` from the .loc of the last quasi
+  // element, in case the parser accidentally decided to include it.
+  var rightBackTickPos = copyPos(node.loc.end);
+  assert.ok(lines.prevPos(rightBackTickPos));
+  assert.strictEqual(lines.charAt(rightBackTickPos), "`");
+  var lastQuasi = node.quasis[node.quasis.length - 1];
+  if (comparePos(rightBackTickPos, lastQuasi.loc.end) < 0) {
+    lastQuasi.loc.end = rightBackTickPos;
   }
 
   // Now we need to exclude ${ and } characters from the .loc's of all
