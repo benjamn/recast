@@ -1173,6 +1173,27 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
+  it("adds parenthesis around arrow function body when returning object literal with typescript typecast", function() {
+    var code = "() => ({} as object);";
+
+    var fn = b.arrowFunctionExpression(
+      [],
+      b.tsAsExpression(
+      b.objectExpression([]),
+        b.tsObjectKeyword()
+      ),
+      false
+    );
+
+    var ast = b.program([
+      b.expressionStatement(fn)
+    ]);
+
+    var printer = new Printer();
+    var pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("prints class property initializers with type annotations correctly", function() {
     var code = [
       "class A {",
