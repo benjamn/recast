@@ -452,4 +452,27 @@ describe("Babel", function () {
         ].join(eol)
     );
   });
+
+  // https://github.com/codemod-js/codemod/issues/157
+  it("avoids extra semicolons on mutated blocks containing a 'use strict' directive", function() {
+    var code = [
+      '(function () {',
+      '  "use strict";',
+      '  hello;',
+      '})();'
+    ].join(eol);
+    var ast = recast.parse(code, parseOptions);
+
+    // delete "hello;"
+    ast.program.body[0].expression.callee.body.body.splice(0);
+
+    assert.strictEqual(
+        recast.print(ast).code,
+        [
+          '(function () {',
+          '  "use strict";',
+          '})();'
+        ].join(eol)
+    );
+  });
 });
