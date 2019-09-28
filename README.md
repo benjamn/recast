@@ -5,12 +5,16 @@
 1. to remodel or reconstruct (a literary work, document, sentence, etc.).
 1. to supply (a theater or opera work) with a new cast.
 
+# Fork contains unmerged fixes
+
+- https://github.com/benjamn/recast/pull/609
+
 Installation
 ---
 
 From NPM:
 
-    npm install recast
+    npm install @putout/recast
     
 From GitHub:
 

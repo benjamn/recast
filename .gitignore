@@ -4,7 +4,7 @@
 /test/data/graphql-tools-src
 
 # Ignore TypeScript-emitted files
-!*.js
+*.js
 *.d.ts
 # Except...
 !/types/**/*.d.ts
