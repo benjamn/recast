@@ -26,6 +26,7 @@
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run build && npm run mocha",
     "build": "npm run clean && tsc",
+    "publishOnly": "npm run build",
     "clean": "ts-emit-clean",
     "prepack": "npm run build",
     "postpack": "npm run clean"
