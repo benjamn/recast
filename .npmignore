@@ -2,6 +2,7 @@
 /test
 /types
 yarn.lock
+.travis.yml
 
 *.ts
 !*.d.ts
