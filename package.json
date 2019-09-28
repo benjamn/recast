@@ -41,13 +41,13 @@
     "source-map": "~0.6.1"
   },
   "devDependencies": {
-    "@babel/core": "7.6.2",
-    "@babel/parser": "7.6.0",
-    "@babel/preset-env": "7.6.2",
+    "@babel/core": "7.4.4",
+    "@babel/parser": "7.4.4",
+    "@babel/preset-env": "7.4.4",
     "@types/esprima": "4.0.2",
     "@types/glob": "7.1.1",
     "@types/mocha": "5.2.6",
-    "@types/node": "12.7.8",
+    "@types/node": "12.0.2",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.98.1",
     "glob": "7.1.4",

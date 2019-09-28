@@ -612,8 +612,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         if (n.directives) {
             path.each(function(childPath: any) {
                 parts.push(
-                    maybeAddSemicolon(print(childPath).indent(options.tabWidth)),
-                    n.directives.length > 1 || !naked.isEmpty() ? "\n" : "");
+                    print(childPath).indent(options.tabWidth),
+                    ";",
+                    n.directives.length > 1 || !naked.isEmpty() ? "\n" : ""
+                );
             }, "directives");
         }
         parts.push(naked.indent(options.tabWidth));
