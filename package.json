@@ -46,7 +46,7 @@
     "@types/esprima": "4.0.2",
     "@types/glob": "7.1.1",
     "@types/mocha": "5.2.6",
-    "@types/node": "12.7.8",
+    "@types/node": "12.7.9",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.98.1",
     "glob": "7.1.4",
