@@ -48,7 +48,7 @@
     "@types/mocha": "5.2.6",
     "@types/node": "12.7.8",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
-    "flow-parser": "0.98.1",
+    "flow-parser": "0.109.0",
     "glob": "7.1.4",
     "mocha": "6.1.4",
     "reify": "0.20.12",
