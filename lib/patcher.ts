@@ -25,7 +25,7 @@ interface PatcherConstructor {
 
 const Patcher = function Patcher(this: PatcherType, lines: any) {
   assert.ok(this instanceof Patcher);
-  assert.ok(lines instanceof linesModule.Lines);
+  assert.ok(lines instanceof linesModule.Lines || isString.check(lines));
 
   const self = this, replacements: any[] = [];
 
