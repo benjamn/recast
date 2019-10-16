@@ -1494,6 +1494,20 @@ describe("printer", function() {
     assert.strictEqual(actual, expected);
   });
 
+  it("does not add extra backticks to template literals in default exports", function() {
+    const code = "export default `hello`;";
+    const ast = parse(code);
+
+    recast.visit(ast, {
+      visitTemplateLiteral(path) {
+        const actual = recast.print(path.node).code;
+        const expected = "`hello`";
+        assert.strictEqual(actual, expected);
+        return false;
+      }
+    });
+  });
+
   it("prints commas for flow object types by default", function() {
     var code = [
       "type MyType = {",
