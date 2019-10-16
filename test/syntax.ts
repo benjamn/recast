@@ -3,36 +3,36 @@ import fs from "fs";
 import path from "path";
 import * as types from "ast-types";
 import { parse } from "../lib/parser";
-var hasOwn = Object.prototype.hasOwnProperty;
+const hasOwn = Object.prototype.hasOwnProperty;
 
 // Babel 7 no longer supports Node 4 or 5.
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 (nodeMajorVersion >= 6 ? describe : xdescribe)
 ("syntax", function() {
   // Make sure we handle all possible node types in Syntax, and no additional
   // types that are not present in Syntax.
   it("Completeness", function(done) {
-    var printer = path.join(__dirname, "../lib/printer.ts");
+    const printer = path.join(__dirname, "../lib/printer.ts");
 
     fs.readFile(printer, "utf-8", function(err, data) {
       assert.ok(!err);
 
-      var ast = parse(data, { parser: require("../parsers/typescript") });
+      const ast = parse(data, { parser: require("../parsers/typescript") });
       assert.ok(ast);
 
-      var typeNames: { [name: string]: string } = {};
+      const typeNames: { [name: string]: string } = {};
       types.visit(ast, {
         visitFunctionDeclaration(path) {
-          var decl = path.node;
+          const decl = path.node;
           if (types.namedTypes.Identifier.check(decl.id) &&
               decl.id.name === "genericPrintNoParens") {
             this.traverse(path, {
               visitSwitchCase(path) {
-                var test = path.node.test;
+                const test = path.node.test;
                 if (test &&
                     test.type === "StringLiteral" &&
                     typeof test.value === "string") {
-                  var name = test.value;
+                  const name = test.value;
                   typeNames[name] = name;
                 }
                 return false;

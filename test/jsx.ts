@@ -3,18 +3,18 @@
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
 import * as types from "ast-types";
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 (nodeMajorVersion >= 6 ? describe : xdescribe)
 ("JSX Compatability", function() {
-  var printer = new Printer({ tabWidth: 2 });
-  var parseOptions = {
+  const printer = new Printer({ tabWidth: 2 });
+  const parseOptions = {
     parser: require("../parsers/babel")
   };
 
   function check(source: string) {
-    var ast1 = parse(source, parseOptions);
-    var ast2 = parse(
+    const ast1 = parse(source, parseOptions);
+    const ast2 = parse(
       printer.printGenerically(ast1).code,
       parseOptions
     );

@@ -57,7 +57,7 @@ export class Lines {
       return null;
     }
 
-    var targetLines = this;
+    const targetLines = this;
 
     function updateJSON(json?: any) {
       json = json || {};
@@ -79,26 +79,26 @@ export class Lines {
       return updateJSON(targetLines.cachedSourceMap.toJSON());
     }
 
-    var smg = new sourceMap.SourceMapGenerator(updateJSON());
-    var sourcesToContents: any = {};
+    const smg = new sourceMap.SourceMapGenerator(updateJSON());
+    const sourcesToContents: any = {};
 
     targetLines.mappings.forEach(function(mapping: any) {
-      var sourceCursor = mapping.sourceLines.skipSpaces(
+      const sourceCursor = mapping.sourceLines.skipSpaces(
         mapping.sourceLoc.start
       ) || mapping.sourceLines.lastPos();
 
-      var targetCursor = targetLines.skipSpaces(
+      const targetCursor = targetLines.skipSpaces(
         mapping.targetLoc.start
       ) || targetLines.lastPos();
 
       while (comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
              comparePos(targetCursor, mapping.targetLoc.end) < 0) {
 
-        var sourceChar = mapping.sourceLines.charAt(sourceCursor);
-        var targetChar = targetLines.charAt(targetCursor);
+        const sourceChar = mapping.sourceLines.charAt(sourceCursor);
+        const targetChar = targetLines.charAt(targetCursor);
         assert.strictEqual(sourceChar, targetChar);
 
-        var sourceName = mapping.sourceLines.name;
+        const sourceName = mapping.sourceLines.name;
 
         // Add mappings one character at a time for maximum resolution.
         smg.addMapping({
@@ -110,7 +110,7 @@ export class Lines {
         });
 
         if (!hasOwn.call(sourcesToContents, sourceName)) {
-          var sourceContent = mapping.sourceLines.toString();
+          const sourceContent = mapping.sourceLines.toString();
           smg.setSourceContent(sourceName, sourceContent);
           sourcesToContents[sourceName] = sourceContent;
         }
@@ -130,10 +130,7 @@ export class Lines {
     assert.strictEqual(typeof pos.line, "number");
     assert.strictEqual(typeof pos.column, "number");
 
-    var line = pos.line,
-    column = pos.column,
-    strings = this.toString().split(lineTerminatorSeqExp),
-    string = strings[line - 1];
+    const line = pos.line, column = pos.column, strings = this.toString().split(lineTerminatorSeqExp), string = strings[line - 1];
 
     if (typeof string === "undefined")
       return "";
@@ -153,17 +150,12 @@ export class Lines {
     assert.strictEqual(typeof pos.line, "number");
     assert.strictEqual(typeof pos.column, "number");
 
-    var line = pos.line,
-    column = pos.column,
-    secret = this,
-    infos = secret.infos,
-    info = infos[line - 1],
-    c = column;
+    let line = pos.line, column = pos.column, secret = this, infos = secret.infos, info = infos[line - 1], c = column;
 
     if (typeof info === "undefined" || c < 0)
       return "";
 
-    var indent = this.getIndentAt(line);
+    const indent = this.getIndentAt(line);
     if (c < indent)
       return " ";
 
@@ -188,7 +180,7 @@ export class Lines {
     if (skipFirstLine && this.length === 1)
       return this;
 
-    var lines = new Lines(this.infos.map(function(info: any, i: any) {
+    const lines = new Lines(this.infos.map(function(info: any, i: any) {
       if (info.line && (i > 0 || !skipFirstLine)) {
         info = {
           ...info,
@@ -199,7 +191,7 @@ export class Lines {
     }));
 
     if (this.mappings.length > 0) {
-      var newMappings = lines.mappings;
+      const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
       this.mappings.forEach(function(mapping: any) {
         newMappings.push(mapping.indent(width, skipFirstLine, true));
@@ -214,7 +206,7 @@ export class Lines {
       return this;
     }
 
-    var lines = new Lines(this.infos.map(function(info: any) {
+    const lines = new Lines(this.infos.map(function(info: any) {
       if (info.line && ! info.locked) {
         info = {
           ...info,
@@ -225,7 +217,7 @@ export class Lines {
     }));
 
     if (this.mappings.length > 0) {
-      var newMappings = lines.mappings;
+      const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
       this.mappings.forEach(function(mapping: any) {
         newMappings.push(mapping.indent(by));
@@ -244,7 +236,7 @@ export class Lines {
       return this;
     }
 
-    var lines = new Lines(this.infos.map(function(info: any, i: any) {
+    const lines = new Lines(this.infos.map(function(info: any, i: any) {
       if (i > 0 && info.line && ! info.locked) {
         info = {
           ...info,
@@ -256,7 +248,7 @@ export class Lines {
     }));
 
     if (this.mappings.length > 0) {
-      var newMappings = lines.mappings;
+      const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
       this.mappings.forEach(function(mapping: any) {
         newMappings.push(mapping.indent(by, true));
@@ -289,12 +281,12 @@ export class Lines {
       return this.cachedTabWidth;
     }
 
-    var counts: any[] = []; // Sparse array.
-    var lastIndent = 0;
+    const counts: any[] = []; // Sparse array.
+    let lastIndent = 0;
 
-    for (var line = 1, last = this.length; line <= last; ++line) {
-      var info = this.infos[line - 1];
-      var sliced = info.line.slice(info.sliceStart, info.sliceEnd);
+    for (let line = 1, last = this.length; line <= last; ++line) {
+      const info = this.infos[line - 1];
+      const sliced = info.line.slice(info.sliceStart, info.sliceEnd);
 
       // Whitespace-only lines don't tell us much about the likely tab
       // width of this code.
@@ -302,15 +294,15 @@ export class Lines {
         continue;
       }
 
-      var diff = Math.abs(info.indent - lastIndent);
+      const diff = Math.abs(info.indent - lastIndent);
       counts[diff] = ~~counts[diff] + 1;
       lastIndent = info.indent;
     }
 
-    var maxCount = -1;
-    var result = 2;
+    let maxCount = -1;
+    let result = 2;
 
-    for (var tabWidth = 1;
+    for (let tabWidth = 1;
          tabWidth < counts.length;
          tabWidth += 1) {
       if (hasOwn.call(counts, tabWidth) &&
@@ -330,10 +322,7 @@ export class Lines {
     if (this.infos.length === 0) {
       return false;
     }
-    var firstLineInfo = this.infos[0],
-    sliceStart = firstLineInfo.sliceStart,
-    sliceEnd = firstLineInfo.sliceEnd,
-    firstLine = firstLineInfo.line.slice(sliceStart, sliceEnd).trim();
+    const firstLineInfo = this.infos[0], sliceStart = firstLineInfo.sliceStart, sliceEnd = firstLineInfo.sliceEnd, firstLine = firstLineInfo.line.slice(sliceStart, sliceEnd).trim();
     return firstLine.length === 0 ||
       firstLine.slice(0, 2) === "//" ||
       firstLine.slice(0, 2) === "/*";
@@ -344,19 +333,19 @@ export class Lines {
   }
 
   isPrecededOnlyByWhitespace(pos: Pos) {
-    var info = this.infos[pos.line - 1];
-    var indent = Math.max(info.indent, 0);
+    const info = this.infos[pos.line - 1];
+    const indent = Math.max(info.indent, 0);
 
-    var diff = pos.column - indent;
+    const diff = pos.column - indent;
     if (diff <= 0) {
       // If pos.column does not exceed the indentation amount, then
       // there must be only whitespace before it.
       return true;
     }
 
-    var start = info.sliceStart;
-    var end = Math.min(start + diff, info.sliceEnd);
-    var prefix = info.line.slice(start, end);
+    const start = info.sliceStart;
+    const end = Math.min(start + diff, info.sliceEnd);
+    const prefix = info.line.slice(start, end);
 
     return isOnlyWhitespace(prefix);
   }
@@ -367,8 +356,7 @@ export class Lines {
   }
 
   nextPos(pos: Pos, skipSpaces: boolean = false) {
-    var l = Math.max(pos.line, 0),
-    c = Math.max(pos.column, 0);
+    const l = Math.max(pos.line, 0), c = Math.max(pos.column, 0);
 
     if (c < this.getLineLength(l)) {
       pos.column += 1;
@@ -391,8 +379,7 @@ export class Lines {
   }
 
   prevPos(pos: Pos, skipSpaces: boolean = false) {
-    var l = pos.line,
-    c = pos.column;
+    let l = pos.line, c = pos.column;
 
     if (c < 1) {
       l -= 1;
@@ -464,12 +451,12 @@ export class Lines {
   }
 
   trimLeft() {
-    var pos = this.skipSpaces(this.firstPos(), false, true);
+    const pos = this.skipSpaces(this.firstPos(), false, true);
     return pos ? this.slice(pos) : emptyLines;
   }
 
   trimRight() {
-    var pos = this.skipSpaces(this.lastPos(), true, true);
+    const pos = this.skipSpaces(this.lastPos(), true, true);
     return pos ? this.slice(this.firstPos(), pos) : emptyLines;
   }
 
@@ -508,7 +495,7 @@ export class Lines {
   }
 
   bootstrapSlice(start: Pos, end: Pos) {
-    var strings = this.toString().split(
+    const strings = this.toString().split(
       lineTerminatorSeqExp
     ).slice(
       start.line - 1,
@@ -550,13 +537,13 @@ export class Lines {
       sliced.push(sliceInfo(sliced.pop(), 0, end.column));
     }
 
-    var lines = new Lines(sliced);
+    const lines = new Lines(sliced);
 
     if (this.mappings.length > 0) {
-      var newMappings = lines.mappings;
+      const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
       this.mappings.forEach(function(this: any, mapping: any) {
-        var sliced = mapping.slice(this, start, end);
+        const sliced = mapping.slice(this, start, end);
         if (sliced) {
           newMappings.push(sliced);
         }
@@ -580,8 +567,8 @@ export class Lines {
     const parts = [];
     const { tabWidth = 2 } = options;
 
-    for (var line = start.line; line <= end.line; ++line) {
-      var info = this.infos[line - 1];
+    for (let line = start.line; line <= end.line; ++line) {
+      let info = this.infos[line - 1];
 
       if (line === start.line) {
         if (line === end.line) {
@@ -593,9 +580,9 @@ export class Lines {
         info = sliceInfo(info, 0, end.column);
       }
 
-      var indent = Math.max(info.indent, 0);
+      const indent = Math.max(info.indent, 0);
 
-      var before = info.line.slice(0, info.sliceStart);
+      const before = info.line.slice(0, info.sliceStart);
       if (options.reuseWhitespace &&
           isOnlyWhitespace(before) &&
           countSpaces(before, options.tabWidth) === indent) {
@@ -604,15 +591,15 @@ export class Lines {
         continue;
       }
 
-      var tabs = 0;
-      var spaces = indent;
+      let tabs = 0;
+      let spaces = indent;
 
       if (options.useTabs) {
         tabs = Math.floor(indent / tabWidth);
         spaces -= tabs * tabWidth;
       }
 
-      var result = "";
+      let result = "";
 
       if (tabs > 0) {
         result += new Array(tabs + 1).join("\t");
@@ -635,10 +622,10 @@ export class Lines {
   }
 
   join(elements: (string | Lines)[]) {
-    var separator = this;
-    var infos: any[] = [];
-    var mappings: any[] = [];
-    var prevInfo: any;
+    const separator = this;
+    const infos: any[] = [];
+    const mappings: any[] = [];
+    let prevInfo: any;
 
     function appendLines(linesOrNull: Lines | null) {
       if (linesOrNull === null) {
@@ -646,10 +633,10 @@ export class Lines {
       }
 
       if (prevInfo) {
-        var info = linesOrNull.infos[0];
-        var indent = new Array(info.indent + 1).join(" ");
-        var prevLine = infos.length;
-        var prevColumn = Math.max(prevInfo.indent, 0) +
+        const info = linesOrNull.infos[0];
+        const indent = new Array(info.indent + 1).join(" ");
+        const prevLine = infos.length;
+        const prevColumn = Math.max(prevInfo.indent, 0) +
           prevInfo.sliceEnd - prevInfo.sliceStart;
 
         prevInfo.line = prevInfo.line.slice(
@@ -687,7 +674,7 @@ export class Lines {
     }
 
     elements.map(function(elem: any) {
-      var lines = fromString(elem);
+      const lines = fromString(elem);
       if (lines.isEmpty())
         return null;
       return lines;
@@ -702,7 +689,7 @@ export class Lines {
     if (infos.length < 1)
       return emptyLines;
 
-    var lines = new Lines(infos);
+    const lines = new Lines(infos);
 
     lines.mappings = mappings;
 
@@ -710,22 +697,22 @@ export class Lines {
   }
 
   concat(...args: (string | Lines)[]) {
-    var list: typeof args = [this];
+    const list: typeof args = [this];
     list.push.apply(list, args);
     assert.strictEqual(list.length, args.length + 1);
     return emptyLines.join(list);
   }
 }
 
-var fromStringCache: any = {};
+const fromStringCache: any = {};
 var hasOwn = fromStringCache.hasOwnProperty;
-var maxCacheKeyLen = 10;
+const maxCacheKeyLen = 10;
 
 export function countSpaces(spaces: any, tabWidth?: number) {
-  var count = 0;
-  var len = spaces.length;
+  let count = 0;
+  const len = spaces.length;
 
-  for (var i = 0; i < len; ++i) {
+  for (let i = 0; i < len; ++i) {
     switch (spaces.charCodeAt(i)) {
     case 9: // '\t'
       assert.strictEqual(typeof tabWidth, "number");
@@ -757,7 +744,7 @@ export function countSpaces(spaces: any, tabWidth?: number) {
   return count;
 }
 
-var leadingSpaceExp = /^\s*/;
+const leadingSpaceExp = /^\s*/;
 
 // As specified here: http://www.ecma-international.org/ecma-262/6.0/#sec-line-terminators
 var lineTerminatorSeqExp =
@@ -775,18 +762,18 @@ export function fromString(
 
   string += "";
 
-  var tabWidth = options && options.tabWidth;
-  var tabless = string.indexOf("\t") < 0;
-  var cacheable = !options && tabless && (string.length <= maxCacheKeyLen);
+  const tabWidth = options && options.tabWidth;
+  const tabless = string.indexOf("\t") < 0;
+  const cacheable = !options && tabless && (string.length <= maxCacheKeyLen);
 
   assert.ok(tabWidth || tabless, "No tab width specified but encountered tabs in string\n" + string);
 
   if (cacheable && hasOwn.call(fromStringCache, string))
     return fromStringCache[string];
 
-  var lines = new Lines(string.split(lineTerminatorSeqExp).map(function(line) {
+  const lines = new Lines(string.split(lineTerminatorSeqExp).map(function(line) {
     // TODO: handle null exec result
-    var spaces = leadingSpaceExp.exec(line)![0];
+    const spaces = leadingSpaceExp.exec(line)![0];
     return {
       line: line,
       indent: countSpaces(spaces, tabWidth),
@@ -808,10 +795,10 @@ function isOnlyWhitespace(string: string) {
 }
 
 function sliceInfo(info: any, startCol: number, endCol?: number) {
-  var sliceStart = info.sliceStart;
-  var sliceEnd = info.sliceEnd;
-  var indent = Math.max(info.indent, 0);
-  var lineLength = indent + sliceEnd - sliceStart;
+  let sliceStart = info.sliceStart;
+  let sliceEnd = info.sliceEnd;
+  let indent = Math.max(info.indent, 0);
+  let lineLength = indent + sliceEnd - sliceStart;
 
   if (typeof endCol === "undefined") {
     endCol = lineLength;

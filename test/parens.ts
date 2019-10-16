@@ -13,7 +13,7 @@ const {
 } = types;
 
 function parseExpression(expr: any) {
-  var ast: any = esprima.parse(expr);
+  let ast: any = esprima.parse(expr);
   n.Program.assert(ast);
   ast = ast.body[0];
   return n.ExpressionStatement.check(ast) ? ast.expression : ast;
@@ -32,7 +32,7 @@ function check(expr: any) {
   );
 }
 
-var operators = [
+const operators = [
   "==", "!=", "===", "!==",
   "<", "<=", ">", ">=",
   "<<", ">>", ">>>",
@@ -132,41 +132,41 @@ describe("parens", function () {
   });
 
   it("ReprintedParens", function () {
-    var code = "a(function g(){}.call(this));";
-    var ast1 = parse(code);
-    var body = ast1.program.body;
+    const code = "a(function g(){}.call(this));";
+    const ast1 = parse(code);
+    const body = ast1.program.body;
 
     // Copy the function from a position where it does not need
     // parentheses to a position where it does need parentheses.
     body.push(b.expressionStatement(
       body[0].expression.arguments[0]));
 
-    var generic = printer.printGenerically(ast1).code;
-    var ast2 = parse(generic);
+    const generic = printer.printGenerically(ast1).code;
+    const ast2 = parse(generic);
     types.astNodesAreEquivalent.assert(ast1, ast2);
 
-    var reprint = printer.print(ast1).code;
-    var ast3 = parse(reprint);
+    let reprint = printer.print(ast1).code;
+    const ast3 = parse(reprint);
     types.astNodesAreEquivalent.assert(ast1, ast3);
 
     body.shift();
     reprint = printer.print(ast1).code;
-    var ast4 = parse(reprint);
+    const ast4 = parse(reprint);
     assert.strictEqual(ast4.program.body.length, 1);
-    var callExp = ast4.program.body[0].expression;
+    const callExp = ast4.program.body[0].expression;
     n.CallExpression.assert(callExp);
     n.MemberExpression.assert(callExp.callee);
     n.FunctionExpression.assert(callExp.callee.object);
     types.astNodesAreEquivalent.assert(ast1, ast4);
 
-    var objCode = "({ foo: 42 }.foo);";
-    var objAst = parse(objCode);
-    var memExp = objAst.program.body[0].expression;
+    const objCode = "({ foo: 42 }.foo);";
+    const objAst = parse(objCode);
+    const memExp = objAst.program.body[0].expression;
     n.MemberExpression.assert(memExp);
     n.ObjectExpression.assert(memExp.object);
     n.Identifier.assert(memExp.property);
     assert.strictEqual(memExp.property.name, "foo");
-    var blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
+    const blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
     reprint = printer.print(blockStmt).code;
     types.astNodesAreEquivalent.assert(
       blockStmt,
@@ -175,36 +175,36 @@ describe("parens", function () {
   });
 
   it("don't reparenthesize valid IIFEs", function () {
-    var iifeCode = "(function     spaces   () {        }.call()  )  ;";
-    var iifeAst = parse(iifeCode);
-    var iifeReprint = printer.print(iifeAst).code;
+    const iifeCode = "(function     spaces   () {        }.call()  )  ;";
+    const iifeAst = parse(iifeCode);
+    const iifeReprint = printer.print(iifeAst).code;
     assert.strictEqual(iifeReprint, iifeCode);
   });
 
   it("don't reparenthesize valid object literals", function () {
-    var objCode = "(  {    foo   :  42}.  foo )  ;";
-    var objAst = parse(objCode);
-    var objReprint = printer.print(objAst).code;
+    const objCode = "(  {    foo   :  42}.  foo )  ;";
+    const objAst = parse(objCode);
+    const objReprint = printer.print(objAst).code;
     assert.strictEqual(objReprint, objCode);
   });
 
   it("don't parenthesize return statements with sequence expressions", function () {
-    var objCode = "function foo() { return 1, 2; }";
-    var objAst = parse(objCode);
-    var objReprint = printer.print(objAst).code;
+    const objCode = "function foo() { return 1, 2; }";
+    const objAst = parse(objCode);
+    const objReprint = printer.print(objAst).code;
     assert.strictEqual(objReprint, objCode);
   });
 
   it("NegatedLoopCondition", function () {
-    var ast = parse([
+    const ast = parse([
       "for (var i = 0; i < 10; ++i) {",
       "  console.log(i);",
       "}"
-    ].join(eol))
+    ].join(eol));
 
-    var loop = ast.program.body[0];
-    var test = loop.test;
-    var negation = b.unaryExpression("!", test);
+    const loop = ast.program.body[0];
+    const test = loop.test;
+    const negation = b.unaryExpression("!", test);
 
     assert.strictEqual(
       printer.print(negation).code,
@@ -221,7 +221,7 @@ describe("parens", function () {
   });
 
   it("MisleadingExistingParens", function () {
-    var ast = parse([
+    const ast = parse([
       // The key === "oyez" expression appears to have parentheses
       // already, but those parentheses won't help us when we negate the
       // condition with a !.
@@ -230,10 +230,10 @@ describe("parens", function () {
       "}"
     ].join(eol));
 
-    var ifStmt = ast.program.body[0];
+    const ifStmt = ast.program.body[0];
     ifStmt.test = b.unaryExpression("!", ifStmt.test);
 
-    var binaryPath = new NodePath(ast).get(
+    const binaryPath = new NodePath(ast).get(
       "program", "body", 0, "test", "argument");
 
     assert.ok(binaryPath.needsParens());
@@ -246,15 +246,15 @@ describe("parens", function () {
   });
 
   it("DiscretionaryParens", function () {
-    var code = [
+    const code = [
       "if (info.line && (i > 0 || !skipFirstLine)) {",
       "  info = copyLineInfo(info);",
       "}"
     ].join(eol);
 
-    var ast = parse(code);
+    const ast = parse(code);
 
-    var rightPath = new NodePath(ast).get(
+    const rightPath = new NodePath(ast).get(
       "program", "body", 0, "test", "right");
 
     assert.ok(rightPath.needsParens());
@@ -262,7 +262,7 @@ describe("parens", function () {
   });
 
   it("should not be added to multiline boolean expressions", function () {
-    var code = [
+    const code = [
       "function foo() {",
       "  return !(",
       "    a &&",
@@ -272,8 +272,8 @@ describe("parens", function () {
       "}"
     ].join(eol);
 
-    var ast = parse(code);
-    var printer = new Printer({
+    const ast = parse(code);
+    const printer = new Printer({
       tabWidth: 2
     });
 

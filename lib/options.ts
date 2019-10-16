@@ -164,7 +164,7 @@ interface DeprecatedOptions {
   esprima?: any;
 }
 
-var defaults: Options = {
+const defaults: Options = {
   parser: require("../parsers/esprima"),
   tabWidth: 4,
   useTabs: false,
@@ -184,13 +184,14 @@ var defaults: Options = {
   arrowParensAlways: false,
   flowObjectCommas: true,
   tokens: true
-}, hasOwn = defaults.hasOwnProperty;
+};
+const hasOwn = defaults.hasOwnProperty;
 
 export type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
 
 // Copy options and fill in default values.
 export function normalize(opts?: Options): NormalizedOptions {
-  var options = opts || defaults;
+  const options = opts || defaults;
 
   function get(key: keyof Options) {
     return hasOwn.call(options, key)

@@ -1,12 +1,12 @@
 import assert from "assert";
 import * as types from "ast-types";
-var n = types.namedTypes;
-var isArray = types.builtInTypes.array;
-var isObject = types.builtInTypes.object;
+const n = types.namedTypes;
+const isArray = types.builtInTypes.array;
+const isObject = types.builtInTypes.object;
 import { Lines, concat } from "./lines";
 import { comparePos, fixFaultyLocations } from "./util";
 import { makeUniqueKey } from "private";
-var childNodesCacheKey = makeUniqueKey();
+const childNodesCacheKey = makeUniqueKey();
 
 // TODO Move a non-caching implementation of this function into ast-types,
 // and implement a caching wrapper function here.
@@ -40,7 +40,7 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
     return node[childNodesCacheKey];
   }
 
-  var names;
+  let names;
   if (isArray.check(node)) {
     names = Object.keys(node);
   } else if (isObject.check(node)) {
@@ -67,13 +67,13 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
 // .precedingNode, .enclosingNode, and/or .followingNode properties, at
 // least one of which is guaranteed to be defined.
 function decorateComment(node: any, comment: any, lines: any) {
-  var childNodes = getSortedChildNodes(node, lines);
+  const childNodes = getSortedChildNodes(node, lines);
 
   // Time to dust off the old binary search robes and wizard hat.
-  var left = 0, right = childNodes.length;
+  let left = 0, right = childNodes.length;
   while (left < right) {
-    var middle = (left + right) >> 1;
-    var child = childNodes[middle];
+    const middle = (left + right) >> 1;
+    const child = childNodes[middle];
 
     if (comparePos(child.loc.start, comment.loc.start) <= 0 &&
         comparePos(comment.loc.end, child.loc.end) <= 0) {
@@ -119,20 +119,20 @@ export function attach(comments: any[], ast: any, lines: any) {
     return;
   }
 
-  var tiesToBreak: any[] = [];
+  const tiesToBreak: any[] = [];
 
   comments.forEach(function(comment) {
     comment.loc.lines = lines;
     decorateComment(ast, comment, lines);
 
-    var pn = comment.precedingNode;
-    var en = comment.enclosingNode;
-    var fn = comment.followingNode;
+    const pn = comment.precedingNode;
+    const en = comment.enclosingNode;
+    const fn = comment.followingNode;
 
     if (pn && fn) {
-      var tieCount = tiesToBreak.length;
+      const tieCount = tiesToBreak.length;
       if (tieCount > 0) {
-        var lastTie = tiesToBreak[tieCount - 1];
+        const lastTie = tiesToBreak[tieCount - 1];
 
         assert.strictEqual(
           lastTie.precedingNode === comment.precedingNode,
@@ -180,14 +180,14 @@ export function attach(comments: any[], ast: any, lines: any) {
 };
 
 function breakTies(tiesToBreak: any[], lines: any) {
-  var tieCount = tiesToBreak.length;
+  const tieCount = tiesToBreak.length;
   if (tieCount === 0) {
     return;
   }
 
-  var pn = tiesToBreak[0].precedingNode;
-  var fn = tiesToBreak[0].followingNode;
-  var gapEndPos = fn.loc.start;
+  const pn = tiesToBreak[0].precedingNode;
+  const fn = tiesToBreak[0].followingNode;
+  let gapEndPos = fn.loc.start;
 
   // Iterate backwards through tiesToBreak, examining the gaps
   // between the tied comments. In order to qualify as leading, a
@@ -200,7 +200,7 @@ function breakTies(tiesToBreak: any[], lines: any) {
     assert.strictEqual(comment.precedingNode, pn);
     assert.strictEqual(comment.followingNode, fn);
 
-    var gap = lines.sliceString(comment.loc.end, gapEndPos);
+    const gap = lines.sliceString(comment.loc.end, gapEndPos);
     if (/\S/.test(gap)) {
       // The gap string contained something other than whitespace.
       break;
@@ -230,7 +230,7 @@ function breakTies(tiesToBreak: any[], lines: any) {
 }
 
 function addCommentHelper(node: any, comment: any) {
-  var comments = node.comments || (node.comments = []);
+  const comments = node.comments || (node.comments = []);
   comments.push(comment);
 }
 
@@ -253,12 +253,12 @@ function addTrailingComment(node: any, comment: any) {
 }
 
 function printLeadingComment(commentPath: any, print: any) {
-  var comment = commentPath.getValue();
+  const comment = commentPath.getValue();
   n.Comment.assert(comment);
 
-  var loc = comment.loc;
-  var lines = loc && loc.lines;
-  var parts = [print(commentPath)];
+  const loc = comment.loc;
+  const lines = loc && loc.lines;
+  const parts = [print(commentPath)];
 
   if (comment.trailing) {
     // When we print trailing comments as leading comments, we don't
@@ -266,7 +266,7 @@ function printLeadingComment(commentPath: any, print: any) {
     parts.push("\n");
 
   } else if (lines instanceof Lines) {
-    var trailingSpace = lines.slice(
+    const trailingSpace = lines.slice(
       loc.end,
       lines.skipSpaces(loc.end) || lines.lastPos(),
     );
@@ -289,16 +289,16 @@ function printLeadingComment(commentPath: any, print: any) {
 }
 
 function printTrailingComment(commentPath: any, print: any) {
-  var comment = commentPath.getValue(commentPath);
+  const comment = commentPath.getValue(commentPath);
   n.Comment.assert(comment);
 
-  var loc = comment.loc;
-  var lines = loc && loc.lines;
-  var parts = [];
+  const loc = comment.loc;
+  const lines = loc && loc.lines;
+  const parts = [];
 
   if (lines instanceof Lines) {
-    var fromPos = lines.skipSpaces(loc.start, true) || lines.firstPos();
-    var leadingSpace = lines.slice(fromPos, loc.start);
+    const fromPos = lines.skipSpaces(loc.start, true) || lines.firstPos();
+    const leadingSpace = lines.slice(fromPos, loc.start);
 
     if (leadingSpace.length === 1) {
       // If the leading space contains no newlines, then we want to
@@ -317,22 +317,22 @@ function printTrailingComment(commentPath: any, print: any) {
 }
 
 export function printComments(path: any, print: any) {
-  var value = path.getValue();
-  var innerLines = print(path);
-  var comments = n.Node.check(value) &&
+  const value = path.getValue();
+  const innerLines = print(path);
+  const comments = n.Node.check(value) &&
     types.getFieldValue(value, "comments");
 
   if (!comments || comments.length === 0) {
     return innerLines;
   }
 
-  var leadingParts: any[] = [];
-  var trailingParts = [innerLines];
+  const leadingParts: any[] = [];
+  const trailingParts = [innerLines];
 
   path.each(function(commentPath: any) {
-    var comment = commentPath.getValue();
-    var leading = types.getFieldValue(comment, "leading");
-    var trailing = types.getFieldValue(comment, "trailing");
+    const comment = commentPath.getValue();
+    const leading = types.getFieldValue(comment, "leading");
+    const trailing = types.getFieldValue(comment, "trailing");
 
     if (leading || (trailing && !(n.Statement.check(value) ||
                                   comment.type === "Block" ||

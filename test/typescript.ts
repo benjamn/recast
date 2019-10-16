@@ -7,7 +7,7 @@ import {EOL as eol} from "os";
 import * as parser from "../parsers/typescript";
 
 // Babel 7 no longer supports Node 4 or 5.
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 (nodeMajorVersion >= 6 ? describe : xdescribe)
 ("TypeScript", function() {
   it('basic printing', function() {
@@ -343,13 +343,12 @@ function testReprinting(pattern: any, description: any) {
     }).filter((file: string) => !(
       // Skip the following files, because they have problems that are not due
       // to any problems in Recast. TODO Revisit this list periodically.
-      file.indexOf("/tsx/") >= 0 ||
+      (file.indexOf("/tsx/") >= 0 ||
       file.endsWith("stitching/errors.ts") ||
       file.endsWith("decorators/type-arguments-invalid/input.js") ||
       // Throws an error with a slightly different message than expected:
-      file.endsWith("types/tuple-rest-invalid/input.js") ||
-      // @babel/parser can't handle naked arrow function expression statements:
-      file.endsWith("/optional-parameter/input.js")
+      file.endsWith("types/tuple-rest-invalid/input.js") || // @babel/parser can't handle naked arrow function expression statements:
+      file.endsWith("/optional-parameter/input.js"))
     )).forEach((file: string) => it(file, function () {
       const absPath = path.join(__dirname, file);
       const source = fs.readFileSync(absPath, "utf8");

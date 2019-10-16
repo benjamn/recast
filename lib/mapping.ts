@@ -18,14 +18,14 @@ export default class Mapping {
     start: Pos,
     end: Pos = lines.lastPos(),
   ) {
-    var sourceLines = this.sourceLines;
-    var sourceLoc = this.sourceLoc;
-    var targetLoc = this.targetLoc;
+    const sourceLines = this.sourceLines;
+    let sourceLoc = this.sourceLoc;
+    let targetLoc = this.targetLoc;
 
     function skip(name: "start" | "end") {
-      var sourceFromPos = sourceLoc[name];
-      var targetFromPos = targetLoc[name];
-      var targetToPos = start;
+      const sourceFromPos = sourceLoc[name];
+      const targetFromPos = targetLoc[name];
+      let targetToPos = start;
 
       if (name === "end") {
         targetToPos = end;
@@ -121,9 +121,9 @@ export default class Mapping {
       return this;
     }
 
-    var targetLoc = this.targetLoc;
-    var startLine = targetLoc.start.line;
-    var endLine = targetLoc.end.line;
+    let targetLoc = this.targetLoc;
+    const startLine = targetLoc.start.line;
+    const endLine = targetLoc.end.line;
 
     if (skipFirstLine && startLine === 1 && endLine === 1) {
       return this;
@@ -135,7 +135,7 @@ export default class Mapping {
     };
 
     if (!skipFirstLine || startLine > 1) {
-      var startColumn = targetLoc.start.column + by;
+      const startColumn = targetLoc.start.column + by;
       targetLoc.start = {
         line: startLine,
         column: noNegativeColumns
@@ -145,7 +145,7 @@ export default class Mapping {
     }
 
     if (!skipFirstLine || endLine > 1) {
-      var endColumn = targetLoc.end.column + by;
+      const endColumn = targetLoc.end.column + by;
       targetLoc.end = {
         line: endLine,
         column: noNegativeColumns
@@ -183,7 +183,7 @@ function skipChars(
   targetFromPos: Pos,
   targetToPos: Pos,
 ) {
-  var targetComparison = comparePos(targetFromPos, targetToPos);
+  const targetComparison = comparePos(targetFromPos, targetToPos);
   if (targetComparison === 0) {
     // Trivial case: no characters to skip.
     return sourceFromPos;

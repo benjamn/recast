@@ -1,12 +1,12 @@
 import assert from "assert";
 import * as types from "ast-types";
-var namedTypes = types.namedTypes;
-var builders = types.builders;
+const namedTypes = types.namedTypes;
+const builders = types.builders;
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
 import { EOL as eol } from "os";
 
-var lines = [
+const lines = [
     "// file comment",
     "exports.foo({",
     "    // some comment",
@@ -17,11 +17,11 @@ var lines = [
 
 describe("types.visit", function() {
     it("replacement", function() {
-        var source = lines.join(eol);
-        var printer = new Printer;
-        var ast = parse(source);
-        var withThis = printer.print(ast).code;
-        var thisExp = /\bthis\b/g;
+        const source = lines.join(eol);
+        const printer = new Printer;
+        const ast = parse(source);
+        const withThis = printer.print(ast).code;
+        const thisExp = /\bthis\b/g;
 
         assert.ok(thisExp.test(withThis));
 
@@ -36,10 +36,10 @@ describe("types.visit", function() {
             withThis.replace(thisExp, "self")
         );
 
-        var propNames: any[] = [];
-        var methods: types.Visitor = {
+        const propNames: any[] = [];
+        const methods: types.Visitor = {
             visitProperty: function(path) {
-                var key: any = path.node.key;
+                const key: any = path.node.key;
                 propNames.push(key.value || key.name);
                 this.traverse(path);
             }
@@ -68,7 +68,7 @@ describe("types.visit", function() {
     });
 
     it("reindent", function() {
-        var lines = [
+        const lines = [
             "a(b(c({",
             "    m: d(function() {",
             "        if (e('y' + 'z'))",
@@ -80,7 +80,7 @@ describe("types.visit", function() {
             "})));"
         ];
 
-        var altered = [
+        const altered = [
             "a(xxx(function() {",
             "    if (e('y' > 'z'))",
             "        f(42).h()",
@@ -96,11 +96,11 @@ describe("types.visit", function() {
             "})));"
         ];
 
-        var source = lines.join(eol);
-        var ast = parse(source);
-        var printer = new Printer;
+        const source = lines.join(eol);
+        const ast = parse(source);
+        const printer = new Printer;
 
-        var funExpr: any;
+        let funExpr: any;
         types.visit(ast, {
             visitFunctionExpression: function(path) {
                 assert.strictEqual(typeof funExpr, "undefined");
@@ -119,7 +119,7 @@ describe("types.visit", function() {
         types.visit(ast, {
             visitCallExpression: function(path) {
                 this.traverse(path);
-                var expr = path.node;
+                const expr = path.node;
                 if (namedTypes.Identifier.check(expr.callee) &&
                     expr.callee.name === "b") {
                     expr.callee.name = "xxx";

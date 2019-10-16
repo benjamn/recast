@@ -1,9 +1,9 @@
 import assert from "assert";
 import * as recast from "../main";
-var n = recast.types.namedTypes;
-var b = recast.types.builders;
+const n = recast.types.namedTypes;
+const b = recast.types.builders;
 import { EOL as eol } from "os";
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
   // Babel no longer supports Node 4 or 5.
@@ -11,17 +11,17 @@ describe("Babel", function () {
     return;
   }
 
-  var babelTransform = require("@babel/core").transform;
-  var babelPresetEnv = require("@babel/preset-env");
-  var parseOptions = {
+  const babelTransform = require("@babel/core").transform;
+  const babelPresetEnv = require("@babel/preset-env");
+  const parseOptions = {
     parser: require("../parsers/babel")
   };
 
   it("basic printing", function () {
     function check(lines: any) {
-      var code = lines.join(eol);
-      var ast = recast.parse(code, parseOptions);
-      var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+      const code = lines.join(eol);
+      const ast = recast.parse(code, parseOptions);
+      const output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
       assert.strictEqual(output, code);
     }
 
@@ -167,19 +167,19 @@ describe("Babel", function () {
   });
 
   it("babel 6: should not wrap IIFE when reusing nodes", function () {
-    var code = [
+    const code = [
       '(function(...c) {',
       '  c();',
       '})();',
     ].join(eol);
 
-    var ast = recast.parse(code, parseOptions);
-    var output = recast.print(ast, { tabWidth: 2 }).code;
+    const ast = recast.parse(code, parseOptions);
+    const output = recast.print(ast, { tabWidth: 2 }).code;
     assert.strictEqual(output, code);
   });
 
   it("should not disappear when surrounding code changes", function () {
-    var code = [
+    const code = [
       'import foo from "foo";',
       'import React from "react";',
       '',
@@ -196,18 +196,18 @@ describe("Babel", function () {
       'export default DebugPanel;',
     ].join(eol);
 
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
     assert.strictEqual(recast.print(ast).code, code);
 
-    var root = new recast.types.NodePath(ast);
-    var reactImportPath = root.get("program", "body", 1);
+    const root = new recast.types.NodePath(ast);
+    const reactImportPath = root.get("program", "body", 1);
     n.ImportDeclaration.assert(reactImportPath.value);
 
     // Remove the second import statement.
     reactImportPath.prune();
 
-    var reprinted = recast.print(ast).code;
+    const reprinted = recast.print(ast).code;
 
     assert.ok(reprinted.match(/@component/));
     assert.ok(reprinted.match(/@callExpression/));
@@ -221,7 +221,7 @@ describe("Babel", function () {
   });
 
   it("should not disappear when an import is added and `export` is used inline", function () {
-    var code = [
+    const code = [
       'import foo from "foo";',
       'import React from "react";',
       '',
@@ -239,19 +239,19 @@ describe("Babel", function () {
       '}',
     ].join(eol);
 
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
     assert.strictEqual(recast.print(ast).code, code);
 
-    var root = new recast.types.NodePath(ast);
-    var body = root.get("program", "body");
+    const root = new recast.types.NodePath(ast);
+    const body = root.get("program", "body");
 
     // add a new import statement
     body.unshift(b.importDeclaration([
       b.importDefaultSpecifier(b.identifier('x')),
     ], b.literal('x')));
 
-    var reprinted = recast.print(ast).code;
+    const reprinted = recast.print(ast).code;
 
     assert.ok(reprinted.match(/@component/));
     assert.ok(reprinted.match(/@callExpression/));
@@ -263,7 +263,7 @@ describe("Babel", function () {
   });
 
   it("should not disappear when an import is added and `export default` is used inline", function () {
-    var code = [
+    const code = [
       'import foo from "foo";',
       'import React from "react";',
       '',
@@ -281,19 +281,19 @@ describe("Babel", function () {
       '}',
     ].join(eol);
 
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
     assert.strictEqual(recast.print(ast).code, code);
 
-    var root = new recast.types.NodePath(ast);
-    var body = root.get("program", "body");
+    const root = new recast.types.NodePath(ast);
+    const body = root.get("program", "body");
 
     // add a new import statement
     body.unshift(b.importDeclaration([
       b.importDefaultSpecifier(b.identifier('x')),
     ], b.literal('x')));
 
-    var reprinted = recast.print(ast).code;
+    const reprinted = recast.print(ast).code;
 
     assert.ok(reprinted.match(/@component/));
     assert.ok(reprinted.match(/@callExpression/));
@@ -305,15 +305,15 @@ describe("Babel", function () {
   });
 
   it("should not print delimiters with type annotations", function () {
-    var code = [
+    const code = [
       'type X = {',
       '  a: number,',
       '  b: number,',
       '};',
     ].join('\n');
 
-    var ast = recast.parse(code, parseOptions)
-    var root = new recast.types.NodePath(ast);
+    const ast = recast.parse(code, parseOptions);
+    const root = new recast.types.NodePath(ast);
 
     root.get('program', 'body', 0, 'right', 'properties', 0).prune();
 
@@ -328,7 +328,7 @@ describe("Babel", function () {
   }
 
   it("should parenthesize ** operator arguments when lower precedence", function () {
-    var ast = recast.parse('a ** b;', parseOptions);
+    const ast = recast.parse('a ** b;', parseOptions);
 
     ast.program.body[0].expression.left = parseExpression('x + y');
     ast.program.body[0].expression.right = parseExpression('x || y');
@@ -340,7 +340,7 @@ describe("Babel", function () {
   });
 
   it("should parenthesize ** operator arguments as needed when same precedence", function () {
-    var ast = recast.parse('a ** b;', parseOptions);
+    const ast = recast.parse('a ** b;', parseOptions);
 
     ast.program.body[0].expression.left = parseExpression('x * y');
     ast.program.body[0].expression.right = parseExpression('x / y');
@@ -352,16 +352,16 @@ describe("Babel", function () {
   });
 
   it("should be able to replace top-level statements with leading empty lines", function () {
-    var code = [
+    const code = [
       '',
       'if (test) {',
       '  console.log(test);',
       '}',
     ].join('\n');
 
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
-    var replacement = b.expressionStatement(
+    const replacement = b.expressionStatement(
       b.callExpression(
         b.identifier('fn'),
         [b.identifier('test'), b.literal(true)]
@@ -389,8 +389,8 @@ describe("Babel", function () {
   });
 
   it("should parse and print dynamic import(...)", function () {
-    var code = 'wait(import("oyez"));';
-  var ast = recast.parse(code, parseOptions);
+    const code = 'wait(import("oyez"));';
+  const ast = recast.parse(code, parseOptions);
     assert.strictEqual(
       recast.prettyPrint(ast).code,
       code
@@ -398,7 +398,7 @@ describe("Babel", function () {
   });
 
   it("tolerates circular references", function () {
-    var code = "function foo(bar = true) {}";
+    const code = "function foo(bar = true) {}";
     recast.parse(code, {
       parser: {
         parse: function (source: any) {
@@ -414,27 +414,27 @@ describe("Babel", function () {
   });
 
   it("prints numbers in bases other than 10 without converting them", function() {
-    var code = [
+    const code = [
       'let decimal = 6;',
       'let hex = 0xf00d;',
       'let binary = 0b1010;',
       'let octal = 0o744;'
     ].join(eol);
 
-    var ast = recast.parse(code, parseOptions);
-    var output = recast.print(ast, { tabWidth: 2 }).code;
+    const ast = recast.parse(code, parseOptions);
+    const output = recast.print(ast, { tabWidth: 2 }).code;
     assert.strictEqual(output, code);
   });
 
   it("prints the export-default-from syntax", function () {
-    var code = [
+    const code = [
       'export { default as foo, bar } from "foo";',
       'export { default as veryLongIdentifier1, veryLongIdentifier2, veryLongIdentifier3, veryLongIdentifier4, veryLongIdentifier5 } from "long-identifiers";'
     ].join(eol);
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
-    var replacement1 = b.exportDefaultSpecifier(b.identifier('foo'));
-    var replacement2 = b.exportDefaultSpecifier(
+    const replacement1 = b.exportDefaultSpecifier(b.identifier('foo'));
+    const replacement2 = b.exportDefaultSpecifier(
       b.identifier('veryLongIdentifier1')
     );
     ast.program.body[0].specifiers[0] = replacement1;
@@ -455,13 +455,13 @@ describe("Babel", function () {
 
   // https://github.com/codemod-js/codemod/issues/157
   it("avoids extra semicolons on mutated blocks containing a 'use strict' directive", function() {
-    var code = [
+    const code = [
       '(function () {',
       '  "use strict";',
       '  hello;',
       '})();'
     ].join(eol);
-    var ast = recast.parse(code, parseOptions);
+    const ast = recast.parse(code, parseOptions);
 
     // delete "hello;"
     ast.program.body[0].expression.callee.body.body.splice(0);

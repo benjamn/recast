@@ -2,9 +2,9 @@ import assert from "assert";
 import sourceMap from "source-map";
 import * as recast from "../main";
 import * as types from "ast-types";
-var n = types.namedTypes;
-var b = types.builders;
-var NodePath = types.NodePath;
+const n = types.namedTypes;
+const b = types.builders;
+const NodePath = types.NodePath;
 import { fromString } from "../lib/lines";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
@@ -12,30 +12,30 @@ import { EOL as eol } from "os";
 
 describe("source maps", function() {
     it("should generate correct mappings", function() {
-        var code = [
+        const code = [
             "function foo(bar) {",
             "  return 1 + bar;",
             "}"
         ].join(eol);
 
         fromString(code);
-        var ast = parse(code, {
+        const ast = parse(code, {
             sourceFileName: "source.js"
         });
 
-        var path = new NodePath(ast);
-        var returnPath = path.get("program", "body", 0, "body", "body", 0);
+        const path = new NodePath(ast);
+        const returnPath = path.get("program", "body", 0, "body", "body", 0);
         n.ReturnStatement.assert(returnPath.value);
 
-        var leftPath = returnPath.get("argument", "left");
-        var leftValue = leftPath.value;
-        var rightPath = returnPath.get("argument", "right");
+        const leftPath = returnPath.get("argument", "left");
+        const leftValue = leftPath.value;
+        const rightPath = returnPath.get("argument", "right");
 
         leftPath.replace(rightPath.value);
         rightPath.replace(leftValue);
 
-        var sourceRoot = "path/to/source/root";
-        var printed = new Printer({
+        const sourceRoot = "path/to/source/root";
+        const printed = new Printer({
             sourceMapName: "source.map.json",
             sourceRoot: sourceRoot
         }).print(ast);
@@ -52,7 +52,7 @@ describe("source maps", function() {
             sourceRoot
         );
 
-        var smc = new sourceMap.SourceMapConsumer(printed.map);
+        const smc = new sourceMap.SourceMapConsumer(printed.map);
 
         function check(origLine: any, origCol: any, genLine: any, genCol: any, lastColumn: any) {
             assert.deepEqual(smc.originalPositionFor({
@@ -98,7 +98,7 @@ describe("source maps", function() {
         function stripConsole(ast: any) {
             return recast.visit(ast, {
                 visitCallExpression: function(path) {
-                    var node = path.value;
+                    const node = path.value;
                     if (n.MemberExpression.check(node.callee) &&
                         n.Identifier.check(node.callee.object) &&
                         node.callee.object.name === "console") {
@@ -111,7 +111,7 @@ describe("source maps", function() {
             });
         }
 
-        var code = [
+        const code = [
             "function add(a, b) {",
             "  var sum = a + b;",
             "  console.log(a, b);",
@@ -119,23 +119,23 @@ describe("source maps", function() {
             "}"
         ].join(eol);
 
-        var ast = parse(code, {
+        const ast = parse(code, {
             sourceFileName: "original.js"
         });
 
-        var useStrictResult = new Printer({
+        const useStrictResult = new Printer({
             sourceMapName: "useStrict.map.json"
         }).print(addUseStrict(ast));
 
-        var useStrictAst = parse(useStrictResult.code, {
+        const useStrictAst = parse(useStrictResult.code, {
             sourceFileName: "useStrict.js"
         });
 
-        var oneStepResult = new Printer({
+        const oneStepResult = new Printer({
             sourceMapName: "oneStep.map.json"
         }).print(stripConsole(ast));
 
-        var twoStepResult = new Printer({
+        const twoStepResult = new Printer({
             sourceMapName: "twoStep.map.json",
             inputSourceMap: useStrictResult.map
         }).print(stripConsole(useStrictAst));
@@ -145,17 +145,17 @@ describe("source maps", function() {
             twoStepResult.code
         );
 
-        var smc1 = new sourceMap.SourceMapConsumer(oneStepResult.map);
-        var smc2 = new sourceMap.SourceMapConsumer(twoStepResult.map);
+        const smc1 = new sourceMap.SourceMapConsumer(oneStepResult.map);
+        const smc2 = new sourceMap.SourceMapConsumer(twoStepResult.map);
 
         smc1.eachMapping(function(mapping) {
-            var pos = {
+            const pos = {
                 line: mapping.generatedLine,
                 column: mapping.generatedColumn
             };
 
-            var orig1 = smc1.originalPositionFor(pos);
-            var orig2 = smc2.originalPositionFor(pos);
+            const orig1 = smc1.originalPositionFor(pos);
+            const orig2 = smc2.originalPositionFor(pos);
 
             // The composition of the source maps generated separately from
             // the two transforms should be equivalent to the source map
@@ -170,19 +170,19 @@ describe("source maps", function() {
 
     it("should work when a child node becomes null", function() {
         // https://github.com/facebook/regenerator/issues/103
-        var code = [
+        const code = [
             "for (var i = 0; false; i++)",
             "  log(i);"
         ].join(eol);
-        var ast = parse(code);
-        var path = new NodePath(ast);
+        const ast = parse(code);
+        const path = new NodePath(ast);
 
-        var updatePath = path.get("program", "body", 0, "update");
+        const updatePath = path.get("program", "body", 0, "update");
         n.UpdateExpression.assert(updatePath.value);
 
         updatePath.replace(null);
 
-        var printed = new Printer().print(ast);
+        const printed = new Printer().print(ast);
         assert.strictEqual(printed.code, [
             "for (var i = 0; false; )",
             "  log(i);"
@@ -190,15 +190,15 @@ describe("source maps", function() {
     });
 
     it("should tolerate programs that become empty", function() {
-        var source = "foo();";
-        var ast = recast.parse(source, {
+        const source = "foo();";
+        const ast = recast.parse(source, {
             sourceFileName: "foo.js"
         });
 
         assert.strictEqual(ast.program.body.length, 1);
         ast.program.body.length = 0;
 
-        var result = recast.print(ast, {
+        const result = recast.print(ast, {
             sourceMapName: "foo.map.json"
         });
 

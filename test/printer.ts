@@ -3,23 +3,23 @@ import * as recast from "../main";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
 import * as types from "ast-types";
-var n = types.namedTypes;
-var b = types.builders;
+const n = types.namedTypes;
+const b = types.builders;
 import { fromString } from "../lib/lines";
 import { EOL as eol } from "os";
-var linesModule = require("../lib/lines");
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const linesModule = require("../lib/lines");
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("printer", function() {
   it("Printer", function testPrinter(done) {
-    var code = testPrinter + "";
-    var ast = parse(code);
-    var printer = new Printer;
+    const code = testPrinter + "";
+    const ast = parse(code);
+    const printer = new Printer;
 
     assert.strictEqual(typeof printer.print, "function");
     assert.strictEqual(printer.print(null).code, "");
 
-    var string = printer.printGenerically(ast).code;
+    let string = printer.printGenerically(ast).code;
     assert.ok(string.indexOf("done();") > 0);
 
     string = printer.print(ast).code;
@@ -31,7 +31,7 @@ describe("printer", function() {
     done();
   });
 
-  var uselessSemicolons = [
+  const uselessSemicolons = [
     'function a() {',
     '  return "a";',
     '};',
@@ -42,46 +42,46 @@ describe("printer", function() {
   ].join(eol);
 
   it("EmptyStatements", function() {
-    var ast = parse(uselessSemicolons);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(uselessSemicolons);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var reprinted = printer.print(ast).code;
+    const reprinted = printer.print(ast).code;
     assert.strictEqual(typeof reprinted, "string");
     assert.strictEqual(reprinted, uselessSemicolons);
 
-    var generic = printer.printGenerically(ast).code;
-    var withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
+    const generic = printer.printGenerically(ast).code;
+    const withoutTrailingSemicolons = uselessSemicolons.replace(/\};/g, "}");
     assert.strictEqual(typeof generic, "string");
     assert.strictEqual(generic, withoutTrailingSemicolons);
   });
 
-  var importantSemicolons = [
+  const importantSemicolons = [
     "var a = {};", // <--- this trailing semi-colon is very important
     "(function() {})();"
   ].join(eol);
 
   it("IffeAfterVariableDeclarationEndingInObjectLiteral", function() {
-    var ast = parse(importantSemicolons);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(importantSemicolons);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var reprinted = printer.printGenerically(ast).code;
+    const reprinted = printer.printGenerically(ast).code;
     assert.strictEqual(typeof reprinted, "string");
     assert.strictEqual(reprinted, importantSemicolons);
   });
 
-  var arrayExprWithTrailingComma = '[1, 2,];';
-  var arrayExprWithoutTrailingComma = '[1, 2];';
+  const arrayExprWithTrailingComma = '[1, 2,];';
+  const arrayExprWithoutTrailingComma = '[1, 2];';
 
   it("ArrayExpressionWithTrailingComma", function() {
-    var ast = parse(arrayExprWithTrailingComma);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(arrayExprWithTrailingComma);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var body = ast.program.body;
-    var arrayExpr = body[0].expression;
+    const body = ast.program.body;
+    const arrayExpr = body[0].expression;
     n.ArrayExpression.assert(arrayExpr);
 
     // This causes the array expression to be reprinted.
-    var arrayExprOrig = arrayExpr.original;
+    const arrayExprOrig = arrayExpr.original;
     arrayExpr.original = null;
 
     assert.strictEqual(
@@ -97,18 +97,18 @@ describe("printer", function() {
     );
   });
 
-  var arrayExprWithHoles = '[,,];';
+  const arrayExprWithHoles = '[,,];';
 
   it("ArrayExpressionWithHoles", function() {
-    var ast = parse(arrayExprWithHoles);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(arrayExprWithHoles);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var body = ast.program.body;
-    var arrayExpr = body[0].expression;
+    const body = ast.program.body;
+    const arrayExpr = body[0].expression;
     n.ArrayExpression.assert(arrayExpr);
 
     // This causes the array expression to be reprinted.
-    var arrayExprOrig = arrayExpr.original;
+    const arrayExprOrig = arrayExpr.original;
     arrayExpr.original = null;
 
     assert.strictEqual(
@@ -124,19 +124,19 @@ describe("printer", function() {
     );
   });
 
-  var objectExprWithTrailingComma = '({x: 1, y: 2,});';
-  var objectExprWithoutTrailingComma = '({' + eol + '  x: 1,' + eol + '  y: 2' + eol + '});';
+  const objectExprWithTrailingComma = '({x: 1, y: 2,});';
+  const objectExprWithoutTrailingComma = '({' + eol + '  x: 1,' + eol + '  y: 2' + eol + '});';
 
   it("ArrayExpressionWithTrailingComma", function() {
-    var ast = parse(objectExprWithTrailingComma);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(objectExprWithTrailingComma);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var body = ast.program.body;
-    var objectExpr = body[0].expression;
+    const body = ast.program.body;
+    const objectExpr = body[0].expression;
     n.ObjectExpression.assert(objectExpr);
 
     // This causes the array expression to be reprinted.
-    var objectExprOrig = objectExpr.original;
+    const objectExprOrig = objectExpr.original;
     objectExpr.original = null;
 
     assert.strictEqual(
@@ -152,7 +152,7 @@ describe("printer", function() {
     );
   });
 
-  var switchCase = [
+  const switchCase = [
     "switch (test) {",
     "  default:",
     "  case a: break",
@@ -162,7 +162,7 @@ describe("printer", function() {
     "}",
   ].join(eol);
 
-  var switchCaseReprinted = [
+  const switchCaseReprinted = [
     "if (test) {",
     "  switch (test) {",
     "  default:",
@@ -173,7 +173,7 @@ describe("printer", function() {
     "}"
   ].join(eol);
 
-  var switchCaseGeneric = [
+  const switchCaseGeneric = [
     "if (test) {",
     "  switch (test) {",
     "  default:",
@@ -186,11 +186,11 @@ describe("printer", function() {
   ].join(eol);
 
   it("SwitchCase", function() {
-    var ast = parse(switchCase);
-    var printer = new Printer({ tabWidth: 2 });
+    const ast = parse(switchCase);
+    const printer = new Printer({ tabWidth: 2 });
 
-    var body = ast.program.body;
-    var switchStmt = body[0];
+    const body = ast.program.body;
+    const switchStmt = body[0];
     n.SwitchStatement.assert(switchStmt);
 
     // This causes the switch statement to be reprinted.
@@ -214,7 +214,7 @@ describe("printer", function() {
     );
   });
 
-  var tryCatch = [
+  const tryCatch = [
     "try {",
     "  a();",
     "} catch (e) {",
@@ -223,17 +223,17 @@ describe("printer", function() {
   ].join(eol);
 
   it("IndentTryCatch", function() {
-    var ast = parse(tryCatch);
-    var printer = new Printer({ tabWidth: 2 });
-    var body = ast.program.body;
-    var tryStmt = body[0];
+    const ast = parse(tryCatch);
+    const printer = new Printer({ tabWidth: 2 });
+    const body = ast.program.body;
+    const tryStmt = body[0];
     n.TryStatement.assert(tryStmt);
 
     // Force reprinting.
     assert.strictEqual(printer.printGenerically(ast).code, tryCatch);
   });
 
-  var classBody = [
+  const classBody = [
     "class A {",
     "  foo(x) { return x }",
     "  bar(y) { this.foo(y); }",
@@ -244,7 +244,7 @@ describe("printer", function() {
     "}"
   ];
 
-  var classBodyExpected = [
+  const classBodyExpected = [
     "class A {",
     "  foo(x) { return x }",
     "  bar(y) { this.foo(y); }",
@@ -257,15 +257,15 @@ describe("printer", function() {
   ];
 
   it("MethodPrinting", function() {
-    var code = classBody.join(eol);
+    const code = classBody.join(eol);
     try {
       var ast = parse(code);
     } catch (e) {
       // ES6 not supported, silently finish
       return;
     }
-    var printer = new Printer({ tabWidth: 2 });
-    var cb = ast.program.body[0].body;
+    const printer = new Printer({ tabWidth: 2 });
+    const cb = ast.program.body[0].body;
     n.ClassBody.assert(cb);
 
     // Trigger reprinting of the class body.
@@ -277,7 +277,7 @@ describe("printer", function() {
     );
   });
 
-  var multiLineParams = [
+  const multiLineParams = [
     "function f(/* first",
     "              xxx",
     "              param */ a,",
@@ -289,7 +289,7 @@ describe("printer", function() {
     "}"
   ];
 
-  var multiLineParamsExpected = [
+  const multiLineParamsExpected = [
     "function f(",
     "  /* first",
     "     xxx",
@@ -305,9 +305,9 @@ describe("printer", function() {
   ];
 
   it("MultiLineParams", function() {
-    var code = multiLineParams.join(eol);
-    var ast = parse(code);
-    var printer = new Printer({ tabWidth: 2 });
+    const code = multiLineParams.join(eol);
+    const ast = parse(code);
+    const printer = new Printer({ tabWidth: 2 });
 
     recast.visit(ast, {
       visitNode: function(path) {
@@ -323,8 +323,8 @@ describe("printer", function() {
   });
 
   it("SimpleVarPrinting", function() {
-    var printer = new Printer({ tabWidth: 2 });
-    var varDecl = b.variableDeclaration("var", [
+    const printer = new Printer({ tabWidth: 2 });
+    const varDecl = b.variableDeclaration("var", [
       b.variableDeclarator(b.identifier("x"), null),
       b.variableDeclarator(b.identifier("y"), null),
       b.variableDeclarator(b.identifier("z"), null)
@@ -335,7 +335,7 @@ describe("printer", function() {
       "var x, y, z;"
     );
 
-    var z: any = varDecl.declarations.pop();
+    const z: any = varDecl.declarations.pop();
     varDecl.declarations.pop();
     varDecl.declarations.push(z);
 
@@ -346,8 +346,8 @@ describe("printer", function() {
   });
 
   it("MultiLineVarPrinting", function() {
-    var printer = new Printer({ tabWidth: 2 });
-    var varDecl = b.variableDeclaration("var", [
+    const printer = new Printer({ tabWidth: 2 });
+    const varDecl = b.variableDeclaration("var", [
       b.variableDeclarator(b.identifier("x"), null),
       b.variableDeclarator(
         b.identifier("y"),
@@ -368,8 +368,8 @@ describe("printer", function() {
   });
 
   it("ForLoopPrinting", function() {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forStatement(
+    const printer = new Printer({ tabWidth: 2 });
+    const loop = b.forStatement(
       b.variableDeclaration("var", [
         b.variableDeclarator(b.identifier("i"), b.literal(0))
       ]),
@@ -388,8 +388,8 @@ describe("printer", function() {
   });
 
   it("EmptyForLoopPrinting", function() {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forStatement(
+    const printer = new Printer({ tabWidth: 2 });
+    const loop = b.forStatement(
       b.variableDeclaration("var", [
         b.variableDeclarator(b.identifier("i"), b.literal(0))
       ]),
@@ -406,8 +406,8 @@ describe("printer", function() {
   });
 
   it("ForInLoopPrinting", function() {
-    var printer = new Printer({ tabWidth: 2 });
-    var loop = b.forInStatement(
+    const printer = new Printer({ tabWidth: 2 });
+    const loop = b.forInStatement(
       b.variableDeclaration("var", [
         b.variableDeclarator(b.identifier("key"), null)
       ]),
@@ -425,32 +425,32 @@ describe("printer", function() {
   });
 
   it("GuessTabWidth", function() {
-    var code = [
+    const code = [
       "function identity(x) {",
       "  return x;",
       "}"
     ].join(eol);
 
-    var guessedTwo = [
+    const guessedTwo = [
       "function identity(x) {",
       "  log(x);",
       "  return x;",
       "}"
     ].join(eol);
 
-    var explicitFour = [
+    const explicitFour = [
       "function identity(x) {",
       "    log(x);",
       "    return x;",
       "}"
     ].join(eol);
 
-    var ast = parse(code);
+    const ast = parse(code);
 
-    var funDecl = ast.program.body[0];
+    const funDecl = ast.program.body[0];
     n.FunctionDeclaration.assert(funDecl);
 
-    var funBody = funDecl.body.body;
+    const funBody = funDecl.body.body;
 
     funBody.unshift(
       b.expressionStatement(
@@ -475,8 +475,8 @@ describe("printer", function() {
   });
 
   it("FunctionDefaultsAndRest", function() {
-    var printer = new Printer();
-    var funExpr = b.functionExpression(
+    const printer = new Printer();
+    const funExpr = b.functionExpression(
       b.identifier('a'),
       [b.identifier('b'), b.identifier('c')],
       b.blockStatement([]),
@@ -492,7 +492,7 @@ describe("printer", function() {
       "function a(b, c = 1, ...d) {}"
     );
 
-    var arrowFunExpr = b.arrowFunctionExpression(
+    const arrowFunExpr = b.arrowFunctionExpression(
       [b.identifier('b'), b.identifier('c')],
       b.blockStatement([]),
       false);
@@ -507,8 +507,8 @@ describe("printer", function() {
   });
 
   it("generically prints parsed code and generated code the same way", function() {
-    var printer = new Printer();
-    var ast = b.program([
+    const printer = new Printer();
+    const ast = b.program([
       b.expressionStatement(b.literal(1)),
       b.expressionStatement(b.literal(2))
     ]);
@@ -520,9 +520,9 @@ describe("printer", function() {
   });
 
   it("ExportDeclaration semicolons", function() {
-    var printer = new Printer();
-    var code = "export var foo = 42;";
-    var ast = parse(code);
+    const printer = new Printer();
+    let code = "export var foo = 42;";
+    let ast = parse(code);
 
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
@@ -547,17 +547,17 @@ describe("printer", function() {
   });
 
   it("empty ExportDeclaration", function() {
-    var printer = new Printer();
-    var code = "export {};";
-    var ast = parse(code);
+    const printer = new Printer();
+    const code = "export {};";
+    const ast = parse(code);
 
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
   it("export default of IIFE", function() {
-    var printer = new Printer();
-    var ast = b.exportDefaultDeclaration(
+    const printer = new Printer();
+    let ast = b.exportDefaultDeclaration(
       b.callExpression(
         b.functionExpression(
           null,
@@ -567,14 +567,14 @@ describe("printer", function() {
         []
       )
     );
-    var code = printer.print(ast).code;
+    const code = printer.print(ast).code;
     ast = parse(code);
 
     assert.strictEqual(printer.print(ast).code, code);
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
-  var stmtListSpaces = [
+  const stmtListSpaces = [
     "",
     "var x = 1;",
     "",
@@ -589,7 +589,7 @@ describe("printer", function() {
     ""
   ].join(eol);
 
-  var stmtListSpacesExpected = [
+  const stmtListSpacesExpected = [
     "",
     "debugger;",
     "var x = 1;",
@@ -609,9 +609,9 @@ describe("printer", function() {
   ].join(eol);
 
   it("Statement list whitespace reuse", function() {
-    var ast = parse(stmtListSpaces);
-    var printer = new Printer({ tabWidth: 2 });
-    var debugStmt = b.expressionStatement(b.identifier("debugger"));
+    const ast = parse(stmtListSpaces);
+    const printer = new Printer({ tabWidth: 2 });
+    const debugStmt = b.expressionStatement(b.identifier("debugger"));
 
     ast.program.body.splice(2, 0, debugStmt);
     ast.program.body.unshift(debugStmt);
@@ -622,7 +622,7 @@ describe("printer", function() {
       stmtListSpacesExpected
     );
 
-    var funDecl = b.functionDeclaration(
+    const funDecl = b.functionDeclaration(
       b.identifier("foo"),
       [],
       b.blockStatement(ast.program.body)
@@ -641,17 +641,17 @@ describe("printer", function() {
   });
 
   it("should print static methods with the static keyword", function() {
-    var printer = new Printer({ tabWidth: 4 });
-    var ast = parse([
+    const printer = new Printer({ tabWidth: 4 });
+    const ast = parse([
       "class A {",
       "  static foo() {}",
       "}"
     ].join(eol));
 
-    var classBody = ast.program.body[0].body;
+    const classBody = ast.program.body[0].body;
     n.ClassBody.assert(classBody);
 
-    var foo = classBody.body[0];
+    const foo = classBody.body[0];
     n.MethodDefinition.assert(foo);
 
     classBody.body.push(foo);
@@ -667,17 +667,17 @@ describe("printer", function() {
   });
 
   it("should print string literals with the specified delimiter", function() {
-    var ast = parse([
+    const ast = parse([
       "var obj = {",
       "    \"foo's\": 'bar',",
       "    '\"bar\\'s\"': /regex/m",
       "};"
     ].join(eol));
 
-    var variableDeclaration = ast.program.body[0];
+    const variableDeclaration = ast.program.body[0];
     n.VariableDeclaration.assert(variableDeclaration);
 
-    var printer = new Printer({ quote: "single" });
+    const printer = new Printer({ quote: "single" });
     assert.strictEqual(printer.printGenerically(ast).code, [
       "var obj = {",
       "    'foo\\'s': 'bar',",
@@ -685,7 +685,7 @@ describe("printer", function() {
       "};"
     ].join(eol));
 
-    var printer2 = new Printer({ quote: "double" });
+    const printer2 = new Printer({ quote: "double" });
     assert.strictEqual(printer2.printGenerically(ast).code, [
       "var obj = {",
       "    \"foo's\": \"bar\",",
@@ -693,7 +693,7 @@ describe("printer", function() {
       "};"
     ].join(eol));
 
-    var printer3 = new Printer({ quote: "auto" });
+    const printer3 = new Printer({ quote: "auto" });
     assert.strictEqual(printer3.printGenerically(ast).code, [
       "var obj = {",
       '    "foo\'s": "bar",',
@@ -704,7 +704,7 @@ describe("printer", function() {
 
   it("should print block comments at head of class once", function() {
     // Given.
-    var ast = parse([
+    const ast = parse([
       "/**",
       " * This class was in an IIFE and returned an instance of itself.",
       " */",
@@ -712,15 +712,15 @@ describe("printer", function() {
       "};"
     ].join(eol));
 
-    var classIdentifier = b.identifier('SimpleClass');
-    var exportsExpression = b.memberExpression(b.identifier('module'), b.identifier('exports'), false);
-    var assignmentExpression = b.assignmentExpression('=', exportsExpression, classIdentifier);
-    var exportStatement = b.expressionStatement(assignmentExpression);
+    const classIdentifier = b.identifier('SimpleClass');
+    const exportsExpression = b.memberExpression(b.identifier('module'), b.identifier('exports'), false);
+    const assignmentExpression = b.assignmentExpression('=', exportsExpression, classIdentifier);
+    const exportStatement = b.expressionStatement(assignmentExpression);
 
     ast.program.body.push(exportStatement);
 
     // When.
-    var printedClass = new Printer().print(ast).code;
+    const printedClass = new Printer().print(ast).code;
 
     // Then.
     assert.strictEqual(printedClass, [
@@ -763,9 +763,9 @@ describe("printer", function() {
       '}'
     ].join(eol);
 
-    var ast = parse(code);
+    let ast = parse(code);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
@@ -809,7 +809,7 @@ describe("printer", function() {
       "};"
     ].join(eol));
 
-    var objExpr = ast.program.body[0].declarations[0].init;
+    const objExpr = ast.program.body[0].declarations[0].init;
     n.ObjectExpression.assert(objExpr);
 
     assert.strictEqual(objExpr.properties[0].computed, false);
@@ -825,24 +825,24 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in object literals", function() {
-    var code = [
+    const code = [
       "({",
       "  foo: bar,",
       "  bar: foo,",
       "});"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
       parser: require("esprima-fb")
     });
 
-    var printer = new Printer({
+    let printer = new Printer({
       tabWidth: 2,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // It should also work when using the `trailingComma` option as an object.
@@ -856,25 +856,25 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in function calls", function() {
-    var code = [
+    const code = [
       "call(",
       "  1,",
       "  2,",
       ");"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
       parser: require("esprima-fb")
     });
 
-    var printer = new Printer({
+    let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // It should also work when using the `trailingComma` option as an object.
@@ -889,25 +889,25 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in array expressions", function() {
-    var code = [
+    const code = [
       "[",
       "  1,",
       "  2,",
       "];"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
       parser: require("esprima-fb")
     });
 
-    var printer = new Printer({
+    let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // It should also work when using the `trailingComma` option as an object.
@@ -922,25 +922,25 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in function definitions", function() {
-    var code = [
+    const code = [
       "function foo(",
       "  a,",
       "  b,",
       ") {}"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
       parser: require("esprima-fb")
     });
 
-    var printer = new Printer({
+    let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // It should also work when using the `trailingComma` option as an object.
@@ -956,7 +956,7 @@ describe("printer", function() {
 
   (nodeMajorVersion >= 6 ? it : xit)
   ("shouldn't print a trailing comma for a RestElement", function() {
-    var code = [
+    const code = [
       "function foo(",
       "  a,",
       "  b,",
@@ -964,46 +964,46 @@ describe("printer", function() {
       ") {}"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // The flow parser and Babylon recognize `...rest` as a `RestElement`
       parser: require("@babel/parser")
     });
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("should support AssignmentPattern and RestElement", function() {
-    var code = [
+    const code = [
       "function foo(a, [b, c] = d(a), ...[e, f, ...rest]) {",
       "  return [a, b, c, e, f, rest];",
       "}"
     ].join(eol);
 
-    var ast = parse(code, {
+    const ast = parse(code, {
       // Supports rest parameter destructuring whereas plain esprima
       // does not.
       parser: require("esprima-fb")
     });
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around spread patterns", function() {
-    var code = "(...rest) => rest;";
+    const code = "(...rest) => rest;";
 
-    var ast = b.program([
+    let ast = b.program([
       b.expressionStatement(b.arrowFunctionExpression(
         [b.spreadElementPattern(b.identifier('rest'))],
         b.identifier('rest'),
@@ -1011,11 +1011,11 @@ describe("printer", function() {
       ))
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // Print RestElement the same way
@@ -1031,7 +1031,7 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
 
     // Do the same for the `rest` field.
-    var arrowFunction = b.arrowFunctionExpression(
+    const arrowFunction = b.arrowFunctionExpression(
       [],
       b.identifier('rest'),
       false
@@ -1046,34 +1046,34 @@ describe("printer", function() {
   });
 
   it("adds parenthesis around single arrow function arg when options.arrowParensAlways is true", function() {
-    var code = "(a) => {};";
+    const code = "(a) => {};";
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [b.identifier('a')],
       b.blockStatement([]),
       false
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(fn)
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       arrowParensAlways: true
     });
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around arrow function when binding", function() {
-    var code = "var a = (x => y).bind(z);";
+    const code = "var a = (x => y).bind(z);";
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [b.identifier("x")],
       b.identifier("y")
     );
 
-    var declaration = b.variableDeclaration("var", [
+    const declaration = b.variableDeclaration("var", [
       b.variableDeclarator(
         b.identifier("a"),
         b.callExpression(
@@ -1083,32 +1083,32 @@ describe("printer", function() {
       )
     ]);
 
-    var ast = b.program([declaration]);
+    const ast = b.program([declaration]);
 
-    var printer = new Printer();
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around async arrow functions with args", function() {
-    var code = "async () => {};";
+    let code = "async () => {};";
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [],
       b.blockStatement([]),
       false
     );
     fn.async = true;
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(fn)
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // No parenthesis for single params if they are identifiers
@@ -1127,34 +1127,34 @@ describe("printer", function() {
   });
 
   it("adds parenthesis around arrow functions with single arg and a type", function() {
-    var code = "(a: b) => {};";
+    const code = "(a: b) => {};";
 
-    var arg = b.identifier('a');
+    const arg = b.identifier('a');
     arg.typeAnnotation = b.typeAnnotation(
       b.genericTypeAnnotation(b.identifier('b'), null)
     );
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [arg],
       b.blockStatement([]),
       false
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(fn)
     ]);
 
-    var printer = new Printer();
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around arrow functions with single arg and a return type", function() {
-    var code = "(a): void => {};";
+    const code = "(a): void => {};";
 
-    var arg = b.identifier('a');
+    const arg = b.identifier('a');
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [arg],
       b.blockStatement([]),
       false
@@ -1164,19 +1164,19 @@ describe("printer", function() {
       b.voidTypeAnnotation()
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(fn)
     ]);
 
-    var printer = new Printer();
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around arrow function body when returning object literal with typescript typecast", function() {
-    var code = "() => ({} as object);";
+    const code = "() => ({} as object);";
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [],
       b.tsAsExpression(
       b.objectExpression([]),
@@ -1185,28 +1185,28 @@ describe("printer", function() {
       false
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(fn)
     ]);
 
-    var printer = new Printer();
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints class property initializers with type annotations correctly", function() {
-    var code = [
+    const code = [
       "class A {",
       "  foo = (a: b): void => {};",
       "}",
     ].join(eol);
 
-    var arg = b.identifier('a');
+    const arg = b.identifier('a');
     arg.typeAnnotation = b.typeAnnotation(
       b.genericTypeAnnotation(b.identifier('b'), null)
     );
 
-    var fn = b.arrowFunctionExpression(
+    const fn = b.arrowFunctionExpression(
       [arg],
       b.blockStatement([]),
       false
@@ -1215,7 +1215,7 @@ describe("printer", function() {
       b.voidTypeAnnotation()
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.classDeclaration(
         b.identifier('A'),
         b.classBody([
@@ -1229,22 +1229,22 @@ describe("printer", function() {
       )
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints ClassProperty correctly", function() {
-    var code = [
+    const code = [
       "class A {",
       "  foo: Type = Bar;",
       "}",
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.classDeclaration(
         b.identifier('A'),
         b.classBody([
@@ -1259,22 +1259,22 @@ describe("printer", function() {
       )
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints static ClassProperty correctly", function() {
-    var code = [
+    const code = [
       "class A {",
       "  static foo = Bar;",
       "}",
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.classDeclaration(
         b.identifier('A'),
         b.classBody([
@@ -1288,20 +1288,20 @@ describe("printer", function() {
       )
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints template expressions correctly", function() {
-    var code = [
+    let code = [
       "graphql`query`;",
     ].join(eol);
 
-    var ast = b.program([
+    let ast = b.program([
       b.taggedTemplateStatement(
         b.identifier('graphql'),
         b.templateLiteral(
@@ -1311,11 +1311,11 @@ describe("printer", function() {
       )
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     code = [
@@ -1374,17 +1374,17 @@ describe("printer", function() {
   });
 
   it("preserves newlines at the beginning/end of files", function() {
-    var code = [
+    const code = [
       "",
       "f();",
       ""
     ].join(eol);
 
-    var lines = fromString(code);
-    var ast = parse(code, {
+    const lines = fromString(code);
+    const ast = parse(code, {
       esprima: {
         parse: function(source: string, options?: any) {
-          var program = require("esprima").parse(source, options);
+          const program = require("esprima").parse(source, options);
           n.Program.assert(program);
           // Expand ast.program.loc to include any
           // leading/trailing whitespace, to simulate the
@@ -1398,7 +1398,7 @@ describe("printer", function() {
 
     ast.program.body.unshift(b.debuggerStatement());
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
@@ -1411,12 +1411,12 @@ describe("printer", function() {
   });
 
   it("respects options.lineTerminator", function() {
-    var lines = [
+    const lines = [
       "var first = 1;",
       "var second = 2;"
     ];
-    var code = lines.join("\n");
-    var ast = parse(code);
+    const code = lines.join("\n");
+    const ast = parse(code);
 
     assert.strictEqual(
       new Printer({
@@ -1427,11 +1427,11 @@ describe("printer", function() {
   });
 
   it("preserves indentation in unmodified template expressions", function() {
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2
     });
 
-    var code = [
+    const code = [
       "var x = {",
       "  y: () => Relay.QL`",
       "    query {",
@@ -1442,13 +1442,13 @@ describe("printer", function() {
       "};",
     ].join(eol);
 
-    var ast = parse(code);
-    var pretty = printer.printGenerically(ast).code;
+    const ast = parse(code);
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("preserves indentation in modified template expressions", function() {
-    var code = [
+    const code = [
       "const fragments = {",
       "  viewer: Relay.QL`",
       "    fragment on Viewer {   // 2 extraneous spaces.",
@@ -1468,8 +1468,8 @@ describe("printer", function() {
       "};"
     ].join(eol);
 
-    var ast = parse(code);
-    var printer = new Printer({
+    const ast = parse(code);
+    const printer = new Printer({
       tabWidth: 2
     });
 
@@ -1488,21 +1488,21 @@ describe("printer", function() {
       }
     });
 
-    var actual = printer.print(ast).code;
-    var expected = code.replace(/\bid\b/g, "nodeID");
+    const actual = printer.print(ast).code;
+    const expected = code.replace(/\bid\b/g, "nodeID");
 
     assert.strictEqual(actual, expected);
   });
 
   it("prints commas for flow object types by default", function() {
-    var code = [
+    const code = [
       "type MyType = {",
       "    message: string,",
       "    isAwesome: boolean,",
       "};"
     ].join(eol);
 
-    var ast = b.typeAlias(
+    const ast = b.typeAlias(
       b.identifier("MyType"),
       null,
       b.objectTypeAnnotation([
@@ -1519,16 +1519,16 @@ describe("printer", function() {
       ])
     );
 
-    var printer = new Printer();
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("shouldn't print a trailing comma for single-line flow object types", function() {
-    var code1 = "type MyType = { message: string };";
-    var code2 = "type MyType = { [key: string]: string };";
+    const code1 = "type MyType = { message: string };";
+    const code2 = "type MyType = { [key: string]: string };";
 
-    var ast1 = b.typeAlias(
+    const ast1 = b.typeAlias(
       b.identifier("MyType"),
       null,
       b.objectTypeAnnotation([
@@ -1540,7 +1540,7 @@ describe("printer", function() {
       ])
     );
 
-    var ast2 = b.typeAlias(
+    const ast2 = b.typeAlias(
       b.identifier("MyType"),
       null,
       b.objectTypeAnnotation([], [
@@ -1552,22 +1552,22 @@ describe("printer", function() {
       ])
     );
 
-    var printer = new Printer({trailingComma: true});
-    var pretty1 = printer.printGenerically(ast1).code;
-    var pretty2 = printer.printGenerically(ast2).code;
+    const printer = new Printer({trailingComma: true});
+    const pretty1 = printer.printGenerically(ast1).code;
+    const pretty2 = printer.printGenerically(ast2).code;
     assert.strictEqual(pretty1, code1);
     assert.strictEqual(pretty2, code2);
   });
 
   it("prints semicolons for flow object types when options.flowObjectCommas is falsy", function() {
-    var code = [
+    const code = [
       "type MyType = {",
       "    message: string;",
       "    isAwesome: boolean;",
       "};"
     ].join(eol);
 
-    var ast = b.typeAlias(
+    const ast = b.typeAlias(
       b.identifier("MyType"),
       null,
       b.objectTypeAnnotation([
@@ -1584,15 +1584,15 @@ describe("printer", function() {
       ])
     );
 
-    var printer = new Printer({ flowObjectCommas: false });
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer({ flowObjectCommas: false });
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints parens for nullable union/intersection types", function() {
-    var code = "type MyType = ?(string | number);";
+    const code = "type MyType = ?(string | number);";
 
-    var ast = b.typeAlias(
+    const ast = b.typeAlias(
       b.identifier("MyType"),
       null,
       b.nullableTypeAnnotation(
@@ -1602,15 +1602,15 @@ describe("printer", function() {
       )
     );
 
-    var printer = new Printer({});
-    var pretty = printer.printGenerically(ast).code;
+    const printer = new Printer({});
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   (nodeMajorVersion >= 6 ? it : xit)
   ("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    var babelParser = require("@babel/parser");
-    var parseOptions = {
+    const babelParser = require("@babel/parser");
+    const parseOptions = {
       parser: {
         parse: function (source: string) {
           return babelParser.parse(source, {
@@ -1621,7 +1621,7 @@ describe("printer", function() {
       }
     };
 
-    var testCaseList = [{
+    const testCaseList = [{
       printerConfig: {arrayBracketSpacing: false, objectCurlySpacing: false},
       code: [
         'import {java, script} from "javascript";',
@@ -1672,11 +1672,11 @@ describe("printer", function() {
     }];
 
     testCaseList.forEach(function(testCase) {
-      var code = testCase.code;
-      var printer = new Printer(testCase.printerConfig);
+      const code = testCase.code;
+      const printer = new Printer(testCase.printerConfig);
 
-      var ast = parse(code, parseOptions);
-      var pretty = printer.printGenerically(ast).code;
+      const ast = parse(code, parseOptions);
+      const pretty = printer.printGenerically(ast).code;
 
       assert.strictEqual(pretty, code);
     });
@@ -1684,21 +1684,21 @@ describe("printer", function() {
 
   it("prints no extra semicolons in for-loop heads (#377)", function () {
     function check(head: any, parser: any) {
-      var source = "for (" + head + ") console.log(i);";
-      var ast = recast.parse(source, { parser: parser });
-      var loop = ast.program.body[0];
+      const source = "for (" + head + ") console.log(i);";
+      const ast = recast.parse(source, { parser: parser });
+      const loop = ast.program.body[0];
       assert.strictEqual(loop.type, "ForStatement");
       loop.body = b.blockStatement([]);
 
-      var reprinted = recast.print(ast).code;
+      const reprinted = recast.print(ast).code;
 
-      var openParenIndex = reprinted.indexOf("(");
+      const openParenIndex = reprinted.indexOf("(");
       assert.notStrictEqual(openParenIndex, -1);
 
-      var closeParenIndex = reprinted.indexOf(")", openParenIndex);
+      const closeParenIndex = reprinted.indexOf(")", openParenIndex);
       assert.notStrictEqual(closeParenIndex, -1);
 
-      var newHead = reprinted.slice(
+      const newHead = reprinted.slice(
         openParenIndex + 1,
         closeParenIndex
       );
@@ -1728,12 +1728,12 @@ describe("printer", function() {
   });
 
   it("parenthesizes NumericLiteral MemberExpression objects", function () {
-    var nonBabelNode = b.memberExpression(
+    const nonBabelNode = b.memberExpression(
       b.literal(1),
       b.identifier('foo')
     );
 
-    var babelNode = b.memberExpression(
+    const babelNode = b.memberExpression(
       b.numericLiteral(1),
       b.identifier('foo')
     );
@@ -1750,7 +1750,7 @@ describe("printer", function() {
   });
 
   it("obeys 'optional' property of OptionalMemberExpression", function () {
-    var node = b.optionalMemberExpression(
+    const node = b.optionalMemberExpression(
       b.identifier('foo'),
       b.identifier('bar')
     );
@@ -1760,7 +1760,7 @@ describe("printer", function() {
       "foo?.bar"
     );
 
-    var nonOptionalNode = b.optionalMemberExpression(
+    const nonOptionalNode = b.optionalMemberExpression(
       b.identifier('foo'),
       b.identifier('bar'),
       false,
@@ -1774,15 +1774,15 @@ describe("printer", function() {
   });
 
   it("prints numbers in bases other than 10 without converting them", function() {
-    var code = [
+    const code = [
       'let decimal = 6;',
       'let hex = 0xf00d;',
       'let binary = 0b1010;',
       'let octal = 0o744;'
     ].join(eol);
-    var ast = parse(code);
-    var printer = new Printer({});
-    var pretty = printer.printGenerically(ast).code;
+    const ast = parse(code);
+    const printer = new Printer({});
+    const pretty = printer.printGenerically(ast).code;
 
     assert.strictEqual(pretty, code);
   });
@@ -1801,7 +1801,7 @@ describe("printer", function() {
   });
 
   it("prints flow tuple type annotations correctly, respecting array options", function () {
-    var code = [
+    const code = [
       'type MyTupleType = [',
       '  "tuple element 1",',
       '  "tuple element 2",',
@@ -1809,7 +1809,7 @@ describe("printer", function() {
       '];',
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.typeAlias(
         b.identifier('MyTupleType'),
         null,
@@ -1821,55 +1821,55 @@ describe("printer", function() {
       ),
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around object expression", function() {
-    var code = "({}).x = 1;";
+    const code = "({}).x = 1;";
 
-    var assignment = b.assignmentExpression(
+    const assignment = b.assignmentExpression(
       '=',
       b.memberExpression(b.objectExpression([]), b.identifier('x'), false),
       b.literal(1)
     );
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(assignment)
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       arrowParensAlways: true
     });
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("adds parenthesis around conditional", function() {
-    var code = 'new (typeof a ? b : c)();';
-    var callee = recast.parse("typeof a ? b : c").program.body[0].expression;
+    const code = 'new (typeof a ? b : c)();';
+    const callee = recast.parse("typeof a ? b : c").program.body[0].expression;
 
-    var newExpression = b.newExpression(callee, []);
+    const newExpression = b.newExpression(callee, []);
 
-    var ast = b.program([
+    const ast = b.program([
       b.expressionStatement(newExpression)
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       arrowParensAlways: true
     });
-    var pretty = printer.print(ast).code;
+    const pretty = printer.print(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints flow object type internal slots correctly", function() {
-    var code = [
+    const code = [
       'type MyObjectType = {',
       '  [myIndexer: string]: any,',
       '  (myParameter: any): any,',
@@ -1882,7 +1882,7 @@ describe("printer", function() {
       '};',
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.typeAlias(
         b.identifier('MyObjectType'),
         null,
@@ -1976,18 +1976,18 @@ describe("printer", function() {
       ),
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints class private methods and properties correctly", function() {
-    var code = [
+    const code = [
       'class MyClassWithPrivate {',
       '  #myPrivateProperty: any;',
       '  #myPrivatePropertyWithValue: any = value;',
@@ -1995,7 +1995,7 @@ describe("printer", function() {
       '}',
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.classDeclaration(
         b.identifier("MyClassWithPrivate"),
         b.classBody([
@@ -2018,23 +2018,23 @@ describe("printer", function() {
       ),
     ]);
 
-    var printer = new Printer({
+    const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
       trailingComma: true,
     });
 
-    var pretty = printer.printGenerically(ast).code;
+    const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints an interpreter directive correctly", function() {
-    var code = [
+    const code = [
       '#!/usr/bin/env node',
       'console.log("Hello, world!");'
     ].join(eol);
 
-    var ast = b.program.from({
+    const ast = b.program.from({
       interpreter: b.interpreterDirective("/usr/bin/env node"),
       body: [
         b.expressionStatement(
@@ -2046,16 +2046,16 @@ describe("printer", function() {
       ],
     });
 
-    var pretty = new Printer().printGenerically(ast).code;
+    const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("prints an interface type annotation correctly", function() {
-    var code = [
+    const code = [
       'let myVar: interface extends MyOtherInterface { myProperty: any };',
     ].join(eol);
 
-    var ast = b.program([
+    const ast = b.program([
       b.variableDeclaration("let", [
         b.variableDeclarator(
           b.identifier.from({
@@ -2077,12 +2077,12 @@ describe("printer", function() {
       ])
     ]);
 
-    var pretty = new Printer().printGenerically(ast).code;
+    const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
   it("object destructuring for function parameters", function() {
-    var code = [
+    const code = [
       'function myFunction(',
       '    {',
       '        yes = "y",',
@@ -2115,7 +2115,7 @@ describe("printer", function() {
 
     const notSimplifiedProperty = b.property('init', b.identifier('long'), b.identifier('longHand'));
 
-    var ast = b.program([
+    const ast = b.program([
       b.functionDeclaration(
         b.identifier('myFunction'),
         [b.objectPattern([
@@ -2128,7 +2128,7 @@ describe("printer", function() {
       )
     ]);
 
-    var pretty = new Printer().printGenerically(ast).code;
+    const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 });

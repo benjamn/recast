@@ -4,23 +4,23 @@ import path from "path";
 import * as types from "ast-types";
 import * as recast from "../main";
 
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 function testFile(path: string, options: { parser?: any } = {}) {
     fs.readFile(path, "utf-8", function(err, source) {
         assert.equal(err, null);
         assert.strictEqual(typeof source, "string");
 
-        var ast = recast.parse(source, options);
+        const ast = recast.parse(source, options);
         types.astNodesAreEquivalent.assert(ast.original, ast);
-        var code = recast.print(ast).code;
+        const code = recast.print(ast).code;
         assert.strictEqual(source, code);
     });
 }
 
 function addTest(name: string) {
     it(name, function() {
-        var filename = path.join(__dirname, "..", name);
+        const filename = path.join(__dirname, "..", name);
 
         if (path.extname(filename) === ".ts") {
             // Babel 7 no longer supports Node 4 and 5.

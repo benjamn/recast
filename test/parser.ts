@@ -4,10 +4,10 @@ import { getReprinter } from "../lib/patcher";
 import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
 import * as types from "ast-types";
-var namedTypes = types.namedTypes;
+const namedTypes = types.namedTypes;
 import FastPath from "../lib/fast-path";
 import { EOL as eol } from "os";
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
@@ -21,10 +21,10 @@ describe("parser", function() {
   ].forEach(runTestsForParser);
 
   it("AlternateParser", function() {
-    var b = types.builders;
-    var parser = {
+    const b = types.builders;
+    const parser = {
       parse: function() {
-        var program = b.program([
+        const program = b.program([
           b.expressionStatement(b.identifier("surprise"))
         ]);
         program.comments = [];
@@ -33,8 +33,8 @@ describe("parser", function() {
     };
 
     function check(options?: any) {
-      var ast = parse("ignored", options);
-      var printer = new Printer;
+      const ast = parse("ignored", options);
+      const printer = new Printer;
 
       types.namedTypes.File.assert(ast, true);
       assert.strictEqual(
@@ -66,10 +66,10 @@ function runTestsForParser(parserId: string) {
   const parser = require(parserId);
 
   it("[" + parserName + "] empty source", function () {
-    var printer = new Printer;
+    const printer = new Printer;
 
     function check(code: string) {
-      var ast = parse(code, { parser });
+      const ast = parse(code, { parser });
       assert.strictEqual(printer.print(ast).code, code);
     }
 
@@ -91,21 +91,21 @@ function runTestsForParser(parserId: string) {
   };
 
   it("[" + parserName + "] parser basics", function testParser(done) {
-    var code = testParser + "";
-    var ast = parse(code, { parser });
+    const code = testParser + "";
+    const ast = parse(code, { parser });
 
     namedTypes.File.assert(ast);
     assert.ok(getReprinter(FastPath.from(ast)));
 
-    var funDecl = ast.program.body[0];
-    var funBody = funDecl.body;
+    const funDecl = ast.program.body[0];
+    const funBody = funDecl.body;
 
     namedTypes.FunctionDeclaration.assert(funDecl);
     namedTypes.BlockStatement.assert(funBody);
     assert.ok(getReprinter(FastPath.from(funBody)));
 
-    var lastStatement = funBody.body.pop();
-    var doneCall = lastStatement.expression;
+    const lastStatement = funBody.body.pop();
+    const doneCall = lastStatement.expression;
 
     assert.ok(!getReprinter(FastPath.from(funBody)));
     assert.ok(getReprinter(FastPath.from(ast)));
@@ -117,7 +117,7 @@ function runTestsForParser(parserId: string) {
 
     assert.strictEqual(lastStatement.comments.length, 2);
 
-    var firstComment = lastStatement.comments[0];
+    const firstComment = lastStatement.comments[0];
 
     assert.strictEqual(
       firstComment.type,
@@ -131,7 +131,7 @@ function runTestsForParser(parserId: string) {
       " Make sure done() remains the final statement in this function,"
     );
 
-    var secondComment = lastStatement.comments[1];
+    const secondComment = lastStatement.comments[1];
 
     assert.strictEqual(
       secondComment.type,
@@ -151,14 +151,14 @@ function runTestsForParser(parserId: string) {
   });
 
   it("[" + parserName + "] LocationFixer", function() {
-    var code = [
+    const code = [
       "function foo() {",
       "    a()",
       "    b()",
       "}"
     ].join(eol);
-    var ast = parse(code, { parser });
-    var printer = new Printer;
+    const ast = parse(code, { parser });
+    const printer = new Printer;
 
     types.visit(ast, {
       visitFunctionDeclaration: function(path) {
@@ -169,7 +169,7 @@ function runTestsForParser(parserId: string) {
       }
     });
 
-    var altered = code
+    const altered = code
       .replace("a()", "xxx")
       .replace("b()", "a()")
       .replace("xxx", "b()");
@@ -179,11 +179,11 @@ function runTestsForParser(parserId: string) {
 
   it("[" + parserName + "] TabHandling", function() {
     function check(code: string, tabWidth: number) {
-      var lines = fromString(code, { tabWidth: tabWidth });
+      const lines = fromString(code, { tabWidth: tabWidth });
       assert.strictEqual(lines.length, 1);
 
       function checkId(s: any, loc: types.namedTypes.SourceLocation) {
-        var sliced = lines.slice(loc.start, loc.end);
+        const sliced = lines.slice(loc.start, loc.end);
         assert.strictEqual(s + "", sliced.toString());
       }
 
@@ -192,20 +192,20 @@ function runTestsForParser(parserId: string) {
         parser,
       }), {
         visitIdentifier(path) {
-          var ident = path.node;
+          const ident = path.node;
           checkId(ident.name, ident.loc!);
           this.traverse(path);
         },
 
         visitLiteral(path) {
-          var lit = path.node;
+          const lit = path.node;
           checkId(lit.value, lit.loc!);
           this.traverse(path);
         }
       });
     }
 
-    for (var tabWidth = 1; tabWidth <= 8; ++tabWidth) {
+    for (let tabWidth = 1; tabWidth <= 8; ++tabWidth) {
       check("\t\ti = 10;", tabWidth);
       check("\t\ti \t= 10;", tabWidth);
       check("\t\ti \t=\t 10;", tabWidth);

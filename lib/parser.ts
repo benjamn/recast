@@ -1,8 +1,8 @@
 import assert from "assert";
 import * as types from "ast-types";
-var b = types.builders;
-var isObject = types.builtInTypes.object;
-var isArray = types.builtInTypes.array;
+const b = types.builders;
+const isObject = types.builtInTypes.object;
+const isArray = types.builtInTypes.array;
 import { normalize as normalizeOptions } from "./options";
 import { fromString } from "./lines";
 import { attach as attachComments } from "./comments";
@@ -102,7 +102,7 @@ export function parse(source: string, options?: Partial<Options>) {
   // well), since sometimes program.loc.{start,end} will coincide with the
   // .loc.{start,end} of the first and last *statements*, mistakenly
   // excluding comments that fall outside that region.
-  var trueProgramLoc: any = util.getTrueLoc({
+  const trueProgramLoc: any = util.getTrueLoc({
     type: program.type,
     loc: program.loc,
     body: [],
@@ -149,7 +149,7 @@ const TreeCopier = function TreeCopier(this: TreeCopierType, lines: any, tokens:
   this.seen = new Map;
 } as any as TreeCopierConstructor;
 
-var TCp: TreeCopierType = TreeCopier.prototype;
+const TCp: TreeCopierType = TreeCopier.prototype;
 
 TCp.copy = function(node) {
   if (this.seen.has(node)) {
@@ -182,9 +182,9 @@ TCp.copy = function(node) {
 
   this.seen.set(node, copy);
 
-  var loc = node.loc;
-  var oldIndent = this.indent;
-  var newIndent = oldIndent;
+  const loc = node.loc;
+  const oldIndent = this.indent;
+  let newIndent = oldIndent;
 
   const oldStartTokenIndex = this.startTokenIndex;
   const oldEndTokenIndex = this.endTokenIndex;
@@ -213,10 +213,10 @@ TCp.copy = function(node) {
     this.findTokenRange(loc);
   }
 
-  var keys = Object.keys(node);
-  var keyCount = keys.length;
-  for (var i = 0; i < keyCount; ++i) {
-    var key = keys[i];
+  const keys = Object.keys(node);
+  const keyCount = keys.length;
+  for (let i = 0; i < keyCount; ++i) {
+    const key = keys[i];
     if (key === "loc") {
       copy[key] = node[key];
     } else if (key === "tokens" &&
