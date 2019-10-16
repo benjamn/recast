@@ -10,14 +10,10 @@ export default class Mapping {
   constructor(
     public sourceLines: Lines,
     public sourceLoc: Loc,
-    public targetLoc: Loc = sourceLoc,
+    public targetLoc: Loc = sourceLoc
   ) {}
 
-  slice(
-    lines: Lines,
-    start: Pos,
-    end: Pos = lines.lastPos(),
-  ) {
+  slice(lines: Lines, start: Pos, end: Pos = lines.lastPos()) {
     const sourceLines = this.sourceLines;
     let sourceLoc = this.sourceLoc;
     let targetLoc = this.targetLoc;
@@ -34,8 +30,11 @@ export default class Mapping {
       }
 
       return skipChars(
-        sourceLines, sourceFromPos,
-        lines, targetFromPos, targetToPos
+        sourceLines,
+        sourceFromPos,
+        lines,
+        targetFromPos,
+        targetToPos
       );
     }
 
@@ -48,10 +47,8 @@ export default class Mapping {
 
         // The sourceLoc can stay the same because the contents of the
         // targetLoc have not changed.
-
       } else if (comparePos(end, targetLoc.start) <= 0) {
         return null;
-
       } else {
         sourceLoc = {
           start: sourceLoc.start,
@@ -63,7 +60,6 @@ export default class Mapping {
           end: subtractPos(end, start.line, start.column)
         };
       }
-
     } else {
       if (comparePos(targetLoc.end, start) <= 0) {
         return null;
@@ -80,7 +76,6 @@ export default class Mapping {
           start: { line: 1, column: 0 },
           end: subtractPos(targetLoc.end, start.line, start.column)
         };
-
       } else {
         sourceLoc = {
           start: skip("start"),
@@ -115,7 +110,7 @@ export default class Mapping {
   indent(
     by: number,
     skipFirstLine: boolean = false,
-    noNegativeColumns: boolean = false,
+    noNegativeColumns: boolean = false
   ) {
     if (by === 0) {
       return this;
@@ -138,9 +133,7 @@ export default class Mapping {
       const startColumn = targetLoc.start.column + by;
       targetLoc.start = {
         line: startLine,
-        column: noNegativeColumns
-          ? Math.max(0, startColumn)
-          : startColumn
+        column: noNegativeColumns ? Math.max(0, startColumn) : startColumn
       };
     }
 
@@ -148,9 +141,7 @@ export default class Mapping {
       const endColumn = targetLoc.end.column + by;
       targetLoc.end = {
         line: endLine,
-        column: noNegativeColumns
-          ? Math.max(0, endColumn)
-          : endColumn
+        column: noNegativeColumns ? Math.max(0, endColumn) : endColumn
       };
     }
 
@@ -161,18 +152,14 @@ export default class Mapping {
 function addPos(toPos: any, line: number, column: number) {
   return {
     line: toPos.line + line - 1,
-    column: (toPos.line === 1)
-      ? toPos.column + column
-      : toPos.column
+    column: toPos.line === 1 ? toPos.column + column : toPos.column
   };
 }
 
 function subtractPos(fromPos: any, line: number, column: number) {
   return {
     line: fromPos.line - line + 1,
-    column: (fromPos.line === line)
-      ? fromPos.column - column
-      : fromPos.column
+    column: fromPos.line === line ? fromPos.column - column : fromPos.column
   };
 }
 
@@ -181,7 +168,7 @@ function skipChars(
   sourceFromPos: Pos,
   targetLines: Lines,
   targetFromPos: Pos,
-  targetToPos: Pos,
+  targetToPos: Pos
 ) {
   const targetComparison = comparePos(targetFromPos, targetToPos);
   if (targetComparison === 0) {
@@ -191,8 +178,10 @@ function skipChars(
 
   if (targetComparison < 0) {
     // Skipping forward.
-    var sourceCursor = sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
-    var targetCursor = targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
+    var sourceCursor =
+      sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
+    var targetCursor =
+      targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
 
     var lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
@@ -207,19 +196,22 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetCursor, targetToPos) < 0 &&
-           targetLines.nextPos(targetCursor, true)) {
+    while (
+      comparePos(targetCursor, targetToPos) < 0 &&
+      targetLines.nextPos(targetCursor, true)
+    ) {
       assert.ok(sourceLines.nextPos(sourceCursor, true));
       assert.strictEqual(
         sourceLines.charAt(sourceCursor),
         targetLines.charAt(targetCursor)
       );
     }
-
   } else {
     // Skipping backward.
-    var sourceCursor = sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
-    var targetCursor = targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
+    var sourceCursor =
+      sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
+    var targetCursor =
+      targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
 
     var lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
@@ -234,8 +226,10 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetToPos, targetCursor) < 0 &&
-           targetLines.prevPos(targetCursor, true)) {
+    while (
+      comparePos(targetToPos, targetCursor) < 0 &&
+      targetLines.prevPos(targetCursor, true)
+    ) {
       assert.ok(sourceLines.prevPos(sourceCursor, true));
       assert.strictEqual(
         sourceLines.charAt(sourceCursor),

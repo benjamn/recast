@@ -5,8 +5,7 @@ import { Printer } from "../lib/printer";
 import * as types from "ast-types";
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
-(nodeMajorVersion >= 6 ? describe : xdescribe)
-("JSX Compatability", function() {
+(nodeMajorVersion >= 6 ? describe : xdescribe)("JSX Compatability", function() {
   const printer = new Printer({ tabWidth: 2 });
   const parseOptions = {
     parser: require("../parsers/babel")
@@ -14,10 +13,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
   function check(source: string) {
     const ast1 = parse(source, parseOptions);
-    const ast2 = parse(
-      printer.printGenerically(ast1).code,
-      parseOptions
-    );
+    const ast2 = parse(printer.printGenerically(ast1).code, parseOptions);
     types.astNodesAreEquivalent.assert(ast1, ast2);
   }
 
@@ -32,7 +28,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
   });
 
   it("should parse and print literal attributes", function() {
-    check("<b className=\"hello\" />");
+    check('<b className="hello" />');
   });
 
   it("should parse and print expression attributes", function() {
@@ -56,11 +52,6 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
   });
 
   it("should parse and print fragments", function() {
-    check([
-      "<>",
-      "  <td>Hello</td>",
-      "  <td>world!</td>",
-      "</>",
-    ].join("\n"));
+    check(["<>", "  <td>Hello</td>", "  <td>world!</td>", "</>"].join("\n"));
   });
 });

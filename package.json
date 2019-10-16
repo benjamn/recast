@@ -24,11 +24,13 @@
   "scripts": {
     "mocha": "test/run.sh",
     "debug": "test/run.sh --inspect-brk",
-    "test": "npm run build && npm run mocha",
+    "test": "npm run build && npm run mocha && npm run format:check",
     "build": "npm run clean && tsc",
     "clean": "ts-emit-clean",
     "prepack": "npm run build",
-    "postpack": "npm run clean"
+    "postpack": "npm run clean",
+    "format:check": "prettier --check lib/*.ts",
+    "format": "prettier --write lib/*.ts"
   },
   "browser": {
     "fs": false
@@ -36,6 +38,7 @@
   "dependencies": {
     "ast-types": "0.13.2",
     "esprima": "~4.0.0",
+    "prettier": "^1.18.2",
     "private": "^0.1.8",
     "source-map": "~0.6.1"
   },

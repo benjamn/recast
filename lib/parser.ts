@@ -47,7 +47,7 @@ export function parse(source: string, options?: Partial<Options>) {
   delete ast.tokens;
 
   // Make sure every token has a token.value string.
-  tokens.forEach(function (token) {
+  tokens.forEach(function(token) {
     if (typeof token.value !== "string") {
       token.value = lines.sliceString(token.loc.start, token.loc.end);
     }
@@ -102,27 +102,26 @@ export function parse(source: string, options?: Partial<Options>) {
   // well), since sometimes program.loc.{start,end} will coincide with the
   // .loc.{start,end} of the first and last *statements*, mistakenly
   // excluding comments that fall outside that region.
-  const trueProgramLoc: any = util.getTrueLoc({
-    type: program.type,
-    loc: program.loc,
-    body: [],
-    comments
-  }, lines);
+  const trueProgramLoc: any = util.getTrueLoc(
+    {
+      type: program.type,
+      loc: program.loc,
+      body: [],
+      comments
+    },
+    lines
+  );
   program.loc.start = trueProgramLoc.start;
   program.loc.end = trueProgramLoc.end;
 
   // Passing file.program here instead of just file means that initial
   // comments will be attached to program.body[0] instead of program.
-  attachComments(
-    comments,
-    program.body.length ? file.program : file,
-    lines
-  );
+  attachComments(comments, program.body.length ? file.program : file, lines);
 
   // Return a copy of the original AST so that any changes made may be
   // compared to the original.
   return new TreeCopier(lines, tokens).copy(file);
-};
+}
 
 interface TreeCopierType {
   lines: any;
@@ -136,18 +135,22 @@ interface TreeCopierType {
 }
 
 interface TreeCopierConstructor {
-  new(lines: any, tokens: any): TreeCopierType;
+  new (lines: any, tokens: any): TreeCopierType;
 }
 
-const TreeCopier = function TreeCopier(this: TreeCopierType, lines: any, tokens: any) {
+const TreeCopier = (function TreeCopier(
+  this: TreeCopierType,
+  lines: any,
+  tokens: any
+) {
   assert.ok(this instanceof TreeCopier);
   this.lines = lines;
   this.tokens = tokens;
   this.startTokenIndex = 0;
   this.endTokenIndex = tokens.length;
   this.indent = 0;
-  this.seen = new Map;
-} as any as TreeCopierConstructor;
+  this.seen = new Map();
+} as any) as TreeCopierConstructor;
 
 const TCp: TreeCopierType = TreeCopier.prototype;
 
@@ -159,7 +162,7 @@ TCp.copy = function(node) {
   if (isArray.check(node)) {
     var copy: any = new Array(node.length);
     this.seen.set(node, copy);
-    node.forEach(function (this: any, item: any, i: any) {
+    node.forEach(function(this: any, item: any, i: any) {
       copy[i] = this.copy(item);
     }, this);
     return copy;
@@ -172,7 +175,8 @@ TCp.copy = function(node) {
   util.fixFaultyLocations(node, this.lines);
 
   var copy: any = Object.create(Object.getPrototypeOf(node), {
-    original: { // Provide a link from the copy to the original.
+    original: {
+      // Provide a link from the copy to the original.
       value: node,
       configurable: false,
       enumerable: false,
@@ -195,9 +199,13 @@ TCp.copy = function(node) {
     // itself, we can strip that much whitespace from the left margin of
     // the comment. This only really matters for multiline Block comments,
     // but it doesn't hurt for Line comments.
-    if (node.type === "Block" || node.type === "Line" ||
-        node.type === "CommentBlock" || node.type === "CommentLine" ||
-        this.lines.isPrecededOnlyByWhitespace(loc.start)) {
+    if (
+      node.type === "Block" ||
+      node.type === "Line" ||
+      node.type === "CommentBlock" ||
+      node.type === "CommentLine" ||
+      this.lines.isPrecededOnlyByWhitespace(loc.start)
+    ) {
       newIndent = this.indent = loc.start.column;
     }
 
@@ -219,8 +227,7 @@ TCp.copy = function(node) {
     const key = keys[i];
     if (key === "loc") {
       copy[key] = node[key];
-    } else if (key === "tokens" &&
-               node.type === "File") {
+    } else if (key === "tokens" && node.type === "File") {
       // Preserve file.tokens (uncopied) in case client code cares about
       // it, even though Recast ignores it when reprinting.
       copy[key] = node[key];
@@ -241,7 +248,7 @@ TCp.copy = function(node) {
 // because we maintain this.startTokenIndex and this.endTokenIndex as we
 // traverse the AST, we only need to make small (linear) adjustments to
 // those indexes with each recursive iteration.
-TCp.findTokenRange = function (loc) {
+TCp.findTokenRange = function(loc) {
   // In the unlikely event that loc.tokens[this.startTokenIndex] starts
   // *after* loc.start, we need to rewind this.startTokenIndex first.
   while (this.startTokenIndex > 0) {

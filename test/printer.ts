@@ -14,7 +14,7 @@ describe("printer", function() {
   it("Printer", function testPrinter(done) {
     const code = testPrinter + "";
     const ast = parse(code);
-    const printer = new Printer;
+    const printer = new Printer();
 
     assert.strictEqual(typeof printer.print, "function");
     assert.strictEqual(printer.print(null).code, "");
@@ -32,13 +32,13 @@ describe("printer", function() {
   });
 
   const uselessSemicolons = [
-    'function a() {',
+    "function a() {",
     '  return "a";',
-    '};',
-    '',
-    'function b() {',
+    "};",
+    "",
+    "function b() {",
     '  return "b";',
-    '};'
+    "};"
   ].join(eol);
 
   it("EmptyStatements", function() {
@@ -69,8 +69,8 @@ describe("printer", function() {
     assert.strictEqual(reprinted, importantSemicolons);
   });
 
-  const arrayExprWithTrailingComma = '[1, 2,];';
-  const arrayExprWithoutTrailingComma = '[1, 2];';
+  const arrayExprWithTrailingComma = "[1, 2,];";
+  const arrayExprWithoutTrailingComma = "[1, 2];";
 
   it("ArrayExpressionWithTrailingComma", function() {
     const ast = parse(arrayExprWithTrailingComma);
@@ -84,20 +84,14 @@ describe("printer", function() {
     const arrayExprOrig = arrayExpr.original;
     arrayExpr.original = null;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      arrayExprWithoutTrailingComma
-    );
+    assert.strictEqual(printer.print(ast).code, arrayExprWithoutTrailingComma);
 
     arrayExpr.original = arrayExprOrig;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      arrayExprWithTrailingComma
-    );
+    assert.strictEqual(printer.print(ast).code, arrayExprWithTrailingComma);
   });
 
-  const arrayExprWithHoles = '[,,];';
+  const arrayExprWithHoles = "[,,];";
 
   it("ArrayExpressionWithHoles", function() {
     const ast = parse(arrayExprWithHoles);
@@ -111,21 +105,16 @@ describe("printer", function() {
     const arrayExprOrig = arrayExpr.original;
     arrayExpr.original = null;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      arrayExprWithHoles
-    );
+    assert.strictEqual(printer.print(ast).code, arrayExprWithHoles);
 
     arrayExpr.original = arrayExprOrig;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      arrayExprWithHoles
-    );
+    assert.strictEqual(printer.print(ast).code, arrayExprWithHoles);
   });
 
-  const objectExprWithTrailingComma = '({x: 1, y: 2,});';
-  const objectExprWithoutTrailingComma = '({' + eol + '  x: 1,' + eol + '  y: 2' + eol + '});';
+  const objectExprWithTrailingComma = "({x: 1, y: 2,});";
+  const objectExprWithoutTrailingComma =
+    "({" + eol + "  x: 1," + eol + "  y: 2" + eol + "});";
 
   it("ArrayExpressionWithTrailingComma", function() {
     const ast = parse(objectExprWithTrailingComma);
@@ -139,17 +128,11 @@ describe("printer", function() {
     const objectExprOrig = objectExpr.original;
     objectExpr.original = null;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      objectExprWithoutTrailingComma
-    );
+    assert.strictEqual(printer.print(ast).code, objectExprWithoutTrailingComma);
 
     objectExpr.original = objectExprOrig;
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      objectExprWithTrailingComma
-    );
+    assert.strictEqual(printer.print(ast).code, objectExprWithTrailingComma);
   });
 
   const switchCase = [
@@ -159,7 +142,7 @@ describe("printer", function() {
     "",
     "  case b:",
     "    break;",
-    "}",
+    "}"
   ].join(eol);
 
   const switchCaseReprinted = [
@@ -198,29 +181,17 @@ describe("printer", function() {
 
     body[0] = b.ifStatement(
       b.identifier("test"),
-      b.blockStatement([
-        switchStmt
-      ])
+      b.blockStatement([switchStmt])
     );
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      switchCaseReprinted
-    );
+    assert.strictEqual(printer.print(ast).code, switchCaseReprinted);
 
-    assert.strictEqual(
-      printer.printGenerically(ast).code,
-      switchCaseGeneric
-    );
+    assert.strictEqual(printer.printGenerically(ast).code, switchCaseGeneric);
   });
 
-  const tryCatch = [
-    "try {",
-    "  a();",
-    "} catch (e) {",
-    "  b(e);",
-    "}"
-  ].join(eol);
+  const tryCatch = ["try {", "  a();", "} catch (e) {", "  b(e);", "}"].join(
+    eol
+  );
 
   it("IndentTryCatch", function() {
     const ast = parse(tryCatch);
@@ -271,10 +242,7 @@ describe("printer", function() {
     // Trigger reprinting of the class body.
     cb.body.push(cb.body[0]);
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      classBodyExpected.join(eol)
-    );
+    assert.strictEqual(printer.print(ast).code, classBodyExpected.join(eol));
   });
 
   const multiLineParams = [
@@ -339,10 +307,7 @@ describe("printer", function() {
     varDecl.declarations.pop();
     varDecl.declarations.push(z);
 
-    assert.strictEqual(
-      printer.print(b.program([varDecl])).code,
-      "var x, z;"
-    );
+    assert.strictEqual(printer.print(b.program([varDecl])).code, "var x, z;");
   });
 
   it("MultiLineVarPrinting", function() {
@@ -358,13 +323,10 @@ describe("printer", function() {
       b.variableDeclarator(b.identifier("z"), null)
     ]);
 
-    assert.strictEqual(printer.print(b.program([varDecl])).code, [
-      "var x,",
-      "    y = {",
-      "      why: \"not\"",
-      "    },",
-      "    z;"
-    ].join(eol));
+    assert.strictEqual(
+      printer.print(b.program([varDecl])).code,
+      ["var x,", "    y = {", '      why: "not"', "    },", "    z;"].join(eol)
+    );
   });
 
   it("ForLoopPrinting", function() {
@@ -382,8 +344,7 @@ describe("printer", function() {
 
     assert.strictEqual(
       printer.print(loop).code,
-      "for (var i = 0; i < 3; i++)" + eol +
-        "  log(i);"
+      "for (var i = 0; i < 3; i++)" + eol + "  log(i);"
     );
   });
 
@@ -400,8 +361,7 @@ describe("printer", function() {
 
     assert.strictEqual(
       printer.print(loop).code,
-      "for (var i = 0; i < 3; i++)" + eol +
-        "  ;"
+      "for (var i = 0; i < 3; i++)" + eol + "  ;"
     );
   });
 
@@ -414,22 +374,17 @@ describe("printer", function() {
       b.identifier("obj"),
       b.expressionStatement(
         b.callExpression(b.identifier("log"), [b.identifier("key")])
-      ),
+      )
     );
 
     assert.strictEqual(
       printer.print(loop).code,
-      "for (var key in obj)" + eol +
-        "  log(key);"
+      "for (var key in obj)" + eol + "  log(key);"
     );
   });
 
   it("GuessTabWidth", function() {
-    const code = [
-      "function identity(x) {",
-      "  return x;",
-      "}"
-    ].join(eol);
+    const code = ["function identity(x) {", "  return x;", "}"].join(eol);
 
     const guessedTwo = [
       "function identity(x) {",
@@ -454,17 +409,11 @@ describe("printer", function() {
 
     funBody.unshift(
       b.expressionStatement(
-        b.callExpression(
-          b.identifier("log"),
-          funDecl.params
-        )
+        b.callExpression(b.identifier("log"), funDecl.params)
       )
     );
 
-    assert.strictEqual(
-      new Printer().print(ast).code,
-      guessedTwo
-    );
+    assert.strictEqual(new Printer().print(ast).code, guessedTwo);
 
     assert.strictEqual(
       new Printer({
@@ -477,15 +426,15 @@ describe("printer", function() {
   it("FunctionDefaultsAndRest", function() {
     const printer = new Printer();
     const funExpr = b.functionExpression(
-      b.identifier('a'),
-      [b.identifier('b'), b.identifier('c')],
+      b.identifier("a"),
+      [b.identifier("b"), b.identifier("c")],
       b.blockStatement([]),
       false,
-      false,
+      false
     );
 
     funExpr.defaults = [null, b.literal(1)];
-    funExpr.rest = b.identifier('d');
+    funExpr.rest = b.identifier("d");
 
     assert.strictEqual(
       printer.print(funExpr).code,
@@ -493,12 +442,13 @@ describe("printer", function() {
     );
 
     const arrowFunExpr = b.arrowFunctionExpression(
-      [b.identifier('b'), b.identifier('c')],
+      [b.identifier("b"), b.identifier("c")],
       b.blockStatement([]),
-      false);
+      false
+    );
 
     arrowFunExpr.defaults = [null, b.literal(1)];
-    arrowFunExpr.rest = b.identifier('d');
+    arrowFunExpr.rest = b.identifier("d");
 
     assert.strictEqual(
       printer.print(arrowFunExpr).code,
@@ -558,14 +508,7 @@ describe("printer", function() {
   it("export default of IIFE", function() {
     const printer = new Printer();
     let ast = b.exportDefaultDeclaration(
-      b.callExpression(
-        b.functionExpression(
-          null,
-          [],
-          b.blockStatement([])
-        ),
-        []
-      )
+      b.callExpression(b.functionExpression(null, [], b.blockStatement([])), [])
     );
     const code = printer.print(ast).code;
     ast = parse(code);
@@ -617,10 +560,7 @@ describe("printer", function() {
     ast.program.body.unshift(debugStmt);
     ast.program.body.push(debugStmt);
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      stmtListSpacesExpected
-    );
+    assert.strictEqual(printer.print(ast).code, stmtListSpacesExpected);
 
     const funDecl = b.functionDeclaration(
       b.identifier("foo"),
@@ -630,23 +570,21 @@ describe("printer", function() {
 
     assert.strictEqual(
       printer.print(funDecl).code,
-      linesModule.concat([
-        "function foo() {" + eol,
-        linesModule.fromString(
-          stmtListSpacesExpected.replace(/^\s+|\s+$/g, "")
-        ).indent(2),
-        eol + "}"
-      ]).toString()
+      linesModule
+        .concat([
+          "function foo() {" + eol,
+          linesModule
+            .fromString(stmtListSpacesExpected.replace(/^\s+|\s+$/g, ""))
+            .indent(2),
+          eol + "}"
+        ])
+        .toString()
     );
   });
 
   it("should print static methods with the static keyword", function() {
     const printer = new Printer({ tabWidth: 4 });
-    const ast = parse([
-      "class A {",
-      "  static foo() {}",
-      "}"
-    ].join(eol));
+    const ast = parse(["class A {", "  static foo() {}", "}"].join(eol));
 
     const classBody = ast.program.body[0].body;
     n.ClassBody.assert(classBody);
@@ -658,63 +596,87 @@ describe("printer", function() {
 
     foo.key.name = "formerlyFoo";
 
-    assert.strictEqual(printer.print(ast).code, [
-      "class A {",
-      "    static formerlyFoo() {}",
-      "    static formerlyFoo() {}",
-      "}"
-    ].join(eol));
+    assert.strictEqual(
+      printer.print(ast).code,
+      [
+        "class A {",
+        "    static formerlyFoo() {}",
+        "    static formerlyFoo() {}",
+        "}"
+      ].join(eol)
+    );
   });
 
   it("should print string literals with the specified delimiter", function() {
-    const ast = parse([
-      "var obj = {",
-      "    \"foo's\": 'bar',",
-      "    '\"bar\\'s\"': /regex/m",
-      "};"
-    ].join(eol));
+    const ast = parse(
+      [
+        "var obj = {",
+        "    \"foo's\": 'bar',",
+        "    '\"bar\\'s\"': /regex/m",
+        "};"
+      ].join(eol)
+    );
 
     const variableDeclaration = ast.program.body[0];
     n.VariableDeclaration.assert(variableDeclaration);
 
     const printer = new Printer({ quote: "single" });
-    assert.strictEqual(printer.printGenerically(ast).code, [
-      "var obj = {",
-      "    'foo\\'s': 'bar',",
-      "    '\"bar\\'s\"': /regex/m",
-      "};"
-    ].join(eol));
+    assert.strictEqual(
+      printer.printGenerically(ast).code,
+      [
+        "var obj = {",
+        "    'foo\\'s': 'bar',",
+        "    '\"bar\\'s\"': /regex/m",
+        "};"
+      ].join(eol)
+    );
 
     const printer2 = new Printer({ quote: "double" });
-    assert.strictEqual(printer2.printGenerically(ast).code, [
-      "var obj = {",
-      "    \"foo's\": \"bar\",",
-      '    "\\"bar\'s\\"": /regex/m',
-      "};"
-    ].join(eol));
+    assert.strictEqual(
+      printer2.printGenerically(ast).code,
+      [
+        "var obj = {",
+        '    "foo\'s": "bar",',
+        '    "\\"bar\'s\\"": /regex/m',
+        "};"
+      ].join(eol)
+    );
 
     const printer3 = new Printer({ quote: "auto" });
-    assert.strictEqual(printer3.printGenerically(ast).code, [
-      "var obj = {",
-      '    "foo\'s": "bar",',
-      '    \'"bar\\\'s"\': /regex/m',
-      "};"
-    ].join(eol));
+    assert.strictEqual(
+      printer3.printGenerically(ast).code,
+      [
+        "var obj = {",
+        '    "foo\'s": "bar",',
+        "    '\"bar\\'s\"': /regex/m",
+        "};"
+      ].join(eol)
+    );
   });
 
   it("should print block comments at head of class once", function() {
     // Given.
-    const ast = parse([
-      "/**",
-      " * This class was in an IIFE and returned an instance of itself.",
-      " */",
-      "function SimpleClass() {",
-      "};"
-    ].join(eol));
+    const ast = parse(
+      [
+        "/**",
+        " * This class was in an IIFE and returned an instance of itself.",
+        " */",
+        "function SimpleClass() {",
+        "};"
+      ].join(eol)
+    );
 
-    const classIdentifier = b.identifier('SimpleClass');
-    const exportsExpression = b.memberExpression(b.identifier('module'), b.identifier('exports'), false);
-    const assignmentExpression = b.assignmentExpression('=', exportsExpression, classIdentifier);
+    const classIdentifier = b.identifier("SimpleClass");
+    const exportsExpression = b.memberExpression(
+      b.identifier("module"),
+      b.identifier("exports"),
+      false
+    );
+    const assignmentExpression = b.assignmentExpression(
+      "=",
+      exportsExpression,
+      classIdentifier
+    );
     const exportStatement = b.expressionStatement(assignmentExpression);
 
     ast.program.body.push(exportStatement);
@@ -723,44 +685,47 @@ describe("printer", function() {
     const printedClass = new Printer().print(ast).code;
 
     // Then.
-    assert.strictEqual(printedClass, [
-      "/**",
-      " * This class was in an IIFE and returned an instance of itself.",
-      " */",
-      "function SimpleClass() {",
-      "}",
-      "module.exports = SimpleClass;"
-    ].join(eol));
+    assert.strictEqual(
+      printedClass,
+      [
+        "/**",
+        " * This class was in an IIFE and returned an instance of itself.",
+        " */",
+        "function SimpleClass() {",
+        "}",
+        "module.exports = SimpleClass;"
+      ].join(eol)
+    );
   });
 
   it("should support computed properties", function() {
     var code = [
-      'class A {',
+      "class A {",
       '  ["a"]() {}',
       '  [ID("b")]() {}',
-      '  [0]() {}',
-      '  [ID(1)]() {}',
+      "  [0]() {}",
+      "  [ID(1)]() {}",
       '  get ["a"]() {}',
       '  get [ID("b")]() {}',
-      '  get [0]() {}',
-      '  get [ID(1)]() {}',
+      "  get [0]() {}",
+      "  get [ID(1)]() {}",
       '  set ["a"](x) {}',
       '  set [ID("b")](x) {}',
-      '  set [0](x) {}',
-      '  set [ID(1)](x) {}',
+      "  set [0](x) {}",
+      "  set [ID(1)](x) {}",
       '  static ["a"]() {}',
       '  static [ID("b")]() {}',
-      '  static [0]() {}',
-      '  static [ID(1)]() {}',
+      "  static [0]() {}",
+      "  static [ID(1)]() {}",
       '  static get ["a"]() {}',
       '  static get [ID("b")]() {}',
-      '  static get [0]() {}',
-      '  static get [ID(1)]() {}',
+      "  static get [0]() {}",
+      "  static get [ID(1)]() {}",
       '  static set ["a"](x) {}',
       '  static set [ID("b")](x) {}',
-      '  static set [0](x) {}',
-      '  static set [ID(1)](x) {}',
-      '}'
+      "  static set [0](x) {}",
+      "  static set [ID(1)](x) {}",
+      "}"
     ].join(eol);
 
     let ast = parse(code);
@@ -769,45 +734,41 @@ describe("printer", function() {
       tabWidth: 2
     });
 
-    assert.strictEqual(
-      printer.printGenerically(ast).code,
-      code
-    );
+    assert.strictEqual(printer.printGenerically(ast).code, code);
 
     var code = [
-      'var obj = {',
+      "var obj = {",
       '  ["a"]: 1,',
       '  [ID("b")]: 2,',
-      '  [0]: 3,',
-      '  [ID(1)]: 4,',
+      "  [0]: 3,",
+      "  [ID(1)]: 4,",
       '  ["a"]() {},',
       '  [ID("b")]() {},',
-      '  [0]() {},',
-      '  [ID(1)]() {},',
+      "  [0]() {},",
+      "  [ID(1)]() {},",
       '  get ["a"]() {},',
       '  get [ID("b")]() {},',
-      '  get [0]() {},',
-      '  get [ID(1)]() {},',
+      "  get [0]() {},",
+      "  get [ID(1)]() {},",
       '  set ["a"](x) {},',
       '  set [ID("b")](x) {},',
-      '  set [0](x) {},',
-      '  set [ID(1)](x) {}',
-      '};'
+      "  set [0](x) {},",
+      "  set [ID(1)](x) {}",
+      "};"
     ].join(eol);
 
     ast = parse(code);
 
-    assert.strictEqual(
-      printer.printGenerically(ast).code,
-      code
-    );
+    assert.strictEqual(printer.printGenerically(ast).code, code);
 
-    ast = parse([
-      "var o = {",
-      "  // This foo will become a computed method name.",
-      "  foo() { return bar }",
-      "};"
-    ].join(eol));
+    ast = parse(
+      [
+        "var o = {",
+        "  // This foo will become a computed method name.",
+        "  foo() { return bar }",
+        "};"
+      ].join(eol)
+    );
 
     const objExpr = ast.program.body[0].declarations[0].init;
     n.ObjectExpression.assert(objExpr);
@@ -816,21 +777,19 @@ describe("printer", function() {
     objExpr.properties[0].computed = true;
     objExpr.properties[0].kind = "get";
 
-    assert.strictEqual(recast.print(ast).code, [
-      "var o = {",
-      "  // This foo will become a computed method name.",
-      "  get [foo]() { return bar }",
-      "};"
-    ].join(eol));
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        "var o = {",
+        "  // This foo will become a computed method name.",
+        "  get [foo]() { return bar }",
+        "};"
+      ].join(eol)
+    );
   });
 
   it("prints trailing commas in object literals", function() {
-    const code = [
-      "({",
-      "  foo: bar,",
-      "  bar: foo,",
-      "});"
-    ].join(eol);
+    const code = ["({", "  foo: bar,", "  bar: foo,", "});"].join(eol);
 
     const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
@@ -839,7 +798,7 @@ describe("printer", function() {
 
     let printer = new Printer({
       tabWidth: 2,
-      trailingComma: true,
+      trailingComma: true
     });
 
     let pretty = printer.printGenerically(ast).code;
@@ -848,7 +807,7 @@ describe("printer", function() {
     // It should also work when using the `trailingComma` option as an object.
     printer = new Printer({
       tabWidth: 2,
-      trailingComma: { objects: true },
+      trailingComma: { objects: true }
     });
 
     pretty = printer.printGenerically(ast).code;
@@ -856,12 +815,7 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in function calls", function() {
-    const code = [
-      "call(",
-      "  1,",
-      "  2,",
-      ");"
-    ].join(eol);
+    const code = ["call(", "  1,", "  2,", ");"].join(eol);
 
     const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
@@ -871,7 +825,7 @@ describe("printer", function() {
     let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: true,
+      trailingComma: true
     });
 
     let pretty = printer.printGenerically(ast).code;
@@ -881,7 +835,7 @@ describe("printer", function() {
     printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: { parameters: true },
+      trailingComma: { parameters: true }
     });
 
     pretty = printer.printGenerically(ast).code;
@@ -889,12 +843,7 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in array expressions", function() {
-    const code = [
-      "[",
-      "  1,",
-      "  2,",
-      "];"
-    ].join(eol);
+    const code = ["[", "  1,", "  2,", "];"].join(eol);
 
     const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
@@ -904,7 +853,7 @@ describe("printer", function() {
     let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: true,
+      trailingComma: true
     });
 
     let pretty = printer.printGenerically(ast).code;
@@ -914,7 +863,7 @@ describe("printer", function() {
     printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: { arrays: true },
+      trailingComma: { arrays: true }
     });
 
     pretty = printer.printGenerically(ast).code;
@@ -922,12 +871,7 @@ describe("printer", function() {
   });
 
   it("prints trailing commas in function definitions", function() {
-    const code = [
-      "function foo(",
-      "  a,",
-      "  b,",
-      ") {}"
-    ].join(eol);
+    const code = ["function foo(", "  a,", "  b,", ") {}"].join(eol);
 
     const ast = parse(code, {
       // Supports trailing commas whereas plain esprima does not.
@@ -937,7 +881,7 @@ describe("printer", function() {
     let printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: true,
+      trailingComma: true
     });
 
     let pretty = printer.printGenerically(ast).code;
@@ -947,37 +891,35 @@ describe("printer", function() {
     printer = new Printer({
       tabWidth: 2,
       wrapColumn: 1,
-      trailingComma: { parameters: true },
+      trailingComma: { parameters: true }
     });
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
 
-  (nodeMajorVersion >= 6 ? it : xit)
-  ("shouldn't print a trailing comma for a RestElement", function() {
-    const code = [
-      "function foo(",
-      "  a,",
-      "  b,",
-      "  ...rest",
-      ") {}"
-    ].join(eol);
+  (nodeMajorVersion >= 6 ? it : xit)(
+    "shouldn't print a trailing comma for a RestElement",
+    function() {
+      const code = ["function foo(", "  a,", "  b,", "  ...rest", ") {}"].join(
+        eol
+      );
 
-    const ast = parse(code, {
-      // The flow parser and Babylon recognize `...rest` as a `RestElement`
-      parser: require("@babel/parser")
-    });
+      const ast = parse(code, {
+        // The flow parser and Babylon recognize `...rest` as a `RestElement`
+        parser: require("@babel/parser")
+      });
 
-    const printer = new Printer({
-      tabWidth: 2,
-      wrapColumn: 1,
-      trailingComma: true,
-    });
+      const printer = new Printer({
+        tabWidth: 2,
+        wrapColumn: 1,
+        trailingComma: true
+      });
 
-    const pretty = printer.printGenerically(ast).code;
-    assert.strictEqual(pretty, code);
-  });
+      const pretty = printer.printGenerically(ast).code;
+      assert.strictEqual(pretty, code);
+    }
+  );
 
   it("should support AssignmentPattern and RestElement", function() {
     const code = [
@@ -1004,11 +946,13 @@ describe("printer", function() {
     const code = "(...rest) => rest;";
 
     let ast = b.program([
-      b.expressionStatement(b.arrowFunctionExpression(
-        [b.spreadElementPattern(b.identifier('rest'))],
-        b.identifier('rest'),
-        false
-      ))
+      b.expressionStatement(
+        b.arrowFunctionExpression(
+          [b.spreadElementPattern(b.identifier("rest"))],
+          b.identifier("rest"),
+          false
+        )
+      )
     ]);
 
     const printer = new Printer({
@@ -1020,11 +964,13 @@ describe("printer", function() {
 
     // Print RestElement the same way
     ast = b.program([
-      b.expressionStatement(b.arrowFunctionExpression(
-        [b.restElement(b.identifier('rest'))],
-        b.identifier('rest'),
-        false
-      ))
+      b.expressionStatement(
+        b.arrowFunctionExpression(
+          [b.restElement(b.identifier("rest"))],
+          b.identifier("rest"),
+          false
+        )
+      )
     ]);
 
     pretty = printer.printGenerically(ast).code;
@@ -1033,13 +979,11 @@ describe("printer", function() {
     // Do the same for the `rest` field.
     const arrowFunction = b.arrowFunctionExpression(
       [],
-      b.identifier('rest'),
+      b.identifier("rest"),
       false
     );
-    arrowFunction.rest = b.identifier('rest');
-    ast = b.program([
-      b.expressionStatement(arrowFunction)
-    ]);
+    arrowFunction.rest = b.identifier("rest");
+    ast = b.program([b.expressionStatement(arrowFunction)]);
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
@@ -1049,14 +993,12 @@ describe("printer", function() {
     const code = "(a) => {};";
 
     const fn = b.arrowFunctionExpression(
-      [b.identifier('a')],
+      [b.identifier("a")],
       b.blockStatement([]),
       false
     );
 
-    const ast = b.program([
-      b.expressionStatement(fn)
-    ]);
+    const ast = b.program([b.expressionStatement(fn)]);
 
     const printer = new Printer({
       arrowParensAlways: true
@@ -1076,10 +1018,9 @@ describe("printer", function() {
     const declaration = b.variableDeclaration("var", [
       b.variableDeclarator(
         b.identifier("a"),
-        b.callExpression(
-          b.memberExpression(fn, b.identifier("bind"), false),
-          [b.identifier("z")]
-        )
+        b.callExpression(b.memberExpression(fn, b.identifier("bind"), false), [
+          b.identifier("z")
+        ])
       )
     ]);
 
@@ -1093,16 +1034,10 @@ describe("printer", function() {
   it("adds parenthesis around async arrow functions with args", function() {
     let code = "async () => {};";
 
-    const fn = b.arrowFunctionExpression(
-      [],
-      b.blockStatement([]),
-      false
-    );
+    const fn = b.arrowFunctionExpression([], b.blockStatement([]), false);
     fn.async = true;
 
-    const ast = b.program([
-      b.expressionStatement(fn)
-    ]);
+    const ast = b.program([b.expressionStatement(fn)]);
 
     const printer = new Printer({
       tabWidth: 2
@@ -1113,14 +1048,14 @@ describe("printer", function() {
 
     // No parenthesis for single params if they are identifiers
     code = "async foo => {};";
-    fn.params = [b.identifier('foo')];
+    fn.params = [b.identifier("foo")];
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
     // Add parenthesis for destructuring
     code = "async ([a, b]) => {};";
-    fn.params = [b.arrayPattern([b.identifier('a'), b.identifier('b')])];
+    fn.params = [b.arrayPattern([b.identifier("a"), b.identifier("b")])];
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
@@ -1129,20 +1064,14 @@ describe("printer", function() {
   it("adds parenthesis around arrow functions with single arg and a type", function() {
     const code = "(a: b) => {};";
 
-    const arg = b.identifier('a');
+    const arg = b.identifier("a");
     arg.typeAnnotation = b.typeAnnotation(
-      b.genericTypeAnnotation(b.identifier('b'), null)
+      b.genericTypeAnnotation(b.identifier("b"), null)
     );
 
-    const fn = b.arrowFunctionExpression(
-      [arg],
-      b.blockStatement([]),
-      false
-    );
+    const fn = b.arrowFunctionExpression([arg], b.blockStatement([]), false);
 
-    const ast = b.program([
-      b.expressionStatement(fn)
-    ]);
+    const ast = b.program([b.expressionStatement(fn)]);
 
     const printer = new Printer();
     const pretty = printer.printGenerically(ast).code;
@@ -1152,21 +1081,13 @@ describe("printer", function() {
   it("adds parenthesis around arrow functions with single arg and a return type", function() {
     const code = "(a): void => {};";
 
-    const arg = b.identifier('a');
+    const arg = b.identifier("a");
 
-    const fn = b.arrowFunctionExpression(
-      [arg],
-      b.blockStatement([]),
-      false
-    );
+    const fn = b.arrowFunctionExpression([arg], b.blockStatement([]), false);
 
-    fn.returnType = b.typeAnnotation(
-      b.voidTypeAnnotation()
-    );
+    fn.returnType = b.typeAnnotation(b.voidTypeAnnotation());
 
-    const ast = b.program([
-      b.expressionStatement(fn)
-    ]);
+    const ast = b.program([b.expressionStatement(fn)]);
 
     const printer = new Printer();
     const pretty = printer.printGenerically(ast).code;
@@ -1178,16 +1099,11 @@ describe("printer", function() {
 
     const fn = b.arrowFunctionExpression(
       [],
-      b.tsAsExpression(
-      b.objectExpression([]),
-        b.tsObjectKeyword()
-      ),
+      b.tsAsExpression(b.objectExpression([]), b.tsObjectKeyword()),
       false
     );
 
-    const ast = b.program([
-      b.expressionStatement(fn)
-    ]);
+    const ast = b.program([b.expressionStatement(fn)]);
 
     const printer = new Printer();
     const pretty = printer.printGenerically(ast).code;
@@ -1195,37 +1111,20 @@ describe("printer", function() {
   });
 
   it("prints class property initializers with type annotations correctly", function() {
-    const code = [
-      "class A {",
-      "  foo = (a: b): void => {};",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  foo = (a: b): void => {};", "}"].join(eol);
 
-    const arg = b.identifier('a');
+    const arg = b.identifier("a");
     arg.typeAnnotation = b.typeAnnotation(
-      b.genericTypeAnnotation(b.identifier('b'), null)
+      b.genericTypeAnnotation(b.identifier("b"), null)
     );
 
-    const fn = b.arrowFunctionExpression(
-      [arg],
-      b.blockStatement([]),
-      false
-    );
-    fn.returnType = b.typeAnnotation(
-      b.voidTypeAnnotation()
-    );
+    const fn = b.arrowFunctionExpression([arg], b.blockStatement([]), false);
+    fn.returnType = b.typeAnnotation(b.voidTypeAnnotation());
 
     const ast = b.program([
       b.classDeclaration(
-        b.identifier('A'),
-        b.classBody([
-          b.classProperty(
-            b.identifier('foo'),
-            fn,
-            null,
-            false
-          )
-        ])
+        b.identifier("A"),
+        b.classBody([b.classProperty(b.identifier("foo"), fn, null, false)])
       )
     ]);
 
@@ -1238,21 +1137,17 @@ describe("printer", function() {
   });
 
   it("prints ClassProperty correctly", function() {
-    const code = [
-      "class A {",
-      "  foo: Type = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  foo: Type = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
-        b.identifier('A'),
+        b.identifier("A"),
         b.classBody([
           b.classProperty(
-            b.identifier('foo'),
-            b.identifier('Bar'),
+            b.identifier("foo"),
+            b.identifier("Bar"),
             b.typeAnnotation(
-              b.genericTypeAnnotation(b.identifier('Type'), null)
+              b.genericTypeAnnotation(b.identifier("Type"), null)
             )
           )
         ])
@@ -1268,22 +1163,13 @@ describe("printer", function() {
   });
 
   it("prints static ClassProperty correctly", function() {
-    const code = [
-      "class A {",
-      "  static foo = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  static foo = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
-        b.identifier('A'),
+        b.identifier("A"),
         b.classBody([
-          b.classProperty(
-            b.identifier('foo'),
-            b.identifier('Bar'),
-            null,
-            true
-          )
+          b.classProperty(b.identifier("foo"), b.identifier("Bar"), null, true)
         ])
       )
     ]);
@@ -1297,15 +1183,13 @@ describe("printer", function() {
   });
 
   it("prints template expressions correctly", function() {
-    let code = [
-      "graphql`query`;",
-    ].join(eol);
+    let code = ["graphql`query`;"].join(eol);
 
     let ast = b.program([
       b.taggedTemplateStatement(
-        b.identifier('graphql'),
+        b.identifier("graphql"),
         b.templateLiteral(
-          [b.templateElement({cooked: 'query', raw: 'query'}, false)],
+          [b.templateElement({ cooked: "query", raw: "query" }, false)],
           []
         )
       )
@@ -1318,38 +1202,27 @@ describe("printer", function() {
     let pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
-    code = [
-      "graphql`query${foo.getQuery()}field${bar}`;",
-    ].join(eol);
+    code = ["graphql`query${foo.getQuery()}field${bar}`;"].join(eol);
 
     ast = b.program([
       b.taggedTemplateStatement(
-        b.identifier('graphql'),
+        b.identifier("graphql"),
         b.templateLiteral(
           [
-            b.templateElement(
-              {cooked: 'query', raw: 'query'},
-              false
-            ),
-            b.templateElement(
-              {cooked: 'field', raw: 'field'},
-              false
-            ),
-            b.templateElement(
-              {cooked: '', raw: ''},
-              true
-            ),
+            b.templateElement({ cooked: "query", raw: "query" }, false),
+            b.templateElement({ cooked: "field", raw: "field" }, false),
+            b.templateElement({ cooked: "", raw: "" }, true)
           ],
           [
             b.callExpression(
               b.memberExpression(
-                b.identifier('foo'),
-                b.identifier('getQuery'),
+                b.identifier("foo"),
+                b.identifier("getQuery"),
                 false
               ),
               []
             ),
-            b.identifier('bar')
+            b.identifier("bar")
           ]
         )
       )
@@ -1365,7 +1238,7 @@ describe("printer", function() {
       "    field,",
       "    ${bar},",
       "  }",
-      "`;",
+      "`;"
     ].join(eol);
 
     ast = parse(code);
@@ -1374,11 +1247,7 @@ describe("printer", function() {
   });
 
   it("preserves newlines at the beginning/end of files", function() {
-    const code = [
-      "",
-      "f();",
-      ""
-    ].join(eol);
+    const code = ["", "f();", ""].join(eol);
 
     const lines = fromString(code);
     const ast = parse(code, {
@@ -1402,19 +1271,14 @@ describe("printer", function() {
       tabWidth: 2
     });
 
-    assert.strictEqual(printer.print(ast).code, [
-      "",
-      "debugger;",
-      "f();",
-      ""
-    ].join(eol));
+    assert.strictEqual(
+      printer.print(ast).code,
+      ["", "debugger;", "f();", ""].join(eol)
+    );
   });
 
   it("respects options.lineTerminator", function() {
-    const lines = [
-      "var first = 1;",
-      "var second = 2;"
-    ];
+    const lines = ["var first = 1;", "var second = 2;"];
     const code = lines.join("\n");
     const ast = parse(code);
 
@@ -1439,7 +1303,7 @@ describe("printer", function() {
       "      field,",
       "    }",
       "  `",
-      "};",
+      "};"
     ].join(eol);
 
     const ast = parse(code);
@@ -1474,12 +1338,12 @@ describe("printer", function() {
     });
 
     recast.visit(ast, {
-      visitTaggedTemplateExpression: function (path) {
+      visitTaggedTemplateExpression: function(path) {
         function replaceIdWithNodeId(path: any) {
           path.replace(path.value.replace(/\bid\b/g, "nodeID"));
         }
 
-        path.get("quasi", "quasis").each(function (quasiPath: any) {
+        path.get("quasi", "quasis").each(function(quasiPath: any) {
           replaceIdWithNodeId(quasiPath.get("value", "cooked"));
           replaceIdWithNodeId(quasiPath.get("value", "raw"));
         });
@@ -1543,16 +1407,19 @@ describe("printer", function() {
     const ast2 = b.typeAlias(
       b.identifier("MyType"),
       null,
-      b.objectTypeAnnotation([], [
-        b.objectTypeIndexer(
-          b.identifier('key'),
-          b.stringTypeAnnotation(),
-          b.stringTypeAnnotation(),
-        )
-      ])
+      b.objectTypeAnnotation(
+        [],
+        [
+          b.objectTypeIndexer(
+            b.identifier("key"),
+            b.stringTypeAnnotation(),
+            b.stringTypeAnnotation()
+          )
+        ]
+      )
     );
 
-    const printer = new Printer({trailingComma: true});
+    const printer = new Printer({ trailingComma: true });
     const pretty1 = printer.printGenerically(ast1).code;
     const pretty2 = printer.printGenerically(ast2).code;
     assert.strictEqual(pretty1, code1);
@@ -1596,9 +1463,10 @@ describe("printer", function() {
       b.identifier("MyType"),
       null,
       b.nullableTypeAnnotation(
-        b.unionTypeAnnotation(
-          [b.stringTypeAnnotation(), b.numberTypeAnnotation()]
-        )
+        b.unionTypeAnnotation([
+          b.stringTypeAnnotation(),
+          b.numberTypeAnnotation()
+        ])
       )
     );
 
@@ -1607,82 +1475,101 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  (nodeMajorVersion >= 6 ? it : xit)
-  ("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function() {
-    const babelParser = require("@babel/parser");
-    const parseOptions = {
-      parser: {
-        parse: function (source: string) {
-          return babelParser.parse(source, {
-            sourceType: 'module',
-            plugins: ['flow'],
-          });
+  (nodeMajorVersion >= 6 ? it : xit)(
+    "uses the `arrayBracketSpacing` and the `objectCurlySpacing` option",
+    function() {
+      const babelParser = require("@babel/parser");
+      const parseOptions = {
+        parser: {
+          parse: function(source: string) {
+            return babelParser.parse(source, {
+              sourceType: "module",
+              plugins: ["flow"]
+            });
+          }
         }
-      }
-    };
+      };
 
-    const testCaseList = [{
-      printerConfig: {arrayBracketSpacing: false, objectCurlySpacing: false},
-      code: [
-        'import {java, script} from "javascript";',
-        '',
-        'function foo(a) {',
-        '    type MyType = {message: string};',
-        '    return [1, 2, 3];',
-        '}',
-        '',
-        'export {foo};'
-      ].join(eol)
-    }, {
-      printerConfig: {arrayBracketSpacing: true, objectCurlySpacing: false},
-      code: [
-        'import {java, script} from "javascript";',
-        '',
-        'function foo(a) {',
-        '    type MyType = {message: string};',
-        '    return [ 1, 2, 3 ];',
-        '}',
-        '',
-        'export {foo};'
-      ].join(eol)
-    }, {
-      printerConfig: {arrayBracketSpacing: false, objectCurlySpacing: true},
-      code: [
-        'import { java, script } from "javascript";',
-        '',
-        'function foo(a) {',
-        '    type MyType = { message: string };',
-        '    return [1, 2, 3];',
-        '}',
-        '',
-        'export { foo };'
-      ].join(eol)
-    }, {
-      printerConfig: {arrayBracketSpacing: true, objectCurlySpacing: true},
-      code: [
-        'import { java, script } from "javascript";',
-        '',
-        'function foo(a) {',
-        '    type MyType = { message: string };',
-        '    return [ 1, 2, 3 ];',
-        '}',
-        '',
-        'export { foo };'
-      ].join(eol)
-    }];
+      const testCaseList = [
+        {
+          printerConfig: {
+            arrayBracketSpacing: false,
+            objectCurlySpacing: false
+          },
+          code: [
+            'import {java, script} from "javascript";',
+            "",
+            "function foo(a) {",
+            "    type MyType = {message: string};",
+            "    return [1, 2, 3];",
+            "}",
+            "",
+            "export {foo};"
+          ].join(eol)
+        },
+        {
+          printerConfig: {
+            arrayBracketSpacing: true,
+            objectCurlySpacing: false
+          },
+          code: [
+            'import {java, script} from "javascript";',
+            "",
+            "function foo(a) {",
+            "    type MyType = {message: string};",
+            "    return [ 1, 2, 3 ];",
+            "}",
+            "",
+            "export {foo};"
+          ].join(eol)
+        },
+        {
+          printerConfig: {
+            arrayBracketSpacing: false,
+            objectCurlySpacing: true
+          },
+          code: [
+            'import { java, script } from "javascript";',
+            "",
+            "function foo(a) {",
+            "    type MyType = { message: string };",
+            "    return [1, 2, 3];",
+            "}",
+            "",
+            "export { foo };"
+          ].join(eol)
+        },
+        {
+          printerConfig: {
+            arrayBracketSpacing: true,
+            objectCurlySpacing: true
+          },
+          code: [
+            'import { java, script } from "javascript";',
+            "",
+            "function foo(a) {",
+            "    type MyType = { message: string };",
+            "    return [ 1, 2, 3 ];",
+            "}",
+            "",
+            "export { foo };"
+          ].join(eol)
+        }
+      ];
 
-    testCaseList.forEach(function(testCase) {
-      const code = testCase.code;
-      const printer = new Printer(testCase.printerConfig);
+      testCaseList.forEach(function(testCase) {
+        const code = testCase.code;
+        const printer = new Printer(testCase.printerConfig);
 
-      const ast = parse(code, parseOptions);
-      const pretty = printer.printGenerically(ast).code;
+        const ast = parse(code, parseOptions);
+        const pretty = printer.printGenerically(ast).code;
 
-      assert.strictEqual(pretty, code);
-    });
-  });
+        assert.strictEqual(pretty, code);
+      });
+    }
+  );
 
-  it("prints no extra semicolons in for-loop heads (#377)", function () {
+  it("prints no extra semicolons in for-loop heads (#377)", function() {
     function check(head: any, parser: any) {
       const source = "for (" + head + ") console.log(i);";
       const ast = recast.parse(source, { parser: parser });
@@ -1698,10 +1585,7 @@ describe("printer", function() {
       const closeParenIndex = reprinted.indexOf(")", openParenIndex);
       assert.notStrictEqual(closeParenIndex, -1);
 
-      const newHead = reprinted.slice(
-        openParenIndex + 1,
-        closeParenIndex
-      );
+      const newHead = reprinted.slice(openParenIndex + 1, closeParenIndex);
 
       assert.strictEqual(newHead.split(";").length, 3);
     }
@@ -1727,58 +1611,43 @@ describe("printer", function() {
     }
   });
 
-  it("parenthesizes NumericLiteral MemberExpression objects", function () {
-    const nonBabelNode = b.memberExpression(
-      b.literal(1),
-      b.identifier('foo')
-    );
+  it("parenthesizes NumericLiteral MemberExpression objects", function() {
+    const nonBabelNode = b.memberExpression(b.literal(1), b.identifier("foo"));
 
     const babelNode = b.memberExpression(
       b.numericLiteral(1),
-      b.identifier('foo')
+      b.identifier("foo")
     );
 
-    assert.strictEqual(
-      recast.print(nonBabelNode).code,
-      "(1).foo"
-    );
+    assert.strictEqual(recast.print(nonBabelNode).code, "(1).foo");
 
-    assert.strictEqual(
-      recast.print(babelNode).code,
-      "(1).foo"
-    );
+    assert.strictEqual(recast.print(babelNode).code, "(1).foo");
   });
 
-  it("obeys 'optional' property of OptionalMemberExpression", function () {
+  it("obeys 'optional' property of OptionalMemberExpression", function() {
     const node = b.optionalMemberExpression(
-      b.identifier('foo'),
-      b.identifier('bar')
+      b.identifier("foo"),
+      b.identifier("bar")
     );
 
-    assert.strictEqual(
-      recast.print(node).code,
-      "foo?.bar"
-    );
+    assert.strictEqual(recast.print(node).code, "foo?.bar");
 
     const nonOptionalNode = b.optionalMemberExpression(
-      b.identifier('foo'),
-      b.identifier('bar'),
+      b.identifier("foo"),
+      b.identifier("bar"),
       false,
       false
     );
 
-    assert.strictEqual(
-      recast.print(nonOptionalNode).code,
-      "foo.bar"
-    );
+    assert.strictEqual(recast.print(nonOptionalNode).code, "foo.bar");
   });
 
   it("prints numbers in bases other than 10 without converting them", function() {
     const code = [
-      'let decimal = 6;',
-      'let hex = 0xf00d;',
-      'let binary = 0b1010;',
-      'let octal = 0o744;'
+      "let decimal = 6;",
+      "let hex = 0xf00d;",
+      "let binary = 0b1010;",
+      "let octal = 0o744;"
     ].join(eol);
     const ast = parse(code);
     const printer = new Printer({});
@@ -1787,8 +1656,8 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
-  it("reprints modified numeric literals", function () {
-    const code = '3 + 4;';
+  it("reprints modified numeric literals", function() {
+    const code = "3 + 4;";
     const ast = parse(code);
     const expr = ast.program.body[0].expression;
     const left = expr.left;
@@ -1797,34 +1666,34 @@ describe("printer", function() {
     left.value++;
     right.value++;
 
-    assert.strictEqual(recast.print(ast).code, '4 + 5;');
+    assert.strictEqual(recast.print(ast).code, "4 + 5;");
   });
 
-  it("prints flow tuple type annotations correctly, respecting array options", function () {
+  it("prints flow tuple type annotations correctly, respecting array options", function() {
     const code = [
-      'type MyTupleType = [',
+      "type MyTupleType = [",
       '  "tuple element 1",',
       '  "tuple element 2",',
       '  "tuple element 3",',
-      '];',
+      "];"
     ].join(eol);
 
     const ast = b.program([
       b.typeAlias(
-        b.identifier('MyTupleType'),
+        b.identifier("MyTupleType"),
         null,
         b.tupleTypeAnnotation([
-          b.stringLiteralTypeAnnotation('tuple element 1', 'tuple element 1'),
-          b.stringLiteralTypeAnnotation('tuple element 2', 'tuple element 2'),
-          b.stringLiteralTypeAnnotation('tuple element 3', 'tuple element 3'),
+          b.stringLiteralTypeAnnotation("tuple element 1", "tuple element 1"),
+          b.stringLiteralTypeAnnotation("tuple element 2", "tuple element 2"),
+          b.stringLiteralTypeAnnotation("tuple element 3", "tuple element 3")
         ])
-      ),
+      )
     ]);
 
     const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
-      trailingComma: true,
+      trailingComma: true
     });
 
     const pretty = printer.printGenerically(ast).code;
@@ -1835,14 +1704,12 @@ describe("printer", function() {
     const code = "({}).x = 1;";
 
     const assignment = b.assignmentExpression(
-      '=',
-      b.memberExpression(b.objectExpression([]), b.identifier('x'), false),
+      "=",
+      b.memberExpression(b.objectExpression([]), b.identifier("x"), false),
       b.literal(1)
     );
 
-    const ast = b.program([
-      b.expressionStatement(assignment)
-    ]);
+    const ast = b.program([b.expressionStatement(assignment)]);
 
     const printer = new Printer({
       arrowParensAlways: true
@@ -1852,14 +1719,12 @@ describe("printer", function() {
   });
 
   it("adds parenthesis around conditional", function() {
-    const code = 'new (typeof a ? b : c)();';
+    const code = "new (typeof a ? b : c)();";
     const callee = recast.parse("typeof a ? b : c").program.body[0].expression;
 
     const newExpression = b.newExpression(callee, []);
 
-    const ast = b.program([
-      b.expressionStatement(newExpression)
-    ]);
+    const ast = b.program([b.expressionStatement(newExpression)]);
 
     const printer = new Printer({
       arrowParensAlways: true
@@ -1870,25 +1735,29 @@ describe("printer", function() {
 
   it("prints flow object type internal slots correctly", function() {
     const code = [
-      'type MyObjectType = {',
-      '  [myIndexer: string]: any,',
-      '  (myParameter: any): any,',
-      '  (myOptionalParameter?: any): any,',
-      '  (myParameterWithRest: any, ...rest: any[]): any,',
-      '  [[myInternalSlot]]: any,',
-      '  static [[myStaticOptionalInternalSlot]]?: (arg: any) => any,',
-      '  static [[myStaticMethodOptionalInternalSlot]]?(arg: any): any,',
-      '  myProperty: any,',
-      '};',
+      "type MyObjectType = {",
+      "  [myIndexer: string]: any,",
+      "  (myParameter: any): any,",
+      "  (myOptionalParameter?: any): any,",
+      "  (myParameterWithRest: any, ...rest: any[]): any,",
+      "  [[myInternalSlot]]: any,",
+      "  static [[myStaticOptionalInternalSlot]]?: (arg: any) => any,",
+      "  static [[myStaticMethodOptionalInternalSlot]]?(arg: any): any,",
+      "  myProperty: any,",
+      "};"
     ].join(eol);
 
     const ast = b.program([
       b.typeAlias(
-        b.identifier('MyObjectType'),
+        b.identifier("MyObjectType"),
         null,
         b.objectTypeAnnotation.from({
           properties: [
-            b.objectTypeProperty(b.identifier("myProperty"), b.anyTypeAnnotation(), false)
+            b.objectTypeProperty(
+              b.identifier("myProperty"),
+              b.anyTypeAnnotation(),
+              false
+            )
           ],
           indexers: [
             b.objectTypeIndexer(
@@ -1904,7 +1773,7 @@ describe("printer", function() {
                   b.functionTypeParam(
                     b.identifier("myParameter"),
                     b.anyTypeAnnotation(),
-                    false,
+                    false
                   )
                 ],
                 b.anyTypeAnnotation(),
@@ -1918,7 +1787,7 @@ describe("printer", function() {
                   b.functionTypeParam(
                     b.identifier("myOptionalParameter"),
                     b.anyTypeAnnotation(),
-                    true,
+                    true
                   )
                 ],
                 b.anyTypeAnnotation(),
@@ -1932,7 +1801,7 @@ describe("printer", function() {
                   b.functionTypeParam(
                     b.identifier("myParameterWithRest"),
                     b.anyTypeAnnotation(),
-                    false,
+                    false
                   )
                 ],
                 b.anyTypeAnnotation(),
@@ -1951,35 +1820,53 @@ describe("printer", function() {
               value: b.anyTypeAnnotation(),
               static: false,
               method: false,
-              optional: false,
+              optional: false
             }),
             b.objectTypeInternalSlot.from({
               id: b.identifier("myStaticOptionalInternalSlot"),
-              value: b.functionTypeAnnotation([
-                b.functionTypeParam(b.identifier("arg"), b.anyTypeAnnotation(), false)
-              ], b.anyTypeAnnotation(), null, null),
+              value: b.functionTypeAnnotation(
+                [
+                  b.functionTypeParam(
+                    b.identifier("arg"),
+                    b.anyTypeAnnotation(),
+                    false
+                  )
+                ],
+                b.anyTypeAnnotation(),
+                null,
+                null
+              ),
               static: true,
               method: false,
-              optional: true,
+              optional: true
             }),
             b.objectTypeInternalSlot.from({
               id: b.identifier("myStaticMethodOptionalInternalSlot"),
-              value: b.functionTypeAnnotation([
-                b.functionTypeParam(b.identifier("arg"), b.anyTypeAnnotation(), false)
-              ], b.anyTypeAnnotation(), null, null),
+              value: b.functionTypeAnnotation(
+                [
+                  b.functionTypeParam(
+                    b.identifier("arg"),
+                    b.anyTypeAnnotation(),
+                    false
+                  )
+                ],
+                b.anyTypeAnnotation(),
+                null,
+                null
+              ),
               static: true,
               method: true,
-              optional: true,
-            }),
-          ],
+              optional: true
+            })
+          ]
         })
-      ),
+      )
     ]);
 
     const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
-      trailingComma: true,
+      trailingComma: true
     });
 
     const pretty = printer.printGenerically(ast).code;
@@ -1988,11 +1875,11 @@ describe("printer", function() {
 
   it("prints class private methods and properties correctly", function() {
     const code = [
-      'class MyClassWithPrivate {',
-      '  #myPrivateProperty: any;',
-      '  #myPrivatePropertyWithValue: any = value;',
-      '  #myPrivateMethod() {}',
-      '}',
+      "class MyClassWithPrivate {",
+      "  #myPrivateProperty: any;",
+      "  #myPrivatePropertyWithValue: any = value;",
+      "  #myPrivateMethod() {}",
+      "}"
     ].join(eol);
 
     const ast = b.program([
@@ -2002,26 +1889,26 @@ describe("printer", function() {
           b.classPrivateProperty.from({
             key: b.privateName(b.identifier("myPrivateProperty")),
             typeAnnotation: b.typeAnnotation(b.anyTypeAnnotation()),
-            value: null,
+            value: null
           }),
           b.classPrivateProperty.from({
             key: b.privateName(b.identifier("myPrivatePropertyWithValue")),
             typeAnnotation: b.typeAnnotation(b.anyTypeAnnotation()),
-            value: b.identifier("value"),
+            value: b.identifier("value")
           }),
           b.classPrivateMethod(
             b.privateName(b.identifier("myPrivateMethod")),
             [],
-            b.blockStatement([]),
-          ),
+            b.blockStatement([])
+          )
         ])
-      ),
+      )
     ]);
 
     const printer = new Printer({
       tabWidth: 2,
       wrapColumn: 40,
-      trailingComma: true,
+      trailingComma: true
     });
 
     const pretty = printer.printGenerically(ast).code;
@@ -2029,10 +1916,9 @@ describe("printer", function() {
   });
 
   it("prints an interpreter directive correctly", function() {
-    const code = [
-      '#!/usr/bin/env node',
-      'console.log("Hello, world!");'
-    ].join(eol);
+    const code = ["#!/usr/bin/env node", 'console.log("Hello, world!");'].join(
+      eol
+    );
 
     const ast = b.program.from({
       interpreter: b.interpreterDirective("/usr/bin/env node"),
@@ -2043,7 +1929,7 @@ describe("printer", function() {
             [b.stringLiteral("Hello, world!")]
           )
         )
-      ],
+      ]
     });
 
     const pretty = new Printer().printGenerically(ast).code;
@@ -2052,7 +1938,7 @@ describe("printer", function() {
 
   it("prints an interface type annotation correctly", function() {
     const code = [
-      'let myVar: interface extends MyOtherInterface { myProperty: any };',
+      "let myVar: interface extends MyOtherInterface { myProperty: any };"
     ].join(eol);
 
     const ast = b.program([
@@ -2066,13 +1952,13 @@ describe("printer", function() {
                   b.objectTypeProperty(
                     b.identifier("myProperty"),
                     b.anyTypeAnnotation(),
-                    false,
+                    false
                   )
                 ]),
-                [b.interfaceExtends(b.identifier("MyOtherInterface"))],
+                [b.interfaceExtends(b.identifier("MyOtherInterface"))]
               )
             )
-          }),
+          })
         )
       ])
     ]);
@@ -2083,48 +1969,54 @@ describe("printer", function() {
 
   it("object destructuring for function parameters", function() {
     const code = [
-      'function myFunction(',
-      '    {',
+      "function myFunction(",
+      "    {",
       '        yes = "y",',
       '        no: no = "n",',
-      '        short,',
-      '        long: longHand',
-      '    }',
-      ') {}',
+      "        short,",
+      "        long: longHand",
+      "    }",
+      ") {}"
     ].join(eol);
 
     const simplifiedDefaultArgProperty = b.property(
-      'init',
-      b.identifier('yes'),
-      b.assignmentPattern(b.identifier('yes'), b.literal('y')),
+      "init",
+      b.identifier("yes"),
+      b.assignmentPattern(b.identifier("yes"), b.literal("y"))
     );
     simplifiedDefaultArgProperty.shorthand = true;
 
     const notSimplifiedDefaultArgProperty = b.property(
-      'init',
-      b.identifier('no'),
-      b.assignmentPattern(b.identifier('no'), b.literal('n')),
+      "init",
+      b.identifier("no"),
+      b.assignmentPattern(b.identifier("no"), b.literal("n"))
     );
 
     const simplifiedProperty = b.property(
-      'init',
-      b.identifier('short'),
-      b.identifier('short'),
+      "init",
+      b.identifier("short"),
+      b.identifier("short")
     );
     simplifiedProperty.shorthand = true;
 
-    const notSimplifiedProperty = b.property('init', b.identifier('long'), b.identifier('longHand'));
+    const notSimplifiedProperty = b.property(
+      "init",
+      b.identifier("long"),
+      b.identifier("longHand")
+    );
 
     const ast = b.program([
       b.functionDeclaration(
-        b.identifier('myFunction'),
-        [b.objectPattern([
-          simplifiedDefaultArgProperty,
-          notSimplifiedDefaultArgProperty,
-          simplifiedProperty,
-          notSimplifiedProperty
-        ])],
-        b.blockStatement([]),
+        b.identifier("myFunction"),
+        [
+          b.objectPattern([
+            simplifiedDefaultArgProperty,
+            notSimplifiedDefaultArgProperty,
+            simplifiedProperty,
+            notSimplifiedProperty
+          ])
+        ],
+        b.blockStatement([])
       )
     ]);
 

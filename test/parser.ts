@@ -13,11 +13,12 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 // test functions with names and then export them later.
 
 describe("parser", function() {
-  ["../parsers/acorn",
-   "../parsers/babel",
-   "../parsers/esprima",
-   "../parsers/flow",
-   "../parsers/typescript",
+  [
+    "../parsers/acorn",
+    "../parsers/babel",
+    "../parsers/esprima",
+    "../parsers/flow",
+    "../parsers/typescript"
   ].forEach(runTestsForParser);
 
   it("AlternateParser", function() {
@@ -34,13 +35,10 @@ describe("parser", function() {
 
     function check(options?: any) {
       const ast = parse("ignored", options);
-      const printer = new Printer;
+      const printer = new Printer();
 
       types.namedTypes.File.assert(ast, true);
-      assert.strictEqual(
-        printer.printGenerically(ast).code,
-        "surprise;"
-      );
+      assert.strictEqual(printer.printGenerically(ast).code, "surprise;");
     }
 
     check({ esprima: parser });
@@ -51,10 +49,12 @@ describe("parser", function() {
 function runTestsForParser(parserId: string) {
   const parserName = parserId.split("/").pop();
 
-  if (nodeMajorVersion < 6 &&
-      (parserName === "babel" ||
-       parserName === "flow" ||
-       parserName === "typescript")) {
+  if (
+    nodeMajorVersion < 6 &&
+    (parserName === "babel" ||
+      parserName === "flow" ||
+      parserName === "typescript")
+  ) {
     // Babel 7 no longer supports Node 4 or 5.
     return;
   }
@@ -65,8 +65,8 @@ function runTestsForParser(parserId: string) {
 
   const parser = require(parserId);
 
-  it("[" + parserName + "] empty source", function () {
-    const printer = new Printer;
+  it("[" + parserName + "] empty source", function() {
+    const printer = new Printer();
 
     function check(code: string) {
       const ast = parse(code, { parser });
@@ -119,10 +119,7 @@ function runTestsForParser(parserId: string) {
 
     const firstComment = lastStatement.comments[0];
 
-    assert.strictEqual(
-      firstComment.type,
-      lineCommentTypes[parserName]
-    );
+    assert.strictEqual(firstComment.type, lineCommentTypes[parserName]);
 
     assert.strictEqual(firstComment.leading, true);
     assert.strictEqual(firstComment.trailing, false);
@@ -133,10 +130,7 @@ function runTestsForParser(parserId: string) {
 
     const secondComment = lastStatement.comments[1];
 
-    assert.strictEqual(
-      secondComment.type,
-      lineCommentTypes[parserName]
-    );
+    assert.strictEqual(secondComment.type, lineCommentTypes[parserName]);
 
     assert.strictEqual(secondComment.leading, true);
     assert.strictEqual(secondComment.trailing, false);
@@ -151,14 +145,9 @@ function runTestsForParser(parserId: string) {
   });
 
   it("[" + parserName + "] LocationFixer", function() {
-    const code = [
-      "function foo() {",
-      "    a()",
-      "    b()",
-      "}"
-    ].join(eol);
+    const code = ["function foo() {", "    a()", "    b()", "}"].join(eol);
     const ast = parse(code, { parser });
-    const printer = new Printer;
+    const printer = new Printer();
 
     types.visit(ast, {
       visitFunctionDeclaration: function(path) {
@@ -187,22 +176,25 @@ function runTestsForParser(parserId: string) {
         assert.strictEqual(s + "", sliced.toString());
       }
 
-      types.visit(parse(code, {
-        tabWidth: tabWidth,
-        parser,
-      }), {
-        visitIdentifier(path) {
-          const ident = path.node;
-          checkId(ident.name, ident.loc!);
-          this.traverse(path);
-        },
+      types.visit(
+        parse(code, {
+          tabWidth: tabWidth,
+          parser
+        }),
+        {
+          visitIdentifier(path) {
+            const ident = path.node;
+            checkId(ident.name, ident.loc!);
+            this.traverse(path);
+          },
 
-        visitLiteral(path) {
-          const lit = path.node;
-          checkId(lit.value, lit.loc!);
-          this.traverse(path);
+          visitLiteral(path) {
+            const lit = path.node;
+            checkId(lit.value, lit.loc!);
+            this.traverse(path);
+          }
         }
-      });
+      );
     }
 
     for (let tabWidth = 1; tabWidth <= 8; ++tabWidth) {
@@ -215,15 +207,12 @@ function runTestsForParser(parserId: string) {
     }
   });
 
-  it("[" + parserName + "] Only comment followed by space", function () {
-    const printer = new Printer;
+  it("[" + parserName + "] Only comment followed by space", function() {
+    const printer = new Printer();
 
     function check(code: string) {
       const ast = parse(code, { parser });
-      assert.strictEqual(
-        printer.print(ast).code,
-        code
-      );
+      assert.strictEqual(printer.print(ast).code, code);
     }
 
     check("// comment");

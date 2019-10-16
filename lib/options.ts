@@ -101,7 +101,7 @@ export interface Options extends DeprecatedOptions {
    * which results in the shorter literal) Otherwise, use double quotes.
    * @default null
    */
-  quote?: 'single' | 'double' | 'auto' | null;
+  quote?: "single" | "double" | "auto" | null;
 
   /**
    * Controls the printing of trailing commas in object literals, array
@@ -187,16 +187,16 @@ const defaults: Options = {
 };
 const hasOwn = defaults.hasOwnProperty;
 
-export type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
+export type NormalizedOptions = Required<
+  Omit<Options, keyof DeprecatedOptions>
+>;
 
 // Copy options and fill in default values.
 export function normalize(opts?: Options): NormalizedOptions {
   const options = opts || defaults;
 
   function get(key: keyof Options) {
-    return hasOwn.call(options, key)
-      ? options[key]
-      : defaults[key];
+    return hasOwn.call(options, key) ? options[key] : defaults[key];
   }
 
   return {
@@ -220,4 +220,4 @@ export function normalize(opts?: Options): NormalizedOptions {
     flowObjectCommas: get("flowObjectCommas"),
     tokens: !!get("tokens")
   };
-};
+}

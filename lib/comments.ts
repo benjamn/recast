@@ -22,14 +22,12 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
   fixFaultyLocations(node, lines);
 
   if (resultArray) {
-    if (n.Node.check(node) &&
-        n.SourceLocation.check(node.loc)) {
+    if (n.Node.check(node) && n.SourceLocation.check(node.loc)) {
       // This reverse insertion sort almost always takes constant
       // time because we almost always (maybe always?) append the
       // nodes in order anyway.
       for (var i = resultArray.length - 1; i >= 0; --i) {
-        if (comparePos(resultArray[i].loc.end,
-                       node.loc.start) <= 0) {
+        if (comparePos(resultArray[i].loc.end, node.loc.start) <= 0) {
           break;
         }
       }
@@ -70,15 +68,18 @@ function decorateComment(node: any, comment: any, lines: any) {
   const childNodes = getSortedChildNodes(node, lines);
 
   // Time to dust off the old binary search robes and wizard hat.
-  let left = 0, right = childNodes.length;
+  let left = 0,
+    right = childNodes.length;
   while (left < right) {
     const middle = (left + right) >> 1;
     const child = childNodes[middle];
 
-    if (comparePos(child.loc.start, comment.loc.start) <= 0 &&
-        comparePos(comment.loc.end, child.loc.end) <= 0) {
+    if (
+      comparePos(child.loc.start, comment.loc.start) <= 0 &&
+      comparePos(comment.loc.end, child.loc.end) <= 0
+    ) {
       // The comment is completely contained by this child node.
-      decorateComment(comment.enclosingNode = child, comment, lines);
+      decorateComment((comment.enclosingNode = child), comment, lines);
       return; // Abandon the binary search at this level.
     }
 
@@ -145,23 +146,19 @@ export function attach(comments: any[], ast: any, lines: any) {
       }
 
       tiesToBreak.push(comment);
-
     } else if (pn) {
       // No contest: we have a trailing comment.
       breakTies(tiesToBreak, lines);
       addTrailingComment(pn, comment);
-
     } else if (fn) {
       // No contest: we have a leading comment.
       breakTies(tiesToBreak, lines);
       addLeadingComment(fn, comment);
-
     } else if (en) {
       // The enclosing node has no child nodes at all, so what we
       // have here is a dangling comment, e.g. [/* crickets */].
       breakTies(tiesToBreak, lines);
       addDanglingComment(en, comment);
-
     } else {
       throw new Error("AST contains no nodes at all?");
     }
@@ -177,7 +174,7 @@ export function attach(comments: any[], ast: any, lines: any) {
     delete comment.enclosingNode;
     delete comment.followingNode;
   });
-};
+}
 
 function breakTies(tiesToBreak: any[], lines: any) {
   const tieCount = tiesToBreak.length;
@@ -193,9 +190,11 @@ function breakTies(tiesToBreak: any[], lines: any) {
   // between the tied comments. In order to qualify as leading, a
   // comment must be separated from fn by an unbroken series of
   // whitespace-only gaps (or other comments).
-  for (var indexOfFirstLeadingComment = tieCount;
-       indexOfFirstLeadingComment > 0;
-       --indexOfFirstLeadingComment) {
+  for (
+    var indexOfFirstLeadingComment = tieCount;
+    indexOfFirstLeadingComment > 0;
+    --indexOfFirstLeadingComment
+  ) {
     var comment = tiesToBreak[indexOfFirstLeadingComment - 1];
     assert.strictEqual(comment.precedingNode, pn);
     assert.strictEqual(comment.followingNode, fn);
@@ -209,12 +208,14 @@ function breakTies(tiesToBreak: any[], lines: any) {
     gapEndPos = comment.loc.start;
   }
 
-  while (indexOfFirstLeadingComment <= tieCount &&
-         (comment = tiesToBreak[indexOfFirstLeadingComment]) &&
-         // If the comment is a //-style comment and indented more
-         // deeply than the node itself, reconsider it as trailing.
-         (comment.type === "Line" || comment.type === "CommentLine") &&
-         comment.loc.start.column > fn.loc.start.column) {
+  while (
+    indexOfFirstLeadingComment <= tieCount &&
+    (comment = tiesToBreak[indexOfFirstLeadingComment]) &&
+    // If the comment is a //-style comment and indented more
+    // deeply than the node itself, reconsider it as trailing.
+    (comment.type === "Line" || comment.type === "CommentLine") &&
+    comment.loc.start.column > fn.loc.start.column
+  ) {
     ++indexOfFirstLeadingComment;
   }
 
@@ -264,11 +265,10 @@ function printLeadingComment(commentPath: any, print: any) {
     // When we print trailing comments as leading comments, we don't
     // want to bring any trailing spaces along.
     parts.push("\n");
-
   } else if (lines instanceof Lines) {
     const trailingSpace = lines.slice(
       loc.end,
-      lines.skipSpaces(loc.end) || lines.lastPos(),
+      lines.skipSpaces(loc.end) || lines.lastPos()
     );
 
     if (trailingSpace.length === 1) {
@@ -280,7 +280,6 @@ function printLeadingComment(commentPath: any, print: any) {
       // with just that many newlines, with all other spaces removed.
       parts.push(new Array(trailingSpace.length).join("\n"));
     }
-
   } else {
     parts.push("\n");
   }
@@ -319,8 +318,8 @@ function printTrailingComment(commentPath: any, print: any) {
 export function printComments(path: any, print: any) {
   const value = path.getValue();
   const innerLines = print(path);
-  const comments = n.Node.check(value) &&
-    types.getFieldValue(value, "comments");
+  const comments =
+    n.Node.check(value) && types.getFieldValue(value, "comments");
 
   if (!comments || comments.length === 0) {
     return innerLines;
@@ -334,9 +333,15 @@ export function printComments(path: any, print: any) {
     const leading = types.getFieldValue(comment, "leading");
     const trailing = types.getFieldValue(comment, "trailing");
 
-    if (leading || (trailing && !(n.Statement.check(value) ||
-                                  comment.type === "Block" ||
-                                  comment.type === "CommentBlock"))) {
+    if (
+      leading ||
+      (trailing &&
+        !(
+          n.Statement.check(value) ||
+          comment.type === "Block" ||
+          comment.type === "CommentBlock"
+        ))
+    ) {
       leadingParts.push(printLeadingComment(commentPath, print));
     } else if (trailing) {
       trailingParts.push(printTrailingComment(commentPath, print));
@@ -345,4 +350,4 @@ export function printComments(path: any, print: any) {
 
   leadingParts.push.apply(leadingParts, trailingParts);
   return concat(leadingParts);
-};
+}
