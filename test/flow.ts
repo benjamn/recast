@@ -142,5 +142,7 @@ describe("type syntax", function() {
     // typeArguments
     check('new A<string>();', flowParserParseOptions);
     check('createPlugin<number>();', flowParserParseOptions);
+
+    check('function myFunction([param1]: Params) {}', flowParserParseOptions);
   });
 });
