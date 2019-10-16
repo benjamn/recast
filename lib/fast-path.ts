@@ -474,6 +474,14 @@ FPp.needsParens = function(assumeExpressionContext) {
 
     break;
 
+  case 'TSAsExpression':
+    if (parent.type === 'ArrowFunctionExpression' &&
+      name === 'body' &&
+      node.expression.type === 'ObjectExpression') {
+      return true;
+    }
+    break;
+
   case "CallExpression":
     if (name === "declaration" &&
         n.ExportDefaultDeclaration.check(parent) &&
