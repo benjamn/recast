@@ -1612,12 +1612,10 @@ describe("printer", function() {
     const babelParser = require("@babel/parser");
     const parseOptions = {
       parser: {
-        parse: function (source: string) {
-          return babelParser.parse(source, {
-            sourceType: 'module',
-            plugins: ['flow'],
-          });
-        }
+        parse: (source: string) => babelParser.parse(source, {
+          sourceType: 'module',
+          plugins: ['flow'],
+        })
       }
     };
 

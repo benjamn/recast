@@ -214,9 +214,7 @@ describe("Babel", function () {
 
     assert.strictEqual(
       reprinted,
-      code.split(eol).filter(function (line) {
-        return ! line.match(/^import React from/);
-      }).join(eol)
+      code.split(eol).filter(line => ! line.match(/^import React from/)).join(eol)
     );
   });
 
@@ -401,14 +399,12 @@ describe("Babel", function () {
     const code = "function foo(bar = true) {}";
     recast.parse(code, {
       parser: {
-        parse: function (source: any) {
-          return babelTransform(source, {
-            code: false,
-            ast: true,
-            sourceMap: false,
-            presets: [babelPresetEnv]
-          }).ast;
-        }
+        parse: (source: any) => babelTransform(source, {
+          code: false,
+          ast: true,
+          sourceMap: false,
+          presets: [babelPresetEnv]
+        }).ast
       }
     });
   });

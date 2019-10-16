@@ -26,9 +26,7 @@ describe("types.visit", function() {
         assert.ok(thisExp.test(withThis));
 
         types.visit(ast, {
-            visitThisExpression: function() {
-                return builders.identifier("self");
-            }
+            visitThisExpression: () => builders.identifier("self")
         });
 
         assert.strictEqual(
@@ -127,9 +125,7 @@ describe("types.visit", function() {
                 }
             },
 
-            visitObjectExpression: function() {
-                return funExpr;
-            }
+            visitObjectExpression: () => funExpr
         });
 
         assert.strictEqual(

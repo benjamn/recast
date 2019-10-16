@@ -546,9 +546,7 @@ function containsCallExpression(node: any): any {
   }
 
   if (n.Node.check(node)) {
-    return types.someField(node, function(_name: any, child: any) {
-      return containsCallExpression(child);
-    });
+    return types.someField(node, (_name: any, child: any) => containsCallExpression(child));
   }
 
   return false;

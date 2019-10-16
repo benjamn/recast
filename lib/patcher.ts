@@ -55,9 +55,7 @@ const Patcher = function Patcher(this: PatcherType, lines: any) {
       toConcat.push(lines.slice(from, to));
     }
 
-    replacements.sort(function(a, b) {
-      return comparePos(a.start, b.start);
-    }).forEach(function(rep) {
+    replacements.sort((a, b) => comparePos(a.start, b.start)).forEach(function(rep) {
       if (comparePos(sliceFrom, rep.start) > 0) {
         // Ignore nested replacement ranges.
       } else {
