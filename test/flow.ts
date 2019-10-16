@@ -5,19 +5,19 @@ import * as types from "ast-types";
 import { EOL as eol } from "os";
 
 describe("type syntax", function() {
-  var printer = new Printer({ tabWidth: 2, quote: 'single', flowObjectCommas: false });
-  var esprimaParserParseOptions = {
+  const printer = new Printer({ tabWidth: 2, quote: 'single', flowObjectCommas: false });
+  const esprimaParserParseOptions = {
     parser: require("esprima-fb")
   };
-  var flowParserParseOptions = {
+  const flowParserParseOptions = {
     parser: require("flow-parser")
   };
 
   function check(source: string, parseOptions?: any) {
     parseOptions = parseOptions || esprimaParserParseOptions;
-    var ast1 = parse(source, parseOptions);
-    var code = printer.printGenerically(ast1).code;
-    var ast2 = parse(code, parseOptions);
+    const ast1 = parse(source, parseOptions);
+    const code = printer.printGenerically(ast1).code;
+    const ast2 = parse(code, parseOptions);
     types.astNodesAreEquivalent.assert(ast1, ast2);
     assert.strictEqual(source, code);
   }

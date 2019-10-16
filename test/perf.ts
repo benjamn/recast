@@ -2,16 +2,16 @@ import path from "path";
 import fs from "fs";
 import * as recast from "../main";
 
-var source = fs.readFileSync(
+const source = fs.readFileSync(
     path.join(__dirname, "data", "backbone.js"),
     "utf8"
 );
 
-var start = +new Date;
-var ast = recast.parse(source);
-var types = Object.create(null);
+const start = +new Date;
+const ast = recast.parse(source);
+const types = Object.create(null);
 
-var parseTime = +new Date - start;
+const parseTime = +new Date - start;
 console.log("parse", parseTime, "ms");
 
 recast.visit(ast, {
@@ -21,12 +21,12 @@ recast.visit(ast, {
     }
 });
 
-var visitTime = +new Date - start - parseTime;
+const visitTime = +new Date - start - parseTime;
 console.log("visit", visitTime, "ms");
 
 recast.prettyPrint(ast).code;
 
-var printTime = +new Date - start - visitTime - parseTime;
+const printTime = +new Date - start - visitTime - parseTime;
 console.log("print", printTime, "ms");
 
 console.log("total", +new Date - start, "ms");

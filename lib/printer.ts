@@ -4,9 +4,9 @@ import { Lines, fromString, concat } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
 import * as types from "ast-types";
-var namedTypes = types.namedTypes;
-var isString = types.builtInTypes.string;
-var isObject = types.builtInTypes.object;
+const namedTypes = types.namedTypes;
+const isString = types.builtInTypes.string;
+const isObject = types.builtInTypes.object;
 import FastPath from "./fast-path";
 import * as util from "./util";
 
@@ -32,8 +32,8 @@ const PrintResult = function PrintResult(this: PrintResultType, code: any, sourc
     }
 } as any as PrintResultConstructor;
 
-var PRp: PrintResultType = PrintResult.prototype;
-var warnedAboutToString = false;
+const PRp: PrintResultType = PrintResult.prototype;
+let warnedAboutToString = false;
 
 PRp.toString = function() {
     if (!warnedAboutToString) {
@@ -49,7 +49,7 @@ PRp.toString = function() {
     return this.code;
 };
 
-var emptyPrintResult = new PrintResult("");
+const emptyPrintResult = new PrintResult("");
 
 interface PrinterType {
     print(ast: any): PrintResultType;
@@ -221,7 +221,7 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
 // configuration object originally passed into the Printer constructor).
 // Its properties are documented in lib/options.js.
 function genericPrintNoParens(path: any, options: any, print: any) {
-    var n = path.getValue();
+    const n = path.getValue();
 
     if (!n) {
         return fromString("");
@@ -625,7 +625,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push("return");
 
         if (n.argument) {
-            var argLines = path.call(print, "argument");
+            const argLines = path.call(print, "argument");
             if (argLines.startsWithComment() ||
                 (argLines.length > 1 &&
                     namedTypes.JSXElement &&
@@ -697,13 +697,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         var i = 0;
         fields.forEach(function(field) {
             path.each(function(childPath: any) {
-                var lines = print(childPath);
+                let lines = print(childPath);
 
                 if (!oneLine) {
                     lines = lines.indent(options.tabWidth);
                 }
 
-                var multiLine = !isTypeAnnotation && lines.length > 1;
+                const multiLine = !isTypeAnnotation && lines.length > 1;
                 if (multiLine && allowBreak) {
                     // Similar to the logic for BlockStatement.
                     parts.push("\n");
@@ -812,8 +812,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
 
         path.each(function(elemPath: any) {
-            var i = elemPath.getName();
-            var elem = elemPath.getValue();
+            const i = elemPath.getName();
+            const elem = elemPath.getValue();
             if (!elem) {
                 // If the array expression ends with a hole, that hole
                 // will be ignored by the interpreter, but if it ends with
@@ -822,7 +822,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
                 // both (all) of the holes.
                 parts.push(",");
             } else {
-                var lines = printed[i];
+                let lines = printed[i];
                 if (oneLine) {
                     if (i > 0)
                         parts.push(" ");
@@ -964,7 +964,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         var maxLen = 0;
         var printed = path.map(function(childPath: any) {
-            var lines = print(childPath);
+            const lines = print(childPath);
             maxLen = Math.max(lines.length, maxLen);
             return lines;
         }, "declarations");
@@ -1253,7 +1253,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         var childLines = concat(
             path.map(function(childPath: any) {
-                var child = childPath.getValue();
+                const child = childPath.getValue();
 
                 if (namedTypes.Literal.check(child) &&
                     typeof child.value === "string") {
@@ -1460,7 +1460,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push("`");
 
         path.each(function(childPath: any) {
-            var i = childPath.getName();
+            const i = childPath.getName();
             parts.push(print(childPath));
             if (i < expressions.length) {
                 parts.push("${", expressions[i], "}");
@@ -1556,8 +1556,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
 
         path.each(function(elemPath: any) {
-            var i = elemPath.getName();
-            var elem = elemPath.getValue();
+            const i = elemPath.getName();
+            const elem = elemPath.getValue();
             if (!elem) {
                 // If the array expression ends with a hole, that hole
                 // will be ignored by the interpreter, but if it ends with
@@ -1566,7 +1566,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
                 // both (all) of the holes.
                 parts.push(",");
             } else {
-                var lines = printed[i];
+                let lines = printed[i];
                 if (oneLine) {
                     if (i > 0)
                         parts.push(" ");
@@ -2165,7 +2165,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         // ambiguous: it can be prefixed by => or :
         // in a type predicate, it takes the for u is U
         var parent = path.getParentNode(0);
-        var prefix = ": ";
+        let prefix = ": ";
         if (namedTypes.TSFunctionType.check(parent) || namedTypes.TSConstructorType.check(parent)) {
             prefix = " => ";
         }
@@ -2534,12 +2534,12 @@ function printDecorators(path: any, printPath: any) {
 }
 
 function printStatementSequence(path: any, options: any, print: any) {
-    var filtered: any[] = [];
-    var sawComment = false;
-    var sawStatement = false;
+    const filtered: any[] = [];
+    let sawComment = false;
+    let sawStatement = false;
 
     path.each(function(stmtPath: any) {
-        var stmt = stmtPath.getValue();
+        const stmt = stmtPath.getValue();
 
         // Just in case the AST has been modified to contain falsy
         // "statements," it's safer simply to skip them.
@@ -2586,27 +2586,27 @@ function printStatementSequence(path: any, options: any, print: any) {
         );
     }
 
-    var prevTrailingSpace: any = null;
-    var len = filtered.length;
-    var parts: any[] = [];
+    let prevTrailingSpace: any = null;
+    const len = filtered.length;
+    const parts: any[] = [];
 
     filtered.forEach(function(info, i) {
-        var printed = info.printed;
-        var stmt = info.node;
-        var multiLine = printed.length > 1;
-        var notFirst = i > 0;
-        var notLast = i < len - 1;
-        var leadingSpace;
-        var trailingSpace;
-        var lines = stmt && stmt.loc && stmt.loc.lines;
-        var trueLoc = lines && options.reuseWhitespace &&
+        const printed = info.printed;
+        const stmt = info.node;
+        const multiLine = printed.length > 1;
+        const notFirst = i > 0;
+        const notLast = i < len - 1;
+        let leadingSpace;
+        let trailingSpace;
+        const lines = stmt && stmt.loc && stmt.loc.lines;
+        const trueLoc = lines && options.reuseWhitespace &&
             util.getTrueLoc(stmt, lines);
 
         if (notFirst) {
             if (trueLoc) {
-                var beforeStart = lines.skipSpaces(trueLoc.start, true);
-                var beforeStartLine = beforeStart ? beforeStart.line : 1;
-                var leadingGap = trueLoc.start.line - beforeStartLine;
+                const beforeStart = lines.skipSpaces(trueLoc.start, true);
+                const beforeStartLine = beforeStart ? beforeStart.line : 1;
+                const leadingGap = trueLoc.start.line - beforeStartLine;
                 leadingSpace = Array(leadingGap + 1).join("\n");
             } else {
                 leadingSpace = multiLine ? "\n\n" : "\n";
@@ -2617,9 +2617,9 @@ function printStatementSequence(path: any, options: any, print: any) {
 
         if (notLast) {
             if (trueLoc) {
-                var afterEnd = lines.skipSpaces(trueLoc.end);
-                var afterEndLine = afterEnd ? afterEnd.line : lines.length;
-                var trailingGap = afterEndLine - trueLoc.end.line;
+                const afterEnd = lines.skipSpaces(trueLoc.end);
+                const afterEndLine = afterEnd ? afterEnd.line : lines.length;
+                const trailingGap = afterEndLine - trueLoc.end.line;
                 trailingSpace = Array(trailingGap + 1).join("\n");
             } else {
                 trailingSpace = multiLine ? "\n\n" : "\n";
@@ -2656,8 +2656,8 @@ function maxSpace(s1: any, s2: any) {
         return fromString(s1);
     }
 
-    var spaceLines1 = fromString(s1);
-    var spaceLines2 = fromString(s2);
+    const spaceLines1 = fromString(s1);
+    const spaceLines2 = fromString(s2);
 
     if (spaceLines2.length > spaceLines1.length) {
         return spaceLines2;
@@ -2667,16 +2667,16 @@ function maxSpace(s1: any, s2: any) {
 }
 
 function printMethod(path: any, options: any, print: any) {
-    var node = path.getNode();
-    var kind = node.kind;
-    var parts = [];
+    const node = path.getNode();
+    const kind = node.kind;
+    const parts = [];
 
-    var nodeValue = node.value;
+    let nodeValue = node.value;
     if (! namedTypes.FunctionExpression.check(nodeValue)) {
         nodeValue = node;
     }
 
-    var access = node.accessibility || node.access;
+    const access = node.accessibility || node.access;
     if (typeof access === "string") {
         parts.push(access, " ");
     }
@@ -2705,7 +2705,7 @@ function printMethod(path: any, options: any, print: any) {
         parts.push(kind, " ");
     }
 
-    var key = path.call(print, "key");
+    let key = path.call(print, "key");
     if (node.computed) {
         key = concat(["[", key, "]"]);
     }
@@ -2753,10 +2753,10 @@ function printMethod(path: any, options: any, print: any) {
 }
 
 function printArgumentsList(path: any, options: any, print: any) {
-    var printed = path.map(print, "arguments");
-    var trailingComma = util.isTrailingCommaEnabled(options, "parameters");
+    const printed = path.map(print, "arguments");
+    const trailingComma = util.isTrailingCommaEnabled(options, "parameters");
 
-    var joined = fromString(", ").join(printed);
+    let joined = fromString(", ").join(printed);
     if (joined.getLineLength(1) > options.wrapColumn) {
         joined = fromString(",\n").join(printed);
         return concat([
@@ -2770,7 +2770,7 @@ function printArgumentsList(path: any, options: any, print: any) {
 }
 
 function printFunctionParams(path: any, options: any, print: any) {
-    var fun = path.getValue();
+    const fun = path.getValue();
 
     if (fun.params) {
         var params = fun.params;
@@ -2782,8 +2782,8 @@ function printFunctionParams(path: any, options: any, print: any) {
 
     if (fun.defaults) {
         path.each(function(defExprPath: any) {
-            var i = defExprPath.getName();
-            var p = printed[i];
+            const i = defExprPath.getName();
+            const p = printed[i];
             if (p && defExprPath.getValue()) {
                 printed[i] = concat([p, " = ", print(defExprPath)]);
             }
@@ -2794,7 +2794,7 @@ function printFunctionParams(path: any, options: any, print: any) {
         printed.push(concat(["...", path.call(print, "rest")]));
     }
 
-    var joined = fromString(", ").join(printed);
+    let joined = fromString(", ").join(printed);
     if (joined.length > 1 ||
         joined.getLineLength(1) > options.wrapColumn) {
         joined = fromString(",\n").join(printed);
@@ -2812,12 +2812,12 @@ function printFunctionParams(path: any, options: any, print: any) {
 }
 
 function printExportDeclaration(path: any, options: any, print: any) {
-    var decl = path.getValue();
-    var parts: (string | Lines)[] = ["export "];
+    const decl = path.getValue();
+    const parts: (string | Lines)[] = ["export "];
     if (decl.exportKind && decl.exportKind !== "value") {
         parts.push(decl.exportKind + " ");
     }
-    var shouldPrintSpaces = options.objectCurlySpacing;
+    const shouldPrintSpaces = options.objectCurlySpacing;
 
     namedTypes.Declaration.assert(decl);
 
@@ -2895,7 +2895,7 @@ function printExportDeclaration(path: any, options: any, print: any) {
         }
     }
 
-    var lines = concat(parts);
+    let lines = concat(parts);
     if (lastNonSpaceCharacter(lines) !== ";" &&
         ! (decl.declaration &&
            (decl.declaration.type === "FunctionDeclaration" ||
@@ -2909,7 +2909,7 @@ function printExportDeclaration(path: any, options: any, print: any) {
 }
 
 function printFlowDeclaration(path: any, parts: any) {
-    var parentExportDecl = util.getParentExportDeclaration(path);
+    const parentExportDecl = util.getParentExportDeclaration(path);
 
     if (parentExportDecl) {
         assert.strictEqual(
@@ -2928,7 +2928,7 @@ function printFlowDeclaration(path: any, parts: any) {
 
 function printVariance(path: any, print: any) {
     return path.call(function (variancePath: any) {
-        var value = variancePath.getValue();
+        const value = variancePath.getValue();
 
         if (value) {
             if (value === "plus") {
@@ -2957,9 +2957,9 @@ function adjustClause(clause: any, options: any) {
 }
 
 function lastNonSpaceCharacter(lines: any) {
-    var pos = lines.lastPos();
+    const pos = lines.lastPos();
     do {
-        var ch = lines.charAt(pos);
+        const ch = lines.charAt(pos);
         if (/\S/.test(ch))
             return ch;
     } while (lines.prevPos(pos));
@@ -2991,7 +2991,7 @@ function nodeStr(str: string, options: any) {
 }
 
 function maybeAddSemicolon(lines: any) {
-    var eoc = lastNonSpaceCharacter(lines);
+    const eoc = lastNonSpaceCharacter(lines);
     if (!eoc || "\n};".indexOf(eoc) < 0)
         return concat([lines, ";"]);
     return lines;

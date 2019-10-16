@@ -1,15 +1,15 @@
 import assert from "assert";
 import * as recast from "../main";
 import * as types from "ast-types";
-var n = types.namedTypes;
-var b = types.builders;
+const n = types.namedTypes;
+const b = types.builders;
 import { getReprinter, Patcher } from "../lib/patcher";
 import { fromString } from "../lib/lines";
 import { parse } from "../lib/parser";
 import FastPath from "../lib/fast-path";
 import { EOL as eol } from "os";
 
-var code = [
+const code = [
   "// file comment",
   "exports.foo({",
   "    // some comment",
@@ -27,9 +27,7 @@ function loc(sl: number, sc: number, el: number, ec: number) {
 
 describe("patcher", function() {
   it("Patcher", function() {
-    var lines = fromString(code.join(eol)),
-    patcher = new Patcher(lines),
-    selfLoc = loc(5, 9, 5, 13);
+    let lines = fromString(code.join(eol)), patcher = new Patcher(lines), selfLoc = loc(5, 9, 5, 13);
 
     assert.strictEqual(patcher.get(selfLoc).toString(), "this");
 
@@ -37,14 +35,13 @@ describe("patcher", function() {
 
     assert.strictEqual(patcher.get(selfLoc).toString(), "self");
 
-    var got = patcher.get().toString();
+    const got = patcher.get().toString();
     assert.strictEqual(got, code.join(eol).replace("this", "self"));
 
     // Make sure comments are preserved.
     assert.ok(got.indexOf("// some") >= 0);
 
-    var oyezLoc = loc(2, 12, 6, 1),
-    beforeOyez = patcher.get(oyezLoc).toString();
+    const oyezLoc = loc(2, 12, 6, 1), beforeOyez = patcher.get(oyezLoc).toString();
     assert.strictEqual(beforeOyez.indexOf("exports"), -1);
     assert.ok(beforeOyez.indexOf("comment") >= 0);
 
@@ -66,7 +63,7 @@ describe("patcher", function() {
     ].join(eol));
   });
 
-  var trickyCode = [
+  const trickyCode = [
     "    function",
     "      foo(bar,",
     "  baz) {",
@@ -76,13 +73,13 @@ describe("patcher", function() {
 
   it("GetIndent", function() {
     function check(indent: number) {
-      var lines = fromString(trickyCode).indent(indent);
-      var file = parse(lines.toString());
-      var reprinter = FastPath.from(file).call(function(bodyPath: any) {
+      const lines = fromString(trickyCode).indent(indent);
+      const file = parse(lines.toString());
+      const reprinter = FastPath.from(file).call(function(bodyPath: any) {
         return getReprinter(bodyPath);
       }, "program", "body", 0, "body");
 
-      var reprintedLines = reprinter(function() {
+      const reprintedLines = reprinter(function() {
         assert.ok(false, "should not have called print function");
       });
 
@@ -97,14 +94,14 @@ describe("patcher", function() {
       ].join(eol));
     }
 
-    for (var indent = -4; indent <= 4; ++indent) {
+    for (let indent = -4; indent <= 4; ++indent) {
       check(indent);
     }
   });
 
   it("should patch return/throw/etc. arguments correctly", function() {
-    var strAST = parse('return"foo"');
-    var returnStmt = strAST.program.body[0];
+    const strAST = parse('return"foo"');
+    const returnStmt = strAST.program.body[0];
     n.ReturnStatement.assert(returnStmt);
     assert.strictEqual(
       recast.print(strAST).code,
@@ -117,8 +114,8 @@ describe("patcher", function() {
       "return null;" // Instead of returnnull.
     );
 
-    var arrAST = parse("throw[1,2,3]");
-    var throwStmt = arrAST.program.body[0];
+    const arrAST = parse("throw[1,2,3]");
+    const throwStmt = arrAST.program.body[0];
     n.ThrowStatement.assert(throwStmt);
     assert.strictEqual(
       recast.print(arrAST).code,
@@ -131,8 +128,8 @@ describe("patcher", function() {
       "throw false" // Instead of throwfalse.
     );
 
-    var inAST = parse('"foo"in bar');
-    var inExpr = inAST.program.body[0].expression;
+    const inAST = parse('"foo"in bar');
+    const inExpr = inAST.program.body[0].expression;
 
     n.BinaryExpression.assert(inExpr);
     assert.strictEqual(inExpr.operator, "in");
@@ -153,15 +150,15 @@ describe("patcher", function() {
   });
 
   it("should not add spaces to the beginnings of lines", function() {
-    var twoLineCode = [
+    const twoLineCode = [
       "return", // Because of ASI rules, these two lines will
       'xxx'     // parse as separate statements.
     ].join(eol);
 
-    var twoLineAST = parse(twoLineCode);
+    const twoLineAST = parse(twoLineCode);
 
     assert.strictEqual(twoLineAST.program.body.length, 2);
-    var xxx = twoLineAST.program.body[1];
+    const xxx = twoLineAST.program.body[1];
     n.ExpressionStatement.assert(xxx);
     n.Identifier.assert(xxx.expression);
     assert.strictEqual(xxx.expression.name, "xxx");
@@ -173,7 +170,7 @@ describe("patcher", function() {
 
     xxx.expression = b.identifier("expression");
 
-    var withExpression = recast.print(twoLineAST).code;
+    const withExpression = recast.print(twoLineAST).code;
     assert.strictEqual(withExpression, [
       "return",
       "expression" // The key is that no space should be added to the
@@ -184,7 +181,7 @@ describe("patcher", function() {
       b.callExpression(b.identifier("foo"), [])
     );
 
-    var withFooCall = recast.print(twoLineAST).code;
+    const withFooCall = recast.print(twoLineAST).code;
     assert.strictEqual(withFooCall, [
       "return",
       "foo()"

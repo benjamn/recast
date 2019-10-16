@@ -14,12 +14,12 @@ function check(a: any, b: any) {
 
 describe("lines", function() {
     describe('line terminators', function() {
-        var source = [
+        const source = [
             'foo;',
             'bar;',
         ];
 
-        var terminators = [
+        const terminators = [
             '\u000A',
             '\u000D',
             '\u2028',
@@ -29,7 +29,7 @@ describe("lines", function() {
 
         terminators.forEach(function(t) {
             it('can handle ' + escape(t) + ' as line terminator', function() {
-                var lines = fromString(source.join(t));
+                const lines = fromString(source.join(t));
                 assert.strictEqual(lines.length, 2);
                 assert.strictEqual(lines.getLineLength(1), 4);
             });
@@ -49,20 +49,20 @@ describe("lines", function() {
         checkIsCached(", ");
         checkIsCached(": ");
 
-        var longer = "This is a somewhat longer string that we do not want to cache.";
+        const longer = "This is a somewhat longer string that we do not want to cache.";
         assert.notStrictEqual(
             fromString(longer),
             fromString(longer));
 
         // Since Lines objects are immutable, if one is passed to fromString,
         // we can return it as-is without having to make a defensive copy.
-        var longerLines = fromString(longer);
+        const longerLines = fromString(longer);
         assert.strictEqual(fromString(longerLines), longerLines);
     });
 
     it("ToString", function ToStringTest() {
-        var code = String(ToStringTest);
-        var lines = fromString(code);
+        const code = String(ToStringTest);
+        const lines = fromString(code);
         check(lines, code);
         check(lines.indentTail(5)
                    .indentTail(-7)
@@ -73,11 +73,11 @@ describe("lines", function() {
     function testEachPosHelper(lines: any, code: any) {
         check(lines, code);
 
-        var chars: any[] = [];
-        var emptyCount = 0;
+        const chars: any[] = [];
+        let emptyCount = 0;
 
         function iterator(pos: any) {
-            var ch = lines.charAt(pos);
+            const ch = lines.charAt(pos);
             if (ch === "")
                 emptyCount += 1;
             chars.push(ch);
@@ -93,11 +93,11 @@ describe("lines", function() {
         // systems, so normalize those to \n characters.
         code = code.replace(/\r\n/g, "\n");
 
-        var joined = chars.join("");
+        let joined = chars.join("");
         assert.strictEqual(joined.length, code.length);
         assert.strictEqual(joined, code);
 
-        var withoutSpaces = code.replace(/\s+/g, "");
+        const withoutSpaces = code.replace(/\s+/g, "");
         chars.length = emptyCount = 0;
         lines.eachPos(iterator, null, true); // Skip spaces this time.
         assert.strictEqual(emptyCount, 0);
@@ -107,8 +107,8 @@ describe("lines", function() {
     }
 
     it("EachPos", function EachPosTest() {
-        var code = String(EachPosTest);
-        var lines = fromString(code);
+        const code = String(EachPosTest);
+        let lines = fromString(code);
 
         testEachPosHelper(lines, code);
 
@@ -125,8 +125,8 @@ describe("lines", function() {
     it("CharAt", function CharAtTest() {
         // Function.prototype.toString uses \r\n line endings on non-*NIX
         // systems, so normalize those to \n characters.
-        var code = String(CharAtTest).replace(/\r\n/g, "\n");
-        var lines = fromString(code);
+        const code = String(CharAtTest).replace(/\r\n/g, "\n");
+        const lines = fromString(code);
 
         function compare(pos: any) {
             assert.strictEqual(
@@ -140,12 +140,10 @@ describe("lines", function() {
         // out-of-bounds input positions.
         fromString(exports.testBasic).eachPos(compare);
 
-        var original = fromString("  ab" + eol + "  c"),
-            indented = original.indentTail(4),
-            reference = fromString("  ab" + eol + "      c");
+        let original = fromString("  ab" + eol + "  c"), indented = original.indentTail(4), reference = fromString("  ab" + eol + "      c");
 
         function compareIndented(pos: any) {
-            var c = indented.charAt(pos);
+            const c = indented.charAt(pos);
             check(c, reference.charAt(pos));
             check(c, indented.bootstrapCharAt(pos));
             check(c, reference.bootstrapCharAt(pos));
@@ -160,9 +158,7 @@ describe("lines", function() {
     });
 
     it("Concat", function() {
-        var strings = ["asdf", "zcxv", "qwer"],
-            lines = fromString(strings.join(eol)),
-            indented = lines.indentTail(4);
+        const strings = ["asdf", "zcxv", "qwer"], lines = fromString(strings.join(eol)), indented = lines.indentTail(4);
 
         assert.strictEqual(lines.length, 3);
 
@@ -214,7 +210,7 @@ describe("lines", function() {
 
     it("Empty", function() {
         function c(s: any) {
-            var lines = fromString(s);
+            const lines = fromString(s);
             check(lines, s);
             assert.strictEqual(
                 lines.isEmpty(),
@@ -238,8 +234,7 @@ describe("lines", function() {
     });
 
     it("SingleLine", function() {
-        var string = "asdf",
-            line = fromString(string);
+        const string = "asdf", line = fromString(string);
 
         check(line, string);
         check(line.indentTail(4), string);
@@ -250,7 +245,7 @@ describe("lines", function() {
 
         // Multi-line Lines objects are altered by indentTail, but only if the
         // amount of the indentation is non-zero.
-        var twice = line.concat(eol, line);
+        const twice = line.concat(eol, line);
         assert.notStrictEqual(twice.indentTail(10), twice);
         assert.strictEqual(twice.indentTail(0), twice);
 
@@ -268,8 +263,7 @@ describe("lines", function() {
     });
 
     it("Slice", function SliceTest() {
-        var code = String(SliceTest),
-            lines = fromString(code);
+        const code = String(SliceTest), lines = fromString(code);
         checkAllSlices(lines);
     });
 
@@ -290,15 +284,10 @@ describe("lines", function() {
     }
 
     it("GetSourceLocation", function GetSourceLocationTest() {
-        var code = String(GetSourceLocationTest),
-            lines = fromString(code);
+        const code = String(GetSourceLocationTest), lines = fromString(code);
 
         function verify(indent: any) {
-            var indented = lines.indentTail(indent),
-                loc = getSourceLocation(indented),
-                string = indented.toString(),
-                strings = string.split(eol),
-                lastLine = strings[strings.length - 1];
+            const indented = lines.indentTail(indent), loc = getSourceLocation(indented), string = indented.toString(), strings = string.split(eol), lastLine = strings[strings.length - 1];
 
             assert.strictEqual(loc.end.line, strings.length);
             assert.strictEqual(loc.end.column, lastLine.length);
@@ -313,12 +302,12 @@ describe("lines", function() {
     });
 
     it("Trim", function() {
-        var string = "  xxx " + eol + " ";
-        var options = { tabWidth: 4 };
+        const string = "  xxx " + eol + " ";
+        const options = { tabWidth: 4 };
         fromString(string);
 
         function test(string: string) {
-            var lines = fromString(string, options);
+            const lines = fromString(string, options);
             check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), options));
             check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), options));
             check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, ""), options));
@@ -335,9 +324,7 @@ describe("lines", function() {
     });
 
     it("NoIndentEmptyLines", function() {
-        var lines = fromString("a" + eol + eol + "b"),
-            indented = lines.indent(4),
-            tailIndented = lines.indentTail(5);
+        const lines = fromString("a" + eol + eol + "b"), indented = lines.indent(4), tailIndented = lines.indentTail(5);
 
         check(indented, fromString("    a" + eol + eol + "    b"));
         check(tailIndented, fromString("a" + eol + eol + "     b"));
@@ -347,7 +334,7 @@ describe("lines", function() {
     });
 
     it("CountSpaces", function() {
-        var count = countSpaces;
+        const count = countSpaces;
 
         assert.strictEqual(count(""), 0);
         assert.strictEqual(count(" "), 1);
@@ -393,11 +380,11 @@ describe("lines", function() {
     });
 
     it("IndentWithTabs", function() {
-        var tabWidth = 4;
-        var tabOpts = { tabWidth: tabWidth, useTabs: true };
-        var noTabOpts = { tabWidth: tabWidth, useTabs: false };
+        const tabWidth = 4;
+        const tabOpts = { tabWidth: tabWidth, useTabs: true };
+        const noTabOpts = { tabWidth: tabWidth, useTabs: false };
 
-        var code = [
+        let code = [
             "function f() {",
             "\treturn this;",
             "}"
@@ -410,7 +397,7 @@ describe("lines", function() {
             check(lines.indent(-3).indent(4).indent(-1).toString(noTabOpts), code);
         }
 
-        var lines = fromString(code, tabOpts);
+        let lines = fromString(code, tabOpts);
         checkUnchanged(lines, code);
 
         check(lines.indent(1).toString(tabOpts), [
@@ -437,13 +424,13 @@ describe("lines", function() {
             "    }"
         ].join(eol));
 
-        var funkyCode = [
+        const funkyCode = [
             " function g() { \t ",
             " \t\t  return this;  ",
             "\t} "
         ].join(eol);
 
-        var funky = fromString(funkyCode, tabOpts);
+        const funky = fromString(funkyCode, tabOpts);
         checkUnchanged(funky, funkyCode);
 
         check(funky.indent(1).toString(tabOpts), [
@@ -496,7 +483,7 @@ describe("lines", function() {
     });
 
     it("GuessTabWidth", function GuessTabWidthTest(done) {
-        var lines;
+        let lines;
         lines = fromString([
             "function identity(x) {",
             "    return x;",
@@ -531,11 +518,11 @@ describe("lines", function() {
     });
 
     it("ExoticWhitespace", function() {
-        var source = "";
-        var spacePattern = /^\s+$/;
+        let source = "";
+        const spacePattern = /^\s+$/;
 
-        for (var i = 0; i < 0xffff; ++i) {
-            var ch = String.fromCharCode(i);
+        for (let i = 0; i < 0xffff; ++i) {
+            const ch = String.fromCharCode(i);
             if (spacePattern.test(ch)) {
                 source += ch;
             }
@@ -543,8 +530,8 @@ describe("lines", function() {
 
         source += "x";
 
-        var options = { tabWidth: 4 };
-        var lines = fromString(source, options);
+        const options = { tabWidth: 4 };
+        const lines = fromString(source, options);
 
         assert.strictEqual(lines.length, 5);
         assert.strictEqual(lines.getLineLength(1), options.tabWidth);

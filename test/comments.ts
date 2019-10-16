@@ -1,14 +1,14 @@
 "use strict";
 
 import * as recast from "../main";
-var n = recast.types.namedTypes;
-var b = recast.types.builders;
+const n = recast.types.namedTypes;
+const b = recast.types.builders;
 import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
 import assert from "assert";
 import { EOL as eol } from "os";
 
-var annotated = [
+const annotated = [
   "function dup(/* string */ s,",
   "             /* int */ n) /* string */",
   "{",
@@ -18,7 +18,7 @@ var annotated = [
   "}"
 ];
 
-var nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("comments", function() {
   ["../parsers/acorn",
@@ -48,10 +48,10 @@ function runTestsForParser(parserId: any) {
   }
 
   pit("attachment and reprinting", function() {
-    var code = annotated.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = annotated.join(eol);
+    const ast = recast.parse(code, { parser });
 
-    var dup = ast.program.body[0];
+    const dup = ast.program.body[0];
     n.FunctionDeclaration.assert(dup);
     assert.strictEqual(dup.id.name, "dup");
 
@@ -75,21 +75,21 @@ function runTestsForParser(parserId: any) {
       ["/* string */"].concat(annotated.slice(2)).join(eol)
     );
 
-    var retStmt = dup.body.body[0];
+    const retStmt = dup.body.body[0];
     n.ReturnStatement.assert(retStmt);
 
-    var indented = annotated.slice(3, 6).join(eol);
-    var flush = fromString(indented).indent(-2);
+    const indented = annotated.slice(3, 6).join(eol);
+    const flush = fromString(indented).indent(-2);
 
     assert.strictEqual(
       recast.print(retStmt).code,
       flush.toString()
     );
 
-    var join = retStmt.argument;
+    const join = retStmt.argument;
     n.CallExpression.assert(join);
 
-    var one = join.callee.object.arguments[0].right;
+    const one = join.callee.object.arguments[0].right;
     n.Literal.assert(one);
     assert.strictEqual(one.value, 1);
     assert.strictEqual(recast.print(one).code, [
@@ -98,7 +98,7 @@ function runTestsForParser(parserId: any) {
     ].join(eol));
   });
 
-  var trailing = [
+  const trailing = [
     "Foo.prototype = {",
     "// Copyright (c) 2013 Ben Newman <bn@cs.stanford.edu>",
     "",
@@ -117,7 +117,7 @@ function runTestsForParser(parserId: any) {
     "};"
   ];
 
-  var trailingExpected = [
+  const trailingExpected = [
     "Foo.prototype = {",
     "  // Copyright (c) 2013 Ben Newman <bn@cs.stanford.edu>",
     "",
@@ -146,8 +146,8 @@ function runTestsForParser(parserId: any) {
   ];
 
   pit("TrailingComments", function() {
-    var code = trailing.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = trailing.join(eol);
+    const ast = recast.parse(code, { parser });
     assert.strictEqual(recast.print(ast).code, code);
 
     // Drop all original source information to force reprinting.
@@ -158,7 +158,7 @@ function runTestsForParser(parserId: any) {
       }
     });
 
-    var assign = ast.program.body[0].expression;
+    const assign = ast.program.body[0].expression;
     n.AssignmentExpression.assert(assign);
 
     const esprimaInfo = {
@@ -195,7 +195,7 @@ function runTestsForParser(parserId: any) {
       typescript: babelInfo
     } as any)[parserName];
 
-    var props = assign.right.properties;
+    const props = assign.right.properties;
     info.Property.arrayOf().assert(props);
 
     props.push(info.propBuilder(
@@ -203,15 +203,15 @@ function runTestsForParser(parserId: any) {
       info.literalBuilder("property")
     ));
 
-    var quxVal = props[2].value;
+    const quxVal = props[2].value;
     n.ObjectExpression.assert(quxVal);
     quxVal.properties.push(info.propBuilder(
       b.identifier("asdf"),
       info.literalBuilder(43)
     ));
 
-    var actual = recast.print(ast, { tabWidth: 2 }).code;
-    var expected = trailingExpected.join(eol);
+    const actual = recast.print(ast, { tabWidth: 2 }).code;
+    const expected = trailingExpected.join(eol);
 
     // Check semantic equivalence:
     recast.types.astNodesAreEquivalent.assert(
@@ -222,14 +222,14 @@ function runTestsForParser(parserId: any) {
     assert.strictEqual(actual, expected);
   });
 
-  var bodyTrailing = [
+  const bodyTrailing = [
     "module.exports = {};",
     "/**",
     " * Trailing comment.",
     " */"
   ];
 
-  var bodyTrailingExpected = [
+  const bodyTrailingExpected = [
     "module.exports = {};",
     "/**",
     " * Trailing comment.",
@@ -237,8 +237,8 @@ function runTestsForParser(parserId: any) {
   ];
 
   pit("BodyTrailingComments", function() {
-    var code = bodyTrailing.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = bodyTrailing.join(eol);
+    const ast = recast.parse(code, { parser });
 
     // Drop all original source information to force reprinting.
     recast.visit(ast, {
@@ -248,40 +248,40 @@ function runTestsForParser(parserId: any) {
       }
     });
 
-    var actual = recast.print(ast, { tabWidth: 2 }).code;
-    var expected = bodyTrailingExpected.join(eol);
+    const actual = recast.print(ast, { tabWidth: 2 }).code;
+    const expected = bodyTrailingExpected.join(eol);
 
     assert.strictEqual(actual, expected);
   });
 
-  var paramTrailing = [
+  const paramTrailing = [
     "function foo(bar, baz /* = null */) {",
     "  assert.strictEqual(baz, null);",
     "}"
   ];
 
-  var paramTrailingExpected = [
+  const paramTrailingExpected = [
     "function foo(zxcv, bar, baz /* = null */) {",
     "  assert.strictEqual(baz, null);",
     "}"
   ];
 
   pit("ParamTrailingComments", function() {
-    var code = paramTrailing.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = paramTrailing.join(eol);
+    const ast = recast.parse(code, { parser });
 
-    var func = ast.program.body[0];
+    const func = ast.program.body[0];
     n.FunctionDeclaration.assert(func);
 
     func.params.unshift(b.identifier("zxcv"));
 
-    var actual = recast.print(ast, { tabWidth: 2 }).code;
-    var expected = paramTrailingExpected.join(eol);
+    const actual = recast.print(ast, { tabWidth: 2 }).code;
+    const expected = paramTrailingExpected.join(eol);
 
     assert.strictEqual(actual, expected);
   });
 
-  var statementTrailing = [
+  const statementTrailing = [
     "if (true) {",
     "  f();",
     "  // trailing 1",
@@ -291,7 +291,7 @@ function runTestsForParser(parserId: any) {
     "}"
   ];
 
-  var statementTrailingExpected = [
+  const statementTrailingExpected = [
     "if (true) {",
     "  e();",
     "  f();",
@@ -303,22 +303,22 @@ function runTestsForParser(parserId: any) {
   ];
 
   pit("StatementTrailingComments", function() {
-    var code = statementTrailing.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = statementTrailing.join(eol);
+    const ast = recast.parse(code, { parser });
 
-    var block = ast.program.body[0].consequent;
+    const block = ast.program.body[0].consequent;
     n.BlockStatement.assert(block);
 
     block.body.unshift(b.expressionStatement(
       b.callExpression(b.identifier("e"), [])));
 
-    var actual = recast.print(ast, { tabWidth: 2 }).code;
-    var expected = statementTrailingExpected.join(eol);
+    const actual = recast.print(ast, { tabWidth: 2 }).code;
+    const expected = statementTrailingExpected.join(eol);
 
     assert.strictEqual(actual, expected);
   });
 
-  var protoAssign = [
+  const protoAssign = [
     "A.prototype.foo = function() {",
     "  return this.bar();",
     "}", // Lack of semicolon screws up location info.
@@ -330,11 +330,11 @@ function runTestsForParser(parserId: any) {
   ];
 
   pit("ProtoAssignComment", function() {
-    var code = protoAssign.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = protoAssign.join(eol);
+    const ast = recast.parse(code, { parser });
 
-    var foo = ast.program.body[0];
-    var bar = ast.program.body[1];
+    const foo = ast.program.body[0];
+    const bar = ast.program.body[1];
 
     n.ExpressionStatement.assert(foo);
     n.ExpressionStatement.assert(bar);
@@ -346,7 +346,7 @@ function runTestsForParser(parserId: any) {
     assert.ok(bar.comments);
     assert.strictEqual(bar.comments.length, 1);
 
-    var barComment = bar.comments[0];
+    const barComment = bar.comments[0];
     assert.strictEqual(barComment.leading, true);
     assert.strictEqual(barComment.trailing, false);
 
@@ -356,7 +356,7 @@ function runTestsForParser(parserId: any) {
     );
   });
 
-  var conciseMethods = [
+  const conciseMethods = [
     "var obj = {",
     "  a(/*before*/ param) {},",
     "  b(param /*after*/) {},",
@@ -365,20 +365,20 @@ function runTestsForParser(parserId: any) {
   ];
 
   pit("should correctly attach to concise methods", function() {
-    var code = conciseMethods.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = conciseMethods.join(eol);
+    const ast = recast.parse(code, { parser });
 
-    var objExpr = ast.program.body[0].declarations[0].init;
+    const objExpr = ast.program.body[0].declarations[0].init;
     n.ObjectExpression.assert(objExpr);
 
-    var a = objExpr.properties[0];
+    const a = objExpr.properties[0];
     n.Identifier.assert(a.key);
     assert.strictEqual(a.key.name, "a");
 
-    var aComments = (a.value || a).params[0].comments;
+    const aComments = (a.value || a).params[0].comments;
     assert.strictEqual(aComments.length, 1);
 
-    var aComment = aComments[0];
+    const aComment = aComments[0];
     assert.strictEqual(aComment.leading, true);
     assert.strictEqual(aComment.trailing, false);
     assert.ok(aComment.type.endsWith("Block"));
@@ -389,14 +389,14 @@ function runTestsForParser(parserId: any) {
       "a(/*before*/ param) {}"
     );
 
-    var b = objExpr.properties[1];
+    const b = objExpr.properties[1];
     n.Identifier.assert(b.key);
     assert.strictEqual(b.key.name, "b");
 
-    var bComments = (b.value || b).params[0].comments;
+    const bComments = (b.value || b).params[0].comments;
     assert.strictEqual(bComments.length, 1);
 
-    var bComment = bComments[0];
+    const bComment = bComments[0];
     assert.strictEqual(bComment.leading, false);
     assert.strictEqual(bComment.trailing, true);
     assert.ok(bComment.type.endsWith("Block"));
@@ -407,14 +407,14 @@ function runTestsForParser(parserId: any) {
       "b(param /*after*/) {}"
     );
 
-    var c = objExpr.properties[2];
+    const c = objExpr.properties[2];
     n.Identifier.assert(c.key);
     assert.strictEqual(c.key.name, "c");
 
-    var cComments = (c.value || c).body.comments;
+    const cComments = (c.value || c).body.comments;
     assert.strictEqual(cComments.length, 1);
 
-    var cComment = cComments[0];
+    const cComment = cComments[0];
     assert.strictEqual(cComment.leading, true);
     assert.strictEqual(cComment.trailing, false);
     assert.ok(cComment.type.endsWith("Block"));
@@ -428,13 +428,13 @@ function runTestsForParser(parserId: any) {
 
   pit("should attach comments as configurable", function() {
     // Given
-    var simpleCommentedCode = [
+    const simpleCommentedCode = [
       "// A comment",
       "var obj = {",
       "};",
     ];
-    var code = simpleCommentedCode.join(eol);
-    var ast = recast.parse(code, { parser });
+    const code = simpleCommentedCode.join(eol);
+    const ast = recast.parse(code, { parser });
 
     // When
     Object.defineProperty(ast.program, 'comments', {
@@ -447,15 +447,15 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should be reprinted when modified", function() {
-    var code = [
+    const code = [
       "foo;",
       "// bar",
       "bar;"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
 
-    var comments = ast.program.body[1].comments;
+    const comments = ast.program.body[1].comments;
     assert.strictEqual(comments.length, 1);
     var comment = comments[0];
     assert.ok(comment.type.endsWith("Line"));
@@ -577,7 +577,7 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should preserve stray non-comment syntax", function() {
-    var code = [
+    const code = [
       "[",
       "  foo",
       "  , /* comma */",
@@ -587,10 +587,10 @@ function runTestsForParser(parserId: any) {
       "]"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     assert.strictEqual(recast.print(ast).code, code);
 
-    var elems = ast.program.body[0].expression.elements;
+    const elems = ast.program.body[0].expression.elements;
     elems[0].comments.push(b.line(" line comment", true, false));
     assert.strictEqual(recast.print(ast).code, [
       "[",
@@ -649,7 +649,7 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should attach to program.body[0] instead of program", function() {
-    var code = [
+    const code = [
       "// comment 1",
       "var a;",
       "// comment 2",
@@ -660,25 +660,25 @@ function runTestsForParser(parserId: any) {
       "}"
     ].join('\n');
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
 
     assert.ok(!ast.program.comments);
 
-    var aDecl = ast.program.body[0];
+    const aDecl = ast.program.body[0];
     n.VariableDeclaration.assert(aDecl);
     assert.strictEqual(aDecl.comments.length, 1);
     assert.strictEqual(aDecl.comments[0].leading, true);
     assert.strictEqual(aDecl.comments[0].trailing, false);
     assert.strictEqual(aDecl.comments[0].value, " comment 1");
 
-    var bDecl = ast.program.body[1];
+    const bDecl = ast.program.body[1];
     n.VariableDeclaration.assert(bDecl);
     assert.strictEqual(bDecl.comments.length, 1);
     assert.strictEqual(bDecl.comments[0].leading, true);
     assert.strictEqual(bDecl.comments[0].trailing, false);
     assert.strictEqual(bDecl.comments[0].value, " comment 2");
 
-    var cDecl = ast.program.body[2].consequent.body[0];
+    const cDecl = ast.program.body[2].consequent.body[0];
     n.VariableDeclaration.assert(cDecl);
     assert.strictEqual(cDecl.comments.length, 1);
     assert.strictEqual(cDecl.comments[0].leading, true);
@@ -687,7 +687,7 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should not collapse multi line function definitions", function() {
-    var code = [
+    const code = [
       "var obj = {",
       "  a(",
       "    /*before*/ param",
@@ -696,8 +696,8 @@ function runTestsForParser(parserId: any) {
       "};",
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
-    var printer = new Printer({
+    const ast = recast.parse(code, { parser });
+    const printer = new Printer({
       tabWidth: 2
     });
 
@@ -708,19 +708,19 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should be pretty-printable in illegal positions", function() {
-    var code = [
+    const code = [
       "var sum = function /*anonymous*/(/*...args*/) /*int*/ {",
       "  // TODO",
       "};"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
-    var funExp = ast.program.body[0].declarations[0].init;
+    const ast = recast.parse(code, { parser });
+    const funExp = ast.program.body[0].declarations[0].init;
     n.FunctionExpression.assert(funExp);
 
     funExp.original = null;
 
-    var comments = funExp.body.comments;
+    const comments = funExp.body.comments;
     assert.strictEqual(comments.length, 4);
     funExp.id = comments.shift();
     funExp.params.push(comments.shift());
@@ -733,13 +733,13 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should preserve correctness when a return expression has a comment", function () {
-    var code = [
+    const code = [
       "function f() {",
       "  return 3;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -753,13 +753,13 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should wrap in parens when the return expression has nested leftmost comment", function () {
-    var code = [
+    const code = [
       "function f() {",
       "  return 1 + 2;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.left.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -773,13 +773,13 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should not wrap in parens when the return expression has an interior comment", function () {
-    var code = [
+    const code = [
       "function f() {",
       "  return 1 + 2;",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument.right.comments = [b.line('Foo')];
 
     assert.strictEqual(recast.print(ast).code, [
@@ -791,17 +791,17 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should correctly handle a lonesome comment (alt 1)", function() {
-    var code = ["", "// boo", ""].join(eol);
+    const code = ["", "// boo", ""].join(eol);
 
-    var ast = recast.parse(code);
+    const ast = recast.parse(code);
 
     assert.strictEqual(recast.print(ast).code, ["", "// boo", ""].join(eol));
   });
 
   pit("should correctly handle a not-so-lonesome comment (alt 2 - trailing whitespace)", function() {
-    var code = ["", "// boo ", ";"].join(eol);
+    const code = ["", "// boo ", ";"].join(eol);
 
-    var ast = recast.parse(code);
+    const ast = recast.parse(code);
 
     assert.strictEqual(
       recast.print(ast).code,
@@ -810,15 +810,15 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should correctly handle a lonesome comment (alt 3 - trailing whitespace)", function() {
-    var code = ["", "// boo ", ""].join(eol);
+    const code = ["", "// boo ", ""].join(eol);
 
-    var ast = recast.parse(code);
+    const ast = recast.parse(code);
 
     assert.strictEqual(recast.print(ast).code, ["", "// boo ", ""].join(eol));
   });
 
   pit("should not reformat a return statement that is not modified", function () {
-    var code = [
+    const code = [
       "function f() {",
       "  return      {",
       "    a:     1,",
@@ -827,19 +827,19 @@ function runTestsForParser(parserId: any) {
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
 
     assert.strictEqual(recast.print(ast).code, code);
   });
 
   pit("should correctly handle a removing the argument from a return", function () {
-    var code = [
+    const code = [
       "function f() {",
       "  return 'foo';",
       "}"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     ast.program.body[0].body.body[0].argument = null;
 
     assert.strictEqual(recast.print(ast).code, [
@@ -850,13 +850,13 @@ function runTestsForParser(parserId: any) {
   });
 
   pit("should preserve comments attached to EmptyStatement", function() {
-    var code = [
+    const code = [
       "removeThisStatement;",
       "// comment",
       ";(function() {})();"
     ].join(eol);
 
-    var ast = recast.parse(code, { parser });
+    const ast = recast.parse(code, { parser });
     ast.program.body.shift();
 
     assert.strictEqual(recast.print(ast).code, [
