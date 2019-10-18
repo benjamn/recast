@@ -54,7 +54,7 @@
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
     "ts-node": "7.0.1",
-    "typescript": "3.4.5"
+    "typescript": "3.6.4"
   },
   "engines": {
     "node": ">= 4"
