@@ -263,12 +263,10 @@ export class Lines {
       return this;
     }
 
-    return new Lines(this.infos.map(function (info: any, i: any) {
-      return {
-        ...info,
-        locked: i > 0,
-      };
-    }));
+    return new Lines(this.infos.map((info: any, i: any) => ({
+      ...info,
+      locked: i > 0
+    })));
   }
 
   getIndentAt(line: number) {

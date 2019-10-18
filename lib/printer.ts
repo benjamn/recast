@@ -75,9 +75,7 @@ const Printer = function Printer(this: PrinterType, config?: any) {
     // new print function that uses the modified options.
     function makePrintFunctionWith(options: any, overrides: any) {
         options = Object.assign({}, options, overrides);
-        return function (path: any) {
-            return print(path, options);
-        };
+        return (path: any) => print(path, options);
     }
 
     function print(path: any, options: any) {
@@ -154,12 +152,10 @@ const Printer = function Printer(this: PrinterType, config?: any) {
 
         // Print the entire AST generically.
         function printGenerically(path: any) {
-            return printComments(path, function (path: any) {
-                return genericPrint(path, config, {
-                    includeComments: true,
-                    avoidRootParens: false
-                }, printGenerically);
-            });
+            return printComments(path, (path: any) => genericPrint(path, config, {
+                includeComments: true,
+                avoidRootParens: false
+            }, printGenerically));
         }
 
         const path = FastPath.from(ast);
@@ -251,9 +247,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             parts.push(path.call(print, "interpreter"));
         }
 
-        parts.push(path.call(function(bodyPath: any) {
-            return printStatementSequence(bodyPath, options, print);
-        }, "body"));
+        parts.push(path.call((bodyPath: any) => printStatementSequence(bodyPath, options, print), "body"));
 
         return concat(parts);
 
@@ -596,9 +590,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "BlockStatement":
-        var naked = path.call(function(bodyPath: any) {
-            return printStatementSequence(bodyPath, options, print);
-        }, "body");
+        var naked = path.call((bodyPath: any) => printStatementSequence(bodyPath, options, print), "body");
 
 
         if (naked.isEmpty()) {
@@ -1099,9 +1091,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         return concat(parts);
 
     case "DoExpression":
-        var statements = path.call(function(bodyPath: any) {
-            return printStatementSequence(bodyPath, options, print);
-        }, "body");
+        var statements = path.call((bodyPath: any) => printStatementSequence(bodyPath, options, print), "body");
 
         return concat([
             "do {\n",
@@ -1191,9 +1181,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             parts.push("default:");
 
         if (n.consequent.length > 0) {
-            parts.push("\n", path.call(function(consequentPath: any) {
-                return printStatementSequence(consequentPath, options, print);
-            }, "consequent").indent(options.tabWidth));
+            parts.push("\n", path.call((consequentPath: any) => printStatementSequence(consequentPath, options, print), "consequent").indent(options.tabWidth));
         }
 
         return concat(parts);
@@ -1335,9 +1323,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         return concat([
             "{\n",
-            path.call(function(bodyPath: any) {
-                return printStatementSequence(bodyPath, options, print);
-            }, "body").indent(options.tabWidth),
+            path.call((bodyPath: any) => printStatementSequence(bodyPath, options, print), "body").indent(options.tabWidth),
             "\n}"
         ]);
 
@@ -2463,9 +2449,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "TSModuleBlock":
-        return path.call(function (bodyPath: any) {
-            return printStatementSequence(bodyPath, options, print);
-        }, "body");
+        return path.call((bodyPath: any) => printStatementSequence(bodyPath, options, print), "body");
 
     // Unhandled types below. If encountered, nodes of these types should
     // be either left alone or desugared into AST types that are fully
@@ -2735,9 +2719,7 @@ function printMethod(path: any, options: any, print: any) {
         parts.push(
             path.call(print, "value", "typeParameters"),
             "(",
-            path.call(function(valuePath: any) {
-                return printFunctionParams(valuePath, options, print);
-            }, "value"),
+            path.call((valuePath: any) => printFunctionParams(valuePath, options, print), "value"),
             ")",
             path.call(print, "value", "returnType")
         );
@@ -2970,9 +2952,7 @@ function endsWithBrace(lines: any) {
 }
 
 function swapQuotes(str: string) {
-    return str.replace(/['"]/g, function(m) {
-        return m === '"' ? '\'' : '"';
-    });
+    return str.replace(/['"]/g, m => m === '"' ? '\'' : '"');
 }
 
 function nodeStr(str: string, options: any) {

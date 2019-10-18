@@ -75,9 +75,7 @@ describe("patcher", function() {
     function check(indent: number) {
       const lines = fromString(trickyCode).indent(indent);
       const file = parse(lines.toString());
-      const reprinter = FastPath.from(file).call(function(bodyPath: any) {
-        return getReprinter(bodyPath);
-      }, "program", "body", 0, "body");
+      const reprinter = FastPath.from(file).call((bodyPath: any) => getReprinter(bodyPath), "program", "body", 0, "body");
 
       const reprintedLines = reprinter(function() {
         assert.ok(false, "should not have called print function");
