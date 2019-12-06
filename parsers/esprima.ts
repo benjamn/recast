@@ -18,7 +18,8 @@ export function parse(source: string, options?: any) {
     onComment: comments,
     range: getOption(options, "range", false),
     tolerant: getOption(options, "tolerant", true),
-    tokens: true
+    tokens: true,
+    jsx: getOption(options, "jsx", false)
   });
 
   if (!Array.isArray(ast.comments)) {
