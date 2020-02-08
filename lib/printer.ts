@@ -1659,7 +1659,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         var needsColon =
             isArrowFunctionTypeAnnotation &&
-            !namedTypes.FunctionTypeParam.check(parent);
+            !namedTypes.FunctionTypeParam.check(parent) &&
+            !namedTypes.TypeAlias.check(parent);
 
         if (needsColon) {
             parts.push(": ");
