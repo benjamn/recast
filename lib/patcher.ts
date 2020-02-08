@@ -371,6 +371,17 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
       return false;
     }
 
+    const newParentNode = newPath.getParentNode();
+    const oldParentNode = oldPath.getParentNode();
+    if (oldParentNode !== null && oldParentNode.type === 'FunctionTypeAnnotation'
+      && newParentNode !== null && newParentNode.type === 'FunctionTypeAnnotation') {
+        const oldNeedsParens = oldParentNode.params.length !== 1 || !!oldParentNode.params[0].name;
+        const newNeedParens = newParentNode.params.length !== 1 || !!newParentNode.params[0].name;
+      if (!oldNeedsParens && newNeedParens) {
+        return false;
+      }
+    }
+
     // Here we need to decide whether the reprinted code for newNode is
     // appropriate for patching into the location of oldNode.
 

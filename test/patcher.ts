@@ -6,6 +6,7 @@ const b = types.builders;
 import { getReprinter, Patcher } from "../lib/patcher";
 import { fromString } from "../lib/lines";
 import { parse } from "../lib/parser";
+import * as flowParser from "../parsers/flow";
 import FastPath from "../lib/fast-path";
 import { EOL as eol } from "os";
 
@@ -184,5 +185,25 @@ describe("patcher", function() {
       "return",
       "foo()"
     ].join(eol));
+  });
+
+  it("should handle function", () => {
+    const strAST = parse('type T = number => string;', { parser: flowParser });
+    const typeAliasStatement = strAST.program.body[0];
+    n.TypeAlias.assert(typeAliasStatement);
+    assert.strictEqual(
+      recast.print(strAST).code,
+      'type T = number => string;'
+    );
+
+    const functionTypeAnnotation = typeAliasStatement.right;
+    n.FunctionTypeAnnotation.assert(functionTypeAnnotation);
+
+    functionTypeAnnotation.params[0].optional = true;
+    functionTypeAnnotation.params[0].name = b.identifier('_');
+    assert.strictEqual(
+      recast.print(strAST,{ tabWidth: 2} ).code,
+      'type T = (_?: number) => string;'
+    );
   });
 });
