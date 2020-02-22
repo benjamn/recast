@@ -471,4 +471,27 @@ describe("Babel", function () {
         ].join(eol)
     );
   });
+
+  it("should print typescript class elements modifiers", function () {
+    const code = [
+      'class A {',
+      '  x;',
+      '}'
+    ].join(eol);
+
+    const ast = recast.parse(code, parseOptions);
+
+    ast.program.body[0].body.body[0].readonly = true;
+    ast.program.body[0].body.body[0].declare = true;
+    ast.program.body[0].body.body[0].accessibility = "public";
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        'class A {',
+        '  declare public readonly x;',
+        '}'
+      ].join(eol)
+    );
+  })
 });
