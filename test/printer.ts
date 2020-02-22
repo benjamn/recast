@@ -1984,6 +1984,40 @@ describe("printer", function() {
     assert.strictEqual(pretty, code);
   });
 
+  it("prints flow type alias to function correctly", function () {
+    const code = [
+      'type MyTypeAlias = (x?: ?number) => string;',
+    ].join(eol);
+
+    const ast = b.program([
+      b.typeAlias(
+        b.identifier('MyTypeAlias'),
+        null,
+        b.functionTypeAnnotation(
+          [
+            b.functionTypeParam(
+              b.identifier("x"),
+              b.nullableTypeAnnotation(b.numberTypeAnnotation()),
+              true,
+            )
+          ],
+          b.stringTypeAnnotation(),
+          null,
+          null,
+        ),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 40,
+      trailingComma: true,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  })
+
   it("prints class private methods and properties correctly", function() {
     const code = [
       'class MyClassWithPrivate {',

@@ -1659,16 +1659,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
         var needsColon =
             isArrowFunctionTypeAnnotation &&
-            !namedTypes.FunctionTypeParam.check(parent);
+            !namedTypes.FunctionTypeParam.check(parent) &&
+            !namedTypes.TypeAlias.check(parent);
 
         if (needsColon) {
             parts.push(": ");
         }
 
+        const needsParens = n.params.length !== 1 || n.params[0].name
+
         parts.push(
-            "(",
+            needsParens ? "(" : '',
             printFunctionParams(path, options, print),
-            ")",
+            needsParens ? ")" : '',
         );
 
         // The returnType is not wrapped in a TypeAnnotation, so the colon
@@ -1683,12 +1686,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         return concat(parts);
 
     case "FunctionTypeParam":
-        return concat([
-            path.call(print, "name"),
-            n.optional ? '?' : '',
-            ": ",
-            path.call(print, "typeAnnotation"),
-        ]);
+        const name = path.call(print, "name");
+        parts.push(name);
+        if (n.optional) {
+            parts.push('?');
+        }
+        if (name.infos[0].line) {
+            parts.push(': ');
+        }
+        parts.push(path.call(print, "typeAnnotation"));
+
+        return concat(parts);
 
     case "GenericTypeAnnotation":
         return concat([
