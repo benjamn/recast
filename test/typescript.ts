@@ -148,6 +148,10 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     ]);
 
     check([
+      'const highlight = (n => false) as (a: number) => boolean;'
+    ]);
+
+    check([
       'enum Color {',
       '  Red,',
       '  Green,',
