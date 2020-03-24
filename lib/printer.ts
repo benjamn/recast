@@ -2143,7 +2143,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         var withParens = n.extra && n.extra.parenthesized === true;
         if (withParens) parts.push("(");
         const expression = path.call(print, "expression");
-        const needParens = path.getValue().expression.type === "ArrowFunctionExpression";
+        const expressionType = path.getValue().expression.type;
+        const needParens = expressionType === "ArrowFunctionExpression" || expressionType === "FunctionExpression";
         parts.push(
             needParens ? '(' + expression + ')' : expression,
             fromString(" as "),
