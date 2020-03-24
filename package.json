@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
-    "@babel/parser": "7.7.7",
+    "@babel/parser": "7.9.4",
     "@babel/preset-env": "7.7.7",
     "@types/esprima": "4.0.2",
     "@types/glob": "7.1.1",
