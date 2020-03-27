@@ -527,6 +527,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "Import":
         return fromString("import", options);
 
+    // Recast and ast-types currently support dynamic import(...) using
+    // either this dedicated ImportExpression type or a CallExpression
+    // whose callee has type Import.
+    // https://github.com/benjamn/ast-types/pull/365#issuecomment-605214486
+    case "ImportExpression":
+        return concat(["import(", path.call(print, "source"), ")"]);
+
     case "ImportDeclaration": {
         parts.push("import ");
 
