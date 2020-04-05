@@ -2149,8 +2149,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSAsExpression": {
         var withParens = n.extra && n.extra.parenthesized === true;
         if (withParens) parts.push("(");
+        const expression = path.call(print, "expression");
+        const expressionType = path.getValue().expression.type;
+        const needParens = expressionType === "ArrowFunctionExpression" || expressionType === "FunctionExpression";
         parts.push(
-            path.call(print, "expression"),
+            needParens ? '(' + expression + ')' : expression,
             fromString(" as "),
             path.call(print, "typeAnnotation")
         );
