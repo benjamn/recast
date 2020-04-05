@@ -345,7 +345,7 @@ describe("Babel", function () {
 
     assert.strictEqual(
       recast.print(ast).code,
-      'x * y ** (x / y);'
+      '(x * y) ** (x / y);'
     );
   });
 
