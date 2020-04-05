@@ -16,6 +16,7 @@ export function parse(source: string, options?: Partial<Options>) {
 
   const sourceWithoutTabs = lines.toString({
     tabWidth: options.tabWidth,
+    lineTerminator: options.parsedLineTerminator,
     reuseWhitespace: false,
     useTabs: false
   });

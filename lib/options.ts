@@ -42,6 +42,15 @@ export interface Options extends DeprecatedOptions {
   lineTerminator?: string;
 
   /**
+   * Override this option to use a different line terminator internally
+   * when parsing and building the AST.  This is only necessary if you care about
+   * node locations and are using offsets from the beginning of the file
+   * as opposed to {line, column} values.
+   * @default require("os").EOL || "\n"
+   */
+  parsedLineTerminator?: string;
+
+  /**
    * Some of the pretty-printer code (such as that for printing function
    * parameter lists) makes a valiant attempt to prevent really long
    * lines. You can adjust the limit by changing this option; however,
@@ -170,6 +179,7 @@ const defaults: Options = {
   useTabs: false,
   reuseWhitespace: true,
   lineTerminator: require("os").EOL || "\n",
+  parsedLineTerminator: require("os").EOL || "\n",
   wrapColumn: 74, // Aspirational for now.
   sourceFileName: null,
   sourceMapName: null,
@@ -204,6 +214,7 @@ export function normalize(opts?: Options): NormalizedOptions {
     useTabs: !!get("useTabs"),
     reuseWhitespace: !!get("reuseWhitespace"),
     lineTerminator: get("lineTerminator"),
+    parsedLineTerminator: get("parsedLineTerminator"),
     wrapColumn: Math.max(get("wrapColumn"), 0),
     sourceFileName: get("sourceFileName"),
     sourceMapName: get("sourceMapName"),
