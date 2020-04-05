@@ -2818,8 +2818,10 @@ function printFunctionParams(path: any, options: any, print: any) {
 function printExportDeclaration(path: any, options: any, print: any) {
     const decl = path.getValue();
     const parts: (string | Lines)[] = ["export "];
-    if (decl.exportKind && decl.exportKind !== "value") {
-        parts.push(decl.exportKind + " ");
+    if (decl.exportKind && decl.exportKind === "type") {
+        if (!decl.declaration){
+            parts.push("type ");
+        }
     }
     const shouldPrintSpaces = options.objectCurlySpacing;
 
