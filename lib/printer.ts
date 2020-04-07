@@ -78,7 +78,7 @@ const Printer = function Printer(this: PrinterType, config?: any) {
         return (path: any) => print(path, options);
     }
 
-    function print(path: any, options: any) {
+    let print = function print(path: any, options: any) {
         assert.ok(path instanceof FastPath);
         options = options || {};
 
@@ -121,7 +121,8 @@ const Printer = function Printer(this: PrinterType, config?: any) {
         config.tabWidth = oldTabWidth;
 
         return lines;
-    }
+    };
+    if (config.wrapPrint) print = config.wrapPrint(print);
 
     this.print = function(ast) {
         if (!ast) {
@@ -151,12 +152,13 @@ const Printer = function Printer(this: PrinterType, config?: any) {
         }
 
         // Print the entire AST generically.
-        function printGenerically(path: any) {
+        let printGenerically = function printGenerically(path: any) {
             return printComments(path, (path: any) => genericPrint(path, config, {
                 includeComments: true,
                 avoidRootParens: false
             }, printGenerically));
-        }
+        };
+        if (config.wrapPrint) printGenerically = config.wrapPrint(printGenerically);
 
         const path = FastPath.from(ast);
         const oldReuseWhitespace = config.reuseWhitespace;
