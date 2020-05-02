@@ -2163,4 +2163,31 @@ describe("printer", function() {
     const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("does not print shorthand properties if key != value", function () {
+    const code = [
+      "var o = {",
+      "    value: value0",
+      "};"
+    ].join(eol);
+
+    const ast = b.program([
+      b.variableDeclaration("var", [
+        b.variableDeclarator(
+          b.identifier("o"),
+          b.objectExpression([
+            b.property.from({
+              kind: "init",
+              key: b.identifier("value"),
+              value: b.identifier("value0"),
+              shorthand: true,
+            }),
+          ])
+        ),
+      ]),
+    ]);
+
+    const pretty = new Printer().printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });

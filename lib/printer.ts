@@ -774,7 +774,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             parts.push(key);
         }
 
-        if (! n.shorthand) {
+        if (!n.shorthand || n.key.name !== n.value.name) {
             parts.push(": ", path.call(print, "value"));
         }
 
