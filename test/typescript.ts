@@ -25,6 +25,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       'let binary: number = 0b1010;',
       'let octal: number = 0o744;',
       'let list: number[] = [1, 2, 3];',
+      'let list2: Array<number> = list;',
       'let matrix: number[][];',
       'let x: [string, number];',
       'let f: <E>(e: E) => void;',
@@ -49,9 +50,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(['type c = T & U & V;']);
 
-    check(['let list: Array<number> = [1, 2, 3];']);
-
-    check(['let n = a!.c();']);
+    check(['a!.c();']);
 
     check(['type A = "cat" | "dog" | "bird";']);
 
@@ -78,14 +77,14 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     ]);
 
     check([
-      'let strLength1: string = (<string> someValue).length;',
-      'let strLength2: string = <string> someValue;',
-      'let square = <Square> {};',
-      'let strLength3: number = (someValue as string).length;',
-      'let strLength4: number = someValue as string;',
+      '(<string> someValue).length;',
+      '<string> someValue;',
+      '<Square> {};',
+      '(someValue as string).length;',
+      'someValue as string;',
     ]);
 
-    check(['let counter = <Counter> function(start: number) {};']);
+    check(['<Counter> function(start: number) {};']);
 
     check(['if ((<F> p).s) {', '  (<F> p).s();', '}']);
 
@@ -114,11 +113,11 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       '): void {}',
     ]);
 
-    check(['const a = b as U as V;']);
+    check(['b as U as V;']);
 
-    check(['const highlight = (n => false) as (a: number) => boolean;']);
+    check(['(n => false) as (a: number) => boolean;']);
 
-    check(['const highlight = (function(n) {', '  return false;', '}) as (a: number) => boolean;']);
+    check(['(function(n) {', '  return false;', '}) as (a: number) => boolean;']);
 
     check([
       'enum Color {',

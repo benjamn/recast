@@ -322,22 +322,10 @@ FPp.needsParens = function (assumeExpressionContext) {
     return false;
   }
 
-  const name = this.getName();
-
   // If the value of this path is some child of a Node and not a Node
   // itself, then it doesn't need parentheses. Only Node objects (in fact,
   // only Expression nodes) need parentheses.
   if (this.getValue() !== node) {
-    return false;
-  }
-
-  // Only statements don't need parentheses.
-  if (n.Statement.check(node)) {
-    return false;
-  }
-
-  // Identifiers never need parentheses.
-  if (node.type === 'Identifier') {
     return false;
   }
 
@@ -346,16 +334,19 @@ FPp.needsParens = function (assumeExpressionContext) {
   }
 
   switch (node.type) {
+    case 'Statement':
+    case 'Identifier':
+      return false;
     case 'UnaryExpression':
     case 'SpreadElement':
     case 'SpreadProperty':
-      return parent.type === 'MemberExpression' && name === 'object' && parent.object === node;
+      return parent.type === 'MemberExpression' && parent.object === node;
 
     case 'BinaryExpression':
     case 'LogicalExpression':
       switch (parent.type) {
         case 'CallExpression':
-          return name === 'callee' && parent.callee === node;
+          return parent.callee === node;
 
         case 'UnaryExpression':
         case 'SpreadElement':
@@ -363,7 +354,7 @@ FPp.needsParens = function (assumeExpressionContext) {
           return true;
 
         case 'MemberExpression':
-          return name === 'object' && parent.object === node;
+          return parent.object === node;
 
         case 'BinaryExpression':
         case 'LogicalExpression': {
@@ -372,27 +363,16 @@ FPp.needsParens = function (assumeExpressionContext) {
           const no = node.operator;
           const np = PRECEDENCE[no];
 
-          if (pp > np) {
-            return true;
-          }
-
-          if (pp === np && name === 'right') {
-            assert.strictEqual(parent.right, node);
-            return true;
-          }
-          break;
+          return pp > np || (pp === np && parent.right === node);
         }
 
         default:
           return false;
       }
-      break;
 
     case 'SequenceExpression':
       switch (parent.type) {
         case 'ReturnStatement':
-          return false;
-
         case 'ForStatement':
           // Although parentheses wouldn't hurt around sequence expressions in
           // the head of for loops, traditional style dictates that e.g. i++,
@@ -400,7 +380,7 @@ FPp.needsParens = function (assumeExpressionContext) {
           return false;
 
         case 'ExpressionStatement':
-          return name !== 'expression';
+          return parent.expression !== node;
 
         default:
           // Otherwise err on the side of overparenthesization, adding
@@ -432,15 +412,12 @@ FPp.needsParens = function (assumeExpressionContext) {
 
     case 'Literal':
       return (
-        parent.type === 'MemberExpression' &&
-        isNumber.check(node.value) &&
-        name === 'object' &&
-        parent.object === node
+        parent.type === 'MemberExpression' && isNumber.check(node.value) && parent.object === node
       );
 
     // Babel 6 Literal split
     case 'NumericLiteral':
-      return parent.type === 'MemberExpression' && name === 'object' && parent.object === node;
+      return parent.type === 'MemberExpression' && parent.object === node;
 
     case 'AssignmentExpression':
     case 'ConditionalExpression':
@@ -454,40 +431,39 @@ FPp.needsParens = function (assumeExpressionContext) {
 
         case 'CallExpression':
         case 'NewExpression':
-          return name === 'callee' && parent.callee === node;
+          return parent.callee === node;
 
         case 'ConditionalExpression':
-          return name === 'test' && parent.test === node;
+          return parent.test === node;
 
         case 'MemberExpression':
-          return name === 'object' && parent.object === node;
+          return parent.object === node;
 
         default:
           return false;
       }
 
     case 'ArrowFunctionExpression':
-      if (n.CallExpression.check(parent) && name === 'callee') {
+      if (parent.type === 'CallExpression' && parent.callee === node) {
         return true;
       }
 
-      if (n.MemberExpression.check(parent) && name === 'object') {
+      if (parent.type === 'MemberExpression' && parent.object === node) {
         return true;
       }
 
       return isBinary(parent);
 
     case 'ObjectExpression':
-      if (parent.type === 'ArrowFunctionExpression' && name === 'body') {
+      if (parent.type === 'ArrowFunctionExpression' && parent.body === node) {
         return true;
       }
-
       break;
 
     case 'TSAsExpression':
       if (
         parent.type === 'ArrowFunctionExpression' &&
-        name === 'body' &&
+        parent.body === node &&
         node.expression.type === 'ObjectExpression'
       ) {
         return true;
@@ -496,27 +472,22 @@ FPp.needsParens = function (assumeExpressionContext) {
 
     case 'CallExpression':
       if (
-        name === 'declaration' &&
+        parent.declaration === node &&
         n.ExportDefaultDeclaration.check(parent) &&
         n.FunctionExpression.check(node.callee)
       ) {
         return true;
       }
+      break;
   }
 
-  if (parent.type === 'NewExpression' && name === 'callee' && parent.callee === node) {
+  if (parent.type === 'NewExpression' && parent.callee === node) {
     return containsCallExpression(node);
   }
 
-  if (
-    assumeExpressionContext !== true &&
-    !this.canBeFirstInStatement() &&
-    this.firstInStatement()
-  ) {
-    return true;
-  }
-
-  return false;
+  return (
+    assumeExpressionContext !== true && !this.canBeFirstInStatement() && this.firstInStatement()
+  );
 };
 
 function isBinary(node: any) {
