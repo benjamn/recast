@@ -388,24 +388,6 @@ FPp.needsParens = function (assumeExpressionContext) {
           return true;
       }
 
-    case 'YieldExpression':
-      switch (parent.type) {
-        case 'BinaryExpression':
-        case 'LogicalExpression':
-        case 'UnaryExpression':
-        case 'SpreadElement':
-        case 'SpreadProperty':
-        case 'CallExpression':
-        case 'MemberExpression':
-        case 'NewExpression':
-        case 'ConditionalExpression':
-        case 'YieldExpression':
-          return true;
-
-        default:
-          return false;
-      }
-
     case 'IntersectionTypeAnnotation':
     case 'UnionTypeAnnotation':
       return parent.type === 'NullableTypeAnnotation';
@@ -419,6 +401,8 @@ FPp.needsParens = function (assumeExpressionContext) {
     case 'NumericLiteral':
       return parent.type === 'MemberExpression' && parent.object === node;
 
+    case 'YieldExpression':
+    case 'AwaitExpression':
     case 'AssignmentExpression':
     case 'ConditionalExpression':
       switch (parent.type) {

@@ -149,6 +149,27 @@ describe('parens', function () {
     check('(() => {}) + (() => {})');
   });
 
+  it('AwaitExpression', function () {
+    check('async () => (await a) && (await b)');
+    check('async () => +(await a)');
+    check('async () => (await f)()');
+    check('async () => new (await C)');
+    check('async () => [...(await obj)]');
+    check('async () => (await a) ? b : c');
+    check('async () => (await a).b');
+  });
+
+  it('YieldExpression', function () {
+    check('function* test () { return (yield a) && (yield b) }');
+    check('function* test () { return +(yield a) }');
+    check('function* test () { return (yield f)() }');
+    check('function* test () { return new (yield C) }');
+    check('function* test () { return [...(yield obj)] }');
+    check('function* test () { return (yield a) ? b : c }');
+    check('function* test () { return (yield a).b }');
+    check('function* test () { yield yield foo }');
+  });
+
   it('ReprintedParens', function () {
     const code = 'a(function g(){}.call(this));';
     const ast1 = parse(code);
