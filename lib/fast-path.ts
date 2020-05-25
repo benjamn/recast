@@ -329,7 +329,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     return false;
   }
 
-  if (parent.type === 'ParenthesizedExpression') {
+  if (parent.type === 'ParenthesizedExpression' || (node.extra && node.extra.parenthesized)) {
     return false;
   }
 
