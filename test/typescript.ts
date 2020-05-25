@@ -5,6 +5,10 @@ import * as recast from "../main";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 import * as parser from "../parsers/typescript";
+import { Printer } from '../lib/printer';
+
+const { namedTypes: n } = types;
+const printer = new Printer();
 
 // Babel 7 no longer supports Node 4 or 5.
 const nodeMajorVersion = parseInt(process.versions.node, 10);
@@ -267,6 +271,31 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check(["createPlugin<number>();"]);
 
     check(["type Class<T> = new (...args: any) => T;"]);
+  });
+
+  it("parens", function () {
+    function parseExpression(expr: any) {
+      let ast: any = parser.parse(expr).program;
+      n.Program.assert(ast);
+      ast = ast.body[0];
+      return n.ExpressionStatement.check(ast) ? ast.expression : ast;
+    }
+
+    const parse = (expr: string) => recast.parse(expr, { parser });
+
+    function check(expr: string) {
+      const ast = parse(expr);
+
+      const reprinted = recast.print(ast).code;
+      assert.strictEqual(reprinted, expr);
+
+      const expressionAst = parseExpression(expr);
+      const generic = printer.printGenerically(expressionAst).code;
+      types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
+    }
+
+    check("(() => {}) as void");
+    check("(function () {} as void)");
   });
 });
 

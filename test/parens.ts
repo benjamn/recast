@@ -170,6 +170,16 @@ describe("parens", function () {
     check("function* test () { yield yield foo }");
   });
 
+  it('ArrowFunctionExpression', () => {
+    check('(() => {})()');
+    check('test(() => {})');
+
+    check('(() => {}).test');
+    check('test[() => {}]');
+
+    check('(() => {}) + (() => {})');
+  });
+
   it("ReprintedParens", function () {
     const code = "a(function g(){}.call(this));";
     const ast1 = parse(code);

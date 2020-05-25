@@ -453,11 +453,22 @@ FPp.needsParens = function (assumeExpressionContext) {
       }
 
     case "ArrowFunctionExpression":
-      if (n.CallExpression.check(parent) && name === "callee") {
+      if (n.CallExpression.check(parent) &&
+          name === "callee" &&
+          parent.callee === node) {
         return true;
       }
 
-      if (n.MemberExpression.check(parent) && name === "object") {
+      if (n.MemberExpression.check(parent) &&
+          name === "object" &&
+          parent.object === node) {
+        return true;
+      }
+
+      if (n.TSAsExpression &&
+          n.TSAsExpression.check(parent) &&
+          name === "expression" &&
+          parent.expression === node) {
         return true;
       }
 
