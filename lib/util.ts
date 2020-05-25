@@ -1,7 +1,7 @@
-import assert from "assert";
-import * as types from "ast-types";
+import assert from 'assert';
+import * as types from 'ast-types';
 const n = types.namedTypes;
-import sourceMap from "source-map";
+import sourceMap from 'source-map';
 const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -27,13 +27,13 @@ export function getUnionOfKeys(...args: any[]) {
 }
 
 export function comparePos(pos1: any, pos2: any) {
-  return (pos1.line - pos2.line) || (pos1.column - pos2.column);
+  return pos1.line - pos2.line || pos1.column - pos2.column;
 }
 
 export function copyPos(pos: any) {
   return {
     line: pos.line,
-    column: pos.column
+    column: pos.column,
   };
 }
 
@@ -50,15 +50,15 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
   const smcLatter = new SourceMapConsumer(latterMap);
   const smg = new SourceMapGenerator({
     file: latterMap.file,
-    sourceRoot: latterMap.sourceRoot
+    sourceRoot: latterMap.sourceRoot,
   });
 
   const sourcesToContents: any = {};
 
-  smcLatter.eachMapping(function(mapping) {
+  smcLatter.eachMapping(function (mapping) {
     const origPos = smcFormer.originalPositionFor({
       line: mapping.originalLine,
-      column: mapping.originalColumn
+      column: mapping.originalColumn,
     });
 
     const sourceName = origPos.source;
@@ -71,9 +71,9 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
       original: copyPos(origPos),
       generated: {
         line: mapping.generatedLine,
-        column: mapping.generatedColumn
+        column: mapping.generatedColumn,
       },
-      name: mapping.name
+      name: mapping.name,
     });
 
     const sourceContent = smcFormer.sourceContentFor(sourceName);
@@ -84,7 +84,7 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
   });
 
   return (smg as any).toJSON();
-};
+}
 
 export function getTrueLoc(node: any, lines: any) {
   // It's possible that node is newly-created (not parsed by Esprima),
@@ -97,7 +97,7 @@ export function getTrueLoc(node: any, lines: any) {
 
   const result = {
     start: node.loc.start,
-    end: node.loc.end
+    end: node.loc.end,
   };
 
   function include(node: any) {
@@ -107,9 +107,7 @@ export function getTrueLoc(node: any, lines: any) {
   // If the node is an export declaration and its .declaration has any
   // decorators, their locations might contribute to the true start/end
   // positions of the export declaration node.
-  if (node.declaration &&
-      node.declaration.decorators &&
-      isExportDeclaration(node)) {
+  if (node.declaration && node.declaration.decorators && isExportDeclaration(node)) {
     node.declaration.decorators.forEach(include);
   }
 
@@ -133,7 +131,7 @@ export function getTrueLoc(node: any, lines: any) {
   }
 
   return result;
-};
+}
 
 function expandLoc(parentLoc: any, childLoc: any) {
   if (parentLoc && childLoc) {
@@ -159,7 +157,7 @@ export function fixFaultyLocations(node: any, lines: any) {
     }
   }
 
-  if (node.type === "File") {
+  if (node.type === 'File') {
     // Babylon returns File nodes whose .loc.{start,end} do not include
     // leading or trailing whitespace.
     loc.start = lines.firstPos();
@@ -175,7 +173,6 @@ export function fixFaultyLocations(node: any, lines: any) {
     node.decorators.forEach(function (decorator: any) {
       expandLoc(loc, decorator.loc);
     });
-
   } else if (node.declaration && isExportDeclaration(node)) {
     // Nullify .loc information for the child declaration so that we never
     // try to reprint it without also reprinting the export declaration.
@@ -189,9 +186,10 @@ export function fixFaultyLocations(node: any, lines: any) {
         expandLoc(loc, decorator.loc);
       });
     }
-
-  } else if ((n.MethodDefinition && n.MethodDefinition.check(node)) ||
-             (n.Property.check(node) && (node.method || node.shorthand))) {
+  } else if (
+    (n.MethodDefinition && n.MethodDefinition.check(node)) ||
+    (n.Property.check(node) && (node.method || node.shorthand))
+  ) {
     // If the node is a MethodDefinition or a .method or .shorthand
     // Property, then the location information stored in
     // node.value.loc is very likely untrustworthy (just the {body}
@@ -205,14 +203,12 @@ export function fixFaultyLocations(node: any, lines: any) {
       // because their .id fields are ignored anyway.
       node.value.id = null;
     }
-
-  } else if (node.type === "ObjectTypeProperty") {
+  } else if (node.type === 'ObjectTypeProperty') {
     var loc = node.loc;
     let end = loc && loc.end;
     if (end) {
       end = copyPos(end);
-      if (lines.prevPos(end) &&
-          lines.charAt(end) === ",") {
+      if (lines.prevPos(end) && lines.charAt(end) === ',') {
         // Some parsers accidentally include trailing commas in the
         // .loc.end information for ObjectTypeProperty nodes.
         if ((end = lines.skipSpaces(end, true, true))) {
@@ -221,10 +217,10 @@ export function fixFaultyLocations(node: any, lines: any) {
       }
     }
   }
-};
+}
 
 function fixForLoopHead(node: any, lines: any) {
-  if (node.type !== "ForStatement") {
+  if (node.type !== 'ForStatement') {
     return;
   }
 
@@ -235,7 +231,7 @@ function fixForLoopHead(node: any, lines: any) {
 
     while (start && end && comparePos(start, end) < 0) {
       lines.prevPos(end);
-      if (lines.charAt(end) === ";") {
+      if (lines.charAt(end) === ';') {
         // Update child.loc.end to *exclude* the ';' character.
         loc.end.line = end.line;
         loc.end.column = end.column;
@@ -251,7 +247,7 @@ function fixForLoopHead(node: any, lines: any) {
 }
 
 function fixTemplateLiteral(node: any, lines: any) {
-  if (node.type !== "TemplateLiteral") {
+  if (node.type !== 'TemplateLiteral') {
     return;
   }
 
@@ -259,13 +255,13 @@ function fixTemplateLiteral(node: any, lines: any) {
     // If there are no quasi elements, then there is nothing to fix.
     return;
   }
-  
+
   // node.loc is not present when using export default with a template literal
   if (node.loc) {
     // First we need to exclude the opening ` from the .loc of the first
     // quasi element, in case the parser accidentally decided to include it.
     const afterLeftBackTickPos = copyPos(node.loc.start);
-    assert.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
+    assert.strictEqual(lines.charAt(afterLeftBackTickPos), '`');
     assert.ok(lines.nextPos(afterLeftBackTickPos));
     const firstQuasi = node.quasis[0];
     if (comparePos(firstQuasi.loc.start, afterLeftBackTickPos) < 0) {
@@ -276,7 +272,7 @@ function fixTemplateLiteral(node: any, lines: any) {
     // element, in case the parser accidentally decided to include it.
     const rightBackTickPos = copyPos(node.loc.end);
     assert.ok(lines.prevPos(rightBackTickPos));
-    assert.strictEqual(lines.charAt(rightBackTickPos), "`");
+    assert.strictEqual(lines.charAt(rightBackTickPos), '`');
     const lastQuasi = node.quasis[node.quasis.length - 1];
     if (comparePos(rightBackTickPos, lastQuasi.loc.end) < 0) {
       lastQuasi.loc.end = rightBackTickPos;
@@ -291,10 +287,12 @@ function fixTemplateLiteral(node: any, lines: any) {
     // as the .loc.end of the preceding quasi element, but some parsers
     // accidentally include the ${ in the .loc of the quasi element.
     const dollarCurlyPos = lines.skipSpaces(expr.loc.start, true, false);
-    if (lines.prevPos(dollarCurlyPos) &&
-        lines.charAt(dollarCurlyPos) === "{" &&
-        lines.prevPos(dollarCurlyPos) &&
-        lines.charAt(dollarCurlyPos) === "$") {
+    if (
+      lines.prevPos(dollarCurlyPos) &&
+      lines.charAt(dollarCurlyPos) === '{' &&
+      lines.prevPos(dollarCurlyPos) &&
+      lines.charAt(dollarCurlyPos) === '$'
+    ) {
       const quasiBefore = node.quasis[i];
       if (comparePos(dollarCurlyPos, quasiBefore.loc.end) < 0) {
         quasiBefore.loc.end = dollarCurlyPos;
@@ -304,7 +302,7 @@ function fixTemplateLiteral(node: any, lines: any) {
     // Likewise, some parsers accidentally include the } that follows
     // the expression in the .loc of the following quasi element.
     const rightCurlyPos = lines.skipSpaces(expr.loc.end, false, false);
-    if (lines.charAt(rightCurlyPos) === "}") {
+    if (lines.charAt(rightCurlyPos) === '}') {
       assert.ok(lines.nextPos(rightCurlyPos));
       // Now rightCurlyPos is technically the position just after the }.
       const quasiAfter = node.quasis[i + 1];
@@ -316,33 +314,33 @@ function fixTemplateLiteral(node: any, lines: any) {
 }
 
 export function isExportDeclaration(node: any) {
-  if (node) switch (node.type) {
-  case "ExportDeclaration":
-  case "ExportDefaultDeclaration":
-  case "ExportDefaultSpecifier":
-  case "DeclareExportDeclaration":
-  case "ExportNamedDeclaration":
-  case "ExportAllDeclaration":
-    return true;
-  }
+  if (node)
+    switch (node.type) {
+      case 'ExportDeclaration':
+      case 'ExportDefaultDeclaration':
+      case 'ExportDefaultSpecifier':
+      case 'DeclareExportDeclaration':
+      case 'ExportNamedDeclaration':
+      case 'ExportAllDeclaration':
+        return true;
+    }
 
   return false;
-};
+}
 
 export function getParentExportDeclaration(path: any) {
   const parentNode = path.getParentNode();
-  if (path.getName() === "declaration" &&
-      isExportDeclaration(parentNode)) {
+  if (path.getName() === 'declaration' && isExportDeclaration(parentNode)) {
     return parentNode;
   }
 
   return null;
-};
+}
 
 export function isTrailingCommaEnabled(options: any, context: any) {
   const trailingComma = options.trailingComma;
-  if (typeof trailingComma === "object") {
+  if (typeof trailingComma === 'object') {
     return !!trailingComma[context];
   }
   return !!trailingComma;
-};
+}

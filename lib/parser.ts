@@ -1,13 +1,13 @@
-import assert from "assert";
-import * as types from "ast-types";
+import assert from 'assert';
+import * as types from 'ast-types';
 const b = types.builders;
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
-import { normalize as normalizeOptions } from "./options";
-import { fromString } from "./lines";
-import { attach as attachComments } from "./comments";
-import * as util from "./util";
-import { Options } from "./options";
+import { normalize as normalizeOptions } from './options';
+import { fromString } from './lines';
+import { attach as attachComments } from './comments';
+import * as util from './util';
+import { Options } from './options';
 
 export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
@@ -17,7 +17,7 @@ export function parse(source: string, options?: Partial<Options>) {
   const sourceWithoutTabs = lines.toString({
     tabWidth: options.tabWidth,
     reuseWhitespace: false,
-    useTabs: false
+    useTabs: false,
   });
 
   let comments: any[] = [];
@@ -28,9 +28,9 @@ export function parse(source: string, options?: Partial<Options>) {
     range: options.range,
     comment: true,
     onComment: comments,
-    tolerant: util.getOption(options, "tolerant", true),
+    tolerant: util.getOption(options, 'tolerant', true),
     ecmaVersion: 6,
-    sourceType: util.getOption(options, "sourceType", "module")
+    sourceType: util.getOption(options, 'sourceType', 'module'),
   });
 
   // Use ast.tokens if possible, and otherwise fall back to the Esprima
@@ -39,8 +39,8 @@ export function parse(source: string, options?: Partial<Options>) {
   // to avoid this fallback.
   const tokens: any[] = Array.isArray(ast.tokens)
     ? ast.tokens
-    : require("esprima").tokenize(sourceWithoutTabs, {
-        loc: true
+    : require('esprima').tokenize(sourceWithoutTabs, {
+        loc: true,
       });
 
   // We will reattach the tokens array to the file object below.
@@ -48,7 +48,7 @@ export function parse(source: string, options?: Partial<Options>) {
 
   // Make sure every token has a token.value string.
   tokens.forEach(function (token) {
-    if (typeof token.value !== "string") {
+    if (typeof token.value !== 'string') {
       token.value = lines.sliceString(token.loc.start, token.loc.end);
     }
   });
@@ -65,7 +65,7 @@ export function parse(source: string, options?: Partial<Options>) {
   } else {
     ast.loc = {
       start: lines.firstPos(),
-      end: lines.lastPos()
+      end: lines.lastPos(),
     };
   }
 
@@ -74,7 +74,7 @@ export function parse(source: string, options?: Partial<Options>) {
 
   let file;
   let program;
-  if (ast.type === "Program") {
+  if (ast.type === 'Program') {
     program = ast;
     // In order to ensure we reprint leading and trailing program
     // comments, wrap the original Program node with a File node. Only
@@ -85,9 +85,9 @@ export function parse(source: string, options?: Partial<Options>) {
       start: lines.firstPos(),
       end: lines.lastPos(),
       lines: lines,
-      indent: 0
+      indent: 0,
     } as any;
-  } else if (ast.type === "File") {
+  } else if (ast.type === 'File') {
     file = ast;
     program = file.program;
   }
@@ -102,27 +102,26 @@ export function parse(source: string, options?: Partial<Options>) {
   // well), since sometimes program.loc.{start,end} will coincide with the
   // .loc.{start,end} of the first and last *statements*, mistakenly
   // excluding comments that fall outside that region.
-  const trueProgramLoc: any = util.getTrueLoc({
-    type: program.type,
-    loc: program.loc,
-    body: [],
-    comments
-  }, lines);
+  const trueProgramLoc: any = util.getTrueLoc(
+    {
+      type: program.type,
+      loc: program.loc,
+      body: [],
+      comments,
+    },
+    lines,
+  );
   program.loc.start = trueProgramLoc.start;
   program.loc.end = trueProgramLoc.end;
 
   // Passing file.program here instead of just file means that initial
   // comments will be attached to program.body[0] instead of program.
-  attachComments(
-    comments,
-    program.body.length ? file.program : file,
-    lines
-  );
+  attachComments(comments, program.body.length ? file.program : file, lines);
 
   // Return a copy of the original AST so that any changes made may be
   // compared to the original.
   return new TreeCopier(lines, tokens).copy(file);
-};
+}
 
 interface TreeCopierType {
   lines: any;
@@ -136,22 +135,22 @@ interface TreeCopierType {
 }
 
 interface TreeCopierConstructor {
-  new(lines: any, tokens: any): TreeCopierType;
+  new (lines: any, tokens: any): TreeCopierType;
 }
 
-const TreeCopier = function TreeCopier(this: TreeCopierType, lines: any, tokens: any) {
+const TreeCopier = (function TreeCopier(this: TreeCopierType, lines: any, tokens: any) {
   assert.ok(this instanceof TreeCopier);
   this.lines = lines;
   this.tokens = tokens;
   this.startTokenIndex = 0;
   this.endTokenIndex = tokens.length;
   this.indent = 0;
-  this.seen = new Map;
-} as any as TreeCopierConstructor;
+  this.seen = new Map();
+} as any) as TreeCopierConstructor;
 
 const TCp: TreeCopierType = TreeCopier.prototype;
 
-TCp.copy = function(node) {
+TCp.copy = function (node) {
   if (this.seen.has(node)) {
     return this.seen.get(node);
   }
@@ -172,12 +171,13 @@ TCp.copy = function(node) {
   util.fixFaultyLocations(node, this.lines);
 
   var copy: any = Object.create(Object.getPrototypeOf(node), {
-    original: { // Provide a link from the copy to the original.
+    original: {
+      // Provide a link from the copy to the original.
       value: node,
       configurable: false,
       enumerable: false,
-      writable: true
-    }
+      writable: true,
+    },
   });
 
   this.seen.set(node, copy);
@@ -195,9 +195,13 @@ TCp.copy = function(node) {
     // itself, we can strip that much whitespace from the left margin of
     // the comment. This only really matters for multiline Block comments,
     // but it doesn't hurt for Line comments.
-    if (node.type === "Block" || node.type === "Line" ||
-        node.type === "CommentBlock" || node.type === "CommentLine" ||
-        this.lines.isPrecededOnlyByWhitespace(loc.start)) {
+    if (
+      node.type === 'Block' ||
+      node.type === 'Line' ||
+      node.type === 'CommentBlock' ||
+      node.type === 'CommentLine' ||
+      this.lines.isPrecededOnlyByWhitespace(loc.start)
+    ) {
       newIndent = this.indent = loc.start.column;
     }
 
@@ -217,10 +221,9 @@ TCp.copy = function(node) {
   const keyCount = keys.length;
   for (let i = 0; i < keyCount; ++i) {
     const key = keys[i];
-    if (key === "loc") {
+    if (key === 'loc') {
       copy[key] = node[key];
-    } else if (key === "tokens" &&
-               node.type === "File") {
+    } else if (key === 'tokens' && node.type === 'File') {
       // Preserve file.tokens (uncopied) in case client code cares about
       // it, even though Recast ignores it when reprinting.
       copy[key] = node[key];

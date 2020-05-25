@@ -1,7 +1,7 @@
-import assert from "assert";
-import { comparePos } from "./util";
-import { namedTypes } from "ast-types";
-import { Lines } from "./lines";
+import assert from 'assert';
+import { comparePos } from './util';
+import { namedTypes } from 'ast-types';
+import { Lines } from './lines';
 
 type Pos = namedTypes.Position;
 type Loc = namedTypes.SourceLocation;
@@ -13,57 +13,47 @@ export default class Mapping {
     public targetLoc: Loc = sourceLoc,
   ) {}
 
-  slice(
-    lines: Lines,
-    start: Pos,
-    end: Pos = lines.lastPos(),
-  ) {
+  slice(lines: Lines, start: Pos, end: Pos = lines.lastPos()) {
     const sourceLines = this.sourceLines;
     let sourceLoc = this.sourceLoc;
     let targetLoc = this.targetLoc;
 
-    function skip(name: "start" | "end") {
+    function skip(name: 'start' | 'end') {
       const sourceFromPos = sourceLoc[name];
       const targetFromPos = targetLoc[name];
       let targetToPos = start;
 
-      if (name === "end") {
+      if (name === 'end') {
         targetToPos = end;
       } else {
-        assert.strictEqual(name, "start");
+        assert.strictEqual(name, 'start');
       }
 
-      return skipChars(
-        sourceLines, sourceFromPos,
-        lines, targetFromPos, targetToPos
-      );
+      return skipChars(sourceLines, sourceFromPos, lines, targetFromPos, targetToPos);
     }
 
     if (comparePos(start, targetLoc.start) <= 0) {
       if (comparePos(targetLoc.end, end) <= 0) {
         targetLoc = {
           start: subtractPos(targetLoc.start, start.line, start.column),
-          end: subtractPos(targetLoc.end, start.line, start.column)
+          end: subtractPos(targetLoc.end, start.line, start.column),
         };
 
         // The sourceLoc can stay the same because the contents of the
         // targetLoc have not changed.
-
       } else if (comparePos(end, targetLoc.start) <= 0) {
         return null;
-
       } else {
         sourceLoc = {
           start: sourceLoc.start,
-          end: skip("end")
+          end: skip('end'),
         };
 
         targetLoc = {
           start: subtractPos(targetLoc.start, start.line, start.column),
-          end: subtractPos(end, start.line, start.column)
+          end: subtractPos(end, start.line, start.column),
         };
       }
-
     } else {
       if (comparePos(targetLoc.end, start) <= 0) {
         return null;
@@ -71,26 +61,25 @@ export default class Mapping {
 
       if (comparePos(targetLoc.end, end) <= 0) {
         sourceLoc = {
-          start: skip("start"),
-          end: sourceLoc.end
+          start: skip('start'),
+          end: sourceLoc.end,
         };
 
         targetLoc = {
           // Same as subtractPos(start, start.line, start.column):
           start: { line: 1, column: 0 },
-          end: subtractPos(targetLoc.end, start.line, start.column)
+          end: subtractPos(targetLoc.end, start.line, start.column),
         };
-
       } else {
         sourceLoc = {
-          start: skip("start"),
-          end: skip("end")
+          start: skip('start'),
+          end: skip('end'),
         };
 
         targetLoc = {
           // Same as subtractPos(start, start.line, start.column):
           start: { line: 1, column: 0 },
-          end: subtractPos(end, start.line, start.column)
+          end: subtractPos(end, start.line, start.column),
         };
       }
     }
@@ -101,22 +90,18 @@ export default class Mapping {
   add(line: number, column: number) {
     return new Mapping(this.sourceLines, this.sourceLoc, {
       start: addPos(this.targetLoc.start, line, column),
-      end: addPos(this.targetLoc.end, line, column)
+      end: addPos(this.targetLoc.end, line, column),
     });
   }
 
   subtract(line: number, column: number) {
     return new Mapping(this.sourceLines, this.sourceLoc, {
       start: subtractPos(this.targetLoc.start, line, column),
-      end: subtractPos(this.targetLoc.end, line, column)
+      end: subtractPos(this.targetLoc.end, line, column),
     });
   }
 
-  indent(
-    by: number,
-    skipFirstLine: boolean = false,
-    noNegativeColumns: boolean = false,
-  ) {
+  indent(by: number, skipFirstLine: boolean = false, noNegativeColumns: boolean = false) {
     if (by === 0) {
       return this;
     }
@@ -131,16 +116,14 @@ export default class Mapping {
 
     targetLoc = {
       start: targetLoc.start,
-      end: targetLoc.end
+      end: targetLoc.end,
     };
 
     if (!skipFirstLine || startLine > 1) {
       const startColumn = targetLoc.start.column + by;
       targetLoc.start = {
         line: startLine,
-        column: noNegativeColumns
-          ? Math.max(0, startColumn)
-          : startColumn
+        column: noNegativeColumns ? Math.max(0, startColumn) : startColumn,
       };
     }
 
@@ -148,9 +131,7 @@ export default class Mapping {
       const endColumn = targetLoc.end.column + by;
       targetLoc.end = {
         line: endLine,
-        column: noNegativeColumns
-          ? Math.max(0, endColumn)
-          : endColumn
+        column: noNegativeColumns ? Math.max(0, endColumn) : endColumn,
       };
     }
 
@@ -161,18 +142,14 @@ export default class Mapping {
 function addPos(toPos: any, line: number, column: number) {
   return {
     line: toPos.line + line - 1,
-    column: (toPos.line === 1)
-      ? toPos.column + column
-      : toPos.column
+    column: toPos.line === 1 ? toPos.column + column : toPos.column,
   };
 }
 
 function subtractPos(fromPos: any, line: number, column: number) {
   return {
     line: fromPos.line - line + 1,
-    column: (fromPos.line === line)
-      ? fromPos.column - column
-      : fromPos.column
+    column: fromPos.line === line ? fromPos.column - column : fromPos.column,
   };
 }
 
@@ -207,15 +184,10 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetCursor, targetToPos) < 0 &&
-           targetLines.nextPos(targetCursor, true)) {
+    while (comparePos(targetCursor, targetToPos) < 0 && targetLines.nextPos(targetCursor, true)) {
       assert.ok(sourceLines.nextPos(sourceCursor, true));
-      assert.strictEqual(
-        sourceLines.charAt(sourceCursor),
-        targetLines.charAt(targetCursor)
-      );
+      assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
     }
-
   } else {
     // Skipping backward.
     var sourceCursor = sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
@@ -234,13 +206,9 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetToPos, targetCursor) < 0 &&
-           targetLines.prevPos(targetCursor, true)) {
+    while (comparePos(targetToPos, targetCursor) < 0 && targetLines.prevPos(targetCursor, true)) {
       assert.ok(sourceLines.prevPos(sourceCursor, true));
-      assert.strictEqual(
-        sourceLines.charAt(sourceCursor),
-        targetLines.charAt(targetCursor)
-      );
+      assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
     }
   }
 

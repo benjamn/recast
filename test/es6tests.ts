@@ -1,21 +1,21 @@
-import assert from "assert";
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
-import * as types from "ast-types";
+import assert from 'assert';
+import { parse } from '../lib/parser';
+import { Printer } from '../lib/printer';
+import * as types from 'ast-types';
 const n = types.namedTypes;
 const b = types.builders;
-import { EOL as eol } from "os";
+import { EOL as eol } from 'os';
 
-describe("ES6 Compatability", function() {
+describe('ES6 Compatability', function () {
   function convertShorthandMethod() {
     const printer = new Printer({ tabWidth: 2 });
 
     const code = [
       "var name='test-name';",
-      "var shorthandObj = {",
-      "  name,",
+      'var shorthandObj = {',
+      '  name,',
       "  func() { return 'value'; }",
-      "};"
+      '};',
     ].join(eol);
 
     const ast = parse(code);
@@ -37,18 +37,17 @@ describe("ES6 Compatability", function() {
         methodDecProperty.value.params,
         methodDecProperty.value.body,
         methodDecProperty.value.generator,
-        methodDecProperty.value.expression
+        methodDecProperty.value.expression,
       ),
     );
 
     assert.strictEqual(
       printer.print(newES5MethodProperty).code,
-      printer.print(correctMethodProperty).code
+      printer.print(correctMethodProperty).code,
     );
   }
 
-  it("correctly converts from a shorthand method to ES5 function",
-     convertShorthandMethod);
+  it('correctly converts from a shorthand method to ES5 function', convertShorthandMethod);
 
   function respectDestructuringAssignment() {
     const printer = new Printer({ tabWidth: 2 });
@@ -58,11 +57,10 @@ describe("ES6 Compatability", function() {
     assert.strictEqual(printer.print(ast).code, code);
   }
 
-  it("respects destructuring assignments",
-     respectDestructuringAssignment);
+  it('respects destructuring assignments', respectDestructuringAssignment);
 });
 
-describe("import/export syntax", function() {
+describe('import/export syntax', function () {
   const printer = new Printer({ tabWidth: 2 });
 
   function check(source: string) {
@@ -71,7 +69,7 @@ describe("import/export syntax", function() {
     types.astNodesAreEquivalent.assert(ast1, ast2);
   }
 
-  it("should parse and print import statements correctly", function() {
+  it('should parse and print import statements correctly', function () {
     check("import foo from 'foo'");
 
     // default imports
@@ -95,34 +93,34 @@ describe("import/export syntax", function() {
     check("import 'foo';");
   });
 
-  it("should parse and print export statements correctly", function() {
+  it('should parse and print export statements correctly', function () {
     // default exports
-    check("export default 42;");
-    check("export default {};");
-    check("export default [];");
-    check("export default foo;");
-    check("export default function () {}");
-    check("export default class {}");
-    check("export default function foo () {}");
-    check("export default class foo {}");
-    check("export default `hello world`");
+    check('export default 42;');
+    check('export default {};');
+    check('export default [];');
+    check('export default foo;');
+    check('export default function () {}');
+    check('export default class {}');
+    check('export default function foo () {}');
+    check('export default class foo {}');
+    check('export default `hello world`');
 
     // variables exports
-    check("export var foo = 1;");
-    check("export var foo = function () {};");
-    check("export var bar;"); // lazy initialization
-    check("export let foo = 2;");
-    check("export let bar;"); // lazy initialization
-    check("export const foo = 3;");
-    check("export function foo () {}");
-    check("export class foo {}");
+    check('export var foo = 1;');
+    check('export var foo = function () {};');
+    check('export var bar;'); // lazy initialization
+    check('export let foo = 2;');
+    check('export let bar;'); // lazy initialization
+    check('export const foo = 3;');
+    check('export function foo () {}');
+    check('export class foo {}');
 
     // named exports
-    check("export {foo};");
-    check("export {foo, bar};");
-    check("export {foo as bar};");
-    check("export {foo as default};");
-    check("export {foo as default, bar};");
+    check('export {foo};');
+    check('export {foo, bar};');
+    check('export {foo as bar};');
+    check('export {foo as default};');
+    check('export {foo as default, bar};');
 
     // exports from
     check("export * from 'foo';");
@@ -135,158 +133,94 @@ describe("import/export syntax", function() {
     check("export {default as foo} from 'foo';");
   });
 
-  it("should forbid invalid import/export syntax", function() {
+  it('should forbid invalid import/export syntax', function () {
     function checkInvalid(source: string, expectedMessage: string) {
       try {
         parse(source);
-        throw new Error("Parsing should have failed: " +
-                        JSON.stringify(source));
+        throw new Error('Parsing should have failed: ' + JSON.stringify(source));
       } catch (err) {
-        assert.strictEqual(err.message, "Line 1: " + expectedMessage);
+        assert.strictEqual(err.message, 'Line 1: ' + expectedMessage);
       }
     }
 
     // const variables must have an initializer
-    checkInvalid(
-      "export const bar;",
-      "Missing initializer in const declaration"
-    );
+    checkInvalid('export const bar;', 'Missing initializer in const declaration');
 
     // Unexpected token identifier, invalid named export syntax
-    checkInvalid(
-      "export foo;",
-      "Unexpected identifier"
-    );
+    checkInvalid('export foo;', 'Unexpected identifier');
 
     // Unexpected token (, use a function declaration instead
-    checkInvalid(
-      "export function () {}",
-      "Unexpected token ("
-    );
+    checkInvalid('export function () {}', 'Unexpected token (');
 
     // Unexpected token default
-    checkInvalid(
-      "export function default () {}",
-      "Unexpected token default"
-    );
+    checkInvalid('export function default () {}', 'Unexpected token default');
 
     // Missing from after import
-    checkInvalid(
-      "import foo;",
-      "Unexpected token ;"
-    );
+    checkInvalid('import foo;', 'Unexpected token ;');
 
     // Missing from after import
-    checkInvalid(
-      "import { foo, bar };",
-      "Unexpected token ;"
-    );
+    checkInvalid('import { foo, bar };', 'Unexpected token ;');
 
     // Invalid module specifier
-    checkInvalid(
-      "import foo from bar;",
-      "Unexpected token"
-    );
+    checkInvalid('import foo from bar;', 'Unexpected token');
 
     // Unexpected token default
-    checkInvalid(
-      "import default from 'foo';",
-      "Unexpected token default"
-    );
+    checkInvalid("import default from 'foo';", 'Unexpected token default');
 
     // Unexpected token from
-    checkInvalid(
-      "export default from 'foo';",
-      "Unexpected token from"
-    );
+    checkInvalid("export default from 'foo';", 'Unexpected token from');
 
     // Missing from after export
-    checkInvalid(
-      "export {default};",
-      "Unexpected token ;"
-    );
+    checkInvalid('export {default};', 'Unexpected token ;');
 
     // Missing from after export
-    checkInvalid(
-      "export *;",
-      "Unexpected token ;"
-    );
+    checkInvalid('export *;', 'Unexpected token ;');
 
     // Missing from after import
-    checkInvalid(
-      "import {default as foo};",
-      "Unexpected token ;"
-    );
+    checkInvalid('import {default as foo};', 'Unexpected token ;');
 
     // Missing as after import *
-    checkInvalid(
-      "import * from 'foo';",
-      "Unexpected token"
-    );
+    checkInvalid("import * from 'foo';", 'Unexpected token');
 
     // Unexpected token =
-    checkInvalid(
-      "export default = 42;",
-      "Unexpected token ="
-    );
+    checkInvalid('export default = 42;', 'Unexpected token =');
 
     // Unexpected token default
-    checkInvalid(
-      "import {bar as default} from 'foo';",
-      "Unexpected token default"
-    );
+    checkInvalid("import {bar as default} from 'foo';", 'Unexpected token default');
 
     // Unexpected token ,
-    checkInvalid(
-      "import foo, * as bar, {baz as xyz} from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import foo, * as bar, {baz as xyz} from 'foo';", 'Unexpected token ,');
 
     // Unexpected token ,
-    checkInvalid(
-      "import {bar}, foo from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import {bar}, foo from 'foo';", 'Unexpected token ,');
 
     // Unexpected token ,
-    checkInvalid(
-      "import {bar}, * as foo from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import {bar}, * as foo from 'foo';", 'Unexpected token ,');
 
     // Unexpected token ,
-    checkInvalid(
-      "import foo, {bar}, foo from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import foo, {bar}, foo from 'foo';", 'Unexpected token ,');
 
     // Unexpected token ,
-    checkInvalid(
-      "import {bar}, {foo} from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import {bar}, {foo} from 'foo';", 'Unexpected token ,');
 
     // Unexpected token ,
-    checkInvalid(
-      "import * as bar, {baz as xyz} from 'foo';",
-      "Unexpected token ,"
-    );
+    checkInvalid("import * as bar, {baz as xyz} from 'foo';", 'Unexpected token ,');
   });
 
-  it("should pretty-print template strings with backticks", function() {
+  it('should pretty-print template strings with backticks', function () {
     const code = [
       'var noun = "fool";',
       'var s = `I am a ${noun}`;',
-      'var t = tag`You said: ${s}!`;'
+      'var t = tag`You said: ${s}!`;',
     ].join(eol);
 
     const ast = parse(code);
 
     assert.strictEqual(
       new Printer({
-        tabWidth: 2
+        tabWidth: 2,
       }).printGenerically(ast).code,
-      code
+      code,
     );
   });
 });

@@ -26,6 +26,7 @@
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run build && npm run mocha",
     "build": "npm run clean && tsc",
+    "format": "prettier --write '{lib,test}/**.ts' '*rc.js'",
     "clean": "ts-emit-clean",
     "prepack": "npm run build",
     "postpack": "npm run clean"
@@ -51,6 +52,7 @@
     "flow-parser": "0.119.1",
     "glob": "7.1.5",
     "mocha": "6.2.2",
+    "prettier": "^2.0.5",
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
     "ts-node": "7.0.1",

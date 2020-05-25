@@ -1,4 +1,4 @@
-import { Omit } from "ast-types/types";
+import { Omit } from 'ast-types/types';
 
 /**
  * All Recast API functions take second parameter with configuration options,
@@ -165,11 +165,11 @@ interface DeprecatedOptions {
 }
 
 const defaults: Options = {
-  parser: require("../parsers/esprima"),
+  parser: require('../parsers/esprima'),
   tabWidth: 4,
   useTabs: false,
   reuseWhitespace: true,
-  lineTerminator: require("os").EOL || "\n",
+  lineTerminator: require('os').EOL || '\n',
   wrapColumn: 74, // Aspirational for now.
   sourceFileName: null,
   sourceMapName: null,
@@ -183,7 +183,7 @@ const defaults: Options = {
   objectCurlySpacing: true,
   arrowParensAlways: false,
   flowObjectCommas: true,
-  tokens: true
+  tokens: true,
 };
 const hasOwn = defaults.hasOwnProperty;
 
@@ -194,30 +194,28 @@ export function normalize(opts?: Options): NormalizedOptions {
   const options = opts || defaults;
 
   function get(key: keyof Options) {
-    return hasOwn.call(options, key)
-      ? options[key]
-      : defaults[key];
+    return hasOwn.call(options, key) ? options[key] : defaults[key];
   }
 
   return {
-    tabWidth: +get("tabWidth"),
-    useTabs: !!get("useTabs"),
-    reuseWhitespace: !!get("reuseWhitespace"),
-    lineTerminator: get("lineTerminator"),
-    wrapColumn: Math.max(get("wrapColumn"), 0),
-    sourceFileName: get("sourceFileName"),
-    sourceMapName: get("sourceMapName"),
-    sourceRoot: get("sourceRoot"),
-    inputSourceMap: get("inputSourceMap"),
-    parser: get("esprima") || get("parser"),
-    range: get("range"),
-    tolerant: get("tolerant"),
-    quote: get("quote"),
-    trailingComma: get("trailingComma"),
-    arrayBracketSpacing: get("arrayBracketSpacing"),
-    objectCurlySpacing: get("objectCurlySpacing"),
-    arrowParensAlways: get("arrowParensAlways"),
-    flowObjectCommas: get("flowObjectCommas"),
-    tokens: !!get("tokens")
+    tabWidth: +get('tabWidth'),
+    useTabs: !!get('useTabs'),
+    reuseWhitespace: !!get('reuseWhitespace'),
+    lineTerminator: get('lineTerminator'),
+    wrapColumn: Math.max(get('wrapColumn'), 0),
+    sourceFileName: get('sourceFileName'),
+    sourceMapName: get('sourceMapName'),
+    sourceRoot: get('sourceRoot'),
+    inputSourceMap: get('inputSourceMap'),
+    parser: get('esprima') || get('parser'),
+    range: get('range'),
+    tolerant: get('tolerant'),
+    quote: get('quote'),
+    trailingComma: get('trailingComma'),
+    arrayBracketSpacing: get('arrayBracketSpacing'),
+    objectCurlySpacing: get('objectCurlySpacing'),
+    arrowParensAlways: get('arrowParensAlways'),
+    flowObjectCommas: get('flowObjectCommas'),
+    tokens: !!get('tokens'),
   };
-};
+}
