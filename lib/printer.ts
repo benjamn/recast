@@ -192,14 +192,14 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
     return linesWithoutParens;
   }
 
-  let shouldAddParens = false;
+  let shouldAddParens = node.extra ? node.extra.parenthesized : false;
   const decoratorsLines = printDecorators(path, printPath);
 
   if (decoratorsLines.isEmpty()) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing path.needsParens() except in this case.
     if (!options.avoidRootParens) {
-      shouldAddParens = path.needsParens();
+      shouldAddParens = shouldAddParens || path.needsParens();
     }
   } else {
     parts.push(decoratorsLines);
@@ -1967,11 +1967,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat([path.call(print, "left"), ".", path.call(print, "right")]);
 
     case "TSAsExpression": {
-      const withParens = n.extra && n.extra.parenthesized === true;
-      if (withParens) parts.push("(");
       const expression = path.call(print, "expression");
       parts.push(expression, fromString(" as "), path.call(print, "typeAnnotation"));
-      if (withParens) parts.push(")");
       return concat(parts);
     }
 
@@ -2096,17 +2093,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "TSTypeAssertion": {
-      const withParens = n.extra && n.extra.parenthesized === true;
-      if (withParens) {
-        parts.push("(");
-      }
-
       parts.push("<", path.call(print, "typeAnnotation"), "> ", path.call(print, "expression"));
-
-      if (withParens) {
-        parts.push(")");
-      }
-
       return concat(parts);
     }
 

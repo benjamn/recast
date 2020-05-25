@@ -37,4 +37,22 @@ describe("babylon parens", function () {
   it("YieldExpression", function () {
     check("(function* () { return {...(yield obj)}})");
   });
+
+  it("decorative parens", function () {
+    const ast = parse("1");
+    const expr = ast.program.body[0].expression;
+
+    expr.extra.parenthesized = true;
+
+    assert.strictEqual(printer.print(ast).code, "(1)");
+  });
+
+  it("decorative parens which are also necessary", function () {
+    const ast = parse("(1).foo");
+    const expr = ast.program.body[0].expression;
+
+    expr.object.extra.parenthesized = false;
+
+    assert.strictEqual(printer.print(ast).code, "(1).foo");
+  });
 });
