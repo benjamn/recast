@@ -403,8 +403,9 @@ function runTestsForParser(parserId: any) {
     const ast = recast.parse(code, { parser });
 
     const comments = ast.program.body[1].comments;
+    let comment;
     assert.strictEqual(comments.length, 1);
-    var comment = comments[0];
+    comment = comments[0];
     assert.ok(comment.type.endsWith('Line'));
     assert.strictEqual(comment.value, ' bar');
 
@@ -421,7 +422,7 @@ function runTestsForParser(parserId: any) {
       ['{', '  // barbara', '  foo;', '}', '', 'bar;'].join(eol),
     );
 
-    var comment = ast.program.body[0].body[0].comments[0];
+    comment = ast.program.body[0].body[0].comments[0];
     comment.type = 'Block';
     assert.strictEqual(
       recast.print(ast).code,

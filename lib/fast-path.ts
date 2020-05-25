@@ -1,9 +1,29 @@
 import assert from 'assert';
 import * as types from 'ast-types';
+import * as util from './util';
+
 const n = types.namedTypes;
 const isArray = types.builtInTypes.array;
 const isNumber = types.builtInTypes.number;
-import * as util from './util';
+
+const PRECEDENCE: any = {};
+[
+  ['||'],
+  ['&&'],
+  ['|'],
+  ['^'],
+  ['&'],
+  ['==', '===', '!=', '!=='],
+  ['<', '>', '<=', '>=', 'in', 'instanceof'],
+  ['>>', '<<', '>>>'],
+  ['+', '-'],
+  ['*', '/', '%'],
+  ['**'],
+].forEach(function (tier, i) {
+  tier.forEach(function (op) {
+    PRECEDENCE[op] = i;
+  });
+});
 
 interface FastPathType {
   stack: any[];
@@ -49,7 +69,7 @@ FastPath.from = function (obj) {
     // lightweight FastPath [..., name, value] stacks.
     const copy = Object.create(FastPath.prototype);
     const stack = [obj.value];
-    for (var pp; (pp = obj.parentPath); obj = pp) stack.push(obj.name, pp.value);
+    for (let pp; (pp = obj.parentPath); obj = pp) stack.push(obj.name, pp.value);
     copy.stack = stack.reverse();
     return copy;
   }
@@ -59,7 +79,7 @@ FastPath.from = function (obj) {
 };
 
 FPp.copy = function copy() {
-  var copy = Object.create(FastPath.prototype);
+  const copy = Object.create(FastPath.prototype);
   copy.stack = this.stack.slice(0);
   return copy;
 };
@@ -154,13 +174,13 @@ FPp.each = function each(callback /*, name1, name2, ... */) {
   let value = s[origLen - 1];
   const argc = arguments.length;
 
-  for (var i = 1; i < argc; ++i) {
+  for (let i = 1; i < argc; ++i) {
     const name = arguments[i];
     value = value[name];
     s.push(name, value);
   }
 
-  for (var i = 0; i < value.length; ++i) {
+  for (let i = 0; i < value.length; ++i) {
     if (i in value) {
       s.push(i, value[i]);
       // If the callback needs to know the value of i, call
@@ -182,7 +202,7 @@ FPp.map = function map(callback /*, name1, name2, ... */) {
   let value = s[origLen - 1];
   const argc = arguments.length;
 
-  for (var i = 1; i < argc; ++i) {
+  for (let i = 1; i < argc; ++i) {
     const name = arguments[i];
     value = value[name];
     s.push(name, value);
@@ -190,7 +210,7 @@ FPp.map = function map(callback /*, name1, name2, ... */) {
 
   const result = new Array(value.length);
 
-  for (var i = 0; i < value.length; ++i) {
+  for (let i = 0; i < value.length; ++i) {
     if (i in value) {
       s.push(i, value[i]);
       result[i] = callback(this, i);
@@ -346,11 +366,11 @@ FPp.needsParens = function (assumeExpressionContext) {
           return name === 'object' && parent.object === node;
 
         case 'BinaryExpression':
-        case 'LogicalExpression':
-          var po = parent.operator;
-          var pp = PRECEDENCE[po];
-          var no = node.operator;
-          var np = PRECEDENCE[no];
+        case 'LogicalExpression': {
+          const po = parent.operator;
+          const pp = PRECEDENCE[po];
+          const no = node.operator;
+          const np = PRECEDENCE[no];
 
           if (pp > np) {
             return true;
@@ -360,10 +380,13 @@ FPp.needsParens = function (assumeExpressionContext) {
             assert.strictEqual(parent.right, node);
             return true;
           }
+          break;
+        }
 
         default:
           return false;
       }
+      break;
 
     case 'SequenceExpression':
       switch (parent.type) {
@@ -510,25 +533,6 @@ function isUnaryLike(node: any) {
     (n.SpreadProperty && n.SpreadProperty.check(node))
   );
 }
-
-var PRECEDENCE: any = {};
-[
-  ['||'],
-  ['&&'],
-  ['|'],
-  ['^'],
-  ['&'],
-  ['==', '===', '!=', '!=='],
-  ['<', '>', '<=', '>=', 'in', 'instanceof'],
-  ['>>', '<<', '>>>'],
-  ['+', '-'],
-  ['*', '/', '%'],
-  ['**'],
-].forEach(function (tier, i) {
-  tier.forEach(function (op) {
-    PRECEDENCE[op] = i;
-  });
-});
 
 function containsCallExpression(node: any): any {
   if (n.CallExpression.check(node)) {

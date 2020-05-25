@@ -467,7 +467,7 @@ export class Lines {
     startPos: Pos = this.firstPos(),
     skipSpaces: boolean = false,
   ) {
-    var pos = this.firstPos();
+    const pos = this.firstPos();
 
     if (startPos) {
       (pos.line = startPos.line), (pos.column = startPos.column);
@@ -542,10 +542,9 @@ export class Lines {
   }
 
   sliceString(start: Pos = this.firstPos(), end: Pos = this.lastPos(), options?: Options) {
-    options = normalizeOptions(options);
+    const { tabWidth, useTabs, reuseWhitespace, lineTerminator } = normalizeOptions(options);
 
     const parts = [];
-    const { tabWidth = 2 } = options;
 
     for (let line = start.line; line <= end.line; ++line) {
       let info = this.infos[line - 1];
@@ -563,11 +562,7 @@ export class Lines {
       const indent = Math.max(info.indent, 0);
 
       const before = info.line.slice(0, info.sliceStart);
-      if (
-        options.reuseWhitespace &&
-        isOnlyWhitespace(before) &&
-        countSpaces(before, options.tabWidth) === indent
-      ) {
+      if (reuseWhitespace && isOnlyWhitespace(before) && countSpaces(before, tabWidth) === indent) {
         // Reuse original spaces if the indentation is correct.
         parts.push(info.line.slice(0, info.sliceEnd));
         continue;
@@ -576,7 +571,7 @@ export class Lines {
       let tabs = 0;
       let spaces = indent;
 
-      if (options.useTabs) {
+      if (useTabs) {
         tabs = Math.floor(indent / tabWidth);
         spaces -= tabs * tabWidth;
       }
@@ -596,7 +591,7 @@ export class Lines {
       parts.push(result);
     }
 
-    return parts.join(options.lineTerminator);
+    return parts.join(lineTerminator);
   }
 
   isEmpty() {
@@ -685,7 +680,7 @@ export class Lines {
 }
 
 const fromStringCache: any = {};
-var hasOwn = fromStringCache.hasOwnProperty;
+const hasOwn = fromStringCache.hasOwnProperty;
 const maxCacheKeyLen = 10;
 
 export function countSpaces(spaces: any, tabWidth?: number) {
@@ -694,11 +689,12 @@ export function countSpaces(spaces: any, tabWidth?: number) {
 
   for (let i = 0; i < len; ++i) {
     switch (spaces.charCodeAt(i)) {
-      case 9: // '\t'
+      case 9: {
+        // '\t'
         assert.strictEqual(typeof tabWidth, 'number');
         assert.ok(tabWidth! > 0);
 
-        var next = Math.ceil(count / tabWidth!) * tabWidth!;
+        const next = Math.ceil(count / tabWidth!) * tabWidth!;
         if (next === count) {
           count += tabWidth!;
         } else {
@@ -706,6 +702,7 @@ export function countSpaces(spaces: any, tabWidth?: number) {
         }
 
         break;
+      }
 
       case 11: // '\v'
       case 12: // '\f'
@@ -728,7 +725,7 @@ export function countSpaces(spaces: any, tabWidth?: number) {
 const leadingSpaceExp = /^\s*/;
 
 // As specified here: http://www.ecma-international.org/ecma-262/6.0/#sec-line-terminators
-var lineTerminatorSeqExp = /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
+const lineTerminatorSeqExp = /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
 
 /**
  * @param {Object} options - Options object that configures printing.

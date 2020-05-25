@@ -146,7 +146,7 @@ function expandLoc(parentLoc: any, childLoc: any) {
 }
 
 export function fixFaultyLocations(node: any, lines: any) {
-  var loc = node.loc;
+  const loc = node.loc;
   if (loc) {
     if (loc.start.line < 1) {
       loc.start.line = 1;
@@ -204,7 +204,7 @@ export function fixFaultyLocations(node: any, lines: any) {
       node.value.id = null;
     }
   } else if (node.type === 'ObjectTypeProperty') {
-    var loc = node.loc;
+    const loc = node.loc;
     let end = loc && loc.end;
     if (end) {
       end = copyPos(end);

@@ -26,7 +26,8 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
       // This reverse insertion sort almost always takes constant
       // time because we almost always (maybe always?) append the
       // nodes in order anyway.
-      for (var i = resultArray.length - 1; i >= 0; --i) {
+      let i = resultArray.length - 1;
+      for (; i >= 0; --i) {
         if (comparePos(resultArray[i].loc.end, node.loc.start) <= 0) {
           break;
         }
@@ -54,7 +55,7 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
     });
   }
 
-  for (var i = 0, nameCount = names.length; i < nameCount; ++i) {
+  for (let i = 0, nameCount = names.length; i < nameCount; ++i) {
     getSortedChildNodes(node[names[i]], lines, resultArray);
   }
 
@@ -69,7 +70,10 @@ function decorateComment(node: any, comment: any, lines: any) {
 
   // Time to dust off the old binary search robes and wizard hat.
   let left = 0,
-    right = childNodes.length;
+    right = childNodes.length,
+    precedingNode,
+    followingNode;
+
   while (left < right) {
     const middle = (left + right) >> 1;
     const child = childNodes[middle];
@@ -88,7 +92,7 @@ function decorateComment(node: any, comment: any, lines: any) {
       // Because we will never consider this node or any nodes
       // before it again, this node must be the closest preceding
       // node we have encountered so far.
-      var precedingNode = child;
+      precedingNode = child;
       left = middle + 1;
       continue;
     }
@@ -98,7 +102,7 @@ function decorateComment(node: any, comment: any, lines: any) {
       // Because we will never consider this node or any nodes after
       // it again, this node must be the closest following node we
       // have encountered so far.
-      var followingNode = child;
+      followingNode = child;
       right = middle;
       continue;
     }
@@ -190,12 +194,10 @@ function breakTies(tiesToBreak: any[], lines: any) {
   // between the tied comments. In order to qualify as leading, a
   // comment must be separated from fn by an unbroken series of
   // whitespace-only gaps (or other comments).
-  for (
-    var indexOfFirstLeadingComment = tieCount;
-    indexOfFirstLeadingComment > 0;
-    --indexOfFirstLeadingComment
-  ) {
-    var comment = tiesToBreak[indexOfFirstLeadingComment - 1];
+  let indexOfFirstLeadingComment = tieCount;
+  let comment;
+  for (; indexOfFirstLeadingComment > 0; --indexOfFirstLeadingComment) {
+    comment = tiesToBreak[indexOfFirstLeadingComment - 1];
     assert.strictEqual(comment.precedingNode, pn);
     assert.strictEqual(comment.followingNode, fn);
 

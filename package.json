@@ -26,10 +26,22 @@
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run build && npm run mocha",
     "build": "npm run clean && tsc",
+    "lint": "eslint --ext .ts .",
     "format": "prettier --write '{lib,test}/**.ts' '*rc.js'",
     "clean": "ts-emit-clean",
     "prepack": "npm run build",
     "postpack": "npm run clean"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && tsc"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint",
+      "prettier -c"
+    ]
   },
   "browser": {
     "fs": false
@@ -48,9 +60,13 @@
     "@types/glob": "7.1.1",
     "@types/mocha": "5.2.7",
     "@types/node": "13.1.1",
+    "@typescript-eslint/parser": "^3.0.1",
+    "eslint": "^7.1.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.119.1",
     "glob": "7.1.5",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.6",
     "mocha": "6.2.2",
     "prettier": "^2.0.5",
     "reify": "0.20.12",

@@ -156,7 +156,7 @@ TCp.copy = function (node) {
   }
 
   if (isArray.check(node)) {
-    var copy: any = new Array(node.length);
+    const copy: any = new Array(node.length);
     this.seen.set(node, copy);
     node.forEach(function (this: any, item: any, i: any) {
       copy[i] = this.copy(item);
@@ -170,7 +170,7 @@ TCp.copy = function (node) {
 
   util.fixFaultyLocations(node, this.lines);
 
-  var copy: any = Object.create(Object.getPrototypeOf(node), {
+  const copy: any = Object.create(Object.getPrototypeOf(node), {
     original: {
       // Provide a link from the copy to the original.
       value: node,

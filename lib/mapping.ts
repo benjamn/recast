@@ -166,12 +166,13 @@ function skipChars(
     return sourceFromPos;
   }
 
+  let sourceCursor, targetCursor;
   if (targetComparison < 0) {
     // Skipping forward.
-    var sourceCursor = sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
-    var targetCursor = targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
+    sourceCursor = sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
+    targetCursor = targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
 
-    var lineDiff = targetToPos.line - targetCursor.line;
+    const lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
     targetCursor.line += lineDiff;
 
@@ -190,10 +191,10 @@ function skipChars(
     }
   } else {
     // Skipping backward.
-    var sourceCursor = sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
-    var targetCursor = targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
+    sourceCursor = sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
+    targetCursor = targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
 
-    var lineDiff = targetToPos.line - targetCursor.line;
+    const lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
     targetCursor.line += lineDiff;
 

@@ -43,7 +43,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
         },
       });
 
-      for (var name in types.namedTypes) {
+      for (let name in types.namedTypes) {
         if (hasOwn.call(types.namedTypes, name)) {
           assert.ok(hasOwn.call(typeNames, name), 'unhandled type: ' + name);
           assert.strictEqual(name, typeNames[name]);

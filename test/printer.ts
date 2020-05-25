@@ -223,8 +223,9 @@ describe('printer', function () {
 
   it('MethodPrinting', function () {
     const code = classBody.join(eol);
+    let ast;
     try {
-      var ast = parse(code);
+      ast = parse(code);
     } catch (e) {
       // ES6 not supported, silently finish
       return;
@@ -615,7 +616,8 @@ describe('printer', function () {
   });
 
   it('should support computed properties', function () {
-    var code = [
+    let code;
+    code = [
       'class A {',
       '  ["a"]() {}',
       '  [ID("b")]() {}',
@@ -652,7 +654,7 @@ describe('printer', function () {
 
     assert.strictEqual(printer.printGenerically(ast).code, code);
 
-    var code = [
+    code = [
       'var obj = {',
       '  ["a"]: 1,',
       '  [ID("b")]: 2,',

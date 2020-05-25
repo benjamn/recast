@@ -314,8 +314,9 @@ function tryToParseFile(source: any, absPath: any) {
   try {
     return recast.parse(source, { parser });
   } catch (e1) {
+    let options;
     try {
-      var options = JSON.parse(
+      options = JSON.parse(
         fs.readFileSync(path.join(path.dirname(absPath), 'options.json')).toString(),
       );
     } catch (e2) {
