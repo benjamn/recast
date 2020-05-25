@@ -1972,14 +1972,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const withParens = n.extra && n.extra.parenthesized === true;
       if (withParens) parts.push('(');
       const expression = path.call(print, 'expression');
-      const expressionType = path.getValue().expression.type;
-      const needParens =
-        expressionType === 'ArrowFunctionExpression' || expressionType === 'FunctionExpression';
-      parts.push(
-        needParens ? '(' + expression + ')' : expression,
-        fromString(' as '),
-        path.call(print, 'typeAnnotation'),
-      );
+      parts.push(expression, fromString(' as '), path.call(print, 'typeAnnotation'));
       if (withParens) parts.push(')');
 
       return concat(parts);

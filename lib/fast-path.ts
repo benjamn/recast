@@ -428,15 +428,12 @@ FPp.needsParens = function (assumeExpressionContext) {
       }
 
     case 'ArrowFunctionExpression':
-      if (parent.type === 'CallExpression' && parent.callee === node) {
-        return true;
-      }
-
-      if (parent.type === 'MemberExpression' && parent.object === node) {
-        return true;
-      }
-
-      return isBinary(parent);
+      return (
+        (parent.type === 'CallExpression' && parent.callee === node) ||
+        (parent.type === 'MemberExpression' && parent.object === node) ||
+        (parent.type === 'TSAsExpression' && parent.expression === node) ||
+        isBinary(parent)
+      );
 
     case 'ObjectExpression':
       if (parent.type === 'ArrowFunctionExpression' && parent.body === node) {
