@@ -410,24 +410,6 @@ FPp.needsParens = function (assumeExpressionContext) {
           return true;
       }
 
-    case "YieldExpression":
-      switch (parent.type) {
-        case "BinaryExpression":
-        case "LogicalExpression":
-        case "UnaryExpression":
-        case "SpreadElement":
-        case "SpreadProperty":
-        case "CallExpression":
-        case "MemberExpression":
-        case "NewExpression":
-        case "ConditionalExpression":
-        case "YieldExpression":
-          return true;
-
-        default:
-          return false;
-      }
-
     case "IntersectionTypeAnnotation":
     case "UnionTypeAnnotation":
       return parent.type === "NullableTypeAnnotation";
@@ -444,6 +426,8 @@ FPp.needsParens = function (assumeExpressionContext) {
     case "NumericLiteral":
       return parent.type === "MemberExpression" && name === "object" && parent.object === node;
 
+    case "YieldExpression":
+    case "AwaitExpression":
     case "AssignmentExpression":
     case "ConditionalExpression":
       switch (parent.type) {
@@ -480,7 +464,9 @@ FPp.needsParens = function (assumeExpressionContext) {
       return isBinary(parent);
 
     case "ObjectExpression":
-      if (parent.type === "ArrowFunctionExpression" && name === "body") {
+      if (parent.type === "ArrowFunctionExpression" &&
+          name === "body" &&
+          parent.body === node) {
         return true;
       }
 
@@ -490,6 +476,7 @@ FPp.needsParens = function (assumeExpressionContext) {
       if (
         parent.type === "ArrowFunctionExpression" &&
         name === "body" &&
+        parent.body === node &&
         node.expression.type === "ObjectExpression"
       ) {
         return true;
@@ -506,7 +493,9 @@ FPp.needsParens = function (assumeExpressionContext) {
       }
   }
 
-  if (parent.type === "NewExpression" && name === "callee" && parent.callee === node) {
+  if (parent.type === "NewExpression" &&
+      name === "callee" &&
+      parent.callee === node) {
     return containsCallExpression(node);
   }
 
