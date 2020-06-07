@@ -1908,7 +1908,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(['[', fromString(', ').join(path.map(print, 'elementTypes')), ']']);
 
     case 'TSRestType':
-      return concat(['...', path.call(print, 'typeAnnotation'), '[]']);
+      return concat(['...', path.call(print, 'typeAnnotation')]);
 
     case 'TSOptionalType':
       return concat([path.call(print, 'typeAnnotation'), '?']);

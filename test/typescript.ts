@@ -254,6 +254,8 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check(['createPlugin<number>();']);
 
     check(['type Class<T> = new (...args: any) => T;']);
+
+    check(['type T1 = [...Array<any>];', 'type T2 = [...any[]];']);
   });
 
   it('parens', function () {
