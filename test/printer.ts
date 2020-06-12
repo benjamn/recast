@@ -836,6 +836,28 @@ describe("printer", function () {
     },
   );
 
+  it("shouldn't print a trailing comma for a RestElement in destructuring", function () {
+    const code = [
+      "const {",
+      "  foo,",
+      "  bar,",
+      "  ...rest",
+      "} = input;",
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: require("@babel/parser"),
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      trailingComma: true,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("should support AssignmentPattern and RestElement", function () {
     const code = [
       "function foo(a, [b, c] = d(a), ...[e, f, ...rest]) {",
