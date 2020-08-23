@@ -29,19 +29,18 @@ export class Lines {
   private cachedSourceMap: any = null;
   private cachedTabWidth: number | void = void 0;
 
-  constructor(
-    private infos: LineInfo[],
-    sourceFileName: string | null = null,
-  ) {
+  constructor(private infos: LineInfo[], sourceFileName: string | null = null) {
     assert.ok(infos.length > 0);
     this.length = infos.length;
     this.name = sourceFileName || null;
 
     if (this.name) {
-      this.mappings.push(new Mapping(this, {
-        start: this.firstPos(),
-        end: this.lastPos(),
-      }));
+      this.mappings.push(
+        new Mapping(this, {
+          start: this.firstPos(),
+          end: this.lastPos(),
+        }),
+      );
     }
   }
 
@@ -82,18 +81,16 @@ export class Lines {
     const smg = new sourceMap.SourceMapGenerator(updateJSON());
     const sourcesToContents: any = {};
 
-    targetLines.mappings.forEach(function(mapping: any) {
-      const sourceCursor = mapping.sourceLines.skipSpaces(
-        mapping.sourceLoc.start
-      ) || mapping.sourceLines.lastPos();
+    targetLines.mappings.forEach(function (mapping: any) {
+      const sourceCursor =
+        mapping.sourceLines.skipSpaces(mapping.sourceLoc.start) || mapping.sourceLines.lastPos();
 
-      const targetCursor = targetLines.skipSpaces(
-        mapping.targetLoc.start
-      ) || targetLines.lastPos();
+      const targetCursor = targetLines.skipSpaces(mapping.targetLoc.start) || targetLines.lastPos();
 
-      while (comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
-             comparePos(targetCursor, mapping.targetLoc.end) < 0) {
-
+      while (
+        comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
+        comparePos(targetCursor, mapping.targetLoc.end) < 0
+      ) {
         const sourceChar = mapping.sourceLines.charAt(sourceCursor);
         const targetChar = targetLines.charAt(targetCursor);
         assert.strictEqual(sourceChar, targetChar);
@@ -103,10 +100,8 @@ export class Lines {
         // Add mappings one character at a time for maximum resolution.
         smg.addMapping({
           source: sourceName,
-          original: { line: sourceCursor.line,
-                      column: sourceCursor.column },
-          generated: { line: targetCursor.line,
-                       column: targetCursor.column }
+          original: { line: sourceCursor.line, column: sourceCursor.column },
+          generated: { line: targetCursor.line, column: targetCursor.column },
         });
 
         if (!hasOwn.call(sourcesToContents, sourceName)) {
@@ -130,17 +125,16 @@ export class Lines {
     assert.strictEqual(typeof pos.line, "number");
     assert.strictEqual(typeof pos.column, "number");
 
-    const line = pos.line, column = pos.column, strings = this.toString().split(lineTerminatorSeqExp), string = strings[line - 1];
+    const line = pos.line,
+      column = pos.column,
+      strings = this.toString().split(lineTerminatorSeqExp),
+      string = strings[line - 1];
 
-    if (typeof string === "undefined")
-      return "";
+    if (typeof string === "undefined") return "";
 
-    if (column === string.length &&
-        line < strings.length)
-      return "\n";
+    if (column === string.length && line < strings.length) return "\n";
 
-    if (column >= string.length)
-      return "";
+    if (column >= string.length) return "";
 
     return string.charAt(column);
   }
@@ -150,50 +144,50 @@ export class Lines {
     assert.strictEqual(typeof pos.line, "number");
     assert.strictEqual(typeof pos.column, "number");
 
-    let line = pos.line, column = pos.column, secret = this, infos = secret.infos, info = infos[line - 1], c = column;
+    let line = pos.line,
+      column = pos.column,
+      secret = this,
+      infos = secret.infos,
+      info = infos[line - 1],
+      c = column;
 
-    if (typeof info === "undefined" || c < 0)
-      return "";
+    if (typeof info === "undefined" || c < 0) return "";
 
     const indent = this.getIndentAt(line);
-    if (c < indent)
-      return " ";
+    if (c < indent) return " ";
 
     c += info.sliceStart - indent;
 
-    if (c === info.sliceEnd &&
-        line < this.length)
-      return "\n";
+    if (c === info.sliceEnd && line < this.length) return "\n";
 
-    if (c >= info.sliceEnd)
-      return "";
+    if (c >= info.sliceEnd) return "";
 
     return info.line.charAt(c);
   }
 
   stripMargin(width: number, skipFirstLine: boolean) {
-    if (width === 0)
-      return this;
+    if (width === 0) return this;
 
     assert.ok(width > 0, "negative margin: " + width);
 
-    if (skipFirstLine && this.length === 1)
-      return this;
+    if (skipFirstLine && this.length === 1) return this;
 
-    const lines = new Lines(this.infos.map(function(info: any, i: any) {
-      if (info.line && (i > 0 || !skipFirstLine)) {
-        info = {
-          ...info,
-          indent: Math.max(0, info.indent - width),
-        };
-      }
-      return info;
-    }));
+    const lines = new Lines(
+      this.infos.map(function (info: any, i: any) {
+        if (info.line && (i > 0 || !skipFirstLine)) {
+          info = {
+            ...info,
+            indent: Math.max(0, info.indent - width),
+          };
+        }
+        return info;
+      }),
+    );
 
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
-      this.mappings.forEach(function(mapping: any) {
+      this.mappings.forEach(function (mapping: any) {
         newMappings.push(mapping.indent(width, skipFirstLine, true));
       });
     }
@@ -206,20 +200,22 @@ export class Lines {
       return this;
     }
 
-    const lines = new Lines(this.infos.map(function(info: any) {
-      if (info.line && ! info.locked) {
-        info = {
-          ...info,
-          indent: info.indent + by,
-        };
-      }
-      return info
-    }));
+    const lines = new Lines(
+      this.infos.map(function (info: any) {
+        if (info.line && !info.locked) {
+          info = {
+            ...info,
+            indent: info.indent + by,
+          };
+        }
+        return info;
+      }),
+    );
 
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
-      this.mappings.forEach(function(mapping: any) {
+      this.mappings.forEach(function (mapping: any) {
         newMappings.push(mapping.indent(by));
       });
     }
@@ -236,21 +232,23 @@ export class Lines {
       return this;
     }
 
-    const lines = new Lines(this.infos.map(function(info: any, i: any) {
-      if (i > 0 && info.line && ! info.locked) {
-        info = {
-          ...info,
-          indent: info.indent + by,
-        };
-      }
+    const lines = new Lines(
+      this.infos.map(function (info: any, i: any) {
+        if (i > 0 && info.line && !info.locked) {
+          info = {
+            ...info,
+            indent: info.indent + by,
+          };
+        }
 
-      return info;
-    }));
+        return info;
+      }),
+    );
 
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
-      this.mappings.forEach(function(mapping: any) {
+      this.mappings.forEach(function (mapping: any) {
         newMappings.push(mapping.indent(by, true));
       });
     }
@@ -263,10 +261,12 @@ export class Lines {
       return this;
     }
 
-    return new Lines(this.infos.map((info: any, i: any) => ({
-      ...info,
-      locked: i > 0
-    })));
+    return new Lines(
+      this.infos.map((info: any, i: any) => ({
+        ...info,
+        locked: i > 0,
+      })),
+    );
   }
 
   getIndentAt(line: number) {
@@ -300,17 +300,14 @@ export class Lines {
     let maxCount = -1;
     let result = 2;
 
-    for (let tabWidth = 1;
-         tabWidth < counts.length;
-         tabWidth += 1) {
-      if (hasOwn.call(counts, tabWidth) &&
-          counts[tabWidth] > maxCount) {
+    for (let tabWidth = 1; tabWidth < counts.length; tabWidth += 1) {
+      if (hasOwn.call(counts, tabWidth) && counts[tabWidth] > maxCount) {
         maxCount = counts[tabWidth];
         result = tabWidth;
       }
     }
 
-    return this.cachedTabWidth = result;
+    return (this.cachedTabWidth = result);
   }
 
   // Determine if the list of lines has a first line that starts with a //
@@ -320,10 +317,13 @@ export class Lines {
     if (this.infos.length === 0) {
       return false;
     }
-    const firstLineInfo = this.infos[0], sliceStart = firstLineInfo.sliceStart, sliceEnd = firstLineInfo.sliceEnd, firstLine = firstLineInfo.line.slice(sliceStart, sliceEnd).trim();
-    return firstLine.length === 0 ||
-      firstLine.slice(0, 2) === "//" ||
-      firstLine.slice(0, 2) === "/*";
+    const firstLineInfo = this.infos[0],
+      sliceStart = firstLineInfo.sliceStart,
+      sliceEnd = firstLineInfo.sliceEnd,
+      firstLine = firstLineInfo.line.slice(sliceStart, sliceEnd).trim();
+    return (
+      firstLine.length === 0 || firstLine.slice(0, 2) === "//" || firstLine.slice(0, 2) === "/*"
+    );
   }
 
   isOnlyWhitespace() {
@@ -354,39 +354,35 @@ export class Lines {
   }
 
   nextPos(pos: Pos, skipSpaces: boolean = false) {
-    const l = Math.max(pos.line, 0), c = Math.max(pos.column, 0);
+    const l = Math.max(pos.line, 0),
+      c = Math.max(pos.column, 0);
 
     if (c < this.getLineLength(l)) {
       pos.column += 1;
 
-      return skipSpaces
-        ? !!this.skipSpaces(pos, false, true)
-        : true;
+      return skipSpaces ? !!this.skipSpaces(pos, false, true) : true;
     }
 
     if (l < this.length) {
       pos.line += 1;
       pos.column = 0;
 
-      return skipSpaces
-        ? !!this.skipSpaces(pos, false, true)
-        : true;
+      return skipSpaces ? !!this.skipSpaces(pos, false, true) : true;
     }
 
     return false;
   }
 
   prevPos(pos: Pos, skipSpaces: boolean = false) {
-    let l = pos.line, c = pos.column;
+    let l = pos.line,
+      c = pos.column;
 
     if (c < 1) {
       l -= 1;
 
-      if (l < 1)
-        return false;
+      if (l < 1) return false;
 
       c = this.getLineLength(l);
-
     } else {
       c = Math.min(c - 1, this.getLineLength(l));
     }
@@ -394,9 +390,7 @@ export class Lines {
     pos.line = l;
     pos.column = c;
 
-    return skipSpaces
-      ? !!this.skipSpaces(pos, true, true)
-      : true;
+    return skipSpaces ? !!this.skipSpaces(pos, true, true) : true;
   }
 
   firstPos() {
@@ -407,20 +401,18 @@ export class Lines {
   lastPos() {
     return {
       line: this.length,
-      column: this.getLineLength(this.length)
+      column: this.getLineLength(this.length),
     };
   }
 
-  skipSpaces(
-    pos: Pos,
-    backward: boolean = false,
-    modifyInPlace: boolean = false,
-  ) {
+  skipSpaces(pos: Pos, backward: boolean = false, modifyInPlace: boolean = false) {
     if (pos) {
-      pos = modifyInPlace ? pos : {
-        line: pos.line,
-        column: pos.column
-      };
+      pos = modifyInPlace
+        ? pos
+        : {
+            line: pos.line,
+            column: pos.column,
+          };
     } else if (backward) {
       pos = this.lastPos();
     } else {
@@ -429,14 +421,12 @@ export class Lines {
 
     if (backward) {
       while (this.prevPos(pos)) {
-        if (!isOnlyWhitespace(this.charAt(pos)) &&
-            this.nextPos(pos)) {
+        if (!isOnlyWhitespace(this.charAt(pos)) && this.nextPos(pos)) {
           return pos;
         }
       }
 
       return null;
-
     } else {
       while (isOnlyWhitespace(this.charAt(pos))) {
         if (!this.nextPos(pos)) {
@@ -477,11 +467,10 @@ export class Lines {
     startPos: Pos = this.firstPos(),
     skipSpaces: boolean = false,
   ) {
-    var pos = this.firstPos();
+    const pos = this.firstPos();
 
     if (startPos) {
-      pos.line = startPos.line,
-      pos.column = startPos.column
+      (pos.line = startPos.line), (pos.column = startPos.column);
     }
 
     if (skipSpaces && !this.skipSpaces(pos, false, true)) {
@@ -493,12 +482,9 @@ export class Lines {
   }
 
   bootstrapSlice(start: Pos, end: Pos) {
-    const strings = this.toString().split(
-      lineTerminatorSeqExp
-    ).slice(
-      start.line - 1,
-      end.line
-    );
+    const strings = this.toString()
+      .split(lineTerminatorSeqExp)
+      .slice(start.line - 1, end.line);
 
     if (strings.length > 0) {
       strings.push(strings.pop()!.slice(0, end.column));
@@ -540,7 +526,7 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       assert.strictEqual(newMappings.length, 0);
-      this.mappings.forEach(function(this: any, mapping: any) {
+      this.mappings.forEach(function (this: any, mapping: any) {
         const sliced = mapping.slice(this, start, end);
         if (sliced) {
           newMappings.push(sliced);
@@ -555,15 +541,10 @@ export class Lines {
     return this.slice(start, end).toString(options);
   }
 
-  sliceString(
-    start: Pos = this.firstPos(),
-    end: Pos = this.lastPos(),
-    options?: Options,
-  ) {
-    options = normalizeOptions(options);
+  sliceString(start: Pos = this.firstPos(), end: Pos = this.lastPos(), options?: Options) {
+    const { tabWidth, useTabs, reuseWhitespace, lineTerminator } = normalizeOptions(options);
 
     const parts = [];
-    const { tabWidth = 2 } = options;
 
     for (let line = start.line; line <= end.line; ++line) {
       let info = this.infos[line - 1];
@@ -581,9 +562,7 @@ export class Lines {
       const indent = Math.max(info.indent, 0);
 
       const before = info.line.slice(0, info.sliceStart);
-      if (options.reuseWhitespace &&
-          isOnlyWhitespace(before) &&
-          countSpaces(before, options.tabWidth) === indent) {
+      if (reuseWhitespace && isOnlyWhitespace(before) && countSpaces(before, tabWidth) === indent) {
         // Reuse original spaces if the indentation is correct.
         parts.push(info.line.slice(0, info.sliceEnd));
         continue;
@@ -592,7 +571,7 @@ export class Lines {
       let tabs = 0;
       let spaces = indent;
 
-      if (options.useTabs) {
+      if (useTabs) {
         tabs = Math.floor(indent / tabWidth);
         spaces -= tabs * tabWidth;
       }
@@ -612,7 +591,7 @@ export class Lines {
       parts.push(result);
     }
 
-    return parts.join(options.lineTerminator);
+    return parts.join(lineTerminator);
   }
 
   isEmpty() {
@@ -634,12 +613,12 @@ export class Lines {
         const info = linesOrNull.infos[0];
         const indent = new Array(info.indent + 1).join(" ");
         const prevLine = infos.length;
-        const prevColumn = Math.max(prevInfo.indent, 0) +
-          prevInfo.sliceEnd - prevInfo.sliceStart;
+        const prevColumn = Math.max(prevInfo.indent, 0) + prevInfo.sliceEnd - prevInfo.sliceStart;
 
-        prevInfo.line = prevInfo.line.slice(
-          0, prevInfo.sliceEnd) + indent + info.line.slice(
-            info.sliceStart, info.sliceEnd);
+        prevInfo.line =
+          prevInfo.line.slice(0, prevInfo.sliceEnd) +
+          indent +
+          info.line.slice(info.sliceStart, info.sliceEnd);
 
         // If any part of a line is indentation-locked, the whole line
         // will be indentation-locked.
@@ -648,16 +627,15 @@ export class Lines {
         prevInfo.sliceEnd = prevInfo.line.length;
 
         if (linesOrNull.mappings.length > 0) {
-          linesOrNull.mappings.forEach(function(mapping: any) {
+          linesOrNull.mappings.forEach(function (mapping: any) {
             mappings.push(mapping.add(prevLine, prevColumn));
           });
         }
-
       } else if (linesOrNull.mappings.length > 0) {
         mappings.push.apply(mappings, linesOrNull.mappings);
       }
 
-      linesOrNull.infos.forEach(function(info: any, i: any) {
+      linesOrNull.infos.forEach(function (info: any, i: any) {
         if (!prevInfo || i > 0) {
           prevInfo = { ...info };
           infos.push(prevInfo);
@@ -666,26 +644,25 @@ export class Lines {
     }
 
     function appendWithSeparator(linesOrNull: Lines | null, i: number) {
-      if (i > 0)
-        appendLines(separator);
+      if (i > 0) appendLines(separator);
       appendLines(linesOrNull);
     }
 
-    elements.map(function(elem: any) {
-      const lines = fromString(elem);
-      if (lines.isEmpty())
-        return null;
-      return lines;
-    }).forEach((linesOrNull, i) => {
-      if (separator.isEmpty()) {
-        appendLines(linesOrNull);
-      } else {
-        appendWithSeparator(linesOrNull, i);
-      }
-    });
+    elements
+      .map(function (elem: any) {
+        const lines = fromString(elem);
+        if (lines.isEmpty()) return null;
+        return lines;
+      })
+      .forEach((linesOrNull, i) => {
+        if (separator.isEmpty()) {
+          appendLines(linesOrNull);
+        } else {
+          appendWithSeparator(linesOrNull, i);
+        }
+      });
 
-    if (infos.length < 1)
-      return emptyLines;
+    if (infos.length < 1) return emptyLines;
 
     const lines = new Lines(infos);
 
@@ -703,7 +680,7 @@ export class Lines {
 }
 
 const fromStringCache: any = {};
-var hasOwn = fromStringCache.hasOwnProperty;
+const hasOwn = fromStringCache.hasOwnProperty;
 const maxCacheKeyLen = 10;
 
 export function countSpaces(spaces: any, tabWidth?: number) {
@@ -712,30 +689,33 @@ export function countSpaces(spaces: any, tabWidth?: number) {
 
   for (let i = 0; i < len; ++i) {
     switch (spaces.charCodeAt(i)) {
-    case 9: // '\t'
-      assert.strictEqual(typeof tabWidth, "number");
-      assert.ok(tabWidth! > 0);
+      case 9: {
+        // '\t'
+        assert.strictEqual(typeof tabWidth, "number");
+        assert.ok(tabWidth! > 0);
 
-      var next = Math.ceil(count / tabWidth!) * tabWidth!;
-      if (next === count) {
-        count += tabWidth!;
-      } else {
-        count = next;
+        const next = Math.ceil(count / tabWidth!) * tabWidth!;
+        if (next === count) {
+          count += tabWidth!;
+        } else {
+          count = next;
+        }
+
+        break;
       }
 
-      break;
+      case 11: // '\v'
+      case 12: // '\f'
+      case 13: // '\r'
+      case 0xfeff: // zero-width non-breaking space
+        // These characters contribute nothing to indentation.
+        break;
 
-    case 11: // '\v'
-    case 12: // '\f'
-    case 13: // '\r'
-    case 0xfeff: // zero-width non-breaking space
-      // These characters contribute nothing to indentation.
-      break;
-
-    case 32: // ' '
-    default: // Treat all other whitespace like ' '.
-      count += 1;
-      break;
+      case 32: // ' '
+      default:
+        // Treat all other whitespace like ' '.
+        count += 1;
+        break;
     }
   }
 
@@ -745,45 +725,44 @@ export function countSpaces(spaces: any, tabWidth?: number) {
 const leadingSpaceExp = /^\s*/;
 
 // As specified here: http://www.ecma-international.org/ecma-262/6.0/#sec-line-terminators
-var lineTerminatorSeqExp =
-  /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
+const lineTerminatorSeqExp = /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
 
 /**
  * @param {Object} options - Options object that configures printing.
  */
-export function fromString(
-  string: string | Lines,
-  options?: Options,
-): Lines {
-  if (string instanceof Lines)
-    return string;
+export function fromString(string: string | Lines, options?: Options): Lines {
+  if (string instanceof Lines) return string;
 
   string += "";
 
   const tabWidth = options && options.tabWidth;
   const tabless = string.indexOf("\t") < 0;
-  const cacheable = !options && tabless && (string.length <= maxCacheKeyLen);
+  const cacheable = !options && tabless && string.length <= maxCacheKeyLen;
 
-  assert.ok(tabWidth || tabless, "No tab width specified but encountered tabs in string\n" + string);
+  assert.ok(
+    tabWidth || tabless,
+    "No tab width specified but encountered tabs in string\n" + string,
+  );
 
-  if (cacheable && hasOwn.call(fromStringCache, string))
-    return fromStringCache[string];
+  if (cacheable && hasOwn.call(fromStringCache, string)) return fromStringCache[string];
 
-  const lines = new Lines(string.split(lineTerminatorSeqExp).map(function(line) {
-    // TODO: handle null exec result
-    const spaces = leadingSpaceExp.exec(line)![0];
-    return {
-      line: line,
-      indent: countSpaces(spaces, tabWidth),
-      // Boolean indicating whether this line can be reindented.
-      locked: false,
-      sliceStart: spaces.length,
-      sliceEnd: line.length
-    };
-  }), normalizeOptions(options).sourceFileName);
+  const lines = new Lines(
+    string.split(lineTerminatorSeqExp).map(function (line) {
+      // TODO: handle null exec result
+      const spaces = leadingSpaceExp.exec(line)![0];
+      return {
+        line: line,
+        indent: countSpaces(spaces, tabWidth),
+        // Boolean indicating whether this line can be reindented.
+        locked: false,
+        sliceStart: spaces.length,
+        sliceEnd: line.length,
+      };
+    }),
+    normalizeOptions(options).sourceFileName,
+  );
 
-  if (cacheable)
-    fromStringCache[string] = lines;
+  if (cacheable) fromStringCache[string] = lines;
 
   return lines;
 }
@@ -828,9 +807,7 @@ function sliceInfo(info: any, startCol: number, endCol?: number) {
   assert.ok(sliceStart <= sliceEnd);
   assert.strictEqual(lineLength, indent + sliceEnd - sliceStart);
 
-  if (info.indent === indent &&
-      info.sliceStart === sliceStart &&
-      info.sliceEnd === sliceEnd) {
+  if (info.indent === indent && info.sliceStart === sliceStart && info.sliceEnd === sliceEnd) {
     return info;
   }
 
@@ -840,13 +817,13 @@ function sliceInfo(info: any, startCol: number, endCol?: number) {
     // A destructive slice always unlocks indentation.
     locked: false,
     sliceStart: sliceStart,
-    sliceEnd: sliceEnd
+    sliceEnd: sliceEnd,
   };
 }
 
 export function concat(elements: any) {
   return emptyLines.join(elements);
-};
+}
 
 // The emptyLines object needs to be created all the way down here so that
 // Lines.prototype will be fully populated.

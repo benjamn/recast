@@ -27,13 +27,13 @@ export function getUnionOfKeys(...args: any[]) {
 }
 
 export function comparePos(pos1: any, pos2: any) {
-  return (pos1.line - pos2.line) || (pos1.column - pos2.column);
+  return pos1.line - pos2.line || pos1.column - pos2.column;
 }
 
 export function copyPos(pos: any) {
   return {
     line: pos.line,
-    column: pos.column
+    column: pos.column,
   };
 }
 
@@ -50,15 +50,15 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
   const smcLatter = new SourceMapConsumer(latterMap);
   const smg = new SourceMapGenerator({
     file: latterMap.file,
-    sourceRoot: latterMap.sourceRoot
+    sourceRoot: latterMap.sourceRoot,
   });
 
   const sourcesToContents: any = {};
 
-  smcLatter.eachMapping(function(mapping) {
+  smcLatter.eachMapping(function (mapping) {
     const origPos = smcFormer.originalPositionFor({
       line: mapping.originalLine,
-      column: mapping.originalColumn
+      column: mapping.originalColumn,
     });
 
     const sourceName = origPos.source;
@@ -71,9 +71,9 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
       original: copyPos(origPos),
       generated: {
         line: mapping.generatedLine,
-        column: mapping.generatedColumn
+        column: mapping.generatedColumn,
       },
-      name: mapping.name
+      name: mapping.name,
     });
 
     const sourceContent = smcFormer.sourceContentFor(sourceName);
@@ -84,7 +84,7 @@ export function composeSourceMaps(formerMap: any, latterMap: any) {
   });
 
   return (smg as any).toJSON();
-};
+}
 
 export function getTrueLoc(node: any, lines: any) {
   // It's possible that node is newly-created (not parsed by Esprima),
@@ -97,7 +97,7 @@ export function getTrueLoc(node: any, lines: any) {
 
   const result = {
     start: node.loc.start,
-    end: node.loc.end
+    end: node.loc.end,
   };
 
   function include(node: any) {
@@ -107,9 +107,7 @@ export function getTrueLoc(node: any, lines: any) {
   // If the node is an export declaration and its .declaration has any
   // decorators, their locations might contribute to the true start/end
   // positions of the export declaration node.
-  if (node.declaration &&
-      node.declaration.decorators &&
-      isExportDeclaration(node)) {
+  if (node.declaration && node.declaration.decorators && isExportDeclaration(node)) {
     node.declaration.decorators.forEach(include);
   }
 
@@ -133,7 +131,7 @@ export function getTrueLoc(node: any, lines: any) {
   }
 
   return result;
-};
+}
 
 function expandLoc(parentLoc: any, childLoc: any) {
   if (parentLoc && childLoc) {
@@ -148,7 +146,7 @@ function expandLoc(parentLoc: any, childLoc: any) {
 }
 
 export function fixFaultyLocations(node: any, lines: any) {
-  var loc = node.loc;
+  const loc = node.loc;
   if (loc) {
     if (loc.start.line < 1) {
       loc.start.line = 1;
@@ -175,7 +173,6 @@ export function fixFaultyLocations(node: any, lines: any) {
     node.decorators.forEach(function (decorator: any) {
       expandLoc(loc, decorator.loc);
     });
-
   } else if (node.declaration && isExportDeclaration(node)) {
     // Nullify .loc information for the child declaration so that we never
     // try to reprint it without also reprinting the export declaration.
@@ -189,9 +186,10 @@ export function fixFaultyLocations(node: any, lines: any) {
         expandLoc(loc, decorator.loc);
       });
     }
-
-  } else if ((n.MethodDefinition && n.MethodDefinition.check(node)) ||
-             (n.Property.check(node) && (node.method || node.shorthand))) {
+  } else if (
+    (n.MethodDefinition && n.MethodDefinition.check(node)) ||
+    (n.Property.check(node) && (node.method || node.shorthand))
+  ) {
     // If the node is a MethodDefinition or a .method or .shorthand
     // Property, then the location information stored in
     // node.value.loc is very likely untrustworthy (just the {body}
@@ -205,14 +203,12 @@ export function fixFaultyLocations(node: any, lines: any) {
       // because their .id fields are ignored anyway.
       node.value.id = null;
     }
-
   } else if (node.type === "ObjectTypeProperty") {
-    var loc = node.loc;
+    const loc = node.loc;
     let end = loc && loc.end;
     if (end) {
       end = copyPos(end);
-      if (lines.prevPos(end) &&
-          lines.charAt(end) === ",") {
+      if (lines.prevPos(end) && lines.charAt(end) === ",") {
         // Some parsers accidentally include trailing commas in the
         // .loc.end information for ObjectTypeProperty nodes.
         if ((end = lines.skipSpaces(end, true, true))) {
@@ -221,7 +217,7 @@ export function fixFaultyLocations(node: any, lines: any) {
       }
     }
   }
-};
+}
 
 function fixForLoopHead(node: any, lines: any) {
   if (node.type !== "ForStatement") {
@@ -259,7 +255,7 @@ function fixTemplateLiteral(node: any, lines: any) {
     // If there are no quasi elements, then there is nothing to fix.
     return;
   }
-  
+
   // node.loc is not present when using export default with a template literal
   if (node.loc) {
     // First we need to exclude the opening ` from the .loc of the first
@@ -291,10 +287,12 @@ function fixTemplateLiteral(node: any, lines: any) {
     // as the .loc.end of the preceding quasi element, but some parsers
     // accidentally include the ${ in the .loc of the quasi element.
     const dollarCurlyPos = lines.skipSpaces(expr.loc.start, true, false);
-    if (lines.prevPos(dollarCurlyPos) &&
-        lines.charAt(dollarCurlyPos) === "{" &&
-        lines.prevPos(dollarCurlyPos) &&
-        lines.charAt(dollarCurlyPos) === "$") {
+    if (
+      lines.prevPos(dollarCurlyPos) &&
+      lines.charAt(dollarCurlyPos) === "{" &&
+      lines.prevPos(dollarCurlyPos) &&
+      lines.charAt(dollarCurlyPos) === "$"
+    ) {
       const quasiBefore = node.quasis[i];
       if (comparePos(dollarCurlyPos, quasiBefore.loc.end) < 0) {
         quasiBefore.loc.end = dollarCurlyPos;
@@ -316,28 +314,28 @@ function fixTemplateLiteral(node: any, lines: any) {
 }
 
 export function isExportDeclaration(node: any) {
-  if (node) switch (node.type) {
-  case "ExportDeclaration":
-  case "ExportDefaultDeclaration":
-  case "ExportDefaultSpecifier":
-  case "DeclareExportDeclaration":
-  case "ExportNamedDeclaration":
-  case "ExportAllDeclaration":
-    return true;
-  }
+  if (node)
+    switch (node.type) {
+      case "ExportDeclaration":
+      case "ExportDefaultDeclaration":
+      case "ExportDefaultSpecifier":
+      case "DeclareExportDeclaration":
+      case "ExportNamedDeclaration":
+      case "ExportAllDeclaration":
+        return true;
+    }
 
   return false;
-};
+}
 
 export function getParentExportDeclaration(path: any) {
   const parentNode = path.getParentNode();
-  if (path.getName() === "declaration" &&
-      isExportDeclaration(parentNode)) {
+  if (path.getName() === "declaration" && isExportDeclaration(parentNode)) {
     return parentNode;
   }
 
   return null;
-};
+}
 
 export function isTrailingCommaEnabled(options: any, context: any) {
   const trailingComma = options.trailingComma;
@@ -345,4 +343,4 @@ export function isTrailingCommaEnabled(options: any, context: any) {
     return !!trailingComma[context];
   }
   return !!trailingComma;
-};
+}

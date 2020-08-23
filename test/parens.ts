@@ -5,12 +5,8 @@ import { Printer } from "../lib/printer";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 
-const printer = new Printer;
-const {
-  namedTypes: n,
-  builders: b,
-  NodePath,
-} = types;
+const printer = new Printer();
+const { namedTypes: n, builders: b, NodePath } = types;
 
 function parseExpression(expr: any) {
   let ast: any = esprima.parse(expr);
@@ -26,21 +22,33 @@ function check(expr: any) {
 
   const expressionAst = parseExpression(expr);
   const generic = printer.printGenerically(expressionAst).code;
-  types.astNodesAreEquivalent.assert(
-    expressionAst,
-    parseExpression(generic)
-  );
+  types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
 }
 
 const operators = [
-  "==", "!=", "===", "!==",
-  "<", "<=", ">", ">=",
-  "<<", ">>", ">>>",
-  "+", "-", "*", "/", "%",
+  "==",
+  "!=",
+  "===",
+  "!==",
+  "<",
+  "<=",
+  ">",
+  ">=",
+  "<<",
+  ">>",
+  ">>>",
+  "+",
+  "-",
+  "*",
+  "/",
+  "%",
   "&", // TODO Missing from the Parser API.
-  "|", "^", "in",
+  "|",
+  "^",
+  "in",
   "instanceof",
-  "&&", "||"
+  "&&",
+  "||",
 ];
 
 describe("parens", function () {
@@ -131,6 +139,47 @@ describe("parens", function () {
     check("({a:b(c)}).a");
   });
 
+  it("ArrowFunctionExpression", () => {
+    check("(() => {})()");
+    check("test(() => {})");
+
+    check("(() => {}).test");
+    check("test[() => {}]");
+
+    check("(() => {}) + (() => {})");
+  });
+
+  it("AwaitExpression", function () {
+    check("async () => (await a) && (await b)");
+    check("async () => +(await a)");
+    check("async () => (await f)()");
+    check("async () => new (await C)");
+    check("async () => [...(await obj)]");
+    check("async () => (await a) ? b : c");
+    check("async () => (await a).b");
+  });
+
+  it("YieldExpression", function () {
+    check("function* test () { return (yield a) && (yield b) }");
+    check("function* test () { return +(yield a) }");
+    check("function* test () { return (yield f)() }");
+    check("function* test () { return new (yield C) }");
+    check("function* test () { return [...(yield obj)] }");
+    check("function* test () { return (yield a) ? b : c }");
+    check("function* test () { return (yield a).b }");
+    check("function* test () { yield yield foo }");
+  });
+
+  it('ArrowFunctionExpression', () => {
+    check('(() => {})()');
+    check('test(() => {})');
+
+    check('(() => {}).test');
+    check('test[() => {}]');
+
+    check('(() => {}) + (() => {})');
+  });
+
   it("ReprintedParens", function () {
     const code = "a(function g(){}.call(this));";
     const ast1 = parse(code);
@@ -138,8 +187,7 @@ describe("parens", function () {
 
     // Copy the function from a position where it does not need
     // parentheses to a position where it does need parentheses.
-    body.push(b.expressionStatement(
-      body[0].expression.arguments[0]));
+    body.push(b.expressionStatement(body[0].expression.arguments[0]));
 
     const generic = printer.printGenerically(ast1).code;
     const ast2 = parse(generic);
@@ -168,10 +216,7 @@ describe("parens", function () {
     assert.strictEqual(memExp.property.name, "foo");
     const blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
     reprint = printer.print(blockStmt).code;
-    types.astNodesAreEquivalent.assert(
-      blockStmt,
-      parse(reprint).program.body[0]
-    );
+    types.astNodesAreEquivalent.assert(blockStmt, parse(reprint).program.body[0]);
   });
 
   it("don't reparenthesize valid IIFEs", function () {
@@ -196,66 +241,57 @@ describe("parens", function () {
   });
 
   it("NegatedLoopCondition", function () {
-    const ast = parse([
-      "for (var i = 0; i < 10; ++i) {",
-      "  console.log(i);",
-      "}"
-    ].join(eol));
+    const ast = parse(["for (var i = 0; i < 10; ++i) {", "  console.log(i);", "}"].join(eol));
 
     const loop = ast.program.body[0];
     const test = loop.test;
     const negation = b.unaryExpression("!", test);
 
-    assert.strictEqual(
-      printer.print(negation).code,
-      "!(i < 10)"
-    );
+    assert.strictEqual(printer.print(negation).code, "!(i < 10)");
 
     loop.test = negation;
 
-    assert.strictEqual(printer.print(ast).code, [
-      "for (var i = 0; !(i < 10); ++i) {",
-      "  console.log(i);",
-      "}"
-    ].join(eol));
+    assert.strictEqual(
+      printer.print(ast).code,
+      ["for (var i = 0; !(i < 10); ++i) {", "  console.log(i);", "}"].join(eol),
+    );
   });
 
   it("MisleadingExistingParens", function () {
-    const ast = parse([
-      // The key === "oyez" expression appears to have parentheses
-      // already, but those parentheses won't help us when we negate the
-      // condition with a !.
-      'if (key === "oyez") {',
-      "  throw new Error(key);",
-      "}"
-    ].join(eol));
+    const ast = parse(
+      [
+        // The key === "oyez" expression appears to have parentheses
+        // already, but those parentheses won't help us when we negate the
+        // condition with a !.
+        'if (key === "oyez") {',
+        "  throw new Error(key);",
+        "}",
+      ].join(eol),
+    );
 
     const ifStmt = ast.program.body[0];
     ifStmt.test = b.unaryExpression("!", ifStmt.test);
 
-    const binaryPath = new NodePath(ast).get(
-      "program", "body", 0, "test", "argument");
+    const binaryPath = new NodePath(ast).get("program", "body", 0, "test", "argument");
 
     assert.ok(binaryPath.needsParens());
 
-    assert.strictEqual(printer.print(ifStmt).code, [
-      'if (!(key === "oyez")) {',
-      "  throw new Error(key);",
-      "}"
-    ].join(eol));
+    assert.strictEqual(
+      printer.print(ifStmt).code,
+      ['if (!(key === "oyez")) {', "  throw new Error(key);", "}"].join(eol),
+    );
   });
 
   it("DiscretionaryParens", function () {
     const code = [
       "if (info.line && (i > 0 || !skipFirstLine)) {",
       "  info = copyLineInfo(info);",
-      "}"
+      "}",
     ].join(eol);
 
     const ast = parse(code);
 
-    const rightPath = new NodePath(ast).get(
-      "program", "body", 0, "test", "right");
+    const rightPath = new NodePath(ast).get("program", "body", 0, "test", "right");
 
     assert.ok(rightPath.needsParens());
     assert.strictEqual(printer.print(ast).code, code);
@@ -269,18 +305,15 @@ describe("parens", function () {
       "    b &&",
       "    c",
       "  );",
-      "}"
+      "}",
     ].join(eol);
 
     const ast = parse(code);
     const printer = new Printer({
-      tabWidth: 2
+      tabWidth: 2,
     });
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      code
-    );
+    assert.strictEqual(printer.print(ast).code, code);
   });
 
   it("should be added to callees that are function expressions", function () {
@@ -314,22 +347,13 @@ describe("parens", function () {
     const callExpression = ast.program.body[0].expression;
     assert.strictEqual(callExpression.type, "CallExpression");
     callExpression.callee.type = "ArrowFunctionExpression";
-    assert.strictEqual(
-      printer.print(ast).code,
-      "((() => {})())"
-    );
+    assert.strictEqual(printer.print(ast).code, "((() => {})())");
     // Print just the callExpression without its enclosing AST context.
-    assert.strictEqual(
-      printer.print(callExpression).code,
-      "(() => {})()"
-    );
+    assert.strictEqual(printer.print(callExpression).code, "(() => {})()");
     // Trigger pretty-printing of the callExpression to remove the outer
     // layer of parentheses.
     callExpression.original = null;
-    assert.strictEqual(
-      printer.print(ast).code,
-      "(() => {})();"
-    );
+    assert.strictEqual(printer.print(ast).code, "(() => {})();");
   });
 
   it("regression test for issue #366", function () {
@@ -341,9 +365,6 @@ describe("parens", function () {
     const callee = exprStmt.expression;
     exprStmt.expression = b.callExpression(callee, []);
 
-    assert.strictEqual(
-      printer.print(ast).code,
-      "(typeof a ? b : c)()"
-    );
+    assert.strictEqual(printer.print(ast).code, "(typeof a ? b : c)()");
   });
 });
