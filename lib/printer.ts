@@ -1905,6 +1905,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSTupleType":
       return concat(["[", fromString(", ").join(path.map(print, "elementTypes")), "]"]);
 
+    case "TSNamedTupleMember":
+      parts.push(path.call(print, "label"));
+
+      if (n.optional) {
+        parts.push("?");
+      }
+
+      parts.push(
+        ": ",
+        path.call(print, "elementType"),
+      );
+
+      return concat(parts);
+
     case "TSRestType":
       return concat(["...", path.call(print, "typeAnnotation")]);
 

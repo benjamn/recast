@@ -272,7 +272,18 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(["type Class<T> = new (...args: any) => T;"]);
 
-    check(["type T1 = [...Array<any>];", "type T2 = [...any[]];"]);
+    check([
+      "type T1 = [...Array<any>];",
+      "type T2 = [...any[]];",
+    ]);
+
+    check([
+      "type Color = [r: number, g: number, b: number, a?: number];",
+      "type Red = Color.r;",
+      "type Green = Color.g;",
+      "type Blue = Color.b;",
+      "type Alpha = Color.a;",
+    ]);
   });
 
   it("parens", function () {
