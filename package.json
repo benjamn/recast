@@ -65,7 +65,6 @@
     "prettier": "^2.0.5",
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
-    "ts-node": "^9.0.0",
     "typescript": "^3.9.7"
   },
   "engines": {
