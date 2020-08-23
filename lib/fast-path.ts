@@ -40,7 +40,7 @@ interface FastPathType {
   hasParens(): any;
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
-  needsParens(assumeExpressionContext: any): any;
+  needsParens(assumeExpressionContext?: boolean): any;
   canBeFirstInStatement(): any;
   firstInStatement(): any;
 }

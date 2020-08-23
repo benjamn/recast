@@ -61,12 +61,11 @@
     "flow-parser": "0.132.0",
     "glob": "7.1.5",
     "lint-staged": "^10.2.6",
-    "mocha": "6.2.2",
+    "mocha": "8.1.1",
     "prettier": "^2.0.5",
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
-    "ts-node": "7.0.1",
-    "typescript": "3.6.4"
+    "typescript": "^3.9.7"
   },
   "engines": {
     "node": ">= 4"
