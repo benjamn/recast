@@ -52,7 +52,7 @@
     "@babel/parser": "7.9.2",
     "@babel/preset-env": "7.9.0",
     "@types/esprima": "4.0.2",
-    "@types/glob": "7.1.1",
+    "@types/glob": "7.1.3",
     "@types/mocha": "5.2.7",
     "@types/node": "14.6.0",
     "@typescript-eslint/parser": "^3.0.1",
