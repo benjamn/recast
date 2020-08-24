@@ -1717,15 +1717,26 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return path.call(print, "value");
 
     case "ObjectTypeIndexer":
-      return concat([
-        printVariance(path, print),
-        "[",
-        path.call(print, "id"),
-        ": ",
+      if (n.static) {
+        parts.push("static ");
+      }
+
+      parts.push(printVariance(path, print), "[");
+
+      if (n.id) {
+        parts.push(
+          path.call(print, "id"),
+          ": ",
+        );
+      }
+
+      parts.push(
         path.call(print, "key"),
         "]: ",
         path.call(print, "value"),
-      ]);
+      );
+
+      return concat(parts);
 
     case "ObjectTypeProperty":
       return concat([
