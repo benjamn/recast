@@ -1566,6 +1566,52 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "DeclareExportAllDeclaration":
       return concat(["declare ", printExportDeclaration(path, options, print)]);
 
+    case "EnumDeclaration":
+      return concat([
+        "enum ",
+        path.call(print, "id"),
+        path.call(print, "body"),
+      ]);
+
+    case "EnumBooleanBody":
+    case "EnumNumberBody":
+    case "EnumStringBody":
+    case "EnumSymbolBody": {
+      if (n.type === "EnumSymbolBody" || n.explicitType) {
+        parts.push(
+          " of ",
+          // EnumBooleanBody => boolean, etc.
+          n.type.slice(4, -4).toLowerCase(),
+        );
+      }
+
+      parts.push(
+        " {\n",
+        fromString("\n")
+          .join(path.map(print, "members"))
+          .indent(options.tabWidth),
+        "\n}",
+      );
+
+      return concat(parts);
+    }
+
+    case "EnumDefaultedMember":
+      return concat([
+        path.call(print, "id"),
+        ",",
+      ]);
+
+    case "EnumBooleanMember":
+    case "EnumNumberMember":
+    case "EnumStringMember":
+      return concat([
+        path.call(print, "id"),
+        " = ",
+        path.call(print, "init"),
+        ",",
+      ]);
+
     case "InferredPredicate":
       return fromString("%checks", options);
 
@@ -1671,15 +1717,26 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return path.call(print, "value");
 
     case "ObjectTypeIndexer":
-      return concat([
-        printVariance(path, print),
-        "[",
-        path.call(print, "id"),
-        ": ",
+      if (n.static) {
+        parts.push("static ");
+      }
+
+      parts.push(printVariance(path, print), "[");
+
+      if (n.id) {
+        parts.push(
+          path.call(print, "id"),
+          ": ",
+        );
+      }
+
+      parts.push(
         path.call(print, "key"),
         "]: ",
         path.call(print, "value"),
-      ]);
+      );
+
+      return concat(parts);
 
     case "ObjectTypeProperty":
       return concat([
@@ -1711,6 +1768,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "NumericLiteralTypeAnnotation":
       assert.strictEqual(typeof n.value, "number");
       return fromString(JSON.stringify(n.value), options);
+
+    case "BigIntLiteralTypeAnnotation":
+      return fromString(n.raw, options);
 
     case "StringTypeAnnotation":
       return fromString("string", options);
@@ -1794,6 +1854,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "NullTypeAnnotation":
       return fromString("null", options);
+
+    case "SymbolTypeAnnotation":
+      return fromString("symbol", options);
+
+    case "BigIntTypeAnnotation":
+      return fromString("bigint", options);
 
     // Type Annotations for TypeScript (when using Babylon as parser)
     case "TSType":
