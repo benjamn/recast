@@ -170,14 +170,14 @@ describe("parens", function () {
     check("function* test () { yield yield foo }");
   });
 
-  it('ArrowFunctionExpression', () => {
-    check('(() => {})()');
-    check('test(() => {})');
+  it("ArrowFunctionExpression", () => {
+    check("(() => {})()");
+    check("test(() => {})");
 
-    check('(() => {}).test');
-    check('test[() => {}]');
+    check("(() => {}).test");
+    check("test[() => {}]");
 
-    check('(() => {}) + (() => {})');
+    check("(() => {}) + (() => {})");
   });
 
   it("ReprintedParens", function () {

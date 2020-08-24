@@ -341,8 +341,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     return false;
   }
 
-  if (parent.type === "ParenthesizedExpression" ||
-      (node.extra && node.extra.parenthesized)) {
+  if (parent.type === "ParenthesizedExpression" || (node.extra && node.extra.parenthesized)) {
     return false;
   }
 
@@ -454,31 +453,27 @@ FPp.needsParens = function (assumeExpressionContext) {
       }
 
     case "ArrowFunctionExpression":
-      if (n.CallExpression.check(parent) &&
-          name === "callee" &&
-          parent.callee === node) {
+      if (n.CallExpression.check(parent) && name === "callee" && parent.callee === node) {
         return true;
       }
 
-      if (n.MemberExpression.check(parent) &&
-          name === "object" &&
-          parent.object === node) {
+      if (n.MemberExpression.check(parent) && name === "object" && parent.object === node) {
         return true;
       }
 
-      if (n.TSAsExpression &&
-          n.TSAsExpression.check(parent) &&
-          name === "expression" &&
-          parent.expression === node) {
+      if (
+        n.TSAsExpression &&
+        n.TSAsExpression.check(parent) &&
+        name === "expression" &&
+        parent.expression === node
+      ) {
         return true;
       }
 
       return isBinary(parent);
 
     case "ObjectExpression":
-      if (parent.type === "ArrowFunctionExpression" &&
-          name === "body" &&
-          parent.body === node) {
+      if (parent.type === "ArrowFunctionExpression" && name === "body" && parent.body === node) {
         return true;
       }
 
@@ -505,9 +500,7 @@ FPp.needsParens = function (assumeExpressionContext) {
       }
   }
 
-  if (parent.type === "NewExpression" &&
-      name === "callee" &&
-      parent.callee === node) {
+  if (parent.type === "NewExpression" && name === "callee" && parent.callee === node) {
     return containsCallExpression(node);
   }
 

@@ -1912,10 +1912,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push("?");
       }
 
-      parts.push(
-        ": ",
-        path.call(print, "elementType"),
-      );
+      parts.push(": ", path.call(print, "elementType"));
 
       return concat(parts);
 
@@ -2043,10 +2040,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(path.call(print, "parameterName"));
 
       if (n.typeAnnotation) {
-        parts.push(
-          " is ",
-          path.call(print, "typeAnnotation", "typeAnnotation"),
-        );
+        parts.push(" is ", path.call(print, "typeAnnotation", "typeAnnotation"));
       }
 
       return concat(parts);
