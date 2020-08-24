@@ -698,7 +698,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             allowBreak = !multiLine;
           } else if (len !== 1 && isTypeAnnotation) {
             parts.push(separator);
-          } else if (!oneLine && util.isTrailingCommaEnabled(options, "objects")) {
+          } else if (
+            !oneLine &&
+            util.isTrailingCommaEnabled(options, "objects") &&
+            childPath.getValue().type !== "RestElement"
+          ) {
             parts.push(separator);
           }
           i++;
