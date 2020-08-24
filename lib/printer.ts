@@ -1712,6 +1712,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       assert.strictEqual(typeof n.value, "number");
       return fromString(JSON.stringify(n.value), options);
 
+    case "BigIntLiteralTypeAnnotation":
+      return fromString(n.raw, options);
+
     case "StringTypeAnnotation":
       return fromString("string", options);
 
