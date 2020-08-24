@@ -1872,8 +1872,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "typeParameters"),
         "(",
         printFunctionParams(path, options, print),
-        ")",
-        path.call(print, "typeAnnotation"),
+        ") => ",
+        path.call(print, "typeAnnotation", "typeAnnotation"),
       ]);
 
     case "TSConstructorType":
@@ -1882,8 +1882,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "typeParameters"),
         "(",
         printFunctionParams(path, options, print),
-        ")",
-        path.call(print, "typeAnnotation"),
+        ") => ",
+        path.call(print, "typeAnnotation", "typeAnnotation"),
       ]);
 
     case "TSMappedType": {
@@ -1904,6 +1904,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSTupleType":
       return concat(["[", fromString(", ").join(path.map(print, "elementTypes")), "]"]);
+
+    case "TSNamedTupleMember":
+      parts.push(path.call(print, "label"));
+
+      if (n.optional) {
+        parts.push("?");
+      }
+
+      parts.push(": ", path.call(print, "elementType"));
+
+      return concat(parts);
 
     case "TSRestType":
       return concat(["...", path.call(print, "typeAnnotation")]);
@@ -1975,22 +1986,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSNonNullExpression":
       return concat([path.call(print, "expression"), "!"]);
 
-    case "TSTypeAnnotation": {
-      // similar to flow's FunctionTypeAnnotation, this can be
-      // ambiguous: it can be prefixed by => or :
-      // in a type predicate, it takes the for u is U
-      const parent = path.getParentNode(0);
-      let prefix = ": ";
-      if (namedTypes.TSFunctionType.check(parent) || namedTypes.TSConstructorType.check(parent)) {
-        prefix = " => ";
-      }
-
-      if (namedTypes.TSTypePredicate.check(parent)) {
-        prefix = " is ";
-      }
-
-      return concat([prefix, path.call(print, "typeAnnotation")]);
-    }
+    case "TSTypeAnnotation":
+      return concat([": ", path.call(print, "typeAnnotation")]);
 
     case "TSIndexSignature":
       return concat([
@@ -2036,7 +2033,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "TSTypePredicate":
-      return concat([path.call(print, "parameterName"), path.call(print, "typeAnnotation")]);
+      if (n.asserts) {
+        parts.push("asserts ");
+      }
+
+      parts.push(path.call(print, "parameterName"));
+
+      if (n.typeAnnotation) {
+        parts.push(" is ", path.call(print, "typeAnnotation", "typeAnnotation"));
+      }
+
+      return concat(parts);
 
     case "TSCallSignatureDeclaration":
       return concat([

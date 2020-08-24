@@ -5,7 +5,7 @@ import * as recast from "../main";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 import * as parser from "../parsers/typescript";
-import { Printer } from '../lib/printer';
+import { Printer } from "../lib/printer";
 
 const { namedTypes: n } = types;
 const printer = new Printer();
@@ -273,6 +273,14 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check(["type Class<T> = new (...args: any) => T;"]);
 
     check(["type T1 = [...Array<any>];", "type T2 = [...any[]];"]);
+
+    check([
+      "type Color = [r: number, g: number, b: number, a?: number];",
+      "type Red = Color.r;",
+      "type Green = Color.g;",
+      "type Blue = Color.b;",
+      "type Alpha = Color.a;",
+    ]);
   });
 
   it("parens", function () {
