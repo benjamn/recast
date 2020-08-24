@@ -1566,6 +1566,52 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "DeclareExportAllDeclaration":
       return concat(["declare ", printExportDeclaration(path, options, print)]);
 
+    case "EnumDeclaration":
+      return concat([
+        "enum ",
+        path.call(print, "id"),
+        path.call(print, "body"),
+      ]);
+
+    case "EnumBooleanBody":
+    case "EnumNumberBody":
+    case "EnumStringBody":
+    case "EnumSymbolBody": {
+      if (n.type === "EnumSymbolBody" || n.explicitType) {
+        parts.push(
+          " of ",
+          // EnumBooleanBody => boolean, etc.
+          n.type.slice(4, -4).toLowerCase(),
+        );
+      }
+
+      parts.push(
+        " {\n",
+        fromString("\n")
+          .join(path.map(print, "members"))
+          .indent(options.tabWidth),
+        "\n}",
+      );
+
+      return concat(parts);
+    }
+
+    case "EnumDefaultedMember":
+      return concat([
+        path.call(print, "id"),
+        ",",
+      ]);
+
+    case "EnumBooleanMember":
+    case "EnumNumberMember":
+    case "EnumStringMember":
+      return concat([
+        path.call(print, "id"),
+        " = ",
+        path.call(print, "init"),
+        ",",
+      ]);
+
     case "InferredPredicate":
       return fromString("%checks", options);
 
