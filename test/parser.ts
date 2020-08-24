@@ -25,7 +25,9 @@ describe("parser", function () {
     const b = types.builders;
     const parser = {
       parse: function () {
-        const program = b.program([b.expressionStatement(b.identifier("surprise"))]);
+        const program = b.program([
+          b.expressionStatement(b.identifier("surprise")),
+        ]);
         program.comments = [];
         return program;
       },
@@ -49,7 +51,9 @@ function runTestsForParser(parserId: string) {
 
   if (
     nodeMajorVersion < 6 &&
-    (parserName === "babel" || parserName === "flow" || parserName === "typescript")
+    (parserName === "babel" ||
+      parserName === "flow" ||
+      parserName === "typescript")
   ) {
     // Babel 7 no longer supports Node 4 or 5.
     return;
@@ -130,7 +134,10 @@ function runTestsForParser(parserId: string) {
 
     assert.strictEqual(secondComment.leading, true);
     assert.strictEqual(secondComment.trailing, false);
-    assert.strictEqual(secondComment.value, " or the above assertions will probably fail.");
+    assert.strictEqual(
+      secondComment.value,
+      " or the above assertions will probably fail.",
+    );
 
     // Make sure done() remains the final statement in this function,
     // or the above assertions will probably fail.
@@ -151,7 +158,10 @@ function runTestsForParser(parserId: string) {
       },
     });
 
-    const altered = code.replace("a()", "xxx").replace("b()", "a()").replace("xxx", "b()");
+    const altered = code
+      .replace("a()", "xxx")
+      .replace("b()", "a()")
+      .replace("xxx", "b()");
 
     assert.strictEqual(altered, printer.print(ast).code);
   });

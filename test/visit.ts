@@ -31,7 +31,10 @@ describe("types.visit", function () {
       },
     });
 
-    assert.strictEqual(printer.print(ast).code, withThis.replace(thisExp, "self"));
+    assert.strictEqual(
+      printer.print(ast).code,
+      withThis.replace(thisExp, "self"),
+    );
 
     const propNames: any[] = [];
     const methods: types.Visitor = {
@@ -47,7 +50,10 @@ describe("types.visit", function () {
 
     types.visit(ast, {
       visitProperty: function (path) {
-        if (namedTypes.Identifier.check(path.node.value) && path.node.value.name === "self") {
+        if (
+          namedTypes.Identifier.check(path.node.value) &&
+          path.node.value.name === "self"
+        ) {
           path.replace();
           return false;
         }
@@ -116,7 +122,10 @@ describe("types.visit", function () {
       visitCallExpression: function (path) {
         this.traverse(path);
         const expr = path.node;
-        if (namedTypes.Identifier.check(expr.callee) && expr.callee.name === "b") {
+        if (
+          namedTypes.Identifier.check(expr.callee) &&
+          expr.callee.name === "b"
+        ) {
           expr.callee.name = "xxx";
           expr["arguments"].unshift(funExpr);
         }

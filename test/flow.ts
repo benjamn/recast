@@ -5,7 +5,11 @@ import * as types from "ast-types";
 import { EOL as eol } from "os";
 
 describe("type syntax", function () {
-  const printer = new Printer({ tabWidth: 2, quote: "single", flowObjectCommas: false });
+  const printer = new Printer({
+    tabWidth: 2,
+    quote: "single",
+    flowObjectCommas: false,
+  });
   const esprimaParserParseOptions = {
     parser: require("esprima-fb"),
   };
@@ -58,19 +62,34 @@ describe("type syntax", function () {
     check("type A = B.C;");
     check("type A = { optionalNumber?: number };");
     check(
-      "type A = {" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "};",
+      "type A = {" +
+        eol +
+        "  ...B;" +
+        eol +
+        "  optionalNumber?: number;" +
+        eol +
+        "};",
       flowParserParseOptions,
     );
     check("type A = {| optionalNumber?: number |};", flowParserParseOptions);
     check(
-      "type A = {|" + eol + "  ...B;" + eol + "  optionalNumber?: number;" + eol + "|};",
+      "type A = {|" +
+        eol +
+        "  ...B;" +
+        eol +
+        "  optionalNumber?: number;" +
+        eol +
+        "|};",
       flowParserParseOptions,
     );
 
     // Opaque types
     check("opaque type A = B;", flowParserParseOptions);
     check("opaque type A = B.C;", flowParserParseOptions);
-    check("opaque type A = { optionalNumber?: number };", flowParserParseOptions);
+    check(
+      "opaque type A = { optionalNumber?: number };",
+      flowParserParseOptions,
+    );
     check("opaque type A: X = B;", flowParserParseOptions);
     check("opaque type A: X.Y = B.C;", flowParserParseOptions);
     check(
@@ -105,7 +124,9 @@ describe("type syntax", function () {
     check("var a: () => X = fn;");
 
     // Object
-    check("var a: {" + eol + "  b: number;" + eol + "  x: { y: A };" + eol + "};");
+    check(
+      "var a: {" + eol + "  b: number;" + eol + "  x: { y: A };" + eol + "};",
+    );
     check("var b: { [key: string]: number };");
     check("var c: { (): number };");
     check(
@@ -133,12 +154,21 @@ describe("type syntax", function () {
     check("declare function foo(c: (e: Event) => void, b: B): void;");
     check("declare function foo(c: C, d?: Array<D>): void;");
     check("declare class C { x: string }");
-    check("declare module M {" + eol + "  declare function foo(c: C): void;" + eol + "}");
+    check(
+      "declare module M {" +
+        eol +
+        "  declare function foo(c: C): void;" +
+        eol +
+        "}",
+    );
 
     check("declare opaque type A;", flowParserParseOptions);
     check("declare opaque type A: X;", flowParserParseOptions);
     check("declare opaque type A: X.Y;", flowParserParseOptions);
-    check("declare opaque type A: { stringProperty: string };", flowParserParseOptions);
+    check(
+      "declare opaque type A: { stringProperty: string };",
+      flowParserParseOptions,
+    );
     check("declare opaque type A<T>: X<T>;", flowParserParseOptions);
     check("declare opaque type A<T>: X.Y<T>;", flowParserParseOptions);
     check("declare opaque type A<T>: { property: T };", flowParserParseOptions);

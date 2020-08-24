@@ -61,7 +61,14 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(['type A = "cat" | "dog" | "bird";']);
 
-    check(["type A<T, U> = {", '  u: "cat",', "  x: number,", "  y: T,", "  z: U", "};"]);
+    check([
+      "type A<T, U> = {",
+      '  u: "cat",',
+      "  x: number,",
+      "  y: T,",
+      "  z: U",
+      "};",
+    ]);
 
     check([
       "type F = <T, U>(",
@@ -104,7 +111,10 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(["if ((<F> p).s) {", "  (<F> p).s();", "}"]);
 
-    check(["function i(p): p is F {}", "function i(p): p is string | number {}"]);
+    check([
+      "function i(p): p is F {}",
+      "function i(p): p is string | number {}",
+    ]);
 
     check(["function f<T, U>(a: T, b: U): void {", "  let c: number;", "}"]);
 
@@ -135,8 +145,16 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check(["const highlight = (n => false) as (a: number) => boolean;"]);
     check(["(n => false) as (a: number) => boolean;"]);
 
-    check(["const highlight = (function(n) {", "  return false;", "}) as (a: number) => boolean;"]);
-    check(["(function(n) {", "  return false;", "}) as (a: number) => boolean;"]);
+    check([
+      "const highlight = (function(n) {",
+      "  return false;",
+      "}) as (a: number) => boolean;",
+    ]);
+    check([
+      "(function(n) {",
+      "  return false;",
+      "}) as (a: number) => boolean;",
+    ]);
 
     check([
       "enum Color {",
@@ -188,7 +206,13 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "}",
     ]);
 
-    check(["class C<T> extends B {", "  f(a: T) {", "    c(a as D);", "  }", "}"]);
+    check([
+      "class C<T> extends B {",
+      "  f(a: T) {",
+      "    c(a as D);",
+      "  }",
+      "}",
+    ]);
 
     check([
       "interface LabelledContainer<T> {",
@@ -252,7 +276,11 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(["declare function foo<K, V>(arg: T = getDefault()): R"]);
 
-    check(["class Animal {", "  public static async *[name]<T>(arg: U): V;", "}"]);
+    check([
+      "class Animal {",
+      "  public static async *[name]<T>(arg: U): V;",
+      "}",
+    ]);
 
     check(["function myFunction(", "  {", "    param1", "  }: Params", ") {}"]);
 
@@ -301,7 +329,10 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
       const expressionAst = parseExpression(expr);
       const generic = printer.printGenerically(expressionAst).code;
-      types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
+      types.astNodesAreEquivalent.assert(
+        expressionAst,
+        parseExpression(generic),
+      );
     }
 
     check("(() => {}) as void");
@@ -314,7 +345,10 @@ testReprinting(
   "Reprinting @babel/parser TypeScript test fixtures",
 );
 
-testReprinting("data/graphql-tools-src/**/*.ts", "Reprinting GraphQL-Tools TypeScript files");
+testReprinting(
+  "data/graphql-tools-src/**/*.ts",
+  "Reprinting GraphQL-Tools TypeScript files",
+);
 
 function testReprinting(pattern: any, description: any) {
   // Babel no longer supports Node 4 or 5.
@@ -370,7 +404,9 @@ function tryToParseFile(source: any, absPath: any) {
     let options;
     try {
       options = JSON.parse(
-        fs.readFileSync(path.join(path.dirname(absPath), "options.json")).toString(),
+        fs
+          .readFileSync(path.join(path.dirname(absPath), "options.json"))
+          .toString(),
       );
     } catch (e2) {
       if (e2.code !== "ENOENT") {

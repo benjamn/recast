@@ -219,7 +219,10 @@ describe("Babel", function () {
 
     // add a new import statement
     body.unshift(
-      b.importDeclaration([b.importDefaultSpecifier(b.identifier("x"))], b.literal("x")),
+      b.importDeclaration(
+        [b.importDefaultSpecifier(b.identifier("x"))],
+        b.literal("x"),
+      ),
     );
 
     const reprinted = recast.print(ast).code;
@@ -227,7 +230,10 @@ describe("Babel", function () {
     assert.ok(reprinted.match(/@component/));
     assert.ok(reprinted.match(/@callExpression/));
 
-    assert.strictEqual(reprinted, ['import x from "x";'].concat(code.split(eol)).join(eol));
+    assert.strictEqual(
+      reprinted,
+      ['import x from "x";'].concat(code.split(eol)).join(eol),
+    );
   });
 
   it("should not disappear when an import is added and `export default` is used inline", function () {
@@ -258,7 +264,10 @@ describe("Babel", function () {
 
     // add a new import statement
     body.unshift(
-      b.importDeclaration([b.importDefaultSpecifier(b.identifier("x"))], b.literal("x")),
+      b.importDeclaration(
+        [b.importDefaultSpecifier(b.identifier("x"))],
+        b.literal("x"),
+      ),
     );
 
     const reprinted = recast.print(ast).code;
@@ -266,11 +275,16 @@ describe("Babel", function () {
     assert.ok(reprinted.match(/@component/));
     assert.ok(reprinted.match(/@callExpression/));
 
-    assert.strictEqual(reprinted, ['import x from "x";'].concat(code.split(eol)).join(eol));
+    assert.strictEqual(
+      reprinted,
+      ['import x from "x";'].concat(code.split(eol)).join(eol),
+    );
   });
 
   it("should not print delimiters with type annotations", function () {
-    const code = ["type X = {", "  a: number,", "  b: number,", "};"].join("\n");
+    const code = ["type X = {", "  a: number,", "  b: number,", "};"].join(
+      "\n",
+    );
 
     const ast = recast.parse(code, parseOptions);
     const root = new recast.types.NodePath(ast);
@@ -308,7 +322,10 @@ describe("Babel", function () {
     const ast = recast.parse(code, parseOptions);
 
     const replacement = b.expressionStatement(
-      b.callExpression(b.identifier("fn"), [b.identifier("test"), b.literal(true)]),
+      b.callExpression(b.identifier("fn"), [
+        b.identifier("test"),
+        b.literal(true),
+      ]),
     );
 
     ast.program.body[0] = replacement;
@@ -367,7 +384,9 @@ describe("Babel", function () {
     const ast = recast.parse(code, parseOptions);
 
     const replacement1 = b.exportDefaultSpecifier(b.identifier("foo"));
-    const replacement2 = b.exportDefaultSpecifier(b.identifier("veryLongIdentifier1"));
+    const replacement2 = b.exportDefaultSpecifier(
+      b.identifier("veryLongIdentifier1"),
+    );
     ast.program.body[0].specifiers[0] = replacement1;
     ast.program.body[1].specifiers[0] = replacement2;
     assert.strictEqual(
@@ -386,7 +405,12 @@ describe("Babel", function () {
 
   // https://github.com/codemod-js/codemod/issues/157
   it("avoids extra semicolons on mutated blocks containing a 'use strict' directive", function () {
-    const code = ["(function () {", '  "use strict";', "  hello;", "})();"].join(eol);
+    const code = [
+      "(function () {",
+      '  "use strict";',
+      "  hello;",
+      "})();",
+    ].join(eol);
     const ast = recast.parse(code, parseOptions);
 
     // delete "hello;"

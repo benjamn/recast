@@ -268,7 +268,10 @@ function printLeadingComment(commentPath: any, print: any) {
     // want to bring any trailing spaces along.
     parts.push("\n");
   } else if (lines instanceof Lines) {
-    const trailingSpace = lines.slice(loc.end, lines.skipSpaces(loc.end) || lines.lastPos());
+    const trailingSpace = lines.slice(
+      loc.end,
+      lines.skipSpaces(loc.end) || lines.lastPos(),
+    );
 
     if (trailingSpace.length === 1) {
       // If the trailing space contains no newlines, then we want to
@@ -317,7 +320,8 @@ function printTrailingComment(commentPath: any, print: any) {
 export function printComments(path: any, print: any) {
   const value = path.getValue();
   const innerLines = print(path);
-  const comments = n.Node.check(value) && types.getFieldValue(value, "comments");
+  const comments =
+    n.Node.check(value) && types.getFieldValue(value, "comments");
 
   if (!comments || comments.length === 0) {
     return innerLines;
@@ -334,7 +338,11 @@ export function printComments(path: any, print: any) {
     if (
       leading ||
       (trailing &&
-        !(n.Statement.check(value) || comment.type === "Block" || comment.type === "CommentBlock"))
+        !(
+          n.Statement.check(value) ||
+          comment.type === "Block" ||
+          comment.type === "CommentBlock"
+        ))
     ) {
       leadingParts.push(printLeadingComment(commentPath, print));
     } else if (trailing) {

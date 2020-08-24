@@ -107,7 +107,11 @@ export function getTrueLoc(node: any, lines: any) {
   // If the node is an export declaration and its .declaration has any
   // decorators, their locations might contribute to the true start/end
   // positions of the export declaration node.
-  if (node.declaration && node.declaration.decorators && isExportDeclaration(node)) {
+  if (
+    node.declaration &&
+    node.declaration.decorators &&
+    isExportDeclaration(node)
+  ) {
     node.declaration.decorators.forEach(include);
   }
 

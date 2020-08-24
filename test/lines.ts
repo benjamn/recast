@@ -19,7 +19,13 @@ describe("lines", function () {
   describe("line terminators", function () {
     const source = ["foo;", "bar;"];
 
-    const terminators = ["\u000A", "\u000D", "\u2028", "\u2029", "\u000D\u000A"];
+    const terminators = [
+      "\u000A",
+      "\u000D",
+      "\u2028",
+      "\u2029",
+      "\u000D\u000A",
+    ];
 
     terminators.forEach(function (t) {
       it("can handle " + escape(t) + " as line terminator", function () {
@@ -43,7 +49,8 @@ describe("lines", function () {
     checkIsCached(", ");
     checkIsCached(": ");
 
-    const longer = "This is a somewhat longer string that we do not want to cache.";
+    const longer =
+      "This is a somewhat longer string that we do not want to cache.";
     assert.notStrictEqual(fromString(longer), fromString(longer));
 
     // Since Lines objects are immutable, if one is passed to fromString,
@@ -164,7 +171,10 @@ describe("lines", function () {
       strings.join(eol + "    ") + strings.join(eol + "        "),
     );
 
-    check(concat([indented, lines]), strings.join(eol + "    ") + lines.toString());
+    check(
+      concat([indented, lines]),
+      strings.join(eol + "    ") + lines.toString(),
+    );
 
     check(concat([lines, indented]), lines.concat(indented));
 
@@ -173,11 +183,17 @@ describe("lines", function () {
     check(concat([]), fromString(""));
     assert.strictEqual(concat([]), fromString(""));
 
-    check(fromString(" ").join([fromString("var"), fromString("foo")]), fromString("var foo"));
+    check(
+      fromString(" ").join([fromString("var"), fromString("foo")]),
+      fromString("var foo"),
+    );
 
     check(fromString(" ").join(["var", "foo"]), fromString("var foo"));
 
-    check(concat([fromString("var"), fromString(" "), fromString("foo")]), fromString("var foo"));
+    check(
+      concat([fromString("var"), fromString(" "), fromString("foo")]),
+      fromString("var foo"),
+    );
 
     check(concat(["var", " ", "foo"]), fromString("var foo"));
 
@@ -246,7 +262,10 @@ describe("lines", function () {
     lines.eachPos(function (start: any) {
       lines.eachPos(function (end: any) {
         check(lines.slice(start, end), lines.bootstrapSlice(start, end));
-        check(lines.sliceString(start, end), lines.bootstrapSliceString(start, end));
+        check(
+          lines.sliceString(start, end),
+          lines.bootstrapSliceString(start, end),
+        );
       }, start);
     });
   }
@@ -269,7 +288,10 @@ describe("lines", function () {
       assert.strictEqual(loc.end.line, strings.length);
       assert.strictEqual(loc.end.column, lastLine.length);
 
-      assert.deepEqual(loc, getSourceLocation(indented.slice(loc.start, loc.end)));
+      assert.deepEqual(
+        loc,
+        getSourceLocation(indented.slice(loc.start, loc.end)),
+      );
     }
 
     verify(0);
@@ -286,7 +308,10 @@ describe("lines", function () {
       const lines = fromString(string, options);
       check(lines.trimLeft(), fromString(string.replace(/^\s+/, ""), options));
       check(lines.trimRight(), fromString(string.replace(/\s+$/, ""), options));
-      check(lines.trim(), fromString(string.replace(/^\s+|\s+$/g, ""), options));
+      check(
+        lines.trim(),
+        fromString(string.replace(/^\s+|\s+$/g, ""), options),
+      );
     }
 
     test("");
@@ -394,7 +419,11 @@ describe("lines", function () {
       ["    function f() {", "        return this;", "    }"].join(eol),
     );
 
-    const funkyCode = [" function g() { \t ", " \t\t  return this;  ", "\t} "].join(eol);
+    const funkyCode = [
+      " function g() { \t ",
+      " \t\t  return this;  ",
+      "\t} ",
+    ].join(eol);
 
     const funky = fromString(funkyCode, tabOpts);
     checkUnchanged(funky, funkyCode);
@@ -411,17 +440,23 @@ describe("lines", function () {
 
     check(
       funky.indent(1).toString(noTabOpts),
-      ["  function g() { \t ", "           return this;  ", "     } "].join(eol),
+      ["  function g() { \t ", "           return this;  ", "     } "].join(
+        eol,
+      ),
     );
 
     check(
       funky.indent(2).toString(noTabOpts),
-      ["   function g() { \t ", "            return this;  ", "      } "].join(eol),
+      ["   function g() { \t ", "            return this;  ", "      } "].join(
+        eol,
+      ),
     );
 
     // Test that '\v' characters are ignored for the purposes of indentation,
     // but preserved when printing untouched lines.
-    code = ["\vfunction f() {\v", " \v   return \vthis;\v", "\v} \v "].join(eol);
+    code = ["\vfunction f() {\v", " \v   return \vthis;\v", "\v} \v "].join(
+      eol,
+    );
 
     lines = fromString(code, tabOpts);
 
@@ -429,7 +464,9 @@ describe("lines", function () {
 
     check(
       lines.indent(4).toString(noTabOpts),
-      ["    function f() {\v", "        return \vthis;\v", "    } \v "].join(eol),
+      ["    function f() {\v", "        return \vthis;\v", "    } \v "].join(
+        eol,
+      ),
     );
 
     check(
@@ -440,10 +477,14 @@ describe("lines", function () {
 
   it("GuessTabWidth", function GuessTabWidthTest(done) {
     let lines;
-    lines = fromString(["function identity(x) {", "    return x;", "}"].join(eol));
+    lines = fromString(
+      ["function identity(x) {", "    return x;", "}"].join(eol),
+    );
     assert.strictEqual(lines.guessTabWidth(), 4);
 
-    lines = fromString(["function identity(x) {", "  return x;", "}"].join(eol));
+    lines = fromString(
+      ["function identity(x) {", "  return x;", "}"].join(eol),
+    );
     assert.strictEqual(lines.guessTabWidth(), 2);
     assert.strictEqual(lines.indent(5).guessTabWidth(), 2);
     assert.strictEqual(lines.indent(-4).guessTabWidth(), 2);
@@ -452,12 +493,16 @@ describe("lines", function () {
       assert.equal(err, null);
       assert.strictEqual(fromString(source).guessTabWidth(), 4);
 
-      fs.readFile(path.join(__dirname, "..", "package.json"), "utf-8", function (err, source) {
-        assert.equal(err, null);
-        assert.strictEqual(fromString(source).guessTabWidth(), 2);
+      fs.readFile(
+        path.join(__dirname, "..", "package.json"),
+        "utf-8",
+        function (err, source) {
+          assert.equal(err, null);
+          assert.strictEqual(fromString(source).guessTabWidth(), 2);
 
-        done();
-      });
+          done();
+        },
+      );
     });
   });
 

@@ -47,7 +47,10 @@ describe("ES6 Compatability", function () {
     );
   }
 
-  it("correctly converts from a shorthand method to ES5 function", convertShorthandMethod);
+  it(
+    "correctly converts from a shorthand method to ES5 function",
+    convertShorthandMethod,
+  );
 
   function respectDestructuringAssignment() {
     const printer = new Printer({ tabWidth: 2 });
@@ -137,14 +140,19 @@ describe("import/export syntax", function () {
     function checkInvalid(source: string, expectedMessage: string) {
       try {
         parse(source);
-        throw new Error("Parsing should have failed: " + JSON.stringify(source));
+        throw new Error(
+          "Parsing should have failed: " + JSON.stringify(source),
+        );
       } catch (err) {
         assert.strictEqual(err.message, "Line 1: " + expectedMessage);
       }
     }
 
     // const variables must have an initializer
-    checkInvalid("export const bar;", "Missing initializer in const declaration");
+    checkInvalid(
+      "export const bar;",
+      "Missing initializer in const declaration",
+    );
 
     // Unexpected token identifier, invalid named export syntax
     checkInvalid("export foo;", "Unexpected identifier");
@@ -186,10 +194,16 @@ describe("import/export syntax", function () {
     checkInvalid("export default = 42;", "Unexpected token =");
 
     // Unexpected token default
-    checkInvalid("import {bar as default} from 'foo';", "Unexpected token default");
+    checkInvalid(
+      "import {bar as default} from 'foo';",
+      "Unexpected token default",
+    );
 
     // Unexpected token ,
-    checkInvalid("import foo, * as bar, {baz as xyz} from 'foo';", "Unexpected token ,");
+    checkInvalid(
+      "import foo, * as bar, {baz as xyz} from 'foo';",
+      "Unexpected token ,",
+    );
 
     // Unexpected token ,
     checkInvalid("import {bar}, foo from 'foo';", "Unexpected token ,");
@@ -204,7 +218,10 @@ describe("import/export syntax", function () {
     checkInvalid("import {bar}, {foo} from 'foo';", "Unexpected token ,");
 
     // Unexpected token ,
-    checkInvalid("import * as bar, {baz as xyz} from 'foo';", "Unexpected token ,");
+    checkInvalid(
+      "import * as bar, {baz as xyz} from 'foo';",
+      "Unexpected token ,",
+    );
   });
 
   it("should pretty-print template strings with backticks", function () {

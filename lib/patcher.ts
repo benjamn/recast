@@ -183,7 +183,11 @@ export function getReprinter(path: any) {
 
       SourceLocation.assert(oldNode.loc, true);
 
-      const needToPrintNewPathWithComments = !patcher.tryToReprintComments(newNode, oldNode, print);
+      const needToPrintNewPathWithComments = !patcher.tryToReprintComments(
+        newNode,
+        oldNode,
+        print,
+      );
 
       if (needToPrintNewPathWithComments) {
         // Since we were not able to preserve all leading/trailing
@@ -200,7 +204,8 @@ export function getReprinter(path: any) {
         // because the existing parentheses will suffice. However, if the
         // newNode has a different type than the oldNode, let the printer
         // decide if reprint.newPath needs parentheses, as usual.
-        avoidRootParens: oldNode.type === newNode.type && reprint.oldPath.hasParens(),
+        avoidRootParens:
+          oldNode.type === newNode.type && reprint.oldPath.hasParens(),
       }).indentTail(oldNode.loc.indent);
 
       const nls = needsLeadingSpace(lines, oldNode.loc, newLines);
@@ -241,7 +246,8 @@ function needsLeadingSpace(oldLines: any, oldLoc: any, newLines: any) {
   const posBeforeOldLoc = copyPos(oldLoc.start);
 
   // The character just before the location occupied by oldNode.
-  const charBeforeOldLoc = oldLines.prevPos(posBeforeOldLoc) && oldLines.charAt(posBeforeOldLoc);
+  const charBeforeOldLoc =
+    oldLines.prevPos(posBeforeOldLoc) && oldLines.charAt(posBeforeOldLoc);
 
   // First character of the reprinted node.
   const newFirstChar = newLines.charAt(newLines.firstPos());
@@ -264,7 +270,8 @@ function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
   const newLastPos = newLines.lastPos();
 
   // Last character of the reprinted node.
-  const newLastChar = newLines.prevPos(newLastPos) && newLines.charAt(newLastPos);
+  const newLastChar =
+    newLines.prevPos(newLastPos) && newLines.charAt(newLastPos);
 
   return (
     newLastChar &&
@@ -305,9 +312,11 @@ function findAnyReprints(newPath: any, oldPath: any, reprints: any) {
 
   if (newNode === oldNode) return true;
 
-  if (isArray.check(newNode)) return findArrayReprints(newPath, oldPath, reprints);
+  if (isArray.check(newNode))
+    return findArrayReprints(newPath, oldPath, reprints);
 
-  if (isObject.check(newNode)) return findObjectReprints(newPath, oldPath, reprints);
+  if (isObject.check(newNode))
+    return findObjectReprints(newPath, oldPath, reprints);
 
   return false;
 }
@@ -316,7 +325,11 @@ function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
   const newNode = newPath.getValue();
   const oldNode = oldPath.getValue();
 
-  if (newNode === oldNode || newPath.valueIsDuplicate() || oldPath.valueIsDuplicate()) {
+  if (
+    newNode === oldNode ||
+    newPath.valueIsDuplicate() ||
+    oldPath.valueIsDuplicate()
+  ) {
     return true;
   }
 
@@ -351,7 +364,11 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
   const oldNode = oldPath.getValue();
   if (!isObject.check(oldNode)) return false;
 
-  if (newNode === oldNode || newPath.valueIsDuplicate() || oldPath.valueIsDuplicate()) {
+  if (
+    newNode === oldNode ||
+    newPath.valueIsDuplicate() ||
+    oldPath.valueIsDuplicate()
+  ) {
     return true;
   }
 
@@ -368,8 +385,10 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
       newParentNode !== null &&
       newParentNode.type === "FunctionTypeAnnotation"
     ) {
-      const oldNeedsParens = oldParentNode.params.length !== 1 || !!oldParentNode.params[0].name;
-      const newNeedParens = newParentNode.params.length !== 1 || !!newParentNode.params[0].name;
+      const oldNeedsParens =
+        oldParentNode.params.length !== 1 || !!oldParentNode.params[0].name;
+      const newNeedParens =
+        newParentNode.params.length !== 1 || !!newParentNode.params[0].name;
       if (!oldNeedsParens && newNeedParens) {
         return false;
       }
@@ -477,7 +496,10 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // Return statements might end up running into ASI issues due to
   // comments inserted deep within the tree, so reprint them if anything
   // changed within them.
-  if (ReturnStatement.check(newPath.getNode()) && reprints.length > originalReprintCount) {
+  if (
+    ReturnStatement.check(newPath.getNode()) &&
+    reprints.length > originalReprintCount
+  ) {
     return false;
   }
 

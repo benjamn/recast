@@ -138,7 +138,11 @@ interface TreeCopierConstructor {
   new (lines: any, tokens: any): TreeCopierType;
 }
 
-const TreeCopier = (function TreeCopier(this: TreeCopierType, lines: any, tokens: any) {
+const TreeCopier = (function TreeCopier(
+  this: TreeCopierType,
+  lines: any,
+  tokens: any,
+) {
   assert.ok(this instanceof TreeCopier);
   this.lines = lines;
   this.tokens = tokens;

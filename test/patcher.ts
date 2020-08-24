@@ -67,9 +67,13 @@ describe("patcher", function () {
     );
   });
 
-  const trickyCode = ["    function", "      foo(bar,", "  baz) {", "        qux();", "    }"].join(
-    eol,
-  );
+  const trickyCode = [
+    "    function",
+    "      foo(bar,",
+    "  baz) {",
+    "        qux();",
+    "    }",
+  ].join(eol);
 
   it("GetIndent", function () {
     function check(indent: number) {
@@ -91,7 +95,10 @@ describe("patcher", function () {
       assert.strictEqual(reprintedLines.getIndentAt(1), 0);
       assert.strictEqual(reprintedLines.getIndentAt(2), 4);
       assert.strictEqual(reprintedLines.getIndentAt(3), 0);
-      assert.strictEqual(reprintedLines.toString(), ["{", "    qux();", "}"].join(eol));
+      assert.strictEqual(
+        reprintedLines.toString(),
+        ["{", "    qux();", "}"].join(eol),
+      );
     }
 
     for (let indent = -4; indent <= 4; ++indent) {
@@ -168,7 +175,9 @@ describe("patcher", function () {
       ].join(eol),
     );
 
-    twoLineAST.program.body[1] = b.expressionStatement(b.callExpression(b.identifier("foo"), []));
+    twoLineAST.program.body[1] = b.expressionStatement(
+      b.callExpression(b.identifier("foo"), []),
+    );
 
     const withFooCall = recast.print(twoLineAST).code;
     assert.strictEqual(withFooCall, ["return", "foo()"].join(eol));

@@ -216,7 +216,10 @@ describe("parens", function () {
     assert.strictEqual(memExp.property.name, "foo");
     const blockStmt = b.blockStatement([b.expressionStatement(memExp)]);
     reprint = printer.print(blockStmt).code;
-    types.astNodesAreEquivalent.assert(blockStmt, parse(reprint).program.body[0]);
+    types.astNodesAreEquivalent.assert(
+      blockStmt,
+      parse(reprint).program.body[0],
+    );
   });
 
   it("don't reparenthesize valid IIFEs", function () {
@@ -241,7 +244,9 @@ describe("parens", function () {
   });
 
   it("NegatedLoopCondition", function () {
-    const ast = parse(["for (var i = 0; i < 10; ++i) {", "  console.log(i);", "}"].join(eol));
+    const ast = parse(
+      ["for (var i = 0; i < 10; ++i) {", "  console.log(i);", "}"].join(eol),
+    );
 
     const loop = ast.program.body[0];
     const test = loop.test;
@@ -272,7 +277,13 @@ describe("parens", function () {
     const ifStmt = ast.program.body[0];
     ifStmt.test = b.unaryExpression("!", ifStmt.test);
 
-    const binaryPath = new NodePath(ast).get("program", "body", 0, "test", "argument");
+    const binaryPath = new NodePath(ast).get(
+      "program",
+      "body",
+      0,
+      "test",
+      "argument",
+    );
 
     assert.ok(binaryPath.needsParens());
 
@@ -291,7 +302,13 @@ describe("parens", function () {
 
     const ast = parse(code);
 
-    const rightPath = new NodePath(ast).get("program", "body", 0, "test", "right");
+    const rightPath = new NodePath(ast).get(
+      "program",
+      "body",
+      0,
+      "test",
+      "right",
+    );
 
     assert.ok(rightPath.needsParens());
     assert.strictEqual(printer.print(ast).code, code);

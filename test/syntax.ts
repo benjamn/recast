@@ -30,7 +30,11 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
             this.traverse(path, {
               visitSwitchCase(path) {
                 const test = path.node.test;
-                if (test && test.type === "StringLiteral" && typeof test.value === "string") {
+                if (
+                  test &&
+                  test.type === "StringLiteral" &&
+                  typeof test.value === "string"
+                ) {
                   const name = test.value;
                   typeNames[name] = name;
                 }

@@ -29,7 +29,13 @@ export default class Mapping {
         assert.strictEqual(name, "start");
       }
 
-      return skipChars(sourceLines, sourceFromPos, lines, targetFromPos, targetToPos);
+      return skipChars(
+        sourceLines,
+        sourceFromPos,
+        lines,
+        targetFromPos,
+        targetToPos,
+      );
     }
 
     if (comparePos(start, targetLoc.start) <= 0) {
@@ -101,7 +107,11 @@ export default class Mapping {
     });
   }
 
-  indent(by: number, skipFirstLine: boolean = false, noNegativeColumns: boolean = false) {
+  indent(
+    by: number,
+    skipFirstLine: boolean = false,
+    noNegativeColumns: boolean = false,
+  ) {
     if (by === 0) {
       return this;
     }
@@ -169,8 +179,10 @@ function skipChars(
   let sourceCursor, targetCursor;
   if (targetComparison < 0) {
     // Skipping forward.
-    sourceCursor = sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
-    targetCursor = targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
+    sourceCursor =
+      sourceLines.skipSpaces(sourceFromPos) || sourceLines.lastPos();
+    targetCursor =
+      targetLines.skipSpaces(targetFromPos) || targetLines.lastPos();
 
     const lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
@@ -185,14 +197,22 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetCursor, targetToPos) < 0 && targetLines.nextPos(targetCursor, true)) {
+    while (
+      comparePos(targetCursor, targetToPos) < 0 &&
+      targetLines.nextPos(targetCursor, true)
+    ) {
       assert.ok(sourceLines.nextPos(sourceCursor, true));
-      assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
+      assert.strictEqual(
+        sourceLines.charAt(sourceCursor),
+        targetLines.charAt(targetCursor),
+      );
     }
   } else {
     // Skipping backward.
-    sourceCursor = sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
-    targetCursor = targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
+    sourceCursor =
+      sourceLines.skipSpaces(sourceFromPos, true) || sourceLines.firstPos();
+    targetCursor =
+      targetLines.skipSpaces(targetFromPos, true) || targetLines.firstPos();
 
     const lineDiff = targetToPos.line - targetCursor.line;
     sourceCursor.line += lineDiff;
@@ -207,9 +227,15 @@ function skipChars(
       assert.strictEqual(lineDiff, 0);
     }
 
-    while (comparePos(targetToPos, targetCursor) < 0 && targetLines.prevPos(targetCursor, true)) {
+    while (
+      comparePos(targetToPos, targetCursor) < 0 &&
+      targetLines.prevPos(targetCursor, true)
+    ) {
       assert.ok(sourceLines.prevPos(sourceCursor, true));
-      assert.strictEqual(sourceLines.charAt(sourceCursor), targetLines.charAt(targetCursor));
+      assert.strictEqual(
+        sourceLines.charAt(sourceCursor),
+        targetLines.charAt(targetCursor),
+      );
     }
   }
 

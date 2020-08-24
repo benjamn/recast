@@ -2,7 +2,10 @@ import path from "path";
 import fs from "fs";
 import * as recast from "../main";
 
-const source = fs.readFileSync(path.join(__dirname, "data", "backbone.js"), "utf8");
+const source = fs.readFileSync(
+  path.join(__dirname, "data", "backbone.js"),
+  "utf8",
+);
 
 const start = +new Date();
 const ast = recast.parse(source);

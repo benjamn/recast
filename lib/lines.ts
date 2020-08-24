@@ -83,9 +83,12 @@ export class Lines {
 
     targetLines.mappings.forEach(function (mapping: any) {
       const sourceCursor =
-        mapping.sourceLines.skipSpaces(mapping.sourceLoc.start) || mapping.sourceLines.lastPos();
+        mapping.sourceLines.skipSpaces(mapping.sourceLoc.start) ||
+        mapping.sourceLines.lastPos();
 
-      const targetCursor = targetLines.skipSpaces(mapping.targetLoc.start) || targetLines.lastPos();
+      const targetCursor =
+        targetLines.skipSpaces(mapping.targetLoc.start) ||
+        targetLines.lastPos();
 
       while (
         comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&
@@ -322,7 +325,9 @@ export class Lines {
       sliceEnd = firstLineInfo.sliceEnd,
       firstLine = firstLineInfo.line.slice(sliceStart, sliceEnd).trim();
     return (
-      firstLine.length === 0 || firstLine.slice(0, 2) === "//" || firstLine.slice(0, 2) === "/*"
+      firstLine.length === 0 ||
+      firstLine.slice(0, 2) === "//" ||
+      firstLine.slice(0, 2) === "/*"
     );
   }
 
@@ -405,7 +410,11 @@ export class Lines {
     };
   }
 
-  skipSpaces(pos: Pos, backward: boolean = false, modifyInPlace: boolean = false) {
+  skipSpaces(
+    pos: Pos,
+    backward: boolean = false,
+    modifyInPlace: boolean = false,
+  ) {
     if (pos) {
       pos = modifyInPlace
         ? pos
@@ -541,8 +550,17 @@ export class Lines {
     return this.slice(start, end).toString(options);
   }
 
-  sliceString(start: Pos = this.firstPos(), end: Pos = this.lastPos(), options?: Options) {
-    const { tabWidth, useTabs, reuseWhitespace, lineTerminator } = normalizeOptions(options);
+  sliceString(
+    start: Pos = this.firstPos(),
+    end: Pos = this.lastPos(),
+    options?: Options,
+  ) {
+    const {
+      tabWidth,
+      useTabs,
+      reuseWhitespace,
+      lineTerminator,
+    } = normalizeOptions(options);
 
     const parts = [];
 
@@ -562,7 +580,11 @@ export class Lines {
       const indent = Math.max(info.indent, 0);
 
       const before = info.line.slice(0, info.sliceStart);
-      if (reuseWhitespace && isOnlyWhitespace(before) && countSpaces(before, tabWidth) === indent) {
+      if (
+        reuseWhitespace &&
+        isOnlyWhitespace(before) &&
+        countSpaces(before, tabWidth) === indent
+      ) {
         // Reuse original spaces if the indentation is correct.
         parts.push(info.line.slice(0, info.sliceEnd));
         continue;
@@ -613,7 +635,10 @@ export class Lines {
         const info = linesOrNull.infos[0];
         const indent = new Array(info.indent + 1).join(" ");
         const prevLine = infos.length;
-        const prevColumn = Math.max(prevInfo.indent, 0) + prevInfo.sliceEnd - prevInfo.sliceStart;
+        const prevColumn =
+          Math.max(prevInfo.indent, 0) +
+          prevInfo.sliceEnd -
+          prevInfo.sliceStart;
 
         prevInfo.line =
           prevInfo.line.slice(0, prevInfo.sliceEnd) +
@@ -744,7 +769,8 @@ export function fromString(string: string | Lines, options?: Options): Lines {
     "No tab width specified but encountered tabs in string\n" + string,
   );
 
-  if (cacheable && hasOwn.call(fromStringCache, string)) return fromStringCache[string];
+  if (cacheable && hasOwn.call(fromStringCache, string))
+    return fromStringCache[string];
 
   const lines = new Lines(
     string.split(lineTerminatorSeqExp).map(function (line) {
@@ -807,7 +833,11 @@ function sliceInfo(info: any, startCol: number, endCol?: number) {
   assert.ok(sliceStart <= sliceEnd);
   assert.strictEqual(lineLength, indent + sliceEnd - sliceStart);
 
-  if (info.indent === indent && info.sliceStart === sliceStart && info.sliceEnd === sliceEnd) {
+  if (
+    info.indent === indent &&
+    info.sliceStart === sliceStart &&
+    info.sliceEnd === sliceEnd
+  ) {
     return info;
   }
 

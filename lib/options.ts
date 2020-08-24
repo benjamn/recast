@@ -187,7 +187,9 @@ const defaults: Options = {
 };
 const hasOwn = defaults.hasOwnProperty;
 
-export type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
+export type NormalizedOptions = Required<
+  Omit<Options, keyof DeprecatedOptions>
+>;
 
 // Copy options and fill in default values.
 export function normalize(opts?: Options): NormalizedOptions {

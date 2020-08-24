@@ -44,7 +44,13 @@ describe("source maps", function () {
 
     const smc = new sourceMap.SourceMapConsumer(printed.map);
 
-    function check(origLine: any, origCol: any, genLine: any, genCol: any, lastColumn: any) {
+    function check(
+      origLine: any,
+      origCol: any,
+      genLine: any,
+      genCol: any,
+      lastColumn: any,
+    ) {
       assert.deepEqual(
         smc.originalPositionFor({
           line: genLine,
@@ -83,7 +89,9 @@ describe("source maps", function () {
     function addUseStrict(ast: any) {
       return recast.visit(ast, {
         visitFunction: function (path) {
-          path.get("body", "body").unshift(b.expressionStatement(b.literal("use strict")));
+          path
+            .get("body", "body")
+            .unshift(b.expressionStatement(b.literal("use strict")));
           this.traverse(path);
         },
       });
@@ -173,7 +181,10 @@ describe("source maps", function () {
     updatePath.replace(null);
 
     const printed = new Printer().print(ast);
-    assert.strictEqual(printed.code, ["for (var i = 0; false; )", "  log(i);"].join(eol));
+    assert.strictEqual(
+      printed.code,
+      ["for (var i = 0; false; )", "  log(i);"].join(eol),
+    );
   });
 
   it("should tolerate programs that become empty", function () {
