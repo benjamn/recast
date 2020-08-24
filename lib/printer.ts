@@ -1795,6 +1795,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "NullTypeAnnotation":
       return fromString("null", options);
 
+    case "SymbolTypeAnnotation":
+      return fromString("symbol", options);
+
     // Type Annotations for TypeScript (when using Babylon as parser)
     case "TSType":
       throw new Error("unprintable type: " + JSON.stringify(n.type));
