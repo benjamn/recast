@@ -1,3 +1,10 @@
+2020.08.30, v1.1.1
+
+fix:
+- fix(npmignore) add .*, examples
+
+
+
 2020.08.30, v1.1.0
 
 fix:
