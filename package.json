@@ -26,7 +26,6 @@
     "debug": "test/run.sh --inspect-brk",
     "test": "npm run lint && npm run build && npm run mocha",
     "build": "npm run clean && tsc",
-    "publishOnly": "npm run build",
     "lint": "eslint --ext .ts .",
     "format": "prettier --write '{lib,test}/**.ts' '*rc.js'",
     "clean": "ts-emit-clean",
