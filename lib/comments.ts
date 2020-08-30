@@ -5,14 +5,17 @@ const isArray = types.builtInTypes.array;
 const isObject = types.builtInTypes.object;
 import { Lines, concat } from "./lines";
 import { comparePos, fixFaultyLocations } from "./util";
-import { makeUniqueKey } from "private";
-const childNodesCacheKey = makeUniqueKey();
+
+type Node = types.namedTypes.Node;
+type Comment = types.namedTypes.Comment;
+
+const childNodesCache = new WeakMap<Node, Node[]>();
 
 // TODO Move a non-caching implementation of this function into ast-types,
 // and implement a caching wrapper function here.
-function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
+function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
   if (!node) {
-    return;
+    return resultArray;
   }
 
   // The .loc checks below are sensitive to some of the problems that
@@ -28,35 +31,40 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
       // nodes in order anyway.
       let i = resultArray.length - 1;
       for (; i >= 0; --i) {
-        if (comparePos(resultArray[i].loc.end, node.loc.start) <= 0) {
+        const child = resultArray[i];
+        if (
+          child &&
+          child.loc &&
+          comparePos(child.loc.end, node.loc.start) <= 0
+        ) {
           break;
         }
       }
       resultArray.splice(i + 1, 0, node);
-      return;
+      return resultArray;
     }
-  } else if (node[childNodesCacheKey]) {
-    return node[childNodesCacheKey];
+  } else {
+    const childNodes = childNodesCache.get(node);
+    if (childNodes) {
+      return childNodes;
+    }
   }
 
-  let names;
+  let names: string[];
   if (isArray.check(node)) {
     names = Object.keys(node);
   } else if (isObject.check(node)) {
     names = types.getFieldNames(node);
   } else {
-    return;
+    return resultArray;
   }
 
   if (!resultArray) {
-    Object.defineProperty(node, childNodesCacheKey, {
-      value: resultArray = [],
-      enumerable: false,
-    });
+    childNodesCache.set(node, (resultArray = []));
   }
 
   for (let i = 0, nameCount = names.length; i < nameCount; ++i) {
-    getSortedChildNodes(node[names[i]], lines, resultArray);
+    getSortedChildNodes((node as any)[names[i]], lines, resultArray);
   }
 
   return resultArray;
@@ -65,29 +73,29 @@ function getSortedChildNodes(node: any, lines: any, resultArray?: any) {
 // As efficiently as possible, decorate the comment object with
 // .precedingNode, .enclosingNode, and/or .followingNode properties, at
 // least one of which is guaranteed to be defined.
-function decorateComment(node: any, comment: any, lines: any) {
+function decorateComment(node: Node, comment: Comment, lines: Lines) {
   const childNodes = getSortedChildNodes(node, lines);
 
   // Time to dust off the old binary search robes and wizard hat.
-  let left = 0,
-    right = childNodes.length,
-    precedingNode,
-    followingNode;
+  let left = 0;
+  let right = childNodes && childNodes.length;
+  let precedingNode: Node | undefined;
+  let followingNode: Node | undefined;
 
-  while (left < right) {
+  while (typeof right === "number" && left < right) {
     const middle = (left + right) >> 1;
-    const child = childNodes[middle];
+    const child = childNodes![middle];
 
     if (
-      comparePos(child.loc.start, comment.loc.start) <= 0 &&
-      comparePos(comment.loc.end, child.loc.end) <= 0
+      comparePos(child.loc!.start, comment.loc!.start) <= 0 &&
+      comparePos(comment.loc!.end, child.loc!.end) <= 0
     ) {
       // The comment is completely contained by this child node.
-      decorateComment((comment.enclosingNode = child), comment, lines);
+      decorateComment(((comment as any).enclosingNode = child), comment, lines);
       return; // Abandon the binary search at this level.
     }
 
-    if (comparePos(child.loc.end, comment.loc.start) <= 0) {
+    if (comparePos(child.loc!.end, comment.loc!.start) <= 0) {
       // This child node falls completely before the comment.
       // Because we will never consider this node or any nodes
       // before it again, this node must be the closest preceding
@@ -97,7 +105,7 @@ function decorateComment(node: any, comment: any, lines: any) {
       continue;
     }
 
-    if (comparePos(comment.loc.end, child.loc.start) <= 0) {
+    if (comparePos(comment.loc!.end, child.loc!.start) <= 0) {
       // This child node falls completely after the comment.
       // Because we will never consider this node or any nodes after
       // it again, this node must be the closest following node we
@@ -111,11 +119,11 @@ function decorateComment(node: any, comment: any, lines: any) {
   }
 
   if (precedingNode) {
-    comment.precedingNode = precedingNode;
+    (comment as any).precedingNode = precedingNode;
   }
 
   if (followingNode) {
-    comment.followingNode = followingNode;
+    (comment as any).followingNode = followingNode;
   }
 }
 
