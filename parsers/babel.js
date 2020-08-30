@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parse = exports.parser = void 0;
 var _babel_options_1 = __importDefault(require("./_babel_options"));
 // Prefer the new @babel/parser package, but fall back to babylon if
 // that's what's available.

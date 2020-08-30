@@ -1,20 +1,33 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.run = exports.prettyPrint = exports.print = exports.types = exports.parse = void 0;
 var fs_1 = __importDefault(require("fs"));
 var types = __importStar(require("ast-types"));
 exports.types = types;
 var parser_1 = require("./lib/parser");
-exports.parse = parser_1.parse;
+Object.defineProperty(exports, "parse", { enumerable: true, get: function () { return parser_1.parse; } });
 var printer_1 = require("./lib/printer");
 /**
  * Traverse and potentially modify an abstract syntax tree using a
@@ -30,7 +43,7 @@ var printer_1 = require("./lib/printer");
  *   });
  */
 var ast_types_1 = require("ast-types");
-exports.visit = ast_types_1.visit;
+Object.defineProperty(exports, "visit", { enumerable: true, get: function () { return ast_types_1.visit; } });
 /**
  * Reprint a modified syntax tree using as much of the original source
  * code as possible.

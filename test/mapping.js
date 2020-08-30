@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -23,14 +35,10 @@ var printer_1 = require("../lib/printer");
 var os_1 = require("os");
 describe("source maps", function () {
     it("should generate correct mappings", function () {
-        var code = [
-            "function foo(bar) {",
-            "  return 1 + bar;",
-            "}"
-        ].join(os_1.EOL);
+        var code = ["function foo(bar) {", "  return 1 + bar;", "}"].join(os_1.EOL);
         lines_1.fromString(code);
         var ast = parser_1.parse(code, {
-            sourceFileName: "source.js"
+            sourceFileName: "source.js",
         });
         var path = new NodePath(ast);
         var returnPath = path.get("program", "body", 0, "body", "body", 0);
@@ -43,7 +51,7 @@ describe("source maps", function () {
         var sourceRoot = "path/to/source/root";
         var printed = new printer_1.Printer({
             sourceMapName: "source.map.json",
-            sourceRoot: sourceRoot
+            sourceRoot: sourceRoot,
         }).print(ast);
         assert_1.default.ok(printed.map);
         assert_1.default.strictEqual(printed.map.file, "source.map.json");
@@ -52,21 +60,21 @@ describe("source maps", function () {
         function check(origLine, origCol, genLine, genCol, lastColumn) {
             assert_1.default.deepEqual(smc.originalPositionFor({
                 line: genLine,
-                column: genCol
+                column: genCol,
             }), {
                 source: sourceRoot + "/source.js",
                 line: origLine,
                 column: origCol,
-                name: null
+                name: null,
             });
             assert_1.default.deepEqual(smc.generatedPositionFor({
                 source: sourceRoot + "/source.js",
                 line: origLine,
-                column: origCol
+                column: origCol,
             }), {
                 line: genLine,
                 column: genCol,
-                lastColumn: lastColumn
+                lastColumn: lastColumn,
             });
         }
         check(1, 0, 1, 0, null); // function
@@ -79,9 +87,11 @@ describe("source maps", function () {
         function addUseStrict(ast) {
             return recast.visit(ast, {
                 visitFunction: function (path) {
-                    path.get("body", "body").unshift(b.expressionStatement(b.literal("use strict")));
+                    path
+                        .get("body", "body")
+                        .unshift(b.expressionStatement(b.literal("use strict")));
                     this.traverse(path);
-                }
+                },
             });
         }
         function stripConsole(ast) {
@@ -96,7 +106,7 @@ describe("source maps", function () {
                         return false;
                     }
                     return;
-                }
+                },
             });
         }
         var code = [
@@ -104,23 +114,23 @@ describe("source maps", function () {
             "  var sum = a + b;",
             "  console.log(a, b);",
             "  return sum;",
-            "}"
+            "}",
         ].join(os_1.EOL);
         var ast = parser_1.parse(code, {
-            sourceFileName: "original.js"
+            sourceFileName: "original.js",
         });
         var useStrictResult = new printer_1.Printer({
-            sourceMapName: "useStrict.map.json"
+            sourceMapName: "useStrict.map.json",
         }).print(addUseStrict(ast));
         var useStrictAst = parser_1.parse(useStrictResult.code, {
-            sourceFileName: "useStrict.js"
+            sourceFileName: "useStrict.js",
         });
         var oneStepResult = new printer_1.Printer({
-            sourceMapName: "oneStep.map.json"
+            sourceMapName: "oneStep.map.json",
         }).print(stripConsole(ast));
         var twoStepResult = new printer_1.Printer({
             sourceMapName: "twoStep.map.json",
-            inputSourceMap: useStrictResult.map
+            inputSourceMap: useStrictResult.map,
         }).print(stripConsole(useStrictAst));
         assert_1.default.strictEqual(oneStepResult.code, twoStepResult.code);
         var smc1 = new source_map_1.default.SourceMapConsumer(oneStepResult.map);
@@ -128,7 +138,7 @@ describe("source maps", function () {
         smc1.eachMapping(function (mapping) {
             var pos = {
                 line: mapping.generatedLine,
-                column: mapping.generatedColumn
+                column: mapping.generatedColumn,
             };
             var orig1 = smc1.originalPositionFor(pos);
             var orig2 = smc2.originalPositionFor(pos);
@@ -143,30 +153,24 @@ describe("source maps", function () {
     });
     it("should work when a child node becomes null", function () {
         // https://github.com/facebook/regenerator/issues/103
-        var code = [
-            "for (var i = 0; false; i++)",
-            "  log(i);"
-        ].join(os_1.EOL);
+        var code = ["for (var i = 0; false; i++)", "  log(i);"].join(os_1.EOL);
         var ast = parser_1.parse(code);
         var path = new NodePath(ast);
         var updatePath = path.get("program", "body", 0, "update");
         n.UpdateExpression.assert(updatePath.value);
         updatePath.replace(null);
         var printed = new printer_1.Printer().print(ast);
-        assert_1.default.strictEqual(printed.code, [
-            "for (var i = 0; false; )",
-            "  log(i);"
-        ].join(os_1.EOL));
+        assert_1.default.strictEqual(printed.code, ["for (var i = 0; false; )", "  log(i);"].join(os_1.EOL));
     });
     it("should tolerate programs that become empty", function () {
         var source = "foo();";
         var ast = recast.parse(source, {
-            sourceFileName: "foo.js"
+            sourceFileName: "foo.js",
         });
         assert_1.default.strictEqual(ast.program.body.length, 1);
         ast.program.body.length = 0;
         var result = recast.print(ast, {
-            sourceMapName: "foo.map.json"
+            sourceMapName: "foo.map.json",
         });
         assert_1.default.strictEqual(result.map.file, "foo.map.json");
         assert_1.default.deepEqual(result.map.sources, []);

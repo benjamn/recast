@@ -1,16 +1,16 @@
 import assert from "assert";
 import * as linesModule from "./lines";
 import * as types from "ast-types";
-var Printable = types.namedTypes.Printable;
-var Expression = types.namedTypes.Expression;
-var ReturnStatement = types.namedTypes.ReturnStatement;
-var SourceLocation = types.namedTypes.SourceLocation;
+const Printable = types.namedTypes.Printable;
+const Expression = types.namedTypes.Expression;
+const ReturnStatement = types.namedTypes.ReturnStatement;
+const SourceLocation = types.namedTypes.SourceLocation;
 import { comparePos, copyPos, getUnionOfKeys } from "./util";
 import FastPath from "./fast-path";
-var isObject = types.builtInTypes.object;
-var isArray = types.builtInTypes.array;
-var isString = types.builtInTypes.string;
-var riskyAdjoiningCharExp = /[0-9a-z_$]/i;
+const isObject = types.builtInTypes.object;
+const isArray = types.builtInTypes.array;
+const isString = types.builtInTypes.string;
+const riskyAdjoiningCharExp = /[0-9a-z_$]/i;
 
 interface PatcherType {
   replace(loc: any, lines: any): any;
@@ -20,95 +20,91 @@ interface PatcherType {
 }
 
 interface PatcherConstructor {
-  new(lines: any): PatcherType;
+  new (lines: any): PatcherType;
 }
 
-const Patcher = function Patcher(this: PatcherType, lines: any) {
+const Patcher = (function Patcher(this: PatcherType, lines: any) {
   assert.ok(this instanceof Patcher);
   assert.ok(lines instanceof linesModule.Lines);
 
-  var self = this,
-  replacements: any[] = [];
+  const self = this,
+    replacements: any[] = [];
 
-  self.replace = function(loc, lines) {
-    if (isString.check(lines))
-      lines = linesModule.fromString(lines);
+  self.replace = function (loc, lines) {
+    if (isString.check(lines)) lines = linesModule.fromString(lines);
 
     replacements.push({
       lines: lines,
       start: loc.start,
-      end: loc.end
+      end: loc.end,
     });
   };
 
-  self.get = function(loc) {
+  self.get = function (loc) {
     // If no location is provided, return the complete Lines object.
     loc = loc || {
       start: { line: 1, column: 0 },
-      end: { line: lines.length,
-             column: lines.getLineLength(lines.length) }
+      end: { line: lines.length, column: lines.getLineLength(lines.length) },
     };
 
-    var sliceFrom = loc.start,
-    toConcat: any[] = [];
+    let sliceFrom = loc.start,
+      toConcat: any[] = [];
 
     function pushSlice(from: any, to: any) {
       assert.ok(comparePos(from, to) <= 0);
       toConcat.push(lines.slice(from, to));
     }
 
-    replacements.sort(function(a, b) {
-      return comparePos(a.start, b.start);
-    }).forEach(function(rep) {
-      if (comparePos(sliceFrom, rep.start) > 0) {
-        // Ignore nested replacement ranges.
-      } else {
-        pushSlice(sliceFrom, rep.start);
-        toConcat.push(rep.lines);
-        sliceFrom = rep.end;
-      }
-    });
+    replacements
+      .sort((a, b) => comparePos(a.start, b.start))
+      .forEach(function (rep) {
+        if (comparePos(sliceFrom, rep.start) > 0) {
+          // Ignore nested replacement ranges.
+        } else {
+          pushSlice(sliceFrom, rep.start);
+          toConcat.push(rep.lines);
+          sliceFrom = rep.end;
+        }
+      });
 
     pushSlice(sliceFrom, loc.end);
 
     return linesModule.concat(toConcat);
   };
-} as any as PatcherConstructor;
+} as any) as PatcherConstructor;
 export { Patcher };
 
-var Pp: PatcherType = Patcher.prototype;
+const Pp: PatcherType = Patcher.prototype;
 
-Pp.tryToReprintComments = function(newNode, oldNode, print) {
-  var patcher = this;
+Pp.tryToReprintComments = function (newNode, oldNode, print) {
+  const patcher = this;
 
-  if (!newNode.comments &&
-      !oldNode.comments) {
+  if (!newNode.comments && !oldNode.comments) {
     // We were (vacuously) able to reprint all the comments!
     return true;
   }
 
-  var newPath = FastPath.from(newNode);
-  var oldPath = FastPath.from(oldNode);
+  const newPath = FastPath.from(newNode);
+  const oldPath = FastPath.from(oldNode);
 
   newPath.stack.push("comments", getSurroundingComments(newNode));
   oldPath.stack.push("comments", getSurroundingComments(oldNode));
 
-  var reprints: any[] = [];
-  var ableToReprintComments =
-    findArrayReprints(newPath, oldPath, reprints);
+  const reprints: any[] = [];
+  const ableToReprintComments = findArrayReprints(newPath, oldPath, reprints);
 
   // No need to pop anything from newPath.stack or oldPath.stack, since
   // newPath and oldPath are fresh local variables.
 
   if (ableToReprintComments && reprints.length > 0) {
-    reprints.forEach(function(reprint) {
-      var oldComment = reprint.oldPath.getValue();
+    reprints.forEach(function (reprint) {
+      const oldComment = reprint.oldPath.getValue();
       assert.ok(oldComment.leading || oldComment.trailing);
       patcher.replace(
         oldComment.loc,
         // Comments can't have .comments, so it doesn't matter whether we
         // print with comments or without.
-        print(reprint.newPath).indentTail(oldComment.loc.indent)
+        print(reprint.newPath).indentTail(oldComment.loc.indent),
       );
     });
   }
@@ -120,10 +116,9 @@ Pp.tryToReprintComments = function(newNode, oldNode, print) {
 // comments that occur inside node.loc. Returns an empty array for nodes
 // with no leading or trailing comments.
 function getSurroundingComments(node: any) {
-  var result: any[] = [];
-  if (node.comments &&
-      node.comments.length > 0) {
-    node.comments.forEach(function(comment: any) {
+  const result: any[] = [];
+  if (node.comments && node.comments.length > 0) {
+    node.comments.forEach(function (comment: any) {
       if (comment.leading || comment.trailing) {
         result.push(comment);
       }
@@ -132,31 +127,34 @@ function getSurroundingComments(node: any) {
   return result;
 }
 
-Pp.deleteComments = function(node) {
+Pp.deleteComments = function (node) {
   if (!node.comments) {
     return;
   }
 
-  var patcher = this;
+  const patcher = this;
 
-  node.comments.forEach(function(comment: any) {
+  node.comments.forEach(function (comment: any) {
     if (comment.leading) {
       // Delete leading comments along with any trailing whitespace they
       // might have.
-      patcher.replace({
-        start: comment.loc.start,
-        end: node.loc.lines.skipSpaces(
-          comment.loc.end, false, false)
-      }, "");
-
+      patcher.replace(
+        {
+          start: comment.loc.start,
+          end: node.loc.lines.skipSpaces(comment.loc.end, false, false),
+        },
+        "",
+      );
     } else if (comment.trailing) {
       // Delete trailing comments along with any leading whitespace they
       // might have.
-      patcher.replace({
-        start: node.loc.lines.skipSpaces(
-          comment.loc.start, true, false),
-        end: comment.loc.end
-      }, "");
+      patcher.replace(
+        {
+          start: node.loc.lines.skipSpaces(comment.loc.start, true, false),
+          end: comment.loc.end,
+        },
+        "",
+      );
     }
   });
 };
@@ -166,29 +164,30 @@ export function getReprinter(path: any) {
 
   // Make sure that this path refers specifically to a Node, rather than
   // some non-Node subproperty of a Node.
-  var node = path.getValue();
-  if (!Printable.check(node))
-    return;
+  const node = path.getValue();
+  if (!Printable.check(node)) return;
 
-  var orig = (node as any).original;
-  var origLoc = orig && orig.loc;
-  var lines = origLoc && origLoc.lines;
-  var reprints: any[] = [];
+  const orig = (node as any).original;
+  const origLoc = orig && orig.loc;
+  const lines = origLoc && origLoc.lines;
+  const reprints: any[] = [];
 
-  if (!lines || !findReprints(path, reprints))
-    return;
+  if (!lines || !findReprints(path, reprints)) return;
 
-  return function(print: any) {
-    var patcher = new Patcher(lines);
+  return function (print: any) {
+    const patcher = new Patcher(lines);
 
-    reprints.forEach(function(reprint) {
-      var newNode = reprint.newPath.getValue();
-      var oldNode = reprint.oldPath.getValue();
+    reprints.forEach(function (reprint) {
+      const newNode = reprint.newPath.getValue();
+      const oldNode = reprint.oldPath.getValue();
 
       SourceLocation.assert(oldNode.loc, true);
 
-      var needToPrintNewPathWithComments =
-        !patcher.tryToReprintComments(newNode, oldNode, print)
+      const needToPrintNewPathWithComments = !patcher.tryToReprintComments(
+        newNode,
+        oldNode,
+        print,
+      );
 
       if (needToPrintNewPathWithComments) {
         // Since we were not able to preserve all leading/trailing
@@ -198,19 +197,19 @@ export function getReprinter(path: any) {
         patcher.deleteComments(oldNode);
       }
 
-      var newLines = print(reprint.newPath, {
+      let newLines = print(reprint.newPath, {
         includeComments: needToPrintNewPathWithComments,
         // If the oldNode we're replacing already had parentheses, we may
         // not need to print the new node with any extra parentheses,
         // because the existing parentheses will suffice. However, if the
         // newNode has a different type than the oldNode, let the printer
         // decide if reprint.newPath needs parentheses, as usual.
-        avoidRootParens: (oldNode.type === newNode.type &&
-                          reprint.oldPath.hasParens())
+        avoidRootParens:
+          oldNode.type === newNode.type && reprint.oldPath.hasParens(),
       }).indentTail(oldNode.loc.indent);
 
-      var nls = needsLeadingSpace(lines, oldNode.loc, newLines);
-      var nts = needsTrailingSpace(lines, oldNode.loc, newLines);
+      const nls = needsLeadingSpace(lines, oldNode.loc, newLines);
+      const nts = needsTrailingSpace(lines, oldNode.loc, newLines);
 
       // If we try to replace the argument of a ReturnStatement like
       // return"asdf" with e.g. a literal null expression, we run the risk
@@ -218,7 +217,7 @@ export function getReprinter(path: any) {
       // space in situations where that might happen. Likewise for
       // "asdf"in obj. See #170.
       if (nls || nts) {
-        var newParts = [];
+        const newParts = [];
         nls && newParts.push(" ");
         newParts.push(newLines);
         nts && newParts.push(" ");
@@ -238,26 +237,27 @@ export function getReprinter(path: any) {
 
     return patchedLines;
   };
-};
+}
 
 // If the last character before oldLoc and the first character of newLines
 // are both identifier characters, they must be separated by a space,
 // otherwise they will most likely get fused together into a single token.
 function needsLeadingSpace(oldLines: any, oldLoc: any, newLines: any) {
-  var posBeforeOldLoc = copyPos(oldLoc.start);
+  const posBeforeOldLoc = copyPos(oldLoc.start);
 
   // The character just before the location occupied by oldNode.
-  var charBeforeOldLoc =
-    oldLines.prevPos(posBeforeOldLoc) &&
-    oldLines.charAt(posBeforeOldLoc);
+  const charBeforeOldLoc =
+    oldLines.prevPos(posBeforeOldLoc) && oldLines.charAt(posBeforeOldLoc);
 
   // First character of the reprinted node.
-  var newFirstChar = newLines.charAt(newLines.firstPos());
+  const newFirstChar = newLines.charAt(newLines.firstPos());
 
-  return charBeforeOldLoc &&
+  return (
+    charBeforeOldLoc &&
     riskyAdjoiningCharExp.test(charBeforeOldLoc) &&
     newFirstChar &&
-    riskyAdjoiningCharExp.test(newFirstChar);
+    riskyAdjoiningCharExp.test(newFirstChar)
+  );
 }
 
 // If the last character of newLines and the first character after oldLoc
@@ -265,25 +265,27 @@ function needsLeadingSpace(oldLines: any, oldLoc: any, newLines: any) {
 // otherwise they will most likely get fused together into a single token.
 function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
   // The character just after the location occupied by oldNode.
-  var charAfterOldLoc = oldLines.charAt(oldLoc.end);
+  const charAfterOldLoc = oldLines.charAt(oldLoc.end);
 
-  var newLastPos = newLines.lastPos();
+  const newLastPos = newLines.lastPos();
 
   // Last character of the reprinted node.
-  var newLastChar = newLines.prevPos(newLastPos) &&
-    newLines.charAt(newLastPos);
+  const newLastChar =
+    newLines.prevPos(newLastPos) && newLines.charAt(newLastPos);
 
-  return newLastChar &&
+  return (
+    newLastChar &&
     riskyAdjoiningCharExp.test(newLastChar) &&
     charAfterOldLoc &&
-    riskyAdjoiningCharExp.test(charAfterOldLoc);
+    riskyAdjoiningCharExp.test(charAfterOldLoc)
+  );
 }
 
 function findReprints(newPath: any, reprints: any) {
-  var newNode = newPath.getValue();
+  const newNode = newPath.getValue();
   Printable.assert(newNode);
 
-  var oldNode = newNode.original;
+  const oldNode = newNode.original;
   Printable.assert(oldNode);
 
   assert.deepEqual(reprints, []);
@@ -292,8 +294,8 @@ function findReprints(newPath: any, reprints: any) {
     return false;
   }
 
-  var oldPath = new FastPath(oldNode);
-  var canReprint = findChildReprints(newPath, oldPath, reprints);
+  const oldPath = new FastPath(oldNode);
+  const canReprint = findChildReprints(newPath, oldPath, reprints);
 
   if (!canReprint) {
     // Make absolutely sure the calling code does not attempt to reprint
@@ -305,11 +307,10 @@ function findReprints(newPath: any, reprints: any) {
 }
 
 function findAnyReprints(newPath: any, oldPath: any, reprints: any) {
-  var newNode = newPath.getValue();
-  var oldNode = oldPath.getValue();
+  const newNode = newPath.getValue();
+  const oldNode = oldPath.getValue();
 
-  if (newNode === oldNode)
-    return true;
+  if (newNode === oldNode) return true;
 
   if (isArray.check(newNode))
     return findArrayReprints(newPath, oldPath, reprints);
@@ -321,26 +322,26 @@ function findAnyReprints(newPath: any, oldPath: any, reprints: any) {
 }
 
 function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
-  var newNode = newPath.getValue();
-  var oldNode = oldPath.getValue();
+  const newNode = newPath.getValue();
+  const oldNode = oldPath.getValue();
 
-  if (newNode === oldNode ||
-      newPath.valueIsDuplicate() ||
-      oldPath.valueIsDuplicate()) {
+  if (
+    newNode === oldNode ||
+    newPath.valueIsDuplicate() ||
+    oldPath.valueIsDuplicate()
+  ) {
     return true;
   }
 
   isArray.assert(newNode);
-  var len = newNode.length;
+  const len = newNode.length;
 
-  if (!(isArray.check(oldNode) &&
-        oldNode.length === len))
-    return false;
+  if (!(isArray.check(oldNode) && oldNode.length === len)) return false;
 
-  for (var i = 0; i < len; ++i) {
+  for (let i = 0; i < len; ++i) {
     newPath.stack.push(i, newNode[i]);
     oldPath.stack.push(i, oldNode[i]);
-    var canReprint = findAnyReprints(newPath, oldPath, reprints);
+    const canReprint = findAnyReprints(newPath, oldPath, reprints);
     newPath.stack.length -= 2;
     oldPath.stack.length -= 2;
     if (!canReprint) {
@@ -352,7 +353,7 @@ function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
 }
 
 function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
-  var newNode = newPath.getValue();
+  const newNode = newPath.getValue();
   isObject.assert(newNode);
 
   if (newNode.original === null) {
@@ -360,13 +361,14 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
     return false;
   }
 
-  var oldNode = oldPath.getValue();
-  if (!isObject.check(oldNode))
-    return false;
+  const oldNode = oldPath.getValue();
+  if (!isObject.check(oldNode)) return false;
 
-  if (newNode === oldNode ||
-      newPath.valueIsDuplicate() ||
-      oldPath.valueIsDuplicate()) {
+  if (
+    newNode === oldNode ||
+    newPath.valueIsDuplicate() ||
+    oldPath.valueIsDuplicate()
+  ) {
     return true;
   }
 
@@ -375,11 +377,28 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
       return false;
     }
 
+    const newParentNode = newPath.getParentNode();
+    const oldParentNode = oldPath.getParentNode();
+    if (
+      oldParentNode !== null &&
+      oldParentNode.type === "FunctionTypeAnnotation" &&
+      newParentNode !== null &&
+      newParentNode.type === "FunctionTypeAnnotation"
+    ) {
+      const oldNeedsParens =
+        oldParentNode.params.length !== 1 || !!oldParentNode.params[0].name;
+      const newNeedParens =
+        newParentNode.params.length !== 1 || !!newParentNode.params[0].name;
+      if (!oldNeedsParens && newNeedParens) {
+        return false;
+      }
+    }
+
     // Here we need to decide whether the reprinted code for newNode is
     // appropriate for patching into the location of oldNode.
 
     if ((newNode as any).type === (oldNode as any).type) {
-      var childReprints: any[] = [];
+      const childReprints: any[] = [];
 
       if (findChildReprints(newPath, oldPath, childReprints)) {
         reprints.push.apply(reprints, childReprints);
@@ -388,7 +407,7 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
         // able to reprint it.
         reprints.push({
           oldPath: oldPath.copy(),
-          newPath: newPath.copy()
+          newPath: newPath.copy(),
         });
       } else {
         return false;
@@ -397,18 +416,19 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
       return true;
     }
 
-    if (Expression.check(newNode) &&
-        Expression.check(oldNode) &&
-        // If we have no .loc information for oldNode, then we won't be
-        // able to reprint it.
-        oldNode.loc) {
-
+    if (
+      Expression.check(newNode) &&
+      Expression.check(oldNode) &&
+      // If we have no .loc information for oldNode, then we won't be
+      // able to reprint it.
+      oldNode.loc
+    ) {
       // If both nodes are subtypes of Expression, then we should be able
       // to fill the location occupied by the old node with code printed
       // for the new node with no ill consequences.
       reprints.push({
         oldPath: oldPath.copy(),
-        newPath: newPath.copy()
+        newPath: newPath.copy(),
       });
 
       return true;
@@ -424,8 +444,8 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
 }
 
 function findChildReprints(newPath: any, oldPath: any, reprints: any) {
-  var newNode = newPath.getValue();
-  var oldNode = oldPath.getValue();
+  const newNode = newPath.getValue();
+  const oldNode = oldPath.getValue();
 
   isObject.assert(newNode);
   isObject.assert(oldNode);
@@ -438,15 +458,13 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // If this node needs parentheses and will not be wrapped with
   // parentheses when reprinted, then return false to skip reprinting and
   // let it be printed generically.
-  if (newPath.needsParens() &&
-      ! oldPath.hasParens()) {
+  if (newPath.needsParens() && !oldPath.hasParens()) {
     return false;
   }
 
-  var keys = getUnionOfKeys(oldNode, newNode);
+  const keys = getUnionOfKeys(oldNode, newNode);
 
-  if (oldNode.type === "File" ||
-      newNode.type === "File") {
+  if (oldNode.type === "File" || newNode.type === "File") {
     // Don't bother traversing file.tokens, an often very large array
     // returned by Babylon, and useless for our purposes.
     delete keys.tokens;
@@ -455,9 +473,9 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // Don't bother traversing .loc objects looking for reprintable nodes.
   delete keys.loc;
 
-  var originalReprintCount = reprints.length;
+  const originalReprintCount = reprints.length;
 
-  for (var k in keys) {
+  for (let k in keys) {
     if (k.charAt(0) === "_") {
       // Ignore "private" AST properties added by e.g. Babel plugins and
       // parsers like Babylon.
@@ -466,7 +484,7 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
     newPath.stack.push(k, types.getFieldValue(newNode, k));
     oldPath.stack.push(k, types.getFieldValue(oldNode, k));
-    var canReprint = findAnyReprints(newPath, oldPath, reprints);
+    const canReprint = findAnyReprints(newPath, oldPath, reprints);
     newPath.stack.length -= 2;
     oldPath.stack.length -= 2;
 
@@ -478,8 +496,10 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // Return statements might end up running into ASI issues due to
   // comments inserted deep within the tree, so reprint them if anything
   // changed within them.
-  if (ReturnStatement.check(newPath.getNode()) &&
-      reprints.length > originalReprintCount) {
+  if (
+    ReturnStatement.check(newPath.getNode()) &&
+    reprints.length > originalReprintCount
+  ) {
     return false;
   }
 

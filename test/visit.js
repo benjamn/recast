@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -23,12 +35,12 @@ var lines = [
     "    // some comment",
     "    bar: 42,",
     "    baz: this",
-    "});"
+    "});",
 ];
 describe("types.visit", function () {
     it("replacement", function () {
         var source = lines.join(os_1.EOL);
-        var printer = new printer_1.Printer;
+        var printer = new printer_1.Printer();
         var ast = parser_1.parse(source);
         var withThis = printer.print(ast).code;
         var thisExp = /\bthis\b/g;
@@ -36,7 +48,7 @@ describe("types.visit", function () {
         types.visit(ast, {
             visitThisExpression: function () {
                 return builders.identifier("self");
-            }
+            },
         });
         assert_1.default.strictEqual(printer.print(ast).code, withThis.replace(thisExp, "self"));
         var propNames = [];
@@ -45,7 +57,7 @@ describe("types.visit", function () {
                 var key = path.node.key;
                 propNames.push(key.value || key.name);
                 this.traverse(path);
-            }
+            },
         };
         types.visit(ast, methods);
         assert_1.default.deepEqual(propNames, ["bar", "baz"]);
@@ -58,7 +70,7 @@ describe("types.visit", function () {
                 }
                 this.traverse(path);
                 return;
-            }
+            },
         });
         propNames.length = 0;
         types.visit(ast, methods);
@@ -74,7 +86,7 @@ describe("types.visit", function () {
             "                 .send();",
             "        g(8);",
             "    })",
-            "})));"
+            "})));",
         ];
         var altered = [
             "a(xxx(function() {",
@@ -89,11 +101,11 @@ describe("types.visit", function () {
             "             .i()",
             "             .send();",
             "    g(8);",
-            "})));"
+            "})));",
         ];
         var source = lines.join(os_1.EOL);
         var ast = parser_1.parse(source);
-        var printer = new printer_1.Printer;
+        var printer = new printer_1.Printer();
         var funExpr;
         types.visit(ast, {
             visitFunctionExpression: function (path) {
@@ -104,7 +116,7 @@ describe("types.visit", function () {
             visitBinaryExpression: function (path) {
                 path.node.operator = ">";
                 this.traverse(path);
-            }
+            },
         });
         namedTypes.FunctionExpression.assert(funExpr);
         types.visit(ast, {
@@ -119,7 +131,7 @@ describe("types.visit", function () {
             },
             visitObjectExpression: function () {
                 return funExpr;
-            }
+            },
         });
         assert_1.default.strictEqual(altered.join(os_1.EOL), printer.print(ast).code);
     });

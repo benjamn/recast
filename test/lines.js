@@ -10,26 +10,23 @@ var lines_1 = require("../lib/lines");
 var os_1 = require("os");
 function check(a, b) {
     assert_1.default.strictEqual(a.toString({
-        lineTerminator: os_1.EOL
+        lineTerminator: os_1.EOL,
     }), b.toString({
-        lineTerminator: os_1.EOL
+        lineTerminator: os_1.EOL,
     }));
 }
 describe("lines", function () {
-    describe('line terminators', function () {
-        var source = [
-            'foo;',
-            'bar;',
-        ];
+    describe("line terminators", function () {
+        var source = ["foo;", "bar;"];
         var terminators = [
-            '\u000A',
-            '\u000D',
-            '\u2028',
-            '\u2029',
-            '\u000D\u000A',
+            "\u000A",
+            "\u000D",
+            "\u2028",
+            "\u2029",
+            "\u000D\u000A",
         ];
         terminators.forEach(function (t) {
-            it('can handle ' + escape(t) + ' as line terminator', function () {
+            it("can handle " + escape(t) + " as line terminator", function () {
                 var lines = lines_1.fromString(source.join(t));
                 assert_1.default.strictEqual(lines.length, 2);
                 assert_1.default.strictEqual(lines.getLineLength(1), 4);
@@ -58,9 +55,7 @@ describe("lines", function () {
         var code = String(ToStringTest);
         var lines = lines_1.fromString(code);
         check(lines, code);
-        check(lines.indentTail(5)
-            .indentTail(-7)
-            .indentTail(2), code);
+        check(lines.indentTail(5).indentTail(-7).indentTail(2), code);
     });
     function testEachPosHelper(lines, code) {
         check(lines, code);
@@ -132,27 +127,17 @@ describe("lines", function () {
         assert_1.default.strictEqual(5, lines_1.concat([lines, indented]).length);
         assert_1.default.strictEqual(5, lines_1.concat([indented, lines]).length);
         check(lines_1.concat([lines, indented]), lines.toString() + indented.toString());
-        check(lines_1.concat([lines, indented]).indentTail(4), strings.join(os_1.EOL + "    ") +
-            strings.join(os_1.EOL + "        "));
+        check(lines_1.concat([lines, indented]).indentTail(4), strings.join(os_1.EOL + "    ") + strings.join(os_1.EOL + "        "));
         check(lines_1.concat([indented, lines]), strings.join(os_1.EOL + "    ") + lines.toString());
         check(lines_1.concat([lines, indented]), lines.concat(indented));
         check(lines_1.concat([indented, lines]), indented.concat(lines));
         check(lines_1.concat([]), lines_1.fromString(""));
         assert_1.default.strictEqual(lines_1.concat([]), lines_1.fromString(""));
-        check(lines_1.fromString(" ").join([
-            lines_1.fromString("var"),
-            lines_1.fromString("foo")
-        ]), lines_1.fromString("var foo"));
+        check(lines_1.fromString(" ").join([lines_1.fromString("var"), lines_1.fromString("foo")]), lines_1.fromString("var foo"));
         check(lines_1.fromString(" ").join(["var", "foo"]), lines_1.fromString("var foo"));
-        check(lines_1.concat([
-            lines_1.fromString("var"),
-            lines_1.fromString(" "),
-            lines_1.fromString("foo")
-        ]), lines_1.fromString("var foo"));
+        check(lines_1.concat([lines_1.fromString("var"), lines_1.fromString(" "), lines_1.fromString("foo")]), lines_1.fromString("var foo"));
         check(lines_1.concat(["var", " ", "foo"]), lines_1.fromString("var foo"));
-        check(lines_1.concat([
-            lines_1.fromString("debugger"), ";"
-        ]), lines_1.fromString("debugger;"));
+        check(lines_1.concat([lines_1.fromString("debugger"), ";"]), lines_1.fromString("debugger;"));
     });
     it("Empty", function () {
         function c(s) {
@@ -209,8 +194,7 @@ describe("lines", function () {
         });
     }
     function getSourceLocation(lines) {
-        return { start: lines.firstPos(),
-            end: lines.lastPos() };
+        return { start: lines.firstPos(), end: lines.lastPos() };
     }
     it("GetSourceLocation", function GetSourceLocationTest() {
         var code = String(GetSourceLocationTest), lines = lines_1.fromString(code);
@@ -292,11 +276,7 @@ describe("lines", function () {
         var tabWidth = 4;
         var tabOpts = { tabWidth: tabWidth, useTabs: true };
         var noTabOpts = { tabWidth: tabWidth, useTabs: false };
-        var code = [
-            "function f() {",
-            "\treturn this;",
-            "}"
-        ].join(os_1.EOL);
+        var code = ["function f() {", "\treturn this;", "}"].join(os_1.EOL);
         function checkUnchanged(lines, code) {
             check(lines.toString(tabOpts), code);
             check(lines.toString(noTabOpts), code);
@@ -305,86 +285,34 @@ describe("lines", function () {
         }
         var lines = lines_1.fromString(code, tabOpts);
         checkUnchanged(lines, code);
-        check(lines.indent(1).toString(tabOpts), [
-            " function f() {",
-            "\t return this;",
-            " }"
-        ].join(os_1.EOL));
-        check(lines.indent(tabWidth).toString(tabOpts), [
-            "\tfunction f() {",
-            "\t\treturn this;",
-            "\t}"
-        ].join(os_1.EOL));
-        check(lines.indent(1).toString(noTabOpts), [
-            " function f() {",
-            "     return this;",
-            " }"
-        ].join(os_1.EOL));
-        check(lines.indent(tabWidth).toString(noTabOpts), [
-            "    function f() {",
-            "        return this;",
-            "    }"
-        ].join(os_1.EOL));
+        check(lines.indent(1).toString(tabOpts), [" function f() {", "\t return this;", " }"].join(os_1.EOL));
+        check(lines.indent(tabWidth).toString(tabOpts), ["\tfunction f() {", "\t\treturn this;", "\t}"].join(os_1.EOL));
+        check(lines.indent(1).toString(noTabOpts), [" function f() {", "     return this;", " }"].join(os_1.EOL));
+        check(lines.indent(tabWidth).toString(noTabOpts), ["    function f() {", "        return this;", "    }"].join(os_1.EOL));
         var funkyCode = [
             " function g() { \t ",
             " \t\t  return this;  ",
-            "\t} "
+            "\t} ",
         ].join(os_1.EOL);
         var funky = lines_1.fromString(funkyCode, tabOpts);
         checkUnchanged(funky, funkyCode);
-        check(funky.indent(1).toString(tabOpts), [
-            "  function g() { \t ",
-            "\t\t   return this;  ",
-            "\t } "
-        ].join(os_1.EOL));
-        check(funky.indent(2).toString(tabOpts), [
-            "   function g() { \t ",
-            "\t\t\treturn this;  ",
-            "\t  } "
-        ].join(os_1.EOL));
-        check(funky.indent(1).toString(noTabOpts), [
-            "  function g() { \t ",
-            "           return this;  ",
-            "     } "
-        ].join(os_1.EOL));
-        check(funky.indent(2).toString(noTabOpts), [
-            "   function g() { \t ",
-            "            return this;  ",
-            "      } "
-        ].join(os_1.EOL));
+        check(funky.indent(1).toString(tabOpts), ["  function g() { \t ", "\t\t   return this;  ", "\t } "].join(os_1.EOL));
+        check(funky.indent(2).toString(tabOpts), ["   function g() { \t ", "\t\t\treturn this;  ", "\t  } "].join(os_1.EOL));
+        check(funky.indent(1).toString(noTabOpts), ["  function g() { \t ", "           return this;  ", "     } "].join(os_1.EOL));
+        check(funky.indent(2).toString(noTabOpts), ["   function g() { \t ", "            return this;  ", "      } "].join(os_1.EOL));
         // Test that '\v' characters are ignored for the purposes of indentation,
         // but preserved when printing untouched lines.
-        code = [
-            "\vfunction f() {\v",
-            " \v   return \vthis;\v",
-            "\v} \v "
-        ].join(os_1.EOL);
+        code = ["\vfunction f() {\v", " \v   return \vthis;\v", "\v} \v "].join(os_1.EOL);
         lines = lines_1.fromString(code, tabOpts);
         checkUnchanged(lines, code);
-        check(lines.indent(4).toString(noTabOpts), [
-            "    function f() {\v",
-            "        return \vthis;\v",
-            "    } \v "
-        ].join(os_1.EOL));
-        check(lines.indent(5).toString(tabOpts), [
-            "\t function f() {\v",
-            "\t\t return \vthis;\v",
-            "\t } \v "
-        ].join(os_1.EOL));
+        check(lines.indent(4).toString(noTabOpts), ["    function f() {\v", "        return \vthis;\v", "    } \v "].join(os_1.EOL));
+        check(lines.indent(5).toString(tabOpts), ["\t function f() {\v", "\t\t return \vthis;\v", "\t } \v "].join(os_1.EOL));
     });
     it("GuessTabWidth", function GuessTabWidthTest(done) {
         var lines;
-        lines = lines_1.fromString([
-            "function identity(x) {",
-            "    return x;",
-            "}"
-        ].join(os_1.EOL));
+        lines = lines_1.fromString(["function identity(x) {", "    return x;", "}"].join(os_1.EOL));
         assert_1.default.strictEqual(lines.guessTabWidth(), 4);
-        lines = lines_1.fromString([
-            "function identity(x) {",
-            "  return x;",
-            "}"
-        ].join(os_1.EOL));
+        lines = lines_1.fromString(["function identity(x) {", "  return x;", "}"].join(os_1.EOL));
         assert_1.default.strictEqual(lines.guessTabWidth(), 2);
         assert_1.default.strictEqual(lines.indent(5).guessTabWidth(), 2);
         assert_1.default.strictEqual(lines.indent(-4).guessTabWidth(), 2);
@@ -413,13 +341,17 @@ describe("lines", function () {
         assert_1.default.strictEqual(lines.length, 5);
         assert_1.default.strictEqual(lines.getLineLength(1), options.tabWidth);
         assert_1.default.strictEqual(lines.getIndentAt(1), options.tabWidth);
-        assert_1.default.strictEqual(lines.slice({
+        assert_1.default.strictEqual(lines
+            .slice({
             line: 5,
-            column: lines.getLineLength(5) - 1
-        }).toString(options), "x");
-        assert_1.default.ok(spacePattern.test(lines.slice(lines.firstPos(), {
+            column: lines.getLineLength(5) - 1,
+        })
+            .toString(options), "x");
+        assert_1.default.ok(spacePattern.test(lines
+            .slice(lines.firstPos(), {
             line: 5,
-            column: lines.getLineLength(5) - 1
-        }).toString(options)));
+            column: lines.getLineLength(5) - 1,
+        })
+            .toString(options)));
     });
 });

@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parse = void 0;
 var babel_1 = require("./babel");
 var _babel_options_1 = __importDefault(require("./_babel_options"));
 // This module is suitable for passing as options.parser when calling

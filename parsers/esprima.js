@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parse = void 0;
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process ECMAScript code with Esprima:
 //
@@ -17,7 +18,8 @@ function parse(source, options) {
         onComment: comments,
         range: util_1.getOption(options, "range", false),
         tolerant: util_1.getOption(options, "tolerant", true),
-        tokens: true
+        tokens: true,
+        jsx: util_1.getOption(options, "jsx", false)
     });
     if (!Array.isArray(ast.comments)) {
         ast.comments = comments;

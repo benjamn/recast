@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -16,12 +28,16 @@ var printer_1 = require("../lib/printer");
 var types = __importStar(require("ast-types"));
 var os_1 = require("os");
 describe("type syntax", function () {
-    var printer = new printer_1.Printer({ tabWidth: 2, quote: 'single', flowObjectCommas: false });
+    var printer = new printer_1.Printer({
+        tabWidth: 2,
+        quote: "single",
+        flowObjectCommas: false,
+    });
     var esprimaParserParseOptions = {
-        parser: require("esprima-fb")
+        parser: require("esprima-fb"),
     };
     var flowParserParseOptions = {
-        parser: require("flow-parser")
+        parser: require("flow-parser"),
     };
     function check(source, parseOptions) {
         parseOptions = parseOptions || esprimaParserParseOptions;
@@ -59,19 +75,43 @@ describe("type syntax", function () {
         check("type A = B;");
         check("type A = B.C;");
         check("type A = { optionalNumber?: number };");
-        check("type A = {" + os_1.EOL + "  ...B;" + os_1.EOL + "  optionalNumber?: number;" + os_1.EOL + "};", flowParserParseOptions);
+        check("type A = {" +
+            os_1.EOL +
+            "  ...B;" +
+            os_1.EOL +
+            "  optionalNumber?: number;" +
+            os_1.EOL +
+            "};", flowParserParseOptions);
         check("type A = {| optionalNumber?: number |};", flowParserParseOptions);
-        check("type A = {|" + os_1.EOL + "  ...B;" + os_1.EOL + "  optionalNumber?: number;" + os_1.EOL + "|};", flowParserParseOptions);
+        check("type A = {|" +
+            os_1.EOL +
+            "  ...B;" +
+            os_1.EOL +
+            "  optionalNumber?: number;" +
+            os_1.EOL +
+            "|};", flowParserParseOptions);
         // Opaque types
         check("opaque type A = B;", flowParserParseOptions);
         check("opaque type A = B.C;", flowParserParseOptions);
         check("opaque type A = { optionalNumber?: number };", flowParserParseOptions);
         check("opaque type A: X = B;", flowParserParseOptions);
         check("opaque type A: X.Y = B.C;", flowParserParseOptions);
-        check("opaque type A: { stringProperty: string } = {" + os_1.EOL + "  stringProperty: string;" + os_1.EOL + "  optionalNumber?: number;" + os_1.EOL + "};", flowParserParseOptions);
+        check("opaque type A: { stringProperty: string } = {" +
+            os_1.EOL +
+            "  stringProperty: string;" +
+            os_1.EOL +
+            "  optionalNumber?: number;" +
+            os_1.EOL +
+            "};", flowParserParseOptions);
         check("opaque type A<T>: X<T> = B<T>;", flowParserParseOptions);
         check("opaque type A<T>: X.Y<T> = B.C<T>;", flowParserParseOptions);
-        check("opaque type A<T>: { optional?: T } = {" + os_1.EOL + "  stringProperty: string;" + os_1.EOL + "  optional?: T;" + os_1.EOL + "};", flowParserParseOptions);
+        check("opaque type A<T>: { optional?: T } = {" +
+            os_1.EOL +
+            "  stringProperty: string;" +
+            os_1.EOL +
+            "  optional?: T;" +
+            os_1.EOL +
+            "};", flowParserParseOptions);
         // Generic
         check("var a: Array<Foo>;");
         check("var a: number[];");
@@ -82,7 +122,17 @@ describe("type syntax", function () {
         check("var a: {" + os_1.EOL + "  b: number;" + os_1.EOL + "  x: { y: A };" + os_1.EOL + "};");
         check("var b: { [key: string]: number };");
         check("var c: { (): number };");
-        check("var d: {" + os_1.EOL + "  [key: string]: A;" + os_1.EOL + "  [key: number]: B;" + os_1.EOL + "  (): C;" + os_1.EOL + "  a: D;" + os_1.EOL + "};");
+        check("var d: {" +
+            os_1.EOL +
+            "  [key: string]: A;" +
+            os_1.EOL +
+            "  [key: number]: B;" +
+            os_1.EOL +
+            "  (): C;" +
+            os_1.EOL +
+            "  a: D;" +
+            os_1.EOL +
+            "};");
         // Casts
         check("(1 + 1: number);");
         // Declare
@@ -92,7 +142,11 @@ describe("type syntax", function () {
         check("declare function foo(c: (e: Event) => void, b: B): void;");
         check("declare function foo(c: C, d?: Array<D>): void;");
         check("declare class C { x: string }");
-        check("declare module M {" + os_1.EOL + "  declare function foo(c: C): void;" + os_1.EOL + "}");
+        check("declare module M {" +
+            os_1.EOL +
+            "  declare function foo(c: C): void;" +
+            os_1.EOL +
+            "}");
         check("declare opaque type A;", flowParserParseOptions);
         check("declare opaque type A: X;", flowParserParseOptions);
         check("declare opaque type A: X.Y;", flowParserParseOptions);
@@ -122,10 +176,11 @@ describe("type syntax", function () {
             "  reallyLongPropertyNameOyezOyezOyezFiddlyFeeDiDumDeDoo: VeryLongTypeName<With, Generic, Type, Parameters>;",
             "  somewhatShorterButStillNotVeryShortPropertyName: string;",
             "  ...",
-            "};"
+            "};",
         ].join(os_1.EOL), flowParserParseOptions);
         // typeArguments
-        check('new A<string>();', flowParserParseOptions);
-        check('createPlugin<number>();', flowParserParseOptions);
+        check("new A<string>();", flowParserParseOptions);
+        check("createPlugin<number>();", flowParserParseOptions);
+        check("function myFunction([param1]: Params) {}", flowParserParseOptions);
     });
 });

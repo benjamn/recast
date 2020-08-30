@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -16,7 +28,7 @@ var parser_1 = require("../lib/parser");
 var printer_1 = require("../lib/printer");
 var types = __importStar(require("ast-types"));
 var os_1 = require("os");
-var printer = new printer_1.Printer;
+var printer = new printer_1.Printer();
 var n = types.namedTypes, b = types.builders, NodePath = types.NodePath;
 function parseExpression(expr) {
     var ast = esprima.parse(expr);
@@ -33,14 +45,29 @@ function check(expr) {
     types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
 }
 var operators = [
-    "==", "!=", "===", "!==",
-    "<", "<=", ">", ">=",
-    "<<", ">>", ">>>",
-    "+", "-", "*", "/", "%",
+    "==",
+    "!=",
+    "===",
+    "!==",
+    "<",
+    "<=",
+    ">",
+    ">=",
+    "<<",
+    ">>",
+    ">>>",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
     "&",
-    "|", "^", "in",
+    "|",
+    "^",
+    "in",
     "instanceof",
-    "&&", "||"
+    "&&",
+    "||",
 ];
 describe("parens", function () {
     it("Arithmetic", function () {
@@ -120,6 +147,39 @@ describe("parens", function () {
         check("a({b:c(d)}.b)");
         check("({a:b(c)}).a");
     });
+    it("ArrowFunctionExpression", function () {
+        check("(() => {})()");
+        check("test(() => {})");
+        check("(() => {}).test");
+        check("test[() => {}]");
+        check("(() => {}) + (() => {})");
+    });
+    it("AwaitExpression", function () {
+        check("async () => (await a) && (await b)");
+        check("async () => +(await a)");
+        check("async () => (await f)()");
+        check("async () => new (await C)");
+        check("async () => [...(await obj)]");
+        check("async () => (await a) ? b : c");
+        check("async () => (await a).b");
+    });
+    it("YieldExpression", function () {
+        check("function* test () { return (yield a) && (yield b) }");
+        check("function* test () { return +(yield a) }");
+        check("function* test () { return (yield f)() }");
+        check("function* test () { return new (yield C) }");
+        check("function* test () { return [...(yield obj)] }");
+        check("function* test () { return (yield a) ? b : c }");
+        check("function* test () { return (yield a).b }");
+        check("function* test () { yield yield foo }");
+    });
+    it("ArrowFunctionExpression", function () {
+        check("(() => {})()");
+        check("test(() => {})");
+        check("(() => {}).test");
+        check("test[() => {}]");
+        check("(() => {}) + (() => {})");
+    });
     it("ReprintedParens", function () {
         var code = "a(function g(){}.call(this));";
         var ast1 = parser_1.parse(code);
@@ -172,21 +232,13 @@ describe("parens", function () {
         assert_1.default.strictEqual(objReprint, objCode);
     });
     it("NegatedLoopCondition", function () {
-        var ast = parser_1.parse([
-            "for (var i = 0; i < 10; ++i) {",
-            "  console.log(i);",
-            "}"
-        ].join(os_1.EOL));
+        var ast = parser_1.parse(["for (var i = 0; i < 10; ++i) {", "  console.log(i);", "}"].join(os_1.EOL));
         var loop = ast.program.body[0];
         var test = loop.test;
         var negation = b.unaryExpression("!", test);
         assert_1.default.strictEqual(printer.print(negation).code, "!(i < 10)");
         loop.test = negation;
-        assert_1.default.strictEqual(printer.print(ast).code, [
-            "for (var i = 0; !(i < 10); ++i) {",
-            "  console.log(i);",
-            "}"
-        ].join(os_1.EOL));
+        assert_1.default.strictEqual(printer.print(ast).code, ["for (var i = 0; !(i < 10); ++i) {", "  console.log(i);", "}"].join(os_1.EOL));
     });
     it("MisleadingExistingParens", function () {
         var ast = parser_1.parse([
@@ -195,23 +247,19 @@ describe("parens", function () {
             // condition with a !.
             'if (key === "oyez") {',
             "  throw new Error(key);",
-            "}"
+            "}",
         ].join(os_1.EOL));
         var ifStmt = ast.program.body[0];
         ifStmt.test = b.unaryExpression("!", ifStmt.test);
         var binaryPath = new NodePath(ast).get("program", "body", 0, "test", "argument");
         assert_1.default.ok(binaryPath.needsParens());
-        assert_1.default.strictEqual(printer.print(ifStmt).code, [
-            'if (!(key === "oyez")) {',
-            "  throw new Error(key);",
-            "}"
-        ].join(os_1.EOL));
+        assert_1.default.strictEqual(printer.print(ifStmt).code, ['if (!(key === "oyez")) {', "  throw new Error(key);", "}"].join(os_1.EOL));
     });
     it("DiscretionaryParens", function () {
         var code = [
             "if (info.line && (i > 0 || !skipFirstLine)) {",
             "  info = copyLineInfo(info);",
-            "}"
+            "}",
         ].join(os_1.EOL);
         var ast = parser_1.parse(code);
         var rightPath = new NodePath(ast).get("program", "body", 0, "test", "right");
@@ -226,11 +274,11 @@ describe("parens", function () {
             "    b &&",
             "    c",
             "  );",
-            "}"
+            "}",
         ].join(os_1.EOL);
         var ast = parser_1.parse(code);
         var printer = new printer_1.Printer({
-            tabWidth: 2
+            tabWidth: 2,
         });
         assert_1.default.strictEqual(printer.print(ast).code, code);
     });

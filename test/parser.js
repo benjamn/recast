@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -23,7 +35,8 @@ var nodeMajorVersion = parseInt(process.versions.node, 10);
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
 describe("parser", function () {
-    ["../parsers/acorn",
+    [
+        "../parsers/acorn",
         "../parsers/babel",
         "../parsers/esprima",
         "../parsers/flow",
@@ -34,15 +47,15 @@ describe("parser", function () {
         var parser = {
             parse: function () {
                 var program = b.program([
-                    b.expressionStatement(b.identifier("surprise"))
+                    b.expressionStatement(b.identifier("surprise")),
                 ]);
                 program.comments = [];
                 return program;
-            }
+            },
         };
         function check(options) {
             var ast = parser_1.parse("ignored", options);
-            var printer = new printer_1.Printer;
+            var printer = new printer_1.Printer();
             types.namedTypes.File.assert(ast, true);
             assert_1.default.strictEqual(printer.printGenerically(ast).code, "surprise;");
         }
@@ -64,7 +77,7 @@ function runTestsForParser(parserId) {
     }
     var parser = require(parserId);
     it("[" + parserName + "] empty source", function () {
-        var printer = new printer_1.Printer;
+        var printer = new printer_1.Printer();
         function check(code) {
             var ast = parser_1.parse(code, { parser: parser });
             assert_1.default.strictEqual(printer.print(ast).code, code);
@@ -82,7 +95,7 @@ function runTestsForParser(parserId) {
         babel: "CommentLine",
         esprima: "Line",
         flow: "CommentLine",
-        typescript: "CommentLine"
+        typescript: "CommentLine",
     };
     it("[" + parserName + "] parser basics", function testParser(done) {
         var code = testParser + "";
@@ -117,21 +130,16 @@ function runTestsForParser(parserId) {
         done();
     });
     it("[" + parserName + "] LocationFixer", function () {
-        var code = [
-            "function foo() {",
-            "    a()",
-            "    b()",
-            "}"
-        ].join(os_1.EOL);
+        var code = ["function foo() {", "    a()", "    b()", "}"].join(os_1.EOL);
         var ast = parser_1.parse(code, { parser: parser });
-        var printer = new printer_1.Printer;
+        var printer = new printer_1.Printer();
         types.visit(ast, {
             visitFunctionDeclaration: function (path) {
                 if (namedTypes.BlockStatement.check(path.node.body)) {
                     path.node.body.body.reverse();
                 }
                 this.traverse(path);
-            }
+            },
         });
         var altered = code
             .replace("a()", "xxx")
@@ -160,7 +168,7 @@ function runTestsForParser(parserId) {
                     var lit = path.node;
                     checkId(lit.value, lit.loc);
                     this.traverse(path);
-                }
+                },
             });
         }
         for (var tabWidth = 1; tabWidth <= 8; ++tabWidth) {
@@ -173,7 +181,7 @@ function runTestsForParser(parserId) {
         }
     });
     it("[" + parserName + "] Only comment followed by space", function () {
-        var printer = new printer_1.Printer;
+        var printer = new printer_1.Printer();
         function check(code) {
             var ast = parser_1.parse(code, { parser: parser });
             assert_1.default.strictEqual(printer.print(ast).code, code);

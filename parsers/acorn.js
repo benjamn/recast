@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parse = void 0;
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process JavaScript code with Acorn:
 //

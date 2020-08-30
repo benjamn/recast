@@ -1,13 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert_1 = __importDefault(require("assert"));
@@ -25,7 +37,7 @@ describe("ES6 Compatability", function () {
             "var shorthandObj = {",
             "  name,",
             "  func() { return 'value'; }",
-            "};"
+            "};",
         ].join(os_1.EOL);
         var ast = parser_1.parse(code);
         n.VariableDeclaration.assert(ast.program.body[1]);
@@ -38,7 +50,7 @@ describe("ES6 Compatability", function () {
     it("correctly converts from a shorthand method to ES5 function", convertShorthandMethod);
     function respectDestructuringAssignment() {
         var printer = new printer_1.Printer({ tabWidth: 2 });
-        var code = 'var {a} = {};';
+        var code = "var {a} = {};";
         var ast = parser_1.parse(code);
         n.VariableDeclaration.assert(ast.program.body[0]);
         assert_1.default.strictEqual(printer.print(ast).code, code);
@@ -110,8 +122,7 @@ describe("import/export syntax", function () {
         function checkInvalid(source, expectedMessage) {
             try {
                 parser_1.parse(source);
-                throw new Error("Parsing should have failed: " +
-                    JSON.stringify(source));
+                throw new Error("Parsing should have failed: " + JSON.stringify(source));
             }
             catch (err) {
                 assert_1.default.strictEqual(err.message, "Line 1: " + expectedMessage);
@@ -163,12 +174,12 @@ describe("import/export syntax", function () {
     it("should pretty-print template strings with backticks", function () {
         var code = [
             'var noun = "fool";',
-            'var s = `I am a ${noun}`;',
-            'var t = tag`You said: ${s}!`;'
+            "var s = `I am a ${noun}`;",
+            "var t = tag`You said: ${s}!`;",
         ].join(os_1.EOL);
         var ast = parser_1.parse(code);
         assert_1.default.strictEqual(new printer_1.Printer({
-            tabWidth: 2
+            tabWidth: 2,
         }).printGenerically(ast).code, code);
     });
 });

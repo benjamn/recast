@@ -101,7 +101,7 @@ export interface Options extends DeprecatedOptions {
    * which results in the shorter literal) Otherwise, use double quotes.
    * @default null
    */
-  quote?: 'single' | 'double' | 'auto' | null;
+  quote?: "single" | "double" | "auto" | null;
 
   /**
    * Controls the printing of trailing commas in object literals, array
@@ -164,7 +164,7 @@ interface DeprecatedOptions {
   esprima?: any;
 }
 
-var defaults: Options = {
+const defaults: Options = {
   parser: require("../parsers/esprima"),
   tabWidth: 4,
   useTabs: false,
@@ -183,19 +183,20 @@ var defaults: Options = {
   objectCurlySpacing: true,
   arrowParensAlways: false,
   flowObjectCommas: true,
-  tokens: true
-}, hasOwn = defaults.hasOwnProperty;
+  tokens: true,
+};
+const hasOwn = defaults.hasOwnProperty;
 
-export type NormalizedOptions = Required<Omit<Options, keyof DeprecatedOptions>>;
+export type NormalizedOptions = Required<
+  Omit<Options, keyof DeprecatedOptions>
+>;
 
 // Copy options and fill in default values.
 export function normalize(opts?: Options): NormalizedOptions {
-  var options = opts || defaults;
+  const options = opts || defaults;
 
   function get(key: keyof Options) {
-    return hasOwn.call(options, key)
-      ? options[key]
-      : defaults[key];
+    return hasOwn.call(options, key) ? options[key] : defaults[key];
   }
 
   return {
@@ -217,6 +218,6 @@ export function normalize(opts?: Options): NormalizedOptions {
     objectCurlySpacing: get("objectCurlySpacing"),
     arrowParensAlways: get("arrowParensAlways"),
     flowObjectCommas: get("flowObjectCommas"),
-    tokens: !!get("tokens")
+    tokens: !!get("tokens"),
   };
-};
+}
