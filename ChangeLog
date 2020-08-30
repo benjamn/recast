@@ -1,3 +1,29 @@
+2020.08.30, v1.1.0
+
+fix:
+- fix(recast) parenthesizes around arrow function body returning object
+- Merge pull request #712 from conartist6/parens-fixes
+- Run Prettier and fix eslint errors across entire codebase.
+- Merge pull request #709 from benjamn/fix/account-for-invalid-shorthand-properties
+- fix: account for invalid shorthand properties
+- Merge pull request #699 from zxbodya/fix-precedence-for-exponentiation-operator
+- fix precedence for ** operator, to correctly parenthesize ariphmetic expressions
+- Update ast-types to the latest version 🚀 (#696)
+- Merge pull request #693 from benjamn/update-acorn
+- chore(deps): update acorn with `npm audit fix`
+- Merge pull request #688 from moroine/fix/flow-FunctionTypeParam
+- Merge pull request #615 from zxbodya/fix-ts-constructor-type
+- Merge pull request #624 from zxbodya/fix-arrow-object-typecast
+- Merge pull request #638 from jedwards1211/fix/ArrayPattern-typeAnnotation
+- fix: print typeAnnotation for ArrayPattern
+- fix TSConstructorType printing
+
+
+feature:
+- feature(js) add
+
+
+
 2019.09.28, v1.0.2
 
 fix:
