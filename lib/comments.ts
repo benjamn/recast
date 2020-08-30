@@ -13,11 +13,7 @@ const childNodesCache = new WeakMap<Node, Node[]>();
 
 // TODO Move a non-caching implementation of this function into ast-types,
 // and implement a caching wrapper function here.
-function getSortedChildNodes(
-  node: Node,
-  lines: Lines,
-  resultArray?: Node[],
-) {
+function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
   if (!node) {
     return resultArray;
   }
@@ -36,9 +32,11 @@ function getSortedChildNodes(
       let i = resultArray.length - 1;
       for (; i >= 0; --i) {
         const child = resultArray[i];
-        if (child &&
-            child.loc &&
-            comparePos(child.loc.end, node.loc.start) <= 0) {
+        if (
+          child &&
+          child.loc &&
+          comparePos(child.loc.end, node.loc.start) <= 0
+        ) {
           break;
         }
       }
@@ -62,7 +60,7 @@ function getSortedChildNodes(
   }
 
   if (!resultArray) {
-    childNodesCache.set(node, resultArray = []);
+    childNodesCache.set(node, (resultArray = []));
   }
 
   for (let i = 0, nameCount = names.length; i < nameCount; ++i) {
@@ -93,11 +91,7 @@ function decorateComment(node: Node, comment: Comment, lines: Lines) {
       comparePos(comment.loc!.end, child.loc!.end) <= 0
     ) {
       // The comment is completely contained by this child node.
-      decorateComment(
-        (comment as any).enclosingNode = child,
-        comment,
-        lines,
-      );
+      decorateComment(((comment as any).enclosingNode = child), comment, lines);
       return; // Abandon the binary search at this level.
     }
 
