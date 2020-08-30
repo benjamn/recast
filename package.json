@@ -13,10 +13,10 @@
     "parsing",
     "pretty-printing"
   ],
-  "homepage": "http://github.com/benjamn/recast",
+  "homepage": "http://github.com/coderaiser/recast",
   "repository": {
     "type": "git",
-    "url": "git://github.com/benjamn/recast.git"
+    "url": "git://github.com/coderaiser/recast.git"
   },
   "license": "MIT",
   "main": "main.js",
