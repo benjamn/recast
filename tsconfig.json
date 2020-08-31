@@ -11,6 +11,7 @@
     "noImplicitReturns": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "importHelpers": true,
     "stripInternal": true
   },
   "exclude": [
