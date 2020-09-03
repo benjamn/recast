@@ -986,10 +986,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       let lastLine : number | undefined = undefined;
       let isMultiline = false;
       const printed = path.map(function (childPath: any) {
-        const currentEndLine = childPath.stack[childPath.stack.length - 1].loc.end.line;
+        const lastPathElement = childPath.stack[childPath.stack.length - 1];
+        const currentEndLine = lastPathElement.loc != null ? lastPathElement.loc.end.line : undefined;
         if (lastLine != null && currentEndLine !== lastLine) {
           isMultiline = true;
         }
+        lastLine = currentEndLine;
         const lines = print(childPath);
         maxLen = Math.max(lines.length, maxLen);
         return lines;

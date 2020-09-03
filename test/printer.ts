@@ -1033,6 +1033,34 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  it("preserves multiline variable declarations " +
+    "when options.preserveMultilineDeclarations is true " +
+    "and the original declaration spans several lines",  () => {
+
+    const code = "var a = 1,\n    b = 2;";
+    const ast = parse(code);
+
+    const printer = new Printer({
+      preserveMultilineDeclarations: true,
+    });
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("preserves single line variable declarations " +
+    "when options.preserveMultilineDeclarations is true " +
+    "and the original declaration in on a single line",  () => {
+
+    const code = "var a = 1, b = 2;";
+    const ast = parse(code);
+
+    const printer = new Printer({
+      preserveMultilineDeclarations: true,
+    });
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("adds parenthesis around arrow function when binding", function () {
     const code = "var a = (x => y).bind(z);";
 
