@@ -153,6 +153,11 @@ export interface Options extends DeprecatedOptions {
   flowObjectCommas?: boolean;
 
   /**
+   * If true, printing multiple declarators will put them on separate lines.
+   */
+  preserveMultilineDeclarations: boolean;
+
+  /**
    * Whether to return an array of .tokens on the root AST node.
    * @default true
    */
@@ -183,6 +188,7 @@ const defaults: Options = {
   objectCurlySpacing: true,
   arrowParensAlways: false,
   flowObjectCommas: true,
+  preserveMultilineDeclarations: false,
   tokens: true,
 };
 const hasOwn = defaults.hasOwnProperty;
@@ -218,6 +224,7 @@ export function normalize(opts?: Options): NormalizedOptions {
     objectCurlySpacing: get("objectCurlySpacing"),
     arrowParensAlways: get("arrowParensAlways"),
     flowObjectCommas: get("flowObjectCommas"),
+    preserveMultilineDeclarations: get("preserveMultilineDeclarations"),
     tokens: !!get("tokens"),
   };
 }

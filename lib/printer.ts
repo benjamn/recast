@@ -983,13 +983,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(n.kind, " ");
 
       let maxLen = 0;
+      let lastLine : number | undefined = undefined;
+      let isMultiline = false;
       const printed = path.map(function (childPath: any) {
+        const currentEndLine = childPath.stack[childPath.stack.length - 1].loc.end.line;
+        if (lastLine != null && currentEndLine !== lastLine) {
+          isMultiline = true;
+        }
         const lines = print(childPath);
         maxLen = Math.max(lines.length, maxLen);
         return lines;
       }, "declarations");
 
-      if (maxLen === 1) {
+      if (maxLen === 1 && !(options.preserveMultilineDeclarations && isMultiline)) {
         parts.push(fromString(", ").join(printed));
       } else if (printed.length > 1) {
         parts.push(
