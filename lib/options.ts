@@ -155,7 +155,7 @@ export interface Options extends DeprecatedOptions {
   /**
    * If true, printing multiple declarators will put them on separate lines.
    */
-  preserveMultilineDeclarations: boolean;
+  preserveMultilineDeclarations?: boolean;
 
   /**
    * Whether to return an array of .tokens on the root AST node.
