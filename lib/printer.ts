@@ -309,7 +309,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "ChainExpression":
-      return concat([path.call(print, "expression"), ";"]);
+      return path.call(print, "expression");
     
     case "ChainElement": {
       parts.push(path.call(print, "object"));
