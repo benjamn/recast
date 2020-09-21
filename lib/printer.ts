@@ -308,6 +308,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
+    case "ChainExpression":
+      return concat([path.call(print, "expression"), ";"]);
+    
+    case "ChainElement": {
+      parts.push(path.call(print, "object"));
+
+      const property = path.call(print, "property");
+      const optional = n.optional;
+
+      parts.push(optional ? "?." : ".", property);
+
+      return concat(parts);
+    }
+
     case "MetaProperty":
       return concat([
         path.call(print, "meta"),
