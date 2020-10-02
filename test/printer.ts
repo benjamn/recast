@@ -1667,6 +1667,31 @@ describe("printer", function () {
     assert.strictEqual(recast.print(nonOptionalNode).code, "foo.bar");
   });
 
+  it("prints chained expression elements", function () {
+    const node = b.chainExpression(
+      b.memberExpression(
+        b.identifier("foo"),
+        b.identifier("bar"),
+        false
+      ),
+    )
+
+    assert.strictEqual(recast.print(node).code, "foo.bar");
+  });
+
+  it("prints optional ChainExpressions", function () {
+    const node = b.chainExpression(
+      b.optionalMemberExpression(
+        b.identifier("foo"),
+        b.identifier("bar"),
+        false,
+        true
+      ),
+    )
+
+    assert.strictEqual(recast.print(node).code, "foo?.bar");
+  });
+
   it("prints numbers in bases other than 10 without converting them", function () {
     const code = [
       "let decimal = 6;",
