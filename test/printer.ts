@@ -1692,6 +1692,36 @@ describe("printer", function () {
     assert.strictEqual(recast.print(node).code, "foo?.bar");
   });
 
+  it("reprints various optional member/call expressions", function () {
+    const parser = require("../parsers/babel");
+
+    function check(code: string) {
+      const ast = recast.parse(code, { parser });
+      const exprStmt = ast.program.body[0];
+      n.ExpressionStatement.assert(exprStmt);
+      const expr = exprStmt.expression;
+      const output = recast.prettyPrint(expr, { tabWidth: 2 }).code;
+      assert.strictEqual(code, output);
+    }
+
+    check("a.b");
+    check("a?.b");
+    check("a?.b.c");
+    check("a.b?.c");
+    check("a?.b?.c");
+    check("a?.(b)");
+    check("a?.b(c)");
+    check("a?.b?.(c)");
+    check("a.b?.(c)");
+    check("a.b?.(c)?.d");
+    check("a.b?.(c)?.d(e)");
+    check("a.b?.(c)?.d?.(e)");
+    check("a?.b?.(c).d?.(e)");
+    check("a?.b?.(c)?.d?.(e)");
+    check("(a?.b)?.(c)?.d?.(e)");
+    check("(a?.b?.(c)?.d)?.(e)");
+  });
+
   it("prints numbers in bases other than 10 without converting them", function () {
     const code = [
       "let decimal = 6;",

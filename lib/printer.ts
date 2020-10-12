@@ -297,7 +297,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(path.call(print, "object"));
 
       const property = path.call(print, "property");
-      const optional = n.type === "OptionalMemberExpression" && n.optional;
+
+      // Like n.optional, except with defaults applied, so optional
+      // defaults to true for OptionalMemberExpression nodes.
+      const optional = types.getFieldValue(n, "optional");
 
       if (n.computed) {
         parts.push(optional ? "?.[" : "[", property, "]");
@@ -310,17 +313,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "ChainExpression":
       return path.call(print, "expression");
-    
-    case "ChainElement": {
-      parts.push(path.call(print, "object"));
-
-      const property = path.call(print, "property");
-      const optional = n.optional;
-
-      parts.push(optional ? "?." : ".", property);
-
-      return concat(parts);
-    }
 
     case "MetaProperty":
       return concat([
@@ -677,10 +669,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(path.call(print, "typeArguments"));
       }
 
-      if (
-        n.type === "OptionalCallExpression" &&
-        n.callee.type !== "OptionalMemberExpression"
-      ) {
+      // Like n.optional, but defaults to true for OptionalCallExpression
+      // nodes that are missing an n.optional property (unusual),
+      // according to the OptionalCallExpression definition in ast-types.
+      if (types.getFieldValue(n, "optional")) {
         parts.push("?.");
       }
 
@@ -1541,6 +1533,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSHasOptionalTypeParameterInstantiation":
     case "TSHasOptionalTypeParameters":
     case "TSHasOptionalTypeAnnotation":
+    case "ChainElement": // Supertype of MemberExpression and CallExpression
       throw new Error("unprintable type: " + JSON.stringify(n.type));
 
     case "CommentBlock": // Babel block comment.
