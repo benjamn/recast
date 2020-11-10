@@ -606,7 +606,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" from ");
       }
 
-      parts.push(path.call(print, "source"), ";");
+      parts.push(path.call(print, "source"));
+
+      if (n.assertions && n.assertions.length > 0) {
+          const [assert] = n.assertions;
+          parts.push(' assert', ' {', assert.key.name, ': ', `'${assert.value.value}'`, '}');
+      }
+      
+      parts.push(';');
 
       return concat(parts);
     }

@@ -191,6 +191,29 @@ describe("Babel", function () {
     );
   });
 
+  it("ImportAttribute", function () {
+    const code = [
+      `import foo from 'foo';`,
+    ].join(eol);
+  
+    const ast = recast.parse(code, parseOptions);
+    ast.program.body[0].assertions = [{
+        type: 'ImportAttribute',
+        key: {
+            type: 'Identifier',
+            name: 'type',
+        },
+        value: {
+            type: 'StringLiteral',
+            value: 'json',
+        }
+    }];
+    
+    const expected = `import foo from 'foo' assert {type: 'json'};`;
+
+    assert.strictEqual(recast.print(ast).code, expected);
+  });
+
   it("should not disappear when an import is added and `export` is used inline", function () {
     const code = [
       'import foo from "foo";',
