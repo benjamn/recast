@@ -605,8 +605,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(path.call(print, "source"));
 
       if (n.assertions && n.assertions.length > 0) {
-          const [assert] = n.assertions;
-          parts.push(' assert', ' {', assert.key.name, ': ', `'${assert.value.value}'`, '}');
+          parts.push(' assert', ' {');
+          const assertList = [];
+          
+          for (const assert of n.assertions) {
+              assertList.push(`${assert.key.name}: '${assert.value.value}'`);
+          }
+          
+          parts.push(assertList.join(', '), '}');
       }
       
       parts.push(';');
