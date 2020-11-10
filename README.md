@@ -8,6 +8,7 @@
 # Fork contains unmerged fixes
 
 - https://github.com/benjamn/recast/pull/744
+- https://github.com/benjamn/recast/pull/804
 
 Installation
 ---
