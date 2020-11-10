@@ -213,6 +213,49 @@ describe("Babel", function () {
 
     assert.strictEqual(recast.print(ast).code, expected);
   });
+  
+  it("ImportAttribute: a couple", function () {
+    const code = [
+      `import foo from 'foo';`,
+    ].join(eol);
+  
+    const ast = recast.parse(code, parseOptions);
+    ast.program.body[0].assertions = [{
+        type: 'ImportAttribute',
+        key: {
+            type: 'Identifier',
+            name: 'type',
+        },
+        value: {
+            type: 'StringLiteral',
+            value: 'json',
+        }
+    }, {
+        type: 'ImportAttribute',
+        key: {
+            type: 'Identifier',
+            name: 'foo',
+        },
+        value: {
+            type: 'StringLiteral',
+            value: 'bar',
+        }
+    }];
+    
+    const expected = `import foo from 'foo' assert {type: 'json', foo: 'bar'};`;
+
+    assert.strictEqual(recast.print(ast).code, expected);
+  });
+  
+  it("ImportAttribute: parse", function () {
+    const code = [
+      `import foo from 'foo' assert {type: 'json'};`,
+    ].join(eol);
+  
+    const ast = recast.parse(code, parseOptions);
+
+    assert.strictEqual(recast.print(ast).code, code);
+  });
 
   it("should not disappear when an import is added and `export` is used inline", function () {
     const code = [
