@@ -193,7 +193,7 @@ describe("Babel", function () {
 
   it("ImportAttribute", function () {
     const code = [
-      `import foo from 'foo';`,
+      `import foo from "foo";`,
     ].join(eol);
   
     const ast = recast.parse(code, parseOptions);
@@ -209,14 +209,14 @@ describe("Babel", function () {
         }
     }];
     
-    const expected = `import foo from 'foo' assert {type: 'json'};`;
+    const expected = `import foo from "foo" assert {type: "json"};`;
 
     assert.strictEqual(recast.print(ast).code, expected);
   });
   
   it("ImportAttribute: a couple", function () {
     const code = [
-      `import foo from 'foo';`,
+      `import foo from "foo";`,
     ].join(eol);
   
     const ast = recast.parse(code, parseOptions);
@@ -242,14 +242,14 @@ describe("Babel", function () {
         }
     }];
     
-    const expected = `import foo from 'foo' assert {type: 'json', foo: 'bar'};`;
+    const expected = `import foo from "foo" assert {type: "json", foo: "bar"};`;
 
     assert.strictEqual(recast.print(ast).code, expected);
   });
   
   it("ImportAttribute: parse", function () {
     const code = [
-      `import foo from 'foo' assert {type: 'json'};`,
+      `import foo from "foo" assert {type: "json"};`,
     ].join(eol);
   
     const ast = recast.parse(code, parseOptions);
