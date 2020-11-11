@@ -1,3 +1,13 @@
+2020.11.11, v1.2.1
+
+feature:
+- feature(printer) improve imports attributes support
+- feature: printer: assertions: using print
+- feature: printer: add support of multiple ImportAttributes
+- feature: add import assertions support
+
+
+
 2020.08.31, v1.1.2
 
 feature:
