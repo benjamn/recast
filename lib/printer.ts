@@ -2215,8 +2215,15 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSNonNullExpression":
       return concat([path.call(print, "expression"), "!"]);
 
-    case "TSTypeAnnotation":
-      return concat([": ", path.call(print, "typeAnnotation")]);
+    case "TSTypeAnnotation": {
+      const isFunctionType = namedTypes.TSFunctionType.check(
+        path.getParentNode(0),
+      );
+
+      let prfx = isFunctionType ? "=> " : ": ";
+
+      return concat([prfx, path.call(print, "typeAnnotation")]);
+    }
 
     case "TSIndexSignature":
       return concat([
