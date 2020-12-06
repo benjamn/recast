@@ -2220,9 +2220,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.getParentNode(0),
       );
 
-      let prfx = isFunctionType ? "=> " : ": ";
+      const prefix = isFunctionType ? "=> " : ": ";
 
-      return concat([prfx, path.call(print, "typeAnnotation")]);
+      return concat([prefix, path.call(print, "typeAnnotation")]);
     }
 
     case "TSIndexSignature":

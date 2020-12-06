@@ -2079,6 +2079,45 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  it("prints an typscript type annotation correctly", function () {
+    const code = [
+      "type MessageGetter = (params: Params) => string;",
+      "",
+      "type MessageStruct = {",
+      "    text: string",
+      "};",
+    ].join(eol);
+
+    const ast = b.program([
+      b.tsTypeAliasDeclaration(
+        b.identifier("MessageGetter"),
+        b.tsFunctionType.from({
+          parameters: [
+            b.identifier.from({
+              name: "params",
+              typeAnnotation: b.tsTypeAnnotation(
+                b.tsTypeReference(b.identifier("Params")),
+              ),
+            }),
+          ],
+          typeAnnotation: b.tsTypeAnnotation(b.tsStringKeyword()),
+        }),
+      ),
+      b.tsTypeAliasDeclaration(
+        b.identifier("MessageStruct"),
+        b.tsTypeLiteral([
+          b.tsPropertySignature.from({
+            key: b.identifier("text"),
+            typeAnnotation: b.tsTypeAnnotation(b.tsStringKeyword()),
+          }),
+        ]),
+      ),
+    ]);
+
+    const pretty = new Printer().printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("object destructuring for function parameters", function () {
     const code = [
       "function myFunction(",
