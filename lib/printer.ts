@@ -143,7 +143,7 @@ const Printer = (function Printer(this: PrinterType, config?: any) {
     return new PrintResult(
       lines.toString(config),
       util.composeSourceMaps(
-        config.inputSourceMap,
+        config.inputSourceMap || ast.inputSourceMap,
         lines.getSourceMap(config.sourceMapName, config.sourceRoot),
       ),
     );
