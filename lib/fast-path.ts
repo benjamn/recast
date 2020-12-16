@@ -347,10 +347,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     return false;
   }
 
-  if (
-    parent.type === "ParenthesizedExpression" ||
-    (node.extra && node.extra.parenthesized)
-  ) {
+  if (parent.type === "ParenthesizedExpression") {
     return false;
   }
 
