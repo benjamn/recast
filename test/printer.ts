@@ -1135,15 +1135,23 @@ describe("printer", function () {
     const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
   });
-  
+
   it("adds parenthesis around arrow functions body when returning object expression using babel parser", function () {
-    const expected = "() => ({a: 'b'});";
-    const source = "(a) => ({a: 'b'});";
+    const expected = [
+      "() => ({",
+      "  a: 'b'",
+      "});",
+    ].join(eol);
+    const source = [
+      "(a) => ({",
+      "  a: 'b'",
+      "});"
+    ].join(eol);
     const ast = recast.parse(source, {
         parser: require('@babel/parser'),
     });
     const traverse = require('@babel/traverse').default;
-    
+
     traverse(ast, {
         Function(path: any) {
             path.get('params.0').remove();
