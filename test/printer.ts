@@ -1136,6 +1136,33 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  it("adds parenthesis around arrow functions body when returning object expression using babel parser", function () {
+    const expected = [
+      "() => ({",
+      "  a: 'b'",
+      "});",
+    ].join(eol);
+    const source = [
+      "(a) => ({",
+      "  a: 'b'",
+      "});"
+    ].join(eol);
+    const ast = recast.parse(source, {
+        parser: require('@babel/parser'),
+    });
+    const traverse = require('@babel/traverse').default;
+
+    traverse(ast, {
+        Function(path: any) {
+            path.get('params.0').remove();
+        }
+    });
+
+    const printer = new Printer();
+    const result = printer.print(ast).code;
+    assert.strictEqual(result, expected);
+  });
+
   it("prints class property initializers with type annotations correctly", function () {
     const code = ["class A {", "  foo = (a: b): void => {};", "}"].join(eol);
 
