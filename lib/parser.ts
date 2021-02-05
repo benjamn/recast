@@ -12,7 +12,8 @@ import { Options } from "./options";
 export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
 
-  const lines = fromString(source, options);
+  const map = options.inputSourceMap ? ({source, inputSourceMap: options.inputSourceMap}) : util.extractInlineSourceMaps(source);
+  const lines = fromString(map.source, options);
 
   const sourceWithoutTabs = lines.toString({
     tabWidth: options.tabWidth,
@@ -120,7 +121,17 @@ export function parse(source: string, options?: Partial<Options>) {
 
   // Return a copy of the original AST so that any changes made may be
   // compared to the original.
-  return new TreeCopier(lines, tokens).copy(file);
+  const copy = new TreeCopier(lines, tokens).copy(file);
+
+  // Attach inline sourcemap metadata when possible
+  Object.defineProperty(copy, "inputSourceMap", {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: map.inputSourceMap
+  });
+
+  return copy;
 }
 
 interface TreeCopierType {
