@@ -3,11 +3,10 @@ import * as types from "ast-types";
 const b = types.builders;
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
-import { normalize as normalizeOptions } from "./options";
+import { normalize as normalizeOptions, Options } from "./options";
 import { fromString } from "./lines";
 import { attach as attachComments } from "./comments";
 import * as util from "./util";
-import { Options } from "./options";
 
 export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
@@ -47,11 +46,11 @@ export function parse(source: string, options?: Partial<Options>) {
   delete ast.tokens;
 
   // Make sure every token has a token.value string.
-  tokens.forEach(function (token) {
+  for (const token of tokens) {
     if (typeof token.value !== "string") {
       token.value = lines.sliceString(token.loc.start, token.loc.end);
     }
-  });
+  }
 
   if (Array.isArray(ast.comments)) {
     comments = ast.comments;
@@ -186,7 +185,7 @@ TCp.copy = function (node) {
 
   this.seen.set(node, copy);
 
-  const loc = node.loc;
+  const {loc} = node;
   const oldIndent = this.indent;
   let newIndent = oldIndent;
 
