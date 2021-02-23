@@ -2398,12 +2398,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString(";\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(path.map(print, "body"));
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
-
-      return concat(["{\n", lines.indent(options.tabWidth), ";", "\n}"]);
+      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
     }
 
     case "TSImportType":
