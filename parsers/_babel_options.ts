@@ -33,6 +33,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "functionBind",
       "functionSent",
       "importMeta",
+      "importAssertions",
       "nullishCoalescingOperator",
       "numericSeparator",
       "objectRestSpread",

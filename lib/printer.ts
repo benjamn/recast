@@ -602,7 +602,23 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" from ");
       }
 
-      parts.push(path.call(print, "source"), ";");
+      parts.push(path.call(print, "source"));
+
+      if (n.assertions && n.assertions.length > 0) {
+          parts.push(' assert', ' {');
+          const assertList: any[] = [];
+
+          path.each((assertPath: any) => {
+            const key = assertPath.call(print, "key");
+            const value = assertPath.call(print, "value");
+
+            assertList.push(`${key}: ${value}`);
+          }, "assertions");
+
+          parts.push(assertList.join(', '), '}');
+      }
+
+      parts.push(';');
 
       return concat(parts);
     }
