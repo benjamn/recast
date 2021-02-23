@@ -336,7 +336,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check("(function () {} as void)");
   });
 
-  it("IntefaceBody: duplicate semicolon", function () {
+  it("InterfaceBody: duplicate semicolon", function () {
     const code = [
         "interface Hello {",
         "  'hello': any;",
@@ -358,7 +358,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     );
   });
   
-  it("IntefaceBody: duplicate semicolon: a lot properties", function () {
+  it("InterfaceBody: duplicate semicolon: a lot of properties", function () {
     const code = [
       "interface LabelledContainer<T> {",
       "  label: string;",
