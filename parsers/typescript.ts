@@ -12,4 +12,4 @@ export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
   babelOptions.plugins.push("typescript");
   return parser.parse(source, babelOptions);
-};
+}

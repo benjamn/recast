@@ -27,7 +27,7 @@
     "test": "npm run lint && npm run build && npm run mocha",
     "build": "npm run clean && tsc",
     "lint": "eslint --ext .ts .",
-    "format": "prettier --write '{lib,test}/**.ts' '*rc.js'",
+    "format": "prettier --write .",
     "clean": "ts-emit-clean",
     "prepack": "npm run build",
     "postpack": "npm run clean"
@@ -62,7 +62,7 @@
     "glob": "7.1.6",
     "lint-staged": "^10.2.6",
     "mocha": "8.2.1",
-    "prettier": "^2.0.5",
+    "prettier": "2.2.1",
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
     "typescript": "^3.9.7"

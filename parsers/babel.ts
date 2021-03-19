@@ -5,13 +5,13 @@ type BabelParser = { parse: typeof babelParse };
 
 // Prefer the new @babel/parser package, but fall back to babylon if
 // that's what's available.
-export const parser = function (): BabelParser {
+export const parser = (function (): BabelParser {
   try {
     return require("@babel/parser");
   } catch (e) {
     return require("babylon");
   }
-}();
+})();
 
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process JavaScript code with Babel:
@@ -24,4 +24,4 @@ export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
   babelOptions.plugins.push("jsx", "flow");
   return parser.parse(source, babelOptions);
-};
+}

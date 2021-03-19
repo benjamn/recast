@@ -21,13 +21,13 @@ export function parse(source: string, options?: any) {
     onToken: tokens,
   });
 
-  if (! ast.comments) {
+  if (!ast.comments) {
     ast.comments = comments;
   }
 
-  if (! ast.tokens) {
+  if (!ast.tokens) {
     ast.tokens = tokens;
   }
 
   return ast;
-};
+}

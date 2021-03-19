@@ -19,7 +19,7 @@ export function parse(source: string, options?: any) {
     range: getOption(options, "range", false),
     tolerant: getOption(options, "tolerant", true),
     tokens: true,
-    jsx: getOption(options, "jsx", false)
+    jsx: getOption(options, "jsx", false),
   });
 
   if (!Array.isArray(ast.comments)) {
@@ -27,4 +27,4 @@ export function parse(source: string, options?: any) {
   }
 
   return ast;
-};
+}
