@@ -23,7 +23,7 @@ interface PatcherConstructor {
   new (lines: any): PatcherType;
 }
 
-const Patcher = (function Patcher(this: PatcherType, lines: any) {
+const Patcher = function Patcher(this: PatcherType, lines: any) {
   assert.ok(this instanceof Patcher);
   assert.ok(lines instanceof linesModule.Lines);
 
@@ -71,7 +71,7 @@ const Patcher = (function Patcher(this: PatcherType, lines: any) {
 
     return linesModule.concat(toConcat);
   };
-} as any) as PatcherConstructor;
+} as any as PatcherConstructor;
 export { Patcher };
 
 const Pp: PatcherType = Patcher.prototype;
