@@ -6,7 +6,9 @@ export type Overrides = Partial<{
   strictMode: ParserOptions["strictMode"];
 }>;
 
-export default function getBabelOptions(options?: Overrides): ParserOptions & { plugins: ParserPlugin[] } {
+export default function getBabelOptions(
+  options?: Overrides,
+): ParserOptions & { plugins: ParserPlugin[] } {
   // The goal here is to tolerate as much syntax as possible, since Recast
   // is not in the business of forbidding anything. If you want your
   // parser to be more restrictive for some reason, you can always pass
@@ -28,7 +30,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "doExpressions",
       "dynamicImport",
       "exportDefaultFrom",
-      "exportExtensions" as any as ParserPlugin,
+      ("exportExtensions" as any) as ParserPlugin,
       "exportNamespaceFrom",
       "functionBind",
       "functionSent",
@@ -38,8 +40,8 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      ["pipelineOperator", { proposal: "minimal" }] as any as ParserPlugin,
+      (["pipelineOperator", { proposal: "minimal" }] as any) as ParserPlugin,
       "throwExpressions",
-    ]
+    ],
   };
-};
+}

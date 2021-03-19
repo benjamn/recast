@@ -1669,12 +1669,8 @@ describe("printer", function () {
 
   it("prints chained expression elements", function () {
     const node = b.chainExpression(
-      b.memberExpression(
-        b.identifier("foo"),
-        b.identifier("bar"),
-        false
-      ),
-    )
+      b.memberExpression(b.identifier("foo"), b.identifier("bar"), false),
+    );
 
     assert.strictEqual(recast.print(node).code, "foo.bar");
   });
@@ -1685,9 +1681,9 @@ describe("printer", function () {
         b.identifier("foo"),
         b.identifier("bar"),
         false,
-        true
+        true,
       ),
-    )
+    );
 
     assert.strictEqual(recast.print(node).code, "foo?.bar");
   });
