@@ -156,7 +156,7 @@ const tsAst = recast.parse(source, {
 });
 ```
 
-**Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install babylon@next` to use the `typescript`, `flow`, or `babylon` parsers, or `npm install acorn` to use the `acorn` parser. Only Esprima is installed by default when Recast is installed.
+**Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install @babel/parser` to use the `typescript`, `flow`, or `babel` parsers, or `npm install acorn` to use the `acorn` parser. Only Esprima is installed by default when Recast is installed.
 
 Source maps
 ---
