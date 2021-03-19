@@ -10,7 +10,6 @@ export {
    * arbitrary modification and reprinting.
    */
   parse,
-
   /**
    * Convenient shorthand for the ast-types package.
    */
@@ -68,7 +67,7 @@ export interface RunOptions extends Options {
 }
 
 function runFile(path: any, transformer: Transformer, options?: RunOptions) {
-  fs.readFile(path, "utf-8", function(err, code) {
+  fs.readFile(path, "utf-8", function (err, code) {
     if (err) {
       console.error(err);
       return;
@@ -82,9 +81,13 @@ function defaultWriteback(output: string) {
   process.stdout.write(output);
 }
 
-function runString(code: string, transformer: Transformer, options?: RunOptions) {
-  const writeback = options && options.writeback || defaultWriteback;
-  transformer(parse(code, options), function(node: any) {
+function runString(
+  code: string,
+  transformer: Transformer,
+  options?: RunOptions,
+) {
+  const writeback = (options && options.writeback) || defaultWriteback;
+  transformer(parse(code, options), function (node: any) {
     writeback(print(node, options).code);
   });
 }

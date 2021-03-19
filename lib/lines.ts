@@ -555,12 +555,8 @@ export class Lines {
     end: Pos = this.lastPos(),
     options?: Options,
   ) {
-    const {
-      tabWidth,
-      useTabs,
-      reuseWhitespace,
-      lineTerminator,
-    } = normalizeOptions(options);
+    const { tabWidth, useTabs, reuseWhitespace, lineTerminator } =
+      normalizeOptions(options);
 
     const parts = [];
 
@@ -750,7 +746,8 @@ export function countSpaces(spaces: any, tabWidth?: number) {
 const leadingSpaceExp = /^\s*/;
 
 // As specified here: http://www.ecma-international.org/ecma-262/6.0/#sec-line-terminators
-const lineTerminatorSeqExp = /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
+const lineTerminatorSeqExp =
+  /\u000D\u000A|\u000D(?!\u000A)|\u000A|\u2028|\u2029/;
 
 /**
  * @param {Object} options - Options object that configures printing.

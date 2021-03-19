@@ -177,13 +177,15 @@ function runTestsForParser(parserId: any) {
       },
     };
 
-    const info = ({
-      acorn: esprimaInfo,
-      babel: babelInfo,
-      esprima: esprimaInfo,
-      flow: babelInfo,
-      typescript: babelInfo,
-    } as any)[parserName];
+    const info = (
+      {
+        acorn: esprimaInfo,
+        babel: babelInfo,
+        esprima: esprimaInfo,
+        flow: babelInfo,
+        typescript: babelInfo,
+      } as any
+    )[parserName];
 
     const props = assign.right.properties;
     info.Property.arrayOf().assert(props);

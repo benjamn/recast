@@ -50,10 +50,10 @@ interface FastPathConstructor {
   from(obj: any): any;
 }
 
-const FastPath = (function FastPath(this: FastPathType, value: any) {
+const FastPath = function FastPath(this: FastPathType, value: any) {
   assert.ok(this instanceof FastPath);
   this.stack = [value];
-} as any) as FastPathConstructor;
+} as any as FastPathConstructor;
 
 const FPp: FastPathType = FastPath.prototype;
 

@@ -338,26 +338,22 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
   it("InterfaceBody: duplicate semicolon", function () {
     const code = [
-        "interface Hello {",
-        "  'hello': any;",
-        "  'hello': string;",
-        "}",
+      "interface Hello {",
+      "  'hello': any;",
+      "  'hello': string;",
+      "}",
     ].join(eol);
-    
+
     const ast = recast.parse(code, { parser });
-    
+
     ast.program.body[0].body.body.pop();
 
     assert.strictEqual(
       recast.print(ast).code,
-      [
-      "interface Hello {",
-      "  'hello': any;",
-      "}",
-      ].join(eol),
+      ["interface Hello {", "  'hello': any;", "}"].join(eol),
     );
   });
-  
+
   it("InterfaceBody: duplicate semicolon: a lot of properties", function () {
     const code = [
       "interface LabelledContainer<T> {",
@@ -374,9 +370,9 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "  a(c: (this: void, e: E) => void): void;",
       "}",
     ].join(eol);
-    
+
     const ast = recast.parse(code, { parser });
-    
+
     ast.program.body[0].body.body.shift();
 
     assert.strictEqual(
