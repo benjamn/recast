@@ -8,6 +8,7 @@ const isNumber = types.builtInTypes.number;
 
 const PRECEDENCE: any = {};
 [
+  ["??"],
   ["||"],
   ["&&"],
   ["|"],
