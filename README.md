@@ -10,6 +10,7 @@
 - https://github.com/benjamn/recast/pull/744
 - https://github.com/benjamn/recast/pull/804
 - https://github.com/benjamn/recast/pull/867
+- https://github.com/benjamn/recast/pull/923
 
 Installation
 ---

@@ -502,4 +502,16 @@ describe("Babel", function () {
       ["class A {", "  declare public readonly x;", "}"].join(eol),
     );
   });
+  
+  it("should keep braces in !(a && b)", function () {
+    const code = '(options || !options.bidirectional) ? false : true;';
+    const ast = recast.parse(code, parseOptions);
+    
+    ast.program.body[0].expression = b.unaryExpression('!', ast.program.body[0].expression.test);
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      '!(options || !options.bidirectional);',
+    );
+  });
 });
