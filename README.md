@@ -14,47 +14,39 @@
 
 Installation
 ---
-
-From NPM:
-
-    npm install @putout/recast
-    
-From GitHub:
-
-    cd path/to/node_modules
-    git clone git://github.com/benjamn/recast.git
-    cd recast
-    npm install .
+```
+npm install @putout/recast
+```
 
 Import style
 ---
 
 Recast is designed to be imported using **named** imports:
 ```js
-import { parse, print } from "recast";
+import { parse, print } from "@putout/recast";
 console.log(print(parse(source)).code);
 
-import * as recast from "recast";
+import * as recast from "@putout/recast";
 console.log(recast.print(recast.parse(source)).code);
 ```
 
 If you're using CommonJS:
 ```js
-const { parse, print } = require("recast");
+const { parse, print } = require("@putout/recast");
 console.log(print(parse(source)).code);
 
-const recast = require("recast");
+const recast = require("@putout/recast");
 console.log(recast.print(recast.parse(source)).code);
 ```
 
 Usage
 ---
 
-Recast exposes two essential interfaces, one for parsing JavaScript code (`require("recast").parse`) and the other for reprinting modified syntax trees (`require("recast").print`).
+Recast exposes two essential interfaces, one for parsing JavaScript code (`require("@putout/recast").parse`) and the other for reprinting modified syntax trees (`require("recast").print`).
 
 Here's a simple but non-trivial example of how you might use `.parse` and `.print`:
 ```js
-import * as recast from "recast";
+import * as recast from "@putout/recast";
 
 // Let's turn this function declaration into a variable declaration.
 const code = [
