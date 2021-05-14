@@ -10,6 +10,6 @@ import getBabelOptions, { Overrides } from "./_babel_options";
 //
 export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
-  babelOptions.plugins.push("typescript");
+  babelOptions.plugins.push("typescript", "jsx");
   return parser.parse(source, babelOptions);
 };
