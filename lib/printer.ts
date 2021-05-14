@@ -943,13 +943,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       // Literal identifying the imported-from module.
       return fromString(nodeStr(n.value, options), options);
 
-    case "UnaryExpression":
+    case "UnaryExpression": {
       parts.push(n.operator);
+      const {argument} = path.getValue();
+      const needsParens = argument.type === 'LogicalExpression';
+      const parenLeft = needsParens ? '(' : '';
+      const parenRight = needsParens ? ')' : '';
       if (/[a-z]$/.test(n.operator)) parts.push(" ");
-      parts.push(path.call(print, "argument"));
+      parts.push(parenLeft, path.call(print, "argument"), parenRight);
       return concat(parts);
 
-    case "UpdateExpression":
+    } case "UpdateExpression":
       parts.push(path.call(print, "argument"), n.operator);
 
       if (n.prefix) parts.reverse();
