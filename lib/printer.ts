@@ -952,8 +952,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       if (/[a-z]$/.test(n.operator)) parts.push(" ");
       parts.push(parenLeft, path.call(print, "argument"), parenRight);
       return concat(parts);
+    }
 
-    } case "UpdateExpression":
+    case "UpdateExpression":
       parts.push(path.call(print, "argument"), n.operator);
 
       if (n.prefix) parts.reverse();
