@@ -216,23 +216,23 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "interface LabelledContainer<T> {",
-      "  label: string;",
-      "  content: T;",
-      "  option?: boolean;",
-      "  readonly x: number;",
-      "  [index: number]: string;",
-      "  [propName: string]: any;",
-      "  readonly [index: number]: string;",
-      "  (source: string, subString: string): boolean;",
-      "  (start: number): string;",
-      "  reset(): void;",
-      "  a(c: (this: void, e: E) => void): void;",
+      "  label: string",
+      "  content: T",
+      "  option?: boolean",
+      "  readonly x: number",
+      "  [index: number]: string",
+      "  [propName: string]: any",
+      "  readonly [index: number]: string",
+      "  (source: string, subString: string): boolean",
+      "  (start: number): string",
+      "  reset(): void",
+      "  a(c: (this: void, e: E) => void): void",
       "}",
     ]);
 
     check([
       "interface Square<T, U> extends Shape<T, U>, Visible<T, U> {",
-      "  sideLength: number;",
+      "  sideLength: number",
       "}",
     ]);
 
@@ -260,17 +260,17 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "}",
     ]);
 
-    check(["export interface S {", "  i(s: string): boolean;", "}"]);
+    check(["export interface S {", "  i(s: string): boolean", "}"]);
 
     check([
       "namespace Validation {",
       "  export interface S {",
-      "    i(j: string): boolean;",
+      "    i(j: string): boolean",
       "  }",
       "}",
     ]);
 
-    check(["export interface S {", "  i(j: string): boolean;", "}"]);
+    check(["export interface S {", "  i(j: string): boolean", "}"]);
 
     check(["declare namespace D3 {", "  export const f: number = 2;", "}"]);
 
@@ -337,6 +337,68 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check("(() => {}) as void");
     check("(function () {} as void)");
+  });
+
+  it("IntefaceBody: duplicate semicolon", function () {
+    const code = [
+        "interface Hello {",
+        "  'hello': any;",
+        "  'hello': string;",
+        "}",
+    ].join(eol);
+    
+    const ast = recast.parse(code, { parser });
+    
+    ast.program.body[0].body.body.pop();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+      "interface Hello {",
+      "  'hello': any;",
+      "}",
+      ].join(eol),
+    );
+  });
+  
+  it("IntefaceBody: duplicate semicolon: a lot properties", function () {
+    const code = [
+      "interface LabelledContainer<T> {",
+      "  label: string;",
+      "  content: T;",
+      "  option?: boolean;",
+      "  readonly x: number;",
+      "  [index: number]: string;",
+      "  [propName: string]: any;",
+      "  readonly [index: number]: string;",
+      "  (source: string, subString: string): boolean;",
+      "  (start: number): string;",
+      "  reset(): void;",
+      "  a(c: (this: void, e: E) => void): void;",
+      "}",
+    ].join(eol);
+    
+    const ast = recast.parse(code, { parser });
+    
+    ast.program.body[0].body.body.shift();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        "interface LabelledContainer<T> {",
+        "  content: T;",
+        "  option?: boolean;",
+        "  readonly x: number;",
+        "  [index: number]: string;",
+        "  [propName: string]: any;",
+        "  readonly [index: number]: string;",
+        "  (source: string, subString: string): boolean;",
+        "  (start: number): string;",
+        "  reset(): void;",
+        "  a(c: (this: void, e: E) => void): void;",
+        "}",
+      ].join(eol),
+    );
   });
 });
 

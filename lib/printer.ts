@@ -943,11 +943,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       // Literal identifying the imported-from module.
       return fromString(nodeStr(n.value, options), options);
 
-    case "UnaryExpression":
+    case "UnaryExpression": {
       parts.push(n.operator);
+      const {argument} = path.getValue();
+      const needsParens = argument.type === 'LogicalExpression';
+      const parenLeft = needsParens ? '(' : '';
+      const parenRight = needsParens ? ')' : '';
       if (/[a-z]$/.test(n.operator)) parts.push(" ");
-      parts.push(path.call(print, "argument"));
+      parts.push(parenLeft, path.call(print, "argument"), parenRight);
       return concat(parts);
+    }
 
     case "UpdateExpression":
       parts.push(path.call(print, "argument"), n.operator);
@@ -2378,12 +2383,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString(";\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(path.map(print, "body"));
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
-
-      return concat(["{\n", lines.indent(options.tabWidth), ";", "\n}"]);
+      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
     }
 
     case "TSImportType":
