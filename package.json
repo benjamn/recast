@@ -58,7 +58,7 @@
     "@typescript-eslint/parser": "^4.9.1",
     "eslint": "^7.1.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
-    "flow-parser": "0.135.0",
+    "flow-parser": "0.155.0",
     "glob": "7.1.6",
     "lint-staged": "^10.2.6",
     "mocha": "8.2.1",
