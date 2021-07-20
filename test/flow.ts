@@ -118,6 +118,7 @@ describe("type syntax", function () {
     // Generic
     check("var a: Array<Foo>;");
     check("var a: number[];");
+    check("var a: <T>() => T;");
 
     // Return types
     check("function a(): number {}");
