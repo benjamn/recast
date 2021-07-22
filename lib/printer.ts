@@ -1770,9 +1770,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(": ");
       }
 
-      const needsParens = n.params.length !== 1 || n.params[0].name;
+      const hasTypeParameters = !!n.typeParameters;
+      const needsParens =
+        hasTypeParameters || n.params.length !== 1 || n.params[0].name;
 
       parts.push(
+        hasTypeParameters ? path.call(print, "typeParameters") : "",
         needsParens ? "(" : "",
         printFunctionParams(path, options, print),
         needsParens ? ")" : "",
