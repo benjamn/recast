@@ -61,7 +61,7 @@
     "flow-parser": "0.156.0",
     "glob": "7.1.6",
     "lint-staged": "^10.2.6",
-    "mocha": "8.2.1",
+    "mocha": "9.0.2",
     "prettier": "^2.0.5",
     "reify": "0.20.12",
     "ts-emit-clean": "1.0.0",
