@@ -170,7 +170,7 @@ All you have to think about is how to manipulate the syntax tree, and Recast wil
 var result = recast.print(transform(recast.parse(source, {
   sourceFileName: "source.js"
 })), {
-  sourceMapName: "map.json"
+  sourceMapName: "source.min.js"
 });
     
 console.log(result.code); // Resulting string of code.
