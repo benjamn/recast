@@ -205,4 +205,52 @@ describe("source maps", function () {
     assert.deepEqual(result.map.names, []);
     assert.strictEqual(result.map.mappings, "");
   });
+
+  it("it can handle code containing multiple empty lines", function () {
+    // https://github.com/benjamn/recast/issues/831
+    const code = [
+      "(",
+      "\n",
+      "\n",
+      "\n",
+      "\n",
+      "\n",
+      "                                            {",
+      "    complete: onComplete,",
+      "\n",
+      "    translateX: 100",
+      "\n",
+      "})"
+    ].join(eol);
+    const builders = recast.types.builders
+    const scope = builders.identifier('scope')
+    const printer = new Printer({
+      sourceMapName: 'source.map'
+    });
+    const ast = parse(code, {
+      sourceFileName: 'test.js'
+    });
+
+    recast.visit(ast, {
+      visitIdentifier(path) {
+        path.replace(builders.memberExpression(
+          scope,
+          path.node,
+          false
+        ))
+
+        return false
+      }
+    });
+
+    const result = builders.functionExpression(
+      null,
+      [scope],
+      builders.blockStatement([builders.returnStatement(
+        ast.program.body[0].expression
+      )])
+    );
+
+    assert.doesNotThrow(() => printer.print(result))
+  })
 });

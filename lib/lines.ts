@@ -82,13 +82,8 @@ export class Lines {
     const sourcesToContents: any = {};
 
     targetLines.mappings.forEach(function (mapping: any) {
-      const sourceCursor =
-        mapping.sourceLines.skipSpaces(mapping.sourceLoc.start) ||
-        mapping.sourceLines.lastPos();
-
-      const targetCursor =
-        targetLines.skipSpaces(mapping.targetLoc.start) ||
-        targetLines.lastPos();
+      const sourceCursor = mapping.sourceLines.lastPos();
+      const targetCursor = targetLines.lastPos();
 
       while (
         comparePos(sourceCursor, mapping.sourceLoc.end) < 0 &&

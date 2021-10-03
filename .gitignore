@@ -9,3 +9,4 @@
 *.d.ts
 # Except...
 !/types/**/*.d.ts
+.idea
