@@ -1,6 +1,6 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
-  "name": "recast",
+  "name": "@agoric/recast",
   "version": "0.20.5",
   "description": "JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
   "keywords": [
