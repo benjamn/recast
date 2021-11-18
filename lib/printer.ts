@@ -259,7 +259,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(
         path.call(
-          (bodyPath: any) => printStatementSequence(bodyPath, options, print),
+          (bodyPath: any) => printStatementSequence(bodyPath, options, print, true),
           "body",
         ),
       );
@@ -2546,7 +2546,7 @@ function printDecorators(path: any, printPath: any) {
   return concat(parts);
 }
 
-function printStatementSequence(path: any, options: any, print: any) {
+function printStatementSequence(path: any, options: any, print: any, isToplevel?: boolean) {
   const filtered: any[] = [];
   let sawComment = false;
   let sawStatement = false;
@@ -2606,6 +2606,9 @@ function printStatementSequence(path: any, options: any, print: any) {
   const len = filtered.length;
   const parts: any[] = [];
 
+  let lineNum = 1;
+  const retainLines = isToplevel && options.retainLines;
+
   filtered.forEach(function (info, i) {
     const printed = info.printed;
     const stmt = info.node;
@@ -2616,40 +2619,62 @@ function printStatementSequence(path: any, options: any, print: any) {
     let trailingSpace;
     const lines = stmt && stmt.loc && stmt.loc.lines;
     const trueLoc =
-      lines && options.reuseWhitespace && util.getTrueLoc(stmt, lines);
+      lines && (options.reuseWhitespace || retainLines) && util.getTrueLoc(stmt, lines);
 
-    if (notFirst) {
+    if (retainLines) {
       if (trueLoc) {
-        const beforeStart = lines.skipSpaces(trueLoc.start, true);
-        const beforeStartLine = beforeStart ? beforeStart.line : 1;
-        const leadingGap = trueLoc.start.line - beforeStartLine;
+        leadingSpace = "\n".repeat(Math.max(0, trueLoc.start.line - lineNum));
+        /*
+        let beforeStart = lines.skipSpaces(trueLoc.start, true);
+        let beforeStartLine = beforeStart ? beforeStart.line : 1;
+        let leadingGap = trueLoc.start.line - beforeStartLine;
         leadingSpace = Array(leadingGap + 1).join("\n");
+        */
       } else {
-        leadingSpace = multiLine ? "\n\n" : "\n";
+        leadingSpace = "";
       }
     } else {
-      leadingSpace = "";
-    }
-
-    if (notLast) {
-      if (trueLoc) {
-        const afterEnd = lines.skipSpaces(trueLoc.end);
-        const afterEndLine = afterEnd ? afterEnd.line : lines.length;
-        const trailingGap = afterEndLine - trueLoc.end.line;
-        trailingSpace = Array(trailingGap + 1).join("\n");
+      if (notFirst) {
+        if (trueLoc) {
+          const beforeStart = lines.skipSpaces(trueLoc.start, true);
+          const beforeStartLine = beforeStart ? beforeStart.line : 1;
+          const leadingGap = trueLoc.start.line - beforeStartLine;
+          leadingSpace = Array(leadingGap + 1).join("\n");
+        } else {
+          leadingSpace = multiLine ? "\n\n" : "\n";
+        }
       } else {
-        trailingSpace = multiLine ? "\n\n" : "\n";
+        leadingSpace = "";
       }
-    } else {
-      trailingSpace = "";
+
+      if (notLast) {
+        if (trueLoc) {
+          const afterEnd = lines.skipSpaces(trueLoc.end);
+          const afterEndLine = afterEnd ? afterEnd.line : lines.length;
+          const trailingGap = afterEndLine - trueLoc.end.line;
+          trailingSpace = Array(trailingGap + 1).join("\n");
+        } else {
+          trailingSpace = multiLine ? "\n\n" : "\n";
+        }
+      } else {
+        trailingSpace = "";
+      }
     }
 
-    parts.push(maxSpace(prevTrailingSpace, leadingSpace), printed);
+    const toPush = [maxSpace(prevTrailingSpace, leadingSpace), printed];
 
     if (notLast) {
       prevTrailingSpace = trailingSpace;
     } else if (trailingSpace) {
-      parts.push(trailingSpace);
+      toPush.push(trailingSpace);
+    }
+
+    parts.push(...toPush);
+    if (retainLines) {
+      lineNum = toPush.reduce((prior, part) => {
+        const linesInPart = `${part}`.split('\n').length - 1;
+        return prior + linesInPart;
+      }, lineNum);
     }
   });
 

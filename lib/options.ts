@@ -29,6 +29,13 @@ export interface Options extends DeprecatedOptions {
   useTabs?: boolean;
 
   /**
+   * If you want the pretty-printer to match line numbers with the original
+   * source, make this option true.
+   * @default false
+   */
+  retainLines?: boolean;
+
+  /**
    * The reprinting code leaves leading whitespace untouched unless it has
    * to reindent a line, or you pass false for this option.
    * @default true
@@ -168,6 +175,7 @@ const defaults: Options = {
   parser: require("../parsers/esprima"),
   tabWidth: 4,
   useTabs: false,
+  retainLines: false,
   reuseWhitespace: true,
   lineTerminator: require("os").EOL || "\n",
   wrapColumn: 74, // Aspirational for now.
@@ -202,6 +210,7 @@ export function normalize(opts?: Options): NormalizedOptions {
   return {
     tabWidth: +get("tabWidth"),
     useTabs: !!get("useTabs"),
+    retainLines: !!get("retainLines"),
     reuseWhitespace: !!get("reuseWhitespace"),
     lineTerminator: get("lineTerminator"),
     wrapColumn: Math.max(get("wrapColumn"), 0),
