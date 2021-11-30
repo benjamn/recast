@@ -10,6 +10,8 @@ import { EOL as eol } from "os";
 const linesModule = require("../lib/lines");
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
+import * as tsParser from "../parsers/typescript";
+
 describe("printer", function () {
   it("Printer", function testPrinter(done) {
     const code = testPrinter + "";
@@ -2157,5 +2159,55 @@ describe("printer", function () {
 
     const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+  });
+
+  it("can pretty-print StaticBlock nodes in class bodies", function () {
+    const code = [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "",
+      "  static {",
+      "    ++this.a;",
+      "    this.#b++;",
+      "  }",
+      "}",
+    ].join(eol);
+
+    const printer = new Printer({ tabWidth: 2 });
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+
+    types.visit(ast, {
+      visitStaticBlock(path) {
+        assert.strictEqual(path.get("body", "length").value, 2);
+        while (path.get("body").shift()) {}
+        assert.strictEqual(path.get("body", "length").value, 0);
+        return false;
+      },
+    });
+
+    const emptyBlockReprinted = printer.print(ast).code;
+    assert.strictEqual(emptyBlockReprinted, [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "", // Empty line preserved because of conservative printer.print reprinting.
+      "  static {}",
+      "}",
+    ].join(eol));
+
+    const emptyBlockPrettyPrinted = printer.printGenerically(ast).code;
+    assert.strictEqual(emptyBlockPrettyPrinted, [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "  static {}",
+      "}",
+    ].join(eol));
   });
 });

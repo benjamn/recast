@@ -607,6 +607,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
+    case "StaticBlock":
+      parts.push("static ");
+      // Intentionally fall through to BlockStatement below.
+
     case "BlockStatement": {
       const naked = path.call(
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
@@ -615,7 +619,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       if (naked.isEmpty()) {
         if (!n.directives || n.directives.length === 0) {
-          return fromString("{}");
+          parts.push("{}");
+          return concat(parts);
         }
       }
 
