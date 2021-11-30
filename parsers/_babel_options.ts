@@ -33,6 +33,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "exportNamespaceFrom",
       "functionBind",
       "functionSent",
+      "importAssertions",
       "importMeta",
       "nullishCoalescingOperator",
       "numericSeparator",
@@ -41,6 +42,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "optionalChaining",
       ["pipelineOperator", { proposal: "minimal" }] as any as ParserPlugin,
       "throwExpressions",
+      "topLevelAwait",
     ]
   };
 };

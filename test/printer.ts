@@ -2210,4 +2210,55 @@ describe("printer", function () {
       "}",
     ].join(eol));
   });
+
+  it("can pretty-print ImportAttribute syntax", function () {
+    const code = [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module" assert {};',
+      'import json from "./module" assert { type: "json" };',
+      'import * as ns from "./module" assert { type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines" }',
+    ].join(eol);
+
+    const expectedPretty = [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module";',
+      'import json from "./module" assert { type: "json" };',
+      '',
+      'import * as ns from "./module" assert {',
+      '  type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines"',
+      '};',
+    ].join(eol);
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 60,
+    });
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, expectedPretty);
+
+    types.visit(ast, {
+      visitImportAttribute(path) {
+        this.traverse(path);
+        const valuePath = path.get("value");
+        const strLit = valuePath.value;
+        types.namedTypes.StringLiteral.assert(strLit);
+        if (strLit.value.startsWith("reallyLong")) {
+          valuePath.replace(b.stringLiteral("shorter"));
+        }
+      },
+    });
+
+    const reprinted = printer.print(ast).code;
+    assert.strictEqual(reprinted, [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module" assert {};',
+      'import json from "./module" assert { type: "json" };',
+      'import * as ns from "./module" assert { type: "shorter" }',
+    ].join(eol));
+  });
 });

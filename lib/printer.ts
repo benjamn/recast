@@ -602,10 +602,21 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" from ");
       }
 
-      parts.push(path.call(print, "source"), ";");
+      parts.push(
+        path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+        ";",
+      );
 
       return concat(parts);
     }
+
+    case "ImportAttribute":
+      return concat([
+        path.call(print, "key"),
+        ": ",
+        path.call(print, "value"),
+      ]);
 
     case "StaticBlock":
       parts.push("static ");
@@ -2832,6 +2843,30 @@ function printFunctionParams(path: any, options: any, print: any) {
   return joined;
 }
 
+function maybePrintImportAssertions(
+  path: any,
+  options: any,
+  print: any,
+): Lines {
+  const n = path.getValue();
+  if (n.assertions && n.assertions.length > 0) {
+    const parts: (string | Lines)[] = [" assert {"];
+    const printed = path.map(print, "assertions");
+    const flat = fromString(", ").join(printed);
+    if (flat.length > 1 || flat.getLineLength(1) > options.wrapColumn) {
+      parts.push(
+        "\n",
+        fromString(",\n").join(printed).indent(options.tabWidth),
+        "\n}",
+      );
+    } else {
+      parts.push(" ", flat, " }")
+    }
+    return concat(parts);
+  }
+  return fromString("");
+}
+
 function printExportDeclaration(path: any, options: any, print: any) {
   const decl = path.getValue();
   const parts: (string | Lines)[] = ["export "];
@@ -2908,7 +2943,10 @@ function printExportDeclaration(path: any, options: any, print: any) {
     }
 
     if (decl.source) {
-      parts.push(" from ", path.call(print, "source"));
+      parts.push(
+        " from ", path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+      );
     }
   }
 
