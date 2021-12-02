@@ -918,47 +918,42 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return fromString("null");
 
     case "RegExpLiteral": // Babel 6 Literal split
-      return fromString(n.extra.raw);
+      return fromString(
+        getPossibleRaw(n) || `/${n.pattern}/${n.flags || ""}`,
+        options,
+      );
 
     case "BigIntLiteral": // Babel 7 Literal split
-      return fromString(n.value + "n");
+      return fromString(
+        getPossibleRaw(n) || (n.value + "n"),
+        options,
+      );
 
     case "NumericLiteral": // Babel 6 Literal Split
-      // Keep original representation for numeric values not in base 10.
-      if (
-        n.extra &&
-        typeof n.extra.raw === "string" &&
-        Number(n.extra.raw) === n.value
-      ) {
-        return fromString(n.extra.raw, options);
-      }
-
-      return fromString(n.value, options);
+      return fromString(
+        getPossibleRaw(n) || n.value,
+        options,
+      );
 
     case "BooleanLiteral": // Babel 6 Literal split
     case "StringLiteral": // Babel 6 Literal split
     case "Literal":
-      // Numeric values may be in bases other than 10. Use their raw
-      // representation if equivalent.
-      if (
-        typeof n.value === "number" &&
-        typeof n.raw === "string" &&
-        Number(n.raw) === n.value
-      ) {
-        return fromString(n.raw, options);
-      }
-
-      if (typeof n.value !== "string") {
-        return fromString(n.value, options);
-      }
-
-      return fromString(nodeStr(n.value, options), options);
+      return fromString(
+        getPossibleRaw(n) || (
+          typeof n.value === "string"
+            ? nodeStr(n.value, options)
+            : n.value),
+        options,
+      );
 
     case "Directive": // Babel 6
       return path.call(print, "value");
 
     case "DirectiveLiteral": // Babel 6
-      return fromString(nodeStr(n.value, options));
+      return fromString(
+        getPossibleRaw(n) || nodeStr(n.value, options),
+        options,
+      );
 
     case "InterpreterDirective":
       return fromString(`#!${n.value}\n`, options);
@@ -3048,6 +3043,33 @@ function endsWithBrace(lines: any) {
 
 function swapQuotes(str: string) {
   return str.replace(/['"]/g, (m) => (m === '"' ? "'" : '"'));
+}
+
+function getPossibleRaw(node:
+  | types.namedTypes.Literal
+  | types.namedTypes.NumericLiteral
+  | types.namedTypes.StringLiteral
+  | types.namedTypes.RegExpLiteral
+  | types.namedTypes.BigIntLiteral
+  | types.namedTypes.DecimalLiteral
+): string | void {
+  const value = types.getFieldValue(node, "value");
+  const extra = types.getFieldValue(node, "extra");
+
+  if (
+    extra &&
+    typeof extra.raw === "string" &&
+    value == extra.rawValue
+  ) {
+    return extra.raw;
+  }
+
+  if (node.type === "Literal") {
+    const raw = (node as typeof extra).raw;
+    if (typeof raw === "string" && value == raw) {
+      return raw;
+    }
+  }
 }
 
 function nodeStr(str: string, options: any) {

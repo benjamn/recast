@@ -1726,7 +1726,7 @@ describe("printer", function () {
 
   it("prints numbers in bases other than 10 without converting them", function () {
     const code = [
-      "let decimal = 6;",
+      "let base10 = 6;",
       "let hex = 0xf00d;",
       "let binary = 0b1010;",
       "let octal = 0o744;",
