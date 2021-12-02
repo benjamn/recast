@@ -24,6 +24,8 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "classPrivateMethods",
       "classPrivateProperties",
       "classProperties",
+      "classStaticBlock",
+      "decimal",
       "decorators-legacy",
       "doExpressions",
       "dynamicImport",
@@ -32,14 +34,22 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "exportNamespaceFrom",
       "functionBind",
       "functionSent",
+      "importAssertions",
       "importMeta",
       "nullishCoalescingOperator",
       "numericSeparator",
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      ["pipelineOperator", { proposal: "minimal" }] as any as ParserPlugin,
+      ["pipelineOperator", {
+        proposal: "minimal",
+      }] as any as ParserPlugin,
+      ["recordAndTuple", {
+        syntaxType: "hash",
+      }],
       "throwExpressions",
+      "topLevelAwait",
+      "v8intrinsic",
     ]
   };
 };

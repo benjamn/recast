@@ -10,6 +10,8 @@ import { EOL as eol } from "os";
 const linesModule = require("../lib/lines");
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
+import * as tsParser from "../parsers/typescript";
+
 describe("printer", function () {
   it("Printer", function testPrinter(done) {
     const code = testPrinter + "";
@@ -1724,7 +1726,7 @@ describe("printer", function () {
 
   it("prints numbers in bases other than 10 without converting them", function () {
     const code = [
-      "let decimal = 6;",
+      "let base10 = 6;",
       "let hex = 0xf00d;",
       "let binary = 0b1010;",
       "let octal = 0o744;",
@@ -2157,5 +2159,186 @@ describe("printer", function () {
 
     const pretty = new Printer().printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+  });
+
+  it("can pretty-print StaticBlock nodes in class bodies", function () {
+    const code = [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "",
+      "  static {",
+      "    ++this.a;",
+      "    this.#b++;",
+      "  }",
+      "}",
+    ].join(eol);
+
+    const printer = new Printer({ tabWidth: 2 });
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+
+    types.visit(ast, {
+      visitStaticBlock(path) {
+        assert.strictEqual(path.get("body", "length").value, 2);
+        while (path.get("body").shift()) {}
+        assert.strictEqual(path.get("body", "length").value, 0);
+        return false;
+      },
+    });
+
+    const emptyBlockReprinted = printer.print(ast).code;
+    assert.strictEqual(emptyBlockReprinted, [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "", // Empty line preserved because of conservative printer.print reprinting.
+      "  static {}",
+      "}",
+    ].join(eol));
+
+    const emptyBlockPrettyPrinted = printer.printGenerically(ast).code;
+    assert.strictEqual(emptyBlockPrettyPrinted, [
+      "class A {",
+      "  static a = 1;",
+      "  static #b = 2;",
+      "  static {}",
+      "}",
+    ].join(eol));
+  });
+
+  it("can pretty-print ImportAttribute syntax", function () {
+    const code = [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module" assert {};',
+      'import json from "./module" assert { type: "json" };',
+      'import * as ns from "./module" assert { type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines" }',
+    ].join(eol);
+
+    const expectedPretty = [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module";',
+      'import json from "./module" assert { type: "json" };',
+      '',
+      'import * as ns from "./module" assert {',
+      '  type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines"',
+      '};',
+    ].join(eol);
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 60,
+    });
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, expectedPretty);
+
+    types.visit(ast, {
+      visitImportAttribute(path) {
+        this.traverse(path);
+        const valuePath = path.get("value");
+        const strLit = valuePath.value;
+        types.namedTypes.StringLiteral.assert(strLit);
+        if (strLit.value.startsWith("reallyLong")) {
+          valuePath.replace(b.stringLiteral("shorter"));
+        }
+      },
+    });
+
+    const reprinted = printer.print(ast).code;
+    assert.strictEqual(reprinted, [
+      'import * as noAssertions from "./module";',
+      'import * as emptyAssert from "./module" assert {};',
+      'import json from "./module" assert { type: "json" };',
+      'import * as ns from "./module" assert { type: "shorter" }',
+    ].join(eol));
+  });
+
+  it("can pretty-print RecordExpression syntax", function () {
+    const code = [
+      "const rec = #{",
+      "  a: #{",
+      "    b: 1234",
+      "  },",
+      "",
+      "  c: #{",
+      '    d: "dee"',
+      "  }",
+      "};",
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 60,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+  });
+
+  it("can pretty-print TupleExpression syntax", function () {
+    const code = [
+      "const keyArgs = #[",
+      '  "query",',
+      '  "type",',
+      '  "@connection",',
+      '  #["key", "filter"]',
+      "];",
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 20,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+  });
+
+  it("can pretty-print ModuleExpression syntax", function () {
+    const code = [
+      'import { log } from "logger";',
+      'export const url = import.meta.url;',
+      'log(url);',
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 20,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+
+    const reprinted = printer.print(
+      b.moduleExpression(ast.program)
+    ).code;
+    assert.strictEqual(reprinted, [
+      "module {",
+      ...code.split(eol).map(line => "  " + line),
+      "}",
+    ].join(eol));
   });
 });

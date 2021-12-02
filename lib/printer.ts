@@ -445,6 +445,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "ModuleExpression":
+      return concat([
+        "module {\n",
+        path.call(print, "body").indent(options.tabWidth),
+        "\n}",
+      ]);
+
     case "ModuleDeclaration":
       parts.push("module", path.call(print, "id"));
 
@@ -602,10 +609,25 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" from ");
       }
 
-      parts.push(path.call(print, "source"), ";");
+      parts.push(
+        path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+        ";",
+      );
 
       return concat(parts);
     }
+
+    case "ImportAttribute":
+      return concat([
+        path.call(print, "key"),
+        ": ",
+        path.call(print, "value"),
+      ]);
+
+    case "StaticBlock":
+      parts.push("static ");
+      // Intentionally fall through to BlockStatement below.
 
     case "BlockStatement": {
       const naked = path.call(
@@ -615,7 +637,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       if (naked.isEmpty()) {
         if (!n.directives || n.directives.length === 0) {
-          return fromString("{}");
+          parts.push("{}");
+          return concat(parts);
         }
       }
 
@@ -680,6 +703,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "RecordExpression":
+      parts.push("#");
+      // Intentionally fall through to printing the object literal...
     case "ObjectExpression":
     case "ObjectPattern":
     case "ObjectTypeAnnotation": {
@@ -818,6 +844,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "Decorator":
       return concat(["@", path.call(print, "expression")]);
 
+    case "TupleExpression":
+      parts.push("#");
+      // Intentionally fall through to printing the tuple elements...
     case "ArrayExpression":
     case "ArrayPattern": {
       const elems: any[] = n.elements;
@@ -889,47 +918,48 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return fromString("null");
 
     case "RegExpLiteral": // Babel 6 Literal split
-      return fromString(n.extra.raw);
+      return fromString(
+        getPossibleRaw(n) || `/${n.pattern}/${n.flags || ""}`,
+        options,
+      );
 
     case "BigIntLiteral": // Babel 7 Literal split
-      return fromString(n.value + "n");
+      return fromString(
+        getPossibleRaw(n) || (n.value + "n"),
+        options,
+      );
 
     case "NumericLiteral": // Babel 6 Literal Split
-      // Keep original representation for numeric values not in base 10.
-      if (
-        n.extra &&
-        typeof n.extra.raw === "string" &&
-        Number(n.extra.raw) === n.value
-      ) {
-        return fromString(n.extra.raw, options);
-      }
+      return fromString(
+        getPossibleRaw(n) || n.value,
+        options,
+      );
 
-      return fromString(n.value, options);
+    case "DecimalLiteral":
+      return fromString(
+        getPossibleRaw(n) || (n.value + "m"),
+        options,
+      );
 
     case "BooleanLiteral": // Babel 6 Literal split
     case "StringLiteral": // Babel 6 Literal split
     case "Literal":
-      // Numeric values may be in bases other than 10. Use their raw
-      // representation if equivalent.
-      if (
-        typeof n.value === "number" &&
-        typeof n.raw === "string" &&
-        Number(n.raw) === n.value
-      ) {
-        return fromString(n.raw, options);
-      }
-
-      if (typeof n.value !== "string") {
-        return fromString(n.value, options);
-      }
-
-      return fromString(nodeStr(n.value, options), options);
+      return fromString(
+        getPossibleRaw(n) || (
+          typeof n.value === "string"
+            ? nodeStr(n.value, options)
+            : n.value),
+        options,
+      );
 
     case "Directive": // Babel 6
       return path.call(print, "value");
 
     case "DirectiveLiteral": // Babel 6
-      return fromString(nodeStr(n.value, options));
+      return fromString(
+        getPossibleRaw(n) || nodeStr(n.value, options),
+        options,
+      );
 
     case "InterpreterDirective":
       return fromString(`#!${n.value}\n`, options);
@@ -1988,6 +2018,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "argument"),
       ]);
 
+    case "IndexedAccessType":
+    case "OptionalIndexedAccessType":
+      return concat([
+        path.call(print, "objectType"),
+        n.optional ? "?." : "",
+        "[",
+        path.call(print, "indexType"),
+        "]",
+      ]);
+
     case "UnionTypeAnnotation":
       return fromString(" | ").join(path.map(print, "types"));
 
@@ -2030,6 +2070,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSVoidKeyword":
       return fromString("void", options);
+
+    case "TSIntrinsicKeyword":
+      return fromString("intrinsic", options);
 
     case "TSThisType":
       return fromString("this", options);
@@ -2476,6 +2519,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         "body",
       );
 
+    // https://github.com/babel/babel/pull/10148
+    case "V8IntrinsicIdentifier":
+      return concat(["%", path.call(print, "name")]);
+
+    // https://github.com/babel/babel/pull/13191
+    case "TopicReference":
+      return fromString("#");
+
     // Unhandled types below. If encountered, nodes of these types should
     // be either left alone or desugared into AST types that are fully
     // supported by the pretty-printer.
@@ -2827,6 +2878,30 @@ function printFunctionParams(path: any, options: any, print: any) {
   return joined;
 }
 
+function maybePrintImportAssertions(
+  path: any,
+  options: any,
+  print: any,
+): Lines {
+  const n = path.getValue();
+  if (n.assertions && n.assertions.length > 0) {
+    const parts: (string | Lines)[] = [" assert {"];
+    const printed = path.map(print, "assertions");
+    const flat = fromString(", ").join(printed);
+    if (flat.length > 1 || flat.getLineLength(1) > options.wrapColumn) {
+      parts.push(
+        "\n",
+        fromString(",\n").join(printed).indent(options.tabWidth),
+        "\n}",
+      );
+    } else {
+      parts.push(" ", flat, " }")
+    }
+    return concat(parts);
+  }
+  return fromString("");
+}
+
 function printExportDeclaration(path: any, options: any, print: any) {
   const decl = path.getValue();
   const parts: (string | Lines)[] = ["export "];
@@ -2903,7 +2978,10 @@ function printExportDeclaration(path: any, options: any, print: any) {
     }
 
     if (decl.source) {
-      parts.push(" from ", path.call(print, "source"));
+      parts.push(
+        " from ", path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+      );
     }
   }
 
@@ -2979,6 +3057,33 @@ function endsWithBrace(lines: any) {
 
 function swapQuotes(str: string) {
   return str.replace(/['"]/g, (m) => (m === '"' ? "'" : '"'));
+}
+
+function getPossibleRaw(node:
+  | types.namedTypes.Literal
+  | types.namedTypes.NumericLiteral
+  | types.namedTypes.StringLiteral
+  | types.namedTypes.RegExpLiteral
+  | types.namedTypes.BigIntLiteral
+  | types.namedTypes.DecimalLiteral
+): string | void {
+  const value = types.getFieldValue(node, "value");
+  const extra = types.getFieldValue(node, "extra");
+
+  if (
+    extra &&
+    typeof extra.raw === "string" &&
+    value == extra.rawValue
+  ) {
+    return extra.raw;
+  }
+
+  if (node.type === "Literal") {
+    const raw = (node as typeof extra).raw;
+    if (typeof raw === "string" && value == raw) {
+      return raw;
+    }
+  }
 }
 
 function nodeStr(str: string, options: any) {
