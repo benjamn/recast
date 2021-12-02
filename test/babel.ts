@@ -152,6 +152,12 @@ describe("Babel", function () {
       "  123456.789m",
       ");"
     ]);
+
+    // V8IntrinsicIdentifier
+    check([
+      "%DebugPrint('hello');",
+      "%DebugPrint(%StringParseInt('42', 10));",
+    ]);
   });
 
   it("babel 6: should not wrap IIFE when reusing nodes", function () {

@@ -49,6 +49,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       }],
       "throwExpressions",
       "topLevelAwait",
+      "v8intrinsic",
     ]
   };
 };
