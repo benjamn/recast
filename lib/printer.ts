@@ -2523,6 +2523,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "V8IntrinsicIdentifier":
       return concat(["%", path.call(print, "name")]);
 
+    // https://github.com/babel/babel/pull/13191
+    case "TopicReference":
+      return fromString("#");
+
     // Unhandled types below. If encountered, nodes of these types should
     // be either left alone or desugared into AST types that are fully
     // supported by the pretty-printer.
