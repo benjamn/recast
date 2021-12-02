@@ -696,6 +696,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "RecordExpression":
+      parts.push("#");
+      // Intentionally fall through to printing the object literal...
     case "ObjectExpression":
     case "ObjectPattern":
     case "ObjectTypeAnnotation": {
@@ -834,6 +837,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "Decorator":
       return concat(["@", path.call(print, "expression")]);
 
+    case "TupleExpression":
+      parts.push("#");
+      // Intentionally fall through to printing the tuple elements...
     case "ArrayExpression":
     case "ArrayPattern": {
       const elems: any[] = n.elements;

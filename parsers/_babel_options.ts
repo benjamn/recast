@@ -40,7 +40,12 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "objectRestSpread",
       "optionalCatchBinding",
       "optionalChaining",
-      ["pipelineOperator", { proposal: "minimal" }] as any as ParserPlugin,
+      ["pipelineOperator", {
+        proposal: "minimal",
+      }] as any as ParserPlugin,
+      ["recordAndTuple", {
+        syntaxType: "hash",
+      }],
       "throwExpressions",
       "topLevelAwait",
     ]

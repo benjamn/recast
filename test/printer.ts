@@ -2261,4 +2261,31 @@ describe("printer", function () {
       'import * as ns from "./module" assert { type: "shorter" }',
     ].join(eol));
   });
+
+  it("can pretty-print RecordExpression syntax", function () {
+    const code = [
+      "const rec = #{",
+      "  a: #{",
+      "    b: 1234",
+      "  },",
+      "",
+      "  c: #{",
+      '    d: "dee"',
+      "  }",
+      "};",
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 60,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+  });
 });
