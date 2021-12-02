@@ -400,7 +400,7 @@ function testReprinting(pattern: any, description: any) {
 function tryToParseFile(source: any, absPath: any) {
   try {
     return recast.parse(source, { parser });
-  } catch (e1) {
+  } catch (e1: any) {
     let options;
     try {
       options = JSON.parse(
@@ -408,7 +408,7 @@ function tryToParseFile(source: any, absPath: any) {
           .readFileSync(path.join(path.dirname(absPath), "options.json"))
           .toString(),
       );
-    } catch (e2) {
+    } catch (e2: any) {
       if (e2.code !== "ENOENT") {
         console.error(e2);
       }
