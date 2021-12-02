@@ -25,6 +25,7 @@ export default function getBabelOptions(options?: Overrides): ParserOptions & { 
       "classPrivateProperties",
       "classProperties",
       "classStaticBlock",
+      "decimal",
       "decorators-legacy",
       "doExpressions",
       "dynamicImport",

@@ -935,6 +935,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         options,
       );
 
+    case "DecimalLiteral":
+      return fromString(
+        getPossibleRaw(n) || (n.value + "m"),
+        options,
+      );
+
     case "BooleanLiteral": // Babel 6 Literal split
     case "StringLiteral": // Babel 6 Literal split
     case "Literal":
