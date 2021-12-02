@@ -2070,6 +2070,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSVoidKeyword":
       return fromString("void", options);
 
+    case "TSIntrinsicKeyword":
+      return fromString("intrinsic", options);
+
     case "TSThisType":
       return fromString("this", options);
 
