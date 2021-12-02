@@ -2017,6 +2017,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "argument"),
       ]);
 
+    case "IndexedAccessType":
+    case "OptionalIndexedAccessType":
+      return concat([
+        path.call(print, "objectType"),
+        n.optional ? "?." : "",
+        "[",
+        path.call(print, "indexType"),
+        "]",
+      ]);
+
     case "UnionTypeAnnotation":
       return fromString(" | ").join(path.map(print, "types"));
 
