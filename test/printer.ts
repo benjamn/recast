@@ -2288,4 +2288,57 @@ describe("printer", function () {
 
     assert.strictEqual(pretty, code);
   });
+
+  it("can pretty-print TupleExpression syntax", function () {
+    const code = [
+      "const keyArgs = #[",
+      '  "query",',
+      '  "type",',
+      '  "@connection",',
+      '  #["key", "filter"]',
+      "];",
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 20,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+
+    assert.strictEqual(pretty, code);
+  });
+
+  it("can pretty-print ModuleExpression syntax", function () {
+    const code = [
+      'import { log } from "logger";',
+      'export const url = import.meta.url;',
+      'log(url);',
+    ].join(eol);
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 20,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+
+    const reprinted = printer.print(
+      b.moduleExpression(ast.program)
+    ).code;
+    assert.strictEqual(reprinted, [
+      "module {",
+      ...code.split(eol).map(line => "  " + line),
+      "}",
+    ].join(eol));
+  });
 });

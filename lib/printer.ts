@@ -445,6 +445,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "ModuleExpression":
+      return concat([
+        "module {\n",
+        path.call(print, "body").indent(options.tabWidth),
+        "\n}",
+      ]);
+
     case "ModuleDeclaration":
       parts.push("module", path.call(print, "id"));
 
