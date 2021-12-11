@@ -1225,6 +1225,33 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  it("prints 'definite' ClassProperty correctly", function () {
+    const code = ["class A {", "  foo!: string;", "}"].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          Object.assign(
+            b.classProperty(
+              b.identifier("foo"),
+              null,
+              b.typeAnnotation(b.stringTypeAnnotation()),
+            ),
+            { definite: true },
+          ),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("prints static ClassProperty correctly", function () {
     const code = ["class A {", "  static foo = Bar;", "}"].join(eol);
 
