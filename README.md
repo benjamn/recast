@@ -11,6 +11,7 @@
 - https://github.com/benjamn/recast/pull/804
 - https://github.com/benjamn/recast/pull/867
 - https://github.com/benjamn/recast/pull/923
+- https://github.com/benjamn/recast/pull/1024 (`broken quotes`)
 
 Installation
 ---
