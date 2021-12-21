@@ -423,6 +423,9 @@ FPp.needsParens = function (assumeExpressionContext) {
           return true;
       }
 
+    case "OptionalIndexedAccessType":
+      return node.optional && parent.type === "IndexedAccessType";
+
     case "IntersectionTypeAnnotation":
     case "UnionTypeAnnotation":
       return parent.type === "NullableTypeAnnotation";

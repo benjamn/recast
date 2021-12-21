@@ -21,7 +21,10 @@ describe("Babel", function () {
     function check(lines: any) {
       const code = lines.join(eol);
       const ast = recast.parse(code, parseOptions);
-      const output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
+      const output = recast.prettyPrint(ast, {
+        tabWidth: 2,
+        wrapColumn: 60,
+      }).code;
       assert.strictEqual(output, code);
     }
 
@@ -138,6 +141,23 @@ describe("Babel", function () {
       '  "1"() {}',
       "});",
     ]);
+
+    check([
+      "console.log(",
+      "  100m,",
+      "  9223372036854775807m,",
+      "  0.m,",
+      "  3.1415926535897932m,",
+      "  100.000m,",
+      "  123456.789m",
+      ");"
+    ]);
+
+    // V8IntrinsicIdentifier
+    check([
+      "%DebugPrint('hello');",
+      "%DebugPrint(%StringParseInt('42', 10));",
+    ]);
   });
 
   it("babel 6: should not wrap IIFE when reusing nodes", function () {
@@ -209,7 +229,7 @@ describe("Babel", function () {
         }
     }];
     
-    const expected = `import foo from "foo" assert {type: "json"};`;
+    const expected = `import foo from "foo" assert { type: "json" };`;
 
     assert.strictEqual(recast.print(ast).code, expected);
   });
@@ -242,14 +262,14 @@ describe("Babel", function () {
         }
     }];
     
-    const expected = `import foo from "foo" assert {type: "json", foo: "bar"};`;
+    const expected = `import foo from "foo" assert { type: "json", foo: "bar" };`;
 
     assert.strictEqual(recast.print(ast).code, expected);
   });
   
   it("ImportAttribute: parse", function () {
     const code = [
-      `import foo from "foo" assert {type: "json"};`,
+      `import foo from "foo" assert { type: "json" };`,
     ].join(eol);
   
     const ast = recast.parse(code, parseOptions);
@@ -431,10 +451,11 @@ describe("Babel", function () {
 
   it("prints numbers in bases other than 10 without converting them", function () {
     const code = [
-      "let decimal = 6;",
+      "let base10 = 6;",
       "let hex = 0xf00d;",
       "let binary = 0b1010;",
       "let octal = 0o744;",
+      "let decimal = 123.456m;",
     ].join(eol);
 
     const ast = recast.parse(code, parseOptions);

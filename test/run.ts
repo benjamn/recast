@@ -1,6 +1,6 @@
 import "./babel";
 import "./comments";
-import "./es6tests";
+import "./ecmascript";
 import "./identity";
 import "./jsx";
 import "./lines";
