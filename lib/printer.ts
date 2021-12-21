@@ -945,8 +945,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         options,
       );
 
+    case "StringLiteral":
+        return fromString(nodeStr(n.value, options));
+    
     case "BooleanLiteral": // Babel 6 Literal split
-    case "StringLiteral": // Babel 6 Literal split
     case "Literal":
       return fromString(
         getPossibleRaw(n) || (

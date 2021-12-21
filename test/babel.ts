@@ -155,8 +155,8 @@ describe("Babel", function () {
 
     // V8IntrinsicIdentifier
     check([
-      "%DebugPrint('hello');",
-      "%DebugPrint(%StringParseInt('42', 10));",
+      `%DebugPrint("hello");`,
+      `%DebugPrint(%StringParseInt("42", 10));`,
     ]);
   });
 
@@ -533,6 +533,17 @@ describe("Babel", function () {
     assert.strictEqual(
       recast.print(ast).code,
       '!(options || !options.bidirectional);',
+    );
+  });
+  it("should use single quotes", function () {
+    const code = 'const a = 1;';
+    const ast = recast.parse(code, parseOptions);
+    
+    ast.program.body.unshift(b.expressionStatement(b.stringLiteral('use strict')));
+
+    assert.strictEqual(
+      recast.print(ast, {quote: 'single'}).code,
+      `'use strict';\nconst a = 1;`,
     );
   });
 });
