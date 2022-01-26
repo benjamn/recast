@@ -24,6 +24,6 @@ jobs:
 
     - name: npm install, build and test
       run: |
-        npm install
+        npm install -f
         npm run build --if-present
         npm test

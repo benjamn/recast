@@ -1,8 +1,9 @@
-/node_modules
-/test
-/types
+node_modules
+test
+types
 yarn.lock
 example
+package-lock.json
 
 .*
 *.ts
