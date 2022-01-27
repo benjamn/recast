@@ -1,7 +1,7 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
   "name": "@agoric/recast",
-  "version": "0.20.8",
+  "version": "0.20.10",
   "description": "JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
   "keywords": [
     "ast",
@@ -42,7 +42,7 @@
     "fs": false
   },
   "dependencies": {
-    "ast-types": "file:./agoric-ast-types-v0.14.2.tgz",
+    "ast-types": "agoric-labs/ast-types#Agoric-built",
     "esprima": "~4.0.0",
     "source-map": "~0.6.1",
     "tslib": "^2.0.1"
