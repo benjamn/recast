@@ -3086,19 +3086,25 @@ function getPossibleRaw(node:
   }
 }
 
+function jsSafeStringify(str: string) {
+  return JSON.stringify(str).replace(/[\u2028\u2029]/g, function (m) {
+    return "\\u" + m.charCodeAt(0).toString(16);
+  });
+}
+
 function nodeStr(str: string, options: any) {
   isString.assert(str);
   switch (options.quote) {
     case "auto": {
-      const double = JSON.stringify(str);
-      const single = swapQuotes(JSON.stringify(swapQuotes(str)));
+      const double = jsSafeStringify(str);
+      const single = swapQuotes(jsSafeStringify(swapQuotes(str)));
       return double.length > single.length ? single : double;
     }
     case "single":
-      return swapQuotes(JSON.stringify(swapQuotes(str)));
+      return swapQuotes(jsSafeStringify(swapQuotes(str)));
     case "double":
     default:
-      return JSON.stringify(str);
+      return jsSafeStringify(str);
   }
 }
 
