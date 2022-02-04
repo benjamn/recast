@@ -643,9 +643,11 @@ FPp.firstInStatement = function () {
       return true;
     }
 
+    // s[i + 1] and s[i + 2] represent the array between the parent
+    // SequenceExpression node and its child nodes
     if (
       n.SequenceExpression.check(parent) &&
-      parentName === "expressions" &&
+      s[i + 1] === "expressions" &&
       childName === 0
     ) {
       assert.strictEqual(parent.expressions[0], child);
