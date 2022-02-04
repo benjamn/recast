@@ -338,6 +338,10 @@ describe("parens", function () {
     check("(function (){})()");
   });
 
+  it("should be added to function expressions at start of sequence", function () {
+    check("(function (){})(), 0");
+  });
+
   it("issues #504 and #512", function () {
     check("() => ({})['foo']");
     check("() => ({ foo: 123 }[foo] + 2) * 3");
