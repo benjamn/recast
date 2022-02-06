@@ -660,6 +660,22 @@ describe("printer", function () {
     );
   });
 
+  it("pretty-prints U+2028 and U+2029 as Unicode escapes", function () {
+    const ast = parse('"\\u2028";');
+    const printer = new Printer();
+    assert.strictEqual(
+      printer.printGenerically(ast).code,
+      '"\\u2028";',
+    );
+
+    const ast2 = parse('"\\u2029";');
+    const printer2 = new Printer();
+    assert.strictEqual(
+      printer2.printGenerically(ast2).code,
+      '"\\u2029";',
+    );
+  });
+
   it("should print block comments at head of class once", function () {
     // Given.
     const ast = parse(
