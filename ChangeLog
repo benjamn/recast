@@ -1,3 +1,9 @@
+2022.02.11, v1.5.2
+
+fix:
+- Parenthesize function at start of sequence
+
+
 2021.12.21, v1.5.1
 
 fix:
