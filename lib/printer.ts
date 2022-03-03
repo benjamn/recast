@@ -196,14 +196,14 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
     return linesWithoutParens;
   }
 
-  let shouldAddParens = node.extra ? node.extra.parenthesized : false;
+  let shouldAddParens = false;
   const decoratorsLines = printDecorators(path, printPath);
 
   if (decoratorsLines.isEmpty()) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing path.needsParens() except in this case.
     if (!options.avoidRootParens) {
-      shouldAddParens = shouldAddParens || path.needsParens();
+      shouldAddParens = path.needsParens();
     }
   } else {
     parts.push(decoratorsLines);
