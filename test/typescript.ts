@@ -273,7 +273,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check(["export interface S {", "  i(j: string): boolean;", "}"]);
 
-    check(["declare namespace D3 {", "  export const f: number = 2;", "}"]);
+    check(["declare namespace D3 {", "  export const f: number;", "}"]);
 
     check(["declare function foo<K, V>(arg: T = getDefault()): R"]);
 
