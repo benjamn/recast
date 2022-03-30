@@ -7,11 +7,12 @@
 
 # Fork contains unmerged fixes
 
-- https://github.com/benjamn/recast/pull/744
-- https://github.com/benjamn/recast/pull/804
-- https://github.com/benjamn/recast/pull/867
-- https://github.com/benjamn/recast/pull/923
-- https://github.com/benjamn/recast/pull/1024 (`broken quotes`)
+- ✅ Fixed of parenthesizes around arrow function body returning object (https://github.com/benjamn/recast/pull/744)
+- ✅ Added import assertions support (https://github.com/benjamn/recast/pull/804)
+- ✅ Fixed additional semicolon it TSInterfaceBody (https://github.com/benjamn/recast/pull/867)
+- ✅ Fixed broken parenthesis when argument of UnaryExpression is LogicalExpression `!(a && b)` (https://github.com/benjamn/recast/pull/923)
+- ✅ Fixed broken quotes (https://github.com/benjamn/recast/pull/1024 )
+- ✅ Fixed ambient context in **TypeScript** tests (https://github.com/benjamn/recast/pull/1077)
 
 Installation
 ---
