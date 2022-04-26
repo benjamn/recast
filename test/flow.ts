@@ -133,6 +133,24 @@ describe("Flow type syntax", function () {
     // Return types
     check("function a(): number {}");
     check("var a: () => X = fn;");
+    check("function f(): () => void {}", flowParserParseOptions);
+    check("function f(): () => () => void {}", flowParserParseOptions);
+    check(
+      "function f(): (cb: () => void) => () => void {}",
+      flowParserParseOptions,
+    );
+    // check(  // TODO this breaks
+    //   "function f(): (() => void) => () => void {}",
+    //   flowParserParseOptions,
+    // );
+    check(
+      "function f(m: (cb: () => void) => () => void): void {}",
+      flowParserParseOptions,
+    );
+    // check(  // TODO this breaks
+    //   "function f((() => void) => () => void): void {}",
+    //   flowParserParseOptions,
+    // );
 
     // Object
     check(
@@ -164,7 +182,28 @@ describe("Flow type syntax", function () {
     check("declare function foo(c: C, b: B): void;");
     check("declare function foo(c: (e: Event) => void, b: B): void;");
     check("declare function foo(c: C, d?: Array<D>): void;");
+    check("declare function f(): () => void;", flowParserParseOptions);
+    check(
+      "declare function f(): (cb: () => void) => () => void;",
+      flowParserParseOptions,
+    );
+    check(
+      "declare function f(m: (cb: () => void) => () => void): void;",
+      flowParserParseOptions,
+    );
+    // check(  // TODO breaks
+    //   "declare function f(): (() => void) => () => void;",
+    //   flowParserParseOptions,
+    // );
+    // check(  // TODO breaks
+    //   "declare function f((() => void) => () => void): void;",
+    //   flowParserParseOptions,
+    // );
+
     check("declare class C { x: string }");
+    // check("declare class C { constructor(): void }");  // TODO broken
+    // check("declare class D { f(): D }");  // TODO broken
+
     check(
       "declare module M {" +
         eol +
@@ -188,6 +227,8 @@ describe("Flow type syntax", function () {
     check("class A {" + eol + "  a: number;" + eol + "}");
     check("class A {" + eol + "  foo(a: number): string {}" + eol + "}");
     check("class A {" + eol + "  static foo(a: number): string {}" + eol + "}");
+    check(`class C {${eol}  constructor() {}${eol}}`);
+    check(`class C {${eol}  f(): C {}${eol}}`);
 
     // Type parameters
     check("class A<T> {}");
