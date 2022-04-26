@@ -22,9 +22,9 @@ describe("Flow type syntax", function () {
       parseOptions = parseOptions || esprimaParserParseOptions;
       const ast1 = parse(source, parseOptions);
       const code = printer.printGenerically(ast1).code;
+      assert.strictEqual(source, code);
       const ast2 = parse(code, parseOptions);
       types.astNodesAreEquivalent.assert(ast1, ast2);
-      assert.strictEqual(source, code);
     });
   }
 
