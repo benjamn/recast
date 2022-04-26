@@ -4,7 +4,7 @@ import { Printer } from "../lib/printer";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 
-describe("type syntax", function () {
+describe("Flow type syntax", function () {
   const printer = new Printer({
     tabWidth: 2,
     quote: "single",
@@ -18,15 +18,25 @@ describe("type syntax", function () {
   };
 
   function check(source: string, parseOptions?: any) {
-    parseOptions = parseOptions || esprimaParserParseOptions;
-    const ast1 = parse(source, parseOptions);
-    const code = printer.printGenerically(ast1).code;
-    const ast2 = parse(code, parseOptions);
-    types.astNodesAreEquivalent.assert(ast1, ast2);
-    assert.strictEqual(source, code);
+    it(`handles: ${source}`, () => {
+      parseOptions = parseOptions || esprimaParserParseOptions;
+      const ast1 = parse(source, parseOptions);
+      const code = printer.printGenerically(ast1).code;
+      const ast2 = parse(code, parseOptions);
+      types.astNodesAreEquivalent.assert(ast1, ast2);
+      assert.strictEqual(source, code);
+    });
   }
 
-  it("should parse and print type annotations correctly", function () {
+  function checkEquiv(a: string, b: string) {
+    it(`handles equivalently \`${a}\` vs. \`${b}\``, () => {
+      const aAst = parse(a, flowParserParseOptions);
+      const bAst = parse(b, flowParserParseOptions);
+      types.astNodesAreEquivalent.assert(aAst, bAst);
+    });
+  }
+
+  describe("should parse and print type annotations correctly", function () {
     // Import type annotations
     check("import type foo from 'foo';");
     check("import typeof foo from 'foo';");
@@ -213,7 +223,7 @@ describe("type syntax", function () {
     check("function myFunction([param1]: Params) {}", flowParserParseOptions);
   });
 
-  it("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
+  describe("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
     check("type A = Obj?.['a'];", flowParserParseOptions);
     check("type B = Array<string>?.[number];", flowParserParseOptions);
     check("type C = Obj?.['bar']['baz'];", flowParserParseOptions);
@@ -223,12 +233,6 @@ describe("type syntax", function () {
     check("type G = Obj['bar']?.[boolean][];", flowParserParseOptions);
     check("type H = (Obj?.['bar'])[string][];", flowParserParseOptions);
     check("type I = Obj?.['bar']?.[string][];", flowParserParseOptions);
-
-    function checkEquiv(a: string, b: string) {
-      const aAst = parse(a, flowParserParseOptions);
-      const bAst = parse(b, flowParserParseOptions);
-      types.astNodesAreEquivalent.assert(aAst, bAst);
-    }
 
     // Since FastPath#needsParens does not currently add any parentheses to
     // these expressions, make sure they do not matter for parsing the AST.
