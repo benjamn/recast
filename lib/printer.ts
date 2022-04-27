@@ -20,7 +20,7 @@ interface PrintResultConstructor {
   new (code: any, sourceMap?: any): PrintResultType;
 }
 
-const PrintResult = (function PrintResult(
+const PrintResult = function PrintResult(
   this: PrintResultType,
   code: any,
   sourceMap?: any,
@@ -34,7 +34,7 @@ const PrintResult = (function PrintResult(
     isObject.assert(sourceMap);
     this.map = sourceMap;
   }
-} as any) as PrintResultConstructor;
+} as any as PrintResultConstructor;
 
 const PRp: PrintResultType = PrintResult.prototype;
 let warnedAboutToString = false;
@@ -64,7 +64,7 @@ interface PrinterConstructor {
   new (config?: any): PrinterType;
 }
 
-const Printer = (function Printer(this: PrinterType, config?: any) {
+const Printer = function Printer(this: PrinterType, config?: any) {
   assert.ok(this instanceof Printer);
 
   const explicitTabWidth = config && config.tabWidth;
@@ -181,7 +181,7 @@ const Printer = (function Printer(this: PrinterType, config?: any) {
     config.reuseWhitespace = oldReuseWhitespace;
     return pr;
   };
-} as any) as PrinterConstructor;
+} as any as PrinterConstructor;
 
 export { Printer };
 
@@ -619,15 +619,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "ImportAttribute":
-      return concat([
-        path.call(print, "key"),
-        ": ",
-        path.call(print, "value"),
-      ]);
+      return concat([path.call(print, "key"), ": ", path.call(print, "value")]);
 
     case "StaticBlock":
       parts.push("static ");
-      // Intentionally fall through to BlockStatement below.
+    // Intentionally fall through to BlockStatement below.
 
     case "BlockStatement": {
       const naked = path.call(
@@ -705,7 +701,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "RecordExpression":
       parts.push("#");
-      // Intentionally fall through to printing the object literal...
+    // Intentionally fall through to printing the object literal...
     case "ObjectExpression":
     case "ObjectPattern":
     case "ObjectTypeAnnotation": {
@@ -846,7 +842,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TupleExpression":
       parts.push("#");
-      // Intentionally fall through to printing the tuple elements...
+    // Intentionally fall through to printing the tuple elements...
     case "ArrayExpression":
     case "ArrayPattern": {
       const elems: any[] = n.elements;
@@ -924,31 +920,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       );
 
     case "BigIntLiteral": // Babel 7 Literal split
-      return fromString(
-        getPossibleRaw(n) || (n.value + "n"),
-        options,
-      );
+      return fromString(getPossibleRaw(n) || n.value + "n", options);
 
     case "NumericLiteral": // Babel 6 Literal Split
-      return fromString(
-        getPossibleRaw(n) || n.value,
-        options,
-      );
+      return fromString(getPossibleRaw(n) || n.value, options);
 
     case "DecimalLiteral":
-      return fromString(
-        getPossibleRaw(n) || (n.value + "m"),
-        options,
-      );
+      return fromString(getPossibleRaw(n) || n.value + "m", options);
 
     case "BooleanLiteral": // Babel 6 Literal split
     case "StringLiteral": // Babel 6 Literal split
     case "Literal":
       return fromString(
-        getPossibleRaw(n) || (
-          typeof n.value === "string"
-            ? nodeStr(n.value, options)
-            : n.value),
+        getPossibleRaw(n) ||
+          (typeof n.value === "string" ? nodeStr(n.value, options) : n.value),
         options,
       );
 
@@ -2898,7 +2883,7 @@ function maybePrintImportAssertions(
         "\n}",
       );
     } else {
-      parts.push(" ", flat, " }")
+      parts.push(" ", flat, " }");
     }
     return concat(parts);
   }
@@ -2982,7 +2967,8 @@ function printExportDeclaration(path: any, options: any, print: any) {
 
     if (decl.source) {
       parts.push(
-        " from ", path.call(print, "source"),
+        " from ",
+        path.call(print, "source"),
         maybePrintImportAssertions(path, options, print),
       );
     }
@@ -3062,22 +3048,19 @@ function swapQuotes(str: string) {
   return str.replace(/['"]/g, (m) => (m === '"' ? "'" : '"'));
 }
 
-function getPossibleRaw(node:
-  | types.namedTypes.Literal
-  | types.namedTypes.NumericLiteral
-  | types.namedTypes.StringLiteral
-  | types.namedTypes.RegExpLiteral
-  | types.namedTypes.BigIntLiteral
-  | types.namedTypes.DecimalLiteral
+function getPossibleRaw(
+  node:
+    | types.namedTypes.Literal
+    | types.namedTypes.NumericLiteral
+    | types.namedTypes.StringLiteral
+    | types.namedTypes.RegExpLiteral
+    | types.namedTypes.BigIntLiteral
+    | types.namedTypes.DecimalLiteral,
 ): string | void {
   const value = types.getFieldValue(node, "value");
   const extra = types.getFieldValue(node, "extra");
 
-  if (
-    extra &&
-    typeof extra.raw === "string" &&
-    value == extra.rawValue
-  ) {
+  if (extra && typeof extra.raw === "string" && value == extra.rawValue) {
     return extra.raw;
   }
 

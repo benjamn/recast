@@ -8,6 +8,8 @@ module.exports = {
       files: "*.md",
       options: {
         printWidth: 60,
+        // Don't reformat code examples in README
+        embeddedLanguageFormatting: "off",
       },
     },
   ],
