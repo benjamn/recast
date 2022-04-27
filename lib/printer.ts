@@ -1672,12 +1672,33 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "DeclareClass":
-      return printFlowDeclaration(path, [
-        "class ",
-        path.call(print, "id"),
-        " ",
-        path.call(print, "body"),
-      ]);
+      parts.push("class");
+
+      if (n.id) {
+        parts.push(" ", path.call(print, "id"));
+      }
+
+      if (n.typeParameters) {
+        parts.push(path.call(print, "typeParameters"));
+      }
+
+      if (n.extends && n.extends.length > 0) {
+        parts.push(
+          " extends ",
+          fromString(", ").join(path.map(print, "extends")),
+        );
+      }
+
+      if (n["implements"] && n["implements"].length > 0) {
+        parts.push(
+          " implements ",
+          fromString(", ").join(path.map(print, "implements")),
+        );
+      }
+
+      parts.push(" ", path.call(print, "body"));
+
+      return printFlowDeclaration(path, parts);
 
     case "DeclareFunction":
       return printFlowDeclaration(path, [
