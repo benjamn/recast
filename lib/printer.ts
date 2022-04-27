@@ -1472,6 +1472,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "ClassDeclaration":
     case "ClassExpression":
+    case "DeclareClass":
       if (n.declare) {
         parts.push("declare ");
       }
@@ -1491,10 +1492,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       if (n.superClass) {
+        // ClassDeclaration and ClassExpression only
         parts.push(
           " extends ",
           path.call(print, "superClass"),
           path.call(print, "superTypeParameters"),
+        );
+      }
+
+      if (n.extends && n.extends.length > 0) {
+        // DeclareClass only
+        parts.push(
+          " extends ",
+          fromString(", ").join(path.map(print, "extends")),
         );
       }
 
@@ -1507,7 +1517,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(" ", path.call(print, "body"));
 
-      return concat(parts);
+      if (n.type === "DeclareClass") {
+        return printFlowDeclaration(path, parts);
+      } else {
+        return concat(parts);
+      }
 
     case "TemplateElement":
       return fromString(n.value.raw, options).lockIndentTail();
@@ -1661,35 +1675,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
       parts.push(" ", path.call(print, "body"));
       return concat(parts);
-
-    case "DeclareClass":
-      parts.push("class");
-
-      if (n.id) {
-        parts.push(" ", path.call(print, "id"));
-      }
-
-      if (n.typeParameters) {
-        parts.push(path.call(print, "typeParameters"));
-      }
-
-      if (n.extends && n.extends.length > 0) {
-        parts.push(
-          " extends ",
-          fromString(", ").join(path.map(print, "extends")),
-        );
-      }
-
-      if (n["implements"] && n["implements"].length > 0) {
-        parts.push(
-          " implements ",
-          fromString(", ").join(path.map(print, "implements")),
-        );
-      }
-
-      parts.push(" ", path.call(print, "body"));
-
-      return printFlowDeclaration(path, parts);
 
     case "DeclareFunction":
       return printFlowDeclaration(path, [
