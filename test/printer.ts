@@ -663,17 +663,11 @@ describe("printer", function () {
   it("pretty-prints U+2028 and U+2029 as Unicode escapes", function () {
     const ast = parse('"\\u2028";');
     const printer = new Printer();
-    assert.strictEqual(
-      printer.printGenerically(ast).code,
-      '"\\u2028";',
-    );
+    assert.strictEqual(printer.printGenerically(ast).code, '"\\u2028";');
 
     const ast2 = parse('"\\u2029";');
     const printer2 = new Printer();
-    assert.strictEqual(
-      printer2.printGenerically(ast2).code,
-      '"\\u2029";',
-    );
+    assert.strictEqual(printer2.printGenerically(ast2).code, '"\\u2029";');
   });
 
   it("should print block comments at head of class once", function () {
@@ -1687,12 +1681,8 @@ describe("printer", function () {
 
   it("prints chained expression elements", function () {
     const node = b.chainExpression(
-      b.memberExpression(
-        b.identifier("foo"),
-        b.identifier("bar"),
-        false
-      ),
-    )
+      b.memberExpression(b.identifier("foo"), b.identifier("bar"), false),
+    );
 
     assert.strictEqual(recast.print(node).code, "foo.bar");
   });
@@ -1703,9 +1693,9 @@ describe("printer", function () {
         b.identifier("foo"),
         b.identifier("bar"),
         false,
-        true
+        true,
       ),
-    )
+    );
 
     assert.strictEqual(recast.print(node).code, "foo?.bar");
   });
@@ -2208,23 +2198,29 @@ describe("printer", function () {
     });
 
     const emptyBlockReprinted = printer.print(ast).code;
-    assert.strictEqual(emptyBlockReprinted, [
-      "class A {",
-      "  static a = 1;",
-      "  static #b = 2;",
-      "", // Empty line preserved because of conservative printer.print reprinting.
-      "  static {}",
-      "}",
-    ].join(eol));
+    assert.strictEqual(
+      emptyBlockReprinted,
+      [
+        "class A {",
+        "  static a = 1;",
+        "  static #b = 2;",
+        "", // Empty line preserved because of conservative printer.print reprinting.
+        "  static {}",
+        "}",
+      ].join(eol),
+    );
 
     const emptyBlockPrettyPrinted = printer.printGenerically(ast).code;
-    assert.strictEqual(emptyBlockPrettyPrinted, [
-      "class A {",
-      "  static a = 1;",
-      "  static #b = 2;",
-      "  static {}",
-      "}",
-    ].join(eol));
+    assert.strictEqual(
+      emptyBlockPrettyPrinted,
+      [
+        "class A {",
+        "  static a = 1;",
+        "  static #b = 2;",
+        "  static {}",
+        "}",
+      ].join(eol),
+    );
   });
 
   it("can pretty-print ImportAttribute syntax", function () {
@@ -2239,10 +2235,10 @@ describe("printer", function () {
       'import * as noAssertions from "./module";',
       'import * as emptyAssert from "./module";',
       'import json from "./module" assert { type: "json" };',
-      '',
+      "",
       'import * as ns from "./module" assert {',
       '  type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines"',
-      '};',
+      "};",
     ].join(eol);
 
     const printer = new Printer({
@@ -2270,12 +2266,15 @@ describe("printer", function () {
     });
 
     const reprinted = printer.print(ast).code;
-    assert.strictEqual(reprinted, [
-      'import * as noAssertions from "./module";',
-      'import * as emptyAssert from "./module" assert {};',
-      'import json from "./module" assert { type: "json" };',
-      'import * as ns from "./module" assert { type: "shorter" }',
-    ].join(eol));
+    assert.strictEqual(
+      reprinted,
+      [
+        'import * as noAssertions from "./module";',
+        'import * as emptyAssert from "./module" assert {};',
+        'import json from "./module" assert { type: "json" };',
+        'import * as ns from "./module" assert { type: "shorter" }',
+      ].join(eol),
+    );
   });
 
   it("can pretty-print RecordExpression syntax", function () {
@@ -2332,8 +2331,8 @@ describe("printer", function () {
   it("can pretty-print ModuleExpression syntax", function () {
     const code = [
       'import { log } from "logger";',
-      'export const url = import.meta.url;',
-      'log(url);',
+      "export const url = import.meta.url;",
+      "log(url);",
     ].join(eol);
 
     const ast = parse(code, {
@@ -2348,13 +2347,12 @@ describe("printer", function () {
     const pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
 
-    const reprinted = printer.print(
-      b.moduleExpression(ast.program)
-    ).code;
-    assert.strictEqual(reprinted, [
-      "module {",
-      ...code.split(eol).map(line => "  " + line),
-      "}",
-    ].join(eol));
+    const reprinted = printer.print(b.moduleExpression(ast.program)).code;
+    assert.strictEqual(
+      reprinted,
+      ["module {", ...code.split(eol).map((line) => "  " + line), "}"].join(
+        eol,
+      ),
+    );
   });
 });
