@@ -60,7 +60,7 @@
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.156.0",
     "glob": "7.2.0",
-    "lint-staged": "^10.2.6",
+    "lint-staged": "^12.4.1",
     "mocha": "9.0.2",
     "prettier": "^2.0.5",
     "reify": "0.20.12",
