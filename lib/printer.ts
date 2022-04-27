@@ -1449,6 +1449,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push("?");
       }
 
+      if (n.definite) {
+        parts.push("!");
+      }
+
       if (n.typeAnnotation) {
         parts.push(path.call(print, "typeAnnotation"));
       }
