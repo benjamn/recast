@@ -1466,6 +1466,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "ClassDeclaration":
     case "ClassExpression":
+    case "DeclareClass":
       if (n.declare) {
         parts.push("declare ");
       }
@@ -1485,10 +1486,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       if (n.superClass) {
+        // ClassDeclaration and ClassExpression only
         parts.push(
           " extends ",
           path.call(print, "superClass"),
           path.call(print, "superTypeParameters"),
+        );
+      }
+
+      if (n.extends && n.extends.length > 0) {
+        // DeclareClass only
+        parts.push(
+          " extends ",
+          fromString(", ").join(path.map(print, "extends")),
         );
       }
 
@@ -1501,7 +1511,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(" ", path.call(print, "body"));
 
-      return concat(parts);
+      if (n.type === "DeclareClass") {
+        return printFlowDeclaration(path, parts);
+      } else {
+        return concat(parts);
+      }
 
     case "TemplateElement":
       return fromString(n.value.raw, options).lockIndentTail();
@@ -1653,14 +1667,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
       parts.push(" ", path.call(print, "body"));
       return concat(parts);
-
-    case "DeclareClass":
-      return printFlowDeclaration(path, [
-        "class ",
-        path.call(print, "id"),
-        " ",
-        path.call(print, "body"),
-      ]);
 
     case "DeclareFunction":
       return printFlowDeclaration(path, [

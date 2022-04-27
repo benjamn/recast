@@ -203,6 +203,11 @@ describe("Flow type syntax", function () {
     check("declare class C { x: string }");
     // check("declare class C { constructor(): void }");  // TODO broken
     // check("declare class D { f(): D }");  // TODO broken
+    check("declare class A<X> extends B<X[]> { x: X }");
+    check(
+      "declare class A extends B implements I<string>, J {}",
+      flowParserParseOptions,
+    );
 
     check(
       "declare module M {" +
