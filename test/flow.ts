@@ -210,6 +210,11 @@ describe("Flow type syntax", function () {
     );
 
     check(
+      "declare interface A<X> extends B<X[]>, C { a: number }",
+      flowParserParseOptions,
+    );
+
+    check(
       "declare module M {" +
         eol +
         "  declare function foo(c: C): void;" +
