@@ -154,7 +154,7 @@ describe("Babel", function () {
     ]);
 
     // V8IntrinsicIdentifier
-    check(["%DebugPrint('hello');", "%DebugPrint(%StringParseInt('42', 10));"]);
+    check(['%DebugPrint("hello");', '%DebugPrint(%StringParseInt("42", 10));']);
   });
 
   it("babel 6: should not wrap IIFE when reusing nodes", function () {
@@ -529,7 +529,7 @@ describe("Babel", function () {
 
     assert.strictEqual(
       recast.print(ast).code,
-      '!(options || !options.bidirectional);',
+      '!((options || !options.bidirectional));',
     );
   });
   it("should use single quotes", function () {

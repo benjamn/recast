@@ -6,6 +6,11 @@ import * as types from "ast-types";
 import { EOL as eol } from "os";
 import * as parser from "../parsers/typescript";
 
+import { Printer } from "../lib/printer";
+
+const { namedTypes: n } = types;
+const printer = new Printer();
+
 // Babel 7 no longer supports Node 4 or 5.
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 (nodeMajorVersion >= 6 ? describe : xdescribe)("TypeScript", function () {
