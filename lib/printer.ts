@@ -420,11 +420,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         );
       }
 
-      if (n.body.type === 'ObjectExpression') {
-          parts.push(" => ", '(', path.call(print, "body"), ')');
-      } else {
-          parts.push(" => ", path.call(print, "body"));
-      }
+      parts.push(" => ", path.call(print, "body"));
 
       return concat(parts);
 

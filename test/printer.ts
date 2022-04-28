@@ -1149,7 +1149,7 @@ describe("printer", function () {
   });
   
   it("adds parenthesis around arrow functions body when returning object expression using babel parser", function () {
-    const expected = "() => (({\n  a: 'b'\n}));";
+    const expected = "() => ({\n  a: 'b'\n});";
     const source = "(a) => ({a: 'b'});";
     const ast = recast.parse(source, {
         parser: require('@babel/parser'),
