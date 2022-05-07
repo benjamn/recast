@@ -1,3 +1,13 @@
+# This version
+
+This is a temporary, ad-hoc fork for the sake of including changes needed
+for [TsFlower](https://github.com/gnprice/tsflower).
+
+The changes found here have been sent upstream as PRs, which hopefully will
+get merged there in due course.  In the meantime, this is published to NPM
+to facilitate using the changes.
+
+
 # recast, _v_. ![CI](https://github.com/benjamn/recast/workflows/CI/badge.svg) [![Join the chat at https://gitter.im/benjamn/recast](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/benjamn/recast?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 1. to give (a metal object) a different form by melting it down and reshaping it.

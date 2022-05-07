@@ -1,8 +1,8 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
-  "name": "recast",
-  "version": "0.21.1",
-  "description": "JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
+  "name": "@gregprice/recast",
+  "version": "0.21.2-0.tsflower.1",
+  "description": "Temporary ad-hoc fork of JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
   "keywords": [
     "ast",
     "rewriting",
@@ -13,10 +13,10 @@
     "parsing",
     "pretty-printing"
   ],
-  "homepage": "http://github.com/benjamn/recast",
+  "homepage": "https://github.com/benjamn/recast",
   "repository": {
     "type": "git",
-    "url": "git://github.com/benjamn/recast.git"
+    "url": "https://github.com/gnprice/recast"
   },
   "license": "MIT",
   "main": "main.js",
