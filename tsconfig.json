@@ -14,5 +14,8 @@
     "importHelpers": true,
     "stripInternal": true
   },
-  "exclude": ["node_modules", "test/data"]
+  "exclude": [
+    "node_modules",
+    "test/data"
+  ]
 }
