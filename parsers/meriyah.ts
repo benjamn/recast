@@ -9,7 +9,7 @@ import { getOption } from "../lib/util";
 
 function convertComment(comment: any): any {
   let { type } = comment;
-  type = type[0] === "S" ? "Line" : "Block"; // SingleLine/MultiLine
+  type = type === "SingleLine" ? "Line" : "Block";
   return { ...comment, type };
 }
 
