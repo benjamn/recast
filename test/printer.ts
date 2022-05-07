@@ -1148,6 +1148,31 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  it("adds parenthesis around nullish expression, when nullish expression is BinaryExpression's child", function () {
+    const code = "let a = (c?.b ?? 1) + 1;";
+
+    const b = recast.types.builders;
+
+    const ast = b.variableDeclaration("let", [
+      b.variableDeclarator(
+        b.identifier("a"),
+        b.binaryExpression(
+          "+",
+          b.logicalExpression(
+            "??",
+            b.optionalMemberExpression(b.identifier("c"), b.identifier("b")),
+            b.numericLiteral(1),
+          ),
+          b.numericLiteral(1),
+        ),
+      ),
+    ]);
+
+    const printer = new Printer();
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
   it("prints class property initializers with type annotations correctly", function () {
     const code = ["class A {", "  foo = (a: b): void => {};", "}"].join(eol);
 
@@ -1187,6 +1212,33 @@ describe("printer", function () {
             b.typeAnnotation(
               b.genericTypeAnnotation(b.identifier("Type"), null),
             ),
+          ),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints 'definite' ClassProperty correctly", function () {
+    const code = ["class A {", "  foo!: string;", "}"].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          Object.assign(
+            b.classProperty(
+              b.identifier("foo"),
+              null,
+              b.typeAnnotation(b.stringTypeAnnotation()),
+            ),
+            { definite: true },
           ),
         ]),
       ),

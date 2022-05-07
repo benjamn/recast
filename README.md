@@ -5,13 +5,12 @@
 1. to remodel or reconstruct (a literary work, document, sentence, etc.).
 1. to supply (a theater or opera work) with a new cast.
 
-Installation
----
+## Installation
 
-From NPM:
+From npm:
 
     npm install recast
-    
+
 From GitHub:
 
     cd path/to/node_modules
@@ -19,10 +18,10 @@ From GitHub:
     cd recast
     npm install .
 
-Import style
----
+## Import style
 
 Recast is designed to be imported using **named** imports:
+
 ```js
 import { parse, print } from "recast";
 console.log(print(parse(source)).code);
@@ -32,6 +31,7 @@ console.log(recast.print(recast.parse(source)).code);
 ```
 
 If you're using CommonJS:
+
 ```js
 const { parse, print } = require("recast");
 console.log(print(parse(source)).code);
@@ -40,12 +40,12 @@ const recast = require("recast");
 console.log(recast.print(recast.parse(source)).code);
 ```
 
-Usage
----
+## Usage
 
 Recast exposes two essential interfaces, one for parsing JavaScript code (`require("recast").parse`) and the other for reprinting modified syntax trees (`require("recast").print`).
 
 Here's a simple but non-trivial example of how you might use `.parse` and `.print`:
+
 ```js
 import * as recast from "recast";
 
@@ -61,9 +61,11 @@ const code = [
 // Parse the code using an interface similar to require("esprima").parse.
 const ast = recast.parse(code);
 ```
-Now do *whatever* you want to `ast`. Really, anything at all!
+
+Now do _whatever_ you want to `ast`. Really, anything at all!
 
 See [ast-types](https://github.com/benjamn/ast-types) (especially the [def/core.ts](https://github.com/benjamn/ast-types/blob/master/def/core.ts)) module for a thorough overview of the `ast` API.
+
 ```js
 // Grab a reference to the function declaration we just parsed.
 const add = ast.program.body[0];
@@ -89,11 +91,15 @@ ast.program.body[0] = b.variableDeclaration("var", [
 // Just for fun, because addition is commutative:
 add.params.push(add.params.shift());
 ```
+
 When you finish manipulating the AST, let `recast.print` work its magic:
+
 ```js
 const output = recast.print(ast).code;
 ```
+
 The `output` string now looks exactly like this, weird formatting and all:
+
 ```js
 var add = function(b, a) {
   return a +
@@ -101,26 +107,32 @@ var add = function(b, a) {
     b;
 }
 ```
+
 The magic of Recast is that it reprints only those parts of the syntax tree that you modify. In other words, the following identity is guaranteed:
+
 ```js
 recast.print(recast.parse(source)).code === source
 ```
+
 Whenever Recast cannot reprint a modified node using the original source code, it falls back to using a generic pretty printer. So the worst that can happen is that your changes trigger some harmless reformatting of your code.
 
 If you really don't care about preserving the original formatting, you can access the pretty printer directly:
+
 ```js
 var output = recast.prettyPrint(ast, { tabWidth: 2 }).code;
 ```
+
 And here's the exact `output`:
+
 ```js
 var add = function(b, a) {
   return a + b;
 }
 ```
+
 Note that the weird formatting was discarded, yet the behavior and abstract structure of the code remain the same.
 
-Using a different parser
----
+## Using a different parser
 
 By default, Recast uses the [Esprima JavaScript parser](https://www.npmjs.com/package/esprima) when you call `recast.parse(code)`. While Esprima supports almost all modern ECMAScript syntax, you may want to use a different parser to enable TypeScript or Flow syntax, or just because you want to match other compilation tools you might be using.
 
@@ -158,21 +170,23 @@ const tsAst = recast.parse(source, {
 
 **Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install babylon@next` to use the `typescript`, `flow`, or `babylon` parsers, or `npm install acorn` to use the `acorn` parser. Only Esprima is installed by default when Recast is installed.
 
-Source maps
----
+After calling `recast.parse`, if you're going to transform the AST, make sure that the `.original` property is preserved. With Babel, for instance, if you call `transformFromAST`, you must pass `cloneInputAst: false` in its options. ([More detail](https://github.com/babel/babel/issues/12882).
+
+## Source maps
 
 One of the coolest consequences of tracking and reusing original source code during reprinting is that it's pretty easy to generate a high-resolution mapping between the original code and the generated code—completely automatically!
 
 With every `slice`, `join`, and re-`indent`-ation, the reprinting process maintains exact knowledge of which character sequences are original, and where in the original source they came from.
 
 All you have to think about is how to manipulate the syntax tree, and Recast will give you a [source map](https://github.com/mozilla/source-map) in exchange for specifying the names of your source file(s) and the desired name of the map:
+
 ```js
 var result = recast.print(transform(recast.parse(source, {
   sourceFileName: "source.js"
 })), {
   sourceMapName: "map.json"
 });
-    
+
 console.log(result.code); // Resulting string of code.
 console.log(result.map); // JSON source map.
 
@@ -191,13 +205,12 @@ Note that you are free to mix and match syntax trees parsed from different sourc
 
 Note also that the source maps generated by Recast are character-by-character maps, so meaningful identifier names are not recorded at this time. This approach leads to higher-resolution debugging in modern browsers, at the expense of somewhat larger map sizes. Striking the perfect balance here is an area for future exploration, but such improvements will not require any breaking changes to the interface demonstrated above.
 
-Options
----
+## Options
+
 All Recast API functions take second parameter with configuration options, documented in
 [options.ts](https://github.com/benjamn/recast/blob/master/lib/options.ts)
 
-Motivation
----
+## Motivation
 
 The more code you have, the harder it becomes to make big, sweeping changes quickly and confidently. Even if you trust yourself not to make too many mistakes, and no matter how proficient you are with your text editor, changing tens of thousands of lines of code takes precious, non-refundable time.
 

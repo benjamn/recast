@@ -5,10 +5,6 @@ import * as recast from "../main";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 import * as parser from "../parsers/typescript";
-import { Printer } from "../lib/printer";
-
-const { namedTypes: n } = types;
-const printer = new Printer();
 
 // Babel 7 no longer supports Node 4 or 5.
 const nodeMajorVersion = parseInt(process.versions.node, 10);
@@ -217,23 +213,23 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "interface LabelledContainer<T> {",
-      "  label: string;",
-      "  content: T;",
-      "  option?: boolean;",
-      "  readonly x: number;",
-      "  [index: number]: string;",
-      "  [propName: string]: any;",
-      "  readonly [index: number]: string;",
-      "  (source: string, subString: string): boolean;",
-      "  (start: number): string;",
-      "  reset(): void;",
-      "  a(c: (this: void, e: E) => void): void;",
+      "  label: string",
+      "  content: T",
+      "  option?: boolean",
+      "  readonly x: number",
+      "  [index: number]: string",
+      "  [propName: string]: any",
+      "  readonly [index: number]: string",
+      "  (source: string, subString: string): boolean",
+      "  (start: number): string",
+      "  reset(): void",
+      "  a(c: (this: void, e: E) => void): void",
       "}",
     ]);
 
     check([
       "interface Square<T, U> extends Shape<T, U>, Visible<T, U> {",
-      "  sideLength: number;",
+      "  sideLength: number",
       "}",
     ]);
 
@@ -261,17 +257,17 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "}",
     ]);
 
-    check(["export interface S {", "  i(s: string): boolean;", "}"]);
+    check(["export interface S {", "  i(s: string): boolean", "}"]);
 
     check([
       "namespace Validation {",
       "  export interface S {",
-      "    i(j: string): boolean;",
+      "    i(j: string): boolean",
       "  }",
       "}",
     ]);
 
-    check(["export interface S {", "  i(j: string): boolean;", "}"]);
+    check(["export interface S {", "  i(j: string): boolean", "}"]);
 
     check(["declare namespace D3 {", "  export const f: number = 2;", "}"]);
 
@@ -312,32 +308,62 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     ]);
   });
 
-  it("parens", function () {
-    function parseExpression(expr: any) {
-      let ast: any = parser.parse(expr).program;
-      n.Program.assert(ast);
-      ast = ast.body[0];
-      return n.ExpressionStatement.check(ast) ? ast.expression : ast;
-    }
+  it("InterfaceBody: duplicate semicolon", function () {
+    const code = [
+      "interface Hello {",
+      "  'hello': any;",
+      "  'hello': string;",
+      "}",
+    ].join(eol);
 
-    const parse = (expr: string) => recast.parse(expr, { parser });
+    const ast = recast.parse(code, { parser });
 
-    function check(expr: string) {
-      const ast = parse(expr);
+    ast.program.body[0].body.body.pop();
 
-      const reprinted = recast.print(ast).code;
-      assert.strictEqual(reprinted, expr);
+    assert.strictEqual(
+      recast.print(ast).code,
+      ["interface Hello {", "  'hello': any;", "}"].join(eol),
+    );
+  });
 
-      const expressionAst = parseExpression(expr);
-      const generic = printer.printGenerically(expressionAst).code;
-      types.astNodesAreEquivalent.assert(
-        expressionAst,
-        parseExpression(generic),
-      );
-    }
+  it("InterfaceBody: duplicate semicolon: a lot of properties", function () {
+    const code = [
+      "interface LabelledContainer<T> {",
+      "  label: string;",
+      "  content: T;",
+      "  option?: boolean;",
+      "  readonly x: number;",
+      "  [index: number]: string;",
+      "  [propName: string]: any;",
+      "  readonly [index: number]: string;",
+      "  (source: string, subString: string): boolean;",
+      "  (start: number): string;",
+      "  reset(): void;",
+      "  a(c: (this: void, e: E) => void): void;",
+      "}",
+    ].join(eol);
 
-    check("(() => {}) as void");
-    check("(function () {} as void)");
+    const ast = recast.parse(code, { parser });
+
+    ast.program.body[0].body.body.shift();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        "interface LabelledContainer<T> {",
+        "  content: T;",
+        "  option?: boolean;",
+        "  readonly x: number;",
+        "  [index: number]: string;",
+        "  [propName: string]: any;",
+        "  readonly [index: number]: string;",
+        "  (source: string, subString: string): boolean;",
+        "  (start: number): string;",
+        "  reset(): void;",
+        "  a(c: (this: void, e: E) => void): void;",
+        "}",
+      ].join(eol),
+    );
   });
 });
 

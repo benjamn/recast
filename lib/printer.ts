@@ -20,7 +20,7 @@ interface PrintResultConstructor {
   new (code: any, sourceMap?: any): PrintResultType;
 }
 
-const PrintResult = (function PrintResult(
+const PrintResult = function PrintResult(
   this: PrintResultType,
   code: any,
   sourceMap?: any,
@@ -34,7 +34,7 @@ const PrintResult = (function PrintResult(
     isObject.assert(sourceMap);
     this.map = sourceMap;
   }
-} as any) as PrintResultConstructor;
+} as any as PrintResultConstructor;
 
 const PRp: PrintResultType = PrintResult.prototype;
 let warnedAboutToString = false;
@@ -64,7 +64,7 @@ interface PrinterConstructor {
   new (config?: any): PrinterType;
 }
 
-const Printer = (function Printer(this: PrinterType, config?: any) {
+const Printer = function Printer(this: PrinterType, config?: any) {
   assert.ok(this instanceof Printer);
 
   const explicitTabWidth = config && config.tabWidth;
@@ -181,7 +181,7 @@ const Printer = (function Printer(this: PrinterType, config?: any) {
     config.reuseWhitespace = oldReuseWhitespace;
     return pr;
   };
-} as any) as PrinterConstructor;
+} as any as PrinterConstructor;
 
 export { Printer };
 
@@ -196,14 +196,14 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
     return linesWithoutParens;
   }
 
-  let shouldAddParens = node.extra ? node.extra.parenthesized : false;
+  let shouldAddParens = false;
   const decoratorsLines = printDecorators(path, printPath);
 
   if (decoratorsLines.isEmpty()) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing path.needsParens() except in this case.
     if (!options.avoidRootParens) {
-      shouldAddParens = shouldAddParens || path.needsParens();
+      shouldAddParens = path.needsParens();
     }
   } else {
     parts.push(decoratorsLines);
@@ -1434,6 +1434,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push("?");
       }
 
+      if (n.definite) {
+        parts.push("!");
+      }
+
       if (n.typeAnnotation) {
         parts.push(path.call(print, "typeAnnotation"));
       }
@@ -2405,12 +2409,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString(";\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(path.map(print, "body"));
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
-
-      return concat(["{\n", lines.indent(options.tabWidth), ";", "\n}"]);
+      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
     }
 
     case "TSImportType":

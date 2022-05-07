@@ -138,7 +138,7 @@ interface TreeCopierConstructor {
   new (lines: any, tokens: any): TreeCopierType;
 }
 
-const TreeCopier = (function TreeCopier(
+const TreeCopier = function TreeCopier(
   this: TreeCopierType,
   lines: any,
   tokens: any,
@@ -150,7 +150,7 @@ const TreeCopier = (function TreeCopier(
   this.endTokenIndex = tokens.length;
   this.indent = 0;
   this.seen = new Map();
-} as any) as TreeCopierConstructor;
+} as any as TreeCopierConstructor;
 
 const TCp: TreeCopierType = TreeCopier.prototype;
 
