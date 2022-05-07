@@ -78,8 +78,8 @@ export function parse(source: string, options?: Partial<Options>) {
     program = ast;
     // In order to ensure we reprint leading and trailing program
     // comments, wrap the original Program node with a File node. Only
-    // ESTree parsers (Acorn and Esprima) return a Program as the root AST
-    // node. Most other (Babylon-like) parsers return a File.
+    // ESTree parsers (Acorn, Esprima, Meriyah) return a Program as the root
+    // AST node. Most other (Babylon-like) parsers return a File.
     file = b.file(ast, options.sourceFileName || null);
     file.loc = {
       start: lines.firstPos(),

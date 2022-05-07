@@ -23,6 +23,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 describe("comments", function () {
   [
     "../parsers/acorn",
+    "../parsers/meriyah",
     "../parsers/babel",
     "../parsers/esprima",
     "../parsers/flow",
@@ -180,6 +181,7 @@ function runTestsForParser(parserId: any) {
     const info = (
       {
         acorn: esprimaInfo,
+        meriyah: esprimaInfo,
         babel: babelInfo,
         esprima: esprimaInfo,
         flow: babelInfo,
