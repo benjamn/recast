@@ -1866,41 +1866,25 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "ObjectTypeCallProperty":
       return path.call(print, "value");
 
-    case "ObjectTypeIndexer":
-      if (n.static) {
-        parts.push("static ");
-      }
-
-      parts.push(printVariance(path, print), "[");
-
-      if (n.id) {
-        parts.push(path.call(print, "id"), ": ");
-      }
-
-      parts.push(path.call(print, "key"), "]: ", path.call(print, "value"));
-
-      return concat(parts);
-
     case "ObjectTypeProperty":
-      return concat([
-        n.static ? "static " : "",
-        printVariance(path, print),
-        path.call(print, "key"),
-        n.optional ? "?" : "",
-        !n.method ? ": " : "",
-        path.call(print, "value"),
-      ]);
-
+    case "ObjectTypeIndexer":
     case "ObjectTypeInternalSlot":
-      return concat([
-        n.static ? "static " : "",
-        "[[",
-        path.call(print, "id"),
-        "]]",
+      parts.push(n.static ? "static " : "", printVariance(path, print));
+      if (n.type === "ObjectTypeProperty") {
+        parts.push(path.call(print, "key"));
+      } else if (n.type === "ObjectTypeIndexer") {
+        parts.push("[");
+        if (n.id) parts.push(path.call(print, "id"), ": ");
+        parts.push(path.call(print, "key"), "]");
+      } else {
+        parts.push("[[", path.call(print, "id"), "]]");
+      }
+      parts.push(
         n.optional ? "?" : "",
         n.value.type !== "FunctionTypeAnnotation" ? ": " : "",
         path.call(print, "value"),
-      ]);
+      );
+      return concat(parts);
 
     case "QualifiedTypeIdentifier":
       return concat([
