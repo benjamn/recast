@@ -1752,6 +1752,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const parent = path.getParentNode(0);
       const isArrowFunctionTypeAnnotation = !(
         namedTypes.ObjectTypeCallProperty.check(parent) ||
+        // @ts-expect-error https://github.com/benjamn/ast-types/pull/755
+        (namedTypes.ObjectTypeProperty.check(parent) && parent.method) ||
         (namedTypes.ObjectTypeInternalSlot.check(parent) && parent.method) ||
         namedTypes.DeclareFunction.check(path.getParentNode(2))
       );
@@ -1884,7 +1886,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         printVariance(path, print),
         path.call(print, "key"),
         n.optional ? "?" : "",
-        ": ",
+        !n.method ? ": " : "",
         path.call(print, "value"),
       ]);
 

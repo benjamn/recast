@@ -145,6 +145,9 @@ describe("type syntax", function () {
     check("declare function foo(c: (e: Event) => void, b: B): void;");
     check("declare function foo(c: C, d?: Array<D>): void;");
     check("declare class C { x: string }");
+    check("declare class C { constructor(): void }");
+    check("declare class D { f(): D }");
+
     check(
       "declare module M {" +
         eol +
