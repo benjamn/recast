@@ -195,6 +195,23 @@ describe("type syntax", function () {
       ].join(eol),
     );
 
+    // Internal slots
+    check(
+      [
+        "declare class C {",
+        "  [[myInternalSlot]]: any;",
+        "  [[myOptionalInternalSlot]]?: any;",
+        "  [[myMethodInternalSlot]](arg: any): any;",
+        "  static [[myStaticInternalSlot]]: any;",
+        "  static [[myStaticOptionalInternalSlot]]?: any;",
+        "  static [[myStaticMethodInternalSlot]](arg: any): any;",
+        // Is there actually syntax for an optional method like this?
+        // Can't seem to find one that Flow's parser accepts.
+        // "  static [[myStaticMethodOptionalInternalSlot]]?(arg: any): any;",
+        "}",
+      ].join(eol),
+    );
+
     // typeArguments
     check("new A<string>();");
     check("createPlugin<number>();");
