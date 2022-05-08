@@ -10,15 +10,12 @@ describe("type syntax", function () {
     quote: "single",
     flowObjectCommas: false,
   });
-  const esprimaParserParseOptions = {
-    parser: require("esprima-fb"),
-  };
   const flowParserParseOptions = {
     parser: require("flow-parser"),
   };
 
   function check(source: string, parseOptions?: any) {
-    parseOptions = parseOptions || esprimaParserParseOptions;
+    parseOptions = parseOptions || flowParserParseOptions;
     const ast1 = parse(source, parseOptions);
     const code = printer.printGenerically(ast1).code;
     const ast2 = parse(code, parseOptions);
@@ -30,7 +27,7 @@ describe("type syntax", function () {
     // Import type annotations
     check("import type foo from 'foo';");
     check("import typeof foo from 'foo';");
-    check("import { type foo } from 'foo';", flowParserParseOptions);
+    check("import { type foo } from 'foo';");
 
     // Export type annotations
     check("export type { foo };");
@@ -69,9 +66,8 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
-    check("type A = {| optionalNumber?: number |};", flowParserParseOptions);
+    check("type A = {| optionalNumber?: number |};");
     check(
       "type A = {|" +
         eol +
@@ -80,18 +76,14 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "|};",
-      flowParserParseOptions,
     );
 
     // Opaque types
-    check("opaque type A = B;", flowParserParseOptions);
-    check("opaque type A = B.C;", flowParserParseOptions);
-    check(
-      "opaque type A = { optionalNumber?: number };",
-      flowParserParseOptions,
-    );
-    check("opaque type A: X = B;", flowParserParseOptions);
-    check("opaque type A: X.Y = B.C;", flowParserParseOptions);
+    check("opaque type A = B;");
+    check("opaque type A = B.C;");
+    check("opaque type A = { optionalNumber?: number };");
+    check("opaque type A: X = B;");
+    check("opaque type A: X.Y = B.C;");
     check(
       "opaque type A: { stringProperty: string } = {" +
         eol +
@@ -100,10 +92,9 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
-    check("opaque type A<T>: X<T> = B<T>;", flowParserParseOptions);
-    check("opaque type A<T>: X.Y<T> = B.C<T>;", flowParserParseOptions);
+    check("opaque type A<T>: X<T> = B<T>;");
+    check("opaque type A<T>: X.Y<T> = B.C<T>;");
     check(
       "opaque type A<T>: { optional?: T } = {" +
         eol +
@@ -112,7 +103,6 @@ describe("type syntax", function () {
         "  optional?: T;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
 
     // Generic
@@ -163,16 +153,13 @@ describe("type syntax", function () {
         "}",
     );
 
-    check("declare opaque type A;", flowParserParseOptions);
-    check("declare opaque type A: X;", flowParserParseOptions);
-    check("declare opaque type A: X.Y;", flowParserParseOptions);
-    check(
-      "declare opaque type A: { stringProperty: string };",
-      flowParserParseOptions,
-    );
-    check("declare opaque type A<T>: X<T>;", flowParserParseOptions);
-    check("declare opaque type A<T>: X.Y<T>;", flowParserParseOptions);
-    check("declare opaque type A<T>: { property: T };", flowParserParseOptions);
+    check("declare opaque type A;");
+    check("declare opaque type A: X;");
+    check("declare opaque type A: X.Y;");
+    check("declare opaque type A: { stringProperty: string };");
+    check("declare opaque type A<T>: X<T>;");
+    check("declare opaque type A<T>: X.Y<T>;");
+    check("declare opaque type A<T>: { property: T };");
 
     // Classes
     check("class A {" + eol + "  a: number;" + eol + "}");
@@ -194,7 +181,7 @@ describe("type syntax", function () {
     check("class A<T: number> {}");
 
     // Inexact object types
-    check("type InexactFoo = { foo: number; ... };", flowParserParseOptions);
+    check("type InexactFoo = { foo: number; ... };");
     check(
       [
         "type MultiLineInexact = {",
@@ -203,26 +190,25 @@ describe("type syntax", function () {
         "  ...",
         "};",
       ].join(eol),
-      flowParserParseOptions,
     );
 
     // typeArguments
-    check("new A<string>();", flowParserParseOptions);
-    check("createPlugin<number>();", flowParserParseOptions);
+    check("new A<string>();");
+    check("createPlugin<number>();");
 
-    check("function myFunction([param1]: Params) {}", flowParserParseOptions);
+    check("function myFunction([param1]: Params) {}");
   });
 
   it("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
-    check("type A = Obj?.['a'];", flowParserParseOptions);
-    check("type B = Array<string>?.[number];", flowParserParseOptions);
-    check("type C = Obj?.['bar']['baz'];", flowParserParseOptions);
-    check("type D = (Obj?.['bar'])['baz'];", flowParserParseOptions);
-    check("type E = Obj?.['bar'][];", flowParserParseOptions);
-    check("type F = Obj?.['bar'][boolean][];", flowParserParseOptions);
-    check("type G = Obj['bar']?.[boolean][];", flowParserParseOptions);
-    check("type H = (Obj?.['bar'])[string][];", flowParserParseOptions);
-    check("type I = Obj?.['bar']?.[string][];", flowParserParseOptions);
+    check("type A = Obj?.['a'];");
+    check("type B = Array<string>?.[number];");
+    check("type C = Obj?.['bar']['baz'];");
+    check("type D = (Obj?.['bar'])['baz'];");
+    check("type E = Obj?.['bar'][];");
+    check("type F = Obj?.['bar'][boolean][];");
+    check("type G = Obj['bar']?.[boolean][];");
+    check("type H = (Obj?.['bar'])[string][];");
+    check("type I = Obj?.['bar']?.[string][];");
 
     function checkEquiv(a: string, b: string) {
       const aAst = parse(a, flowParserParseOptions);
