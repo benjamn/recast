@@ -147,6 +147,9 @@ describe("type syntax", function () {
     check("declare class C { x: string }");
     check("declare class C { constructor(): void }");
     check("declare class D { f(): D }");
+    check("declare class C { static make(): C }");
+    check("declare class C { static make: () => C }");
+    check("declare class C { static instance: C }");
 
     check(
       "declare module M {" +

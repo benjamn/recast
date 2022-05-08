@@ -1883,6 +1883,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "ObjectTypeProperty":
       return concat([
+        n.static ? "static " : "",
         printVariance(path, print),
         path.call(print, "key"),
         n.optional ? "?" : "",
