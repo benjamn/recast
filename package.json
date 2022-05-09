@@ -1,7 +1,7 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
   "name": "@gregprice/recast",
-  "version": "0.21.2-0.tsflower.5",
+  "version": "0.21.2-0.tsflower.6",
   "description": "Temporary ad-hoc fork of JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
   "keywords": [
     "ast",
