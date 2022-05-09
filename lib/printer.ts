@@ -1767,7 +1767,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         isArrowFunctionTypeAnnotation &&
         !hasTypeParameters &&
         n.params.length === 1 &&
-        !n.params[0].name;
+        !n.params[0].name &&
+        !(
+          namedTypes.FunctionTypeAnnotation.check(n.params[0].typeAnnotation) ||
+          namedTypes.UnionTypeAnnotation.check(n.params[0].typeAnnotation) ||
+          namedTypes.IntersectionTypeAnnotation.check(n.params[0].typeAnnotation)
+        );
 
       parts.push(
         hasTypeParameters ? path.call(print, "typeParameters") : "",

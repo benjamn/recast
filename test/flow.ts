@@ -126,9 +126,8 @@ describe("Flow type syntax", function () {
     check("function f(): () => void {}");
     check("function f(): () => () => void {}");
     check("function f(): (cb: () => void) => () => void {}");
-    // check("function f(): (() => void) => () => void {}"); // TODO this breaks
+    check("function f(): (() => void) => () => void {}");
     check("function f(m: (cb: () => void) => () => void): void {}");
-    // check("function f((() => void) => () => void): void {}"); // TODO this breaks
 
     // Object
     check(
@@ -166,8 +165,10 @@ describe("Flow type syntax", function () {
     check("declare function f(): (cb: () => void) => () => void;");
     check("declare function f(m: (cb: () => void) => () => void): void;");
     check("declare function anonymousParameter(number): void;")
-    // check("declare function f(): (() => void) => () => void;"); // TODO breaks
-    // check("declare function f((() => void) => () => void): void;"); // TODO breaks
+    check("declare function f(): (() => void) => () => void;");
+    check("declare function f((() => void) => () => void): void;");
+    check("declare function f(): ('a' & mixed) => void;");
+    check("declare function f(): ('a' | 'b') => void;");
 
     check("declare class C { x: string }");
     check("declare class C { constructor(): void }");
