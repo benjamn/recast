@@ -1764,7 +1764,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       const hasTypeParameters = !!n.typeParameters;
       const needsParens =
-        hasTypeParameters || n.params.length !== 1 || n.params[0].name;
+        !isArrowFunctionTypeAnnotation ||
+        hasTypeParameters ||
+        n.params.length !== 1 ||
+        n.params[0].name;
 
       parts.push(
         hasTypeParameters ? path.call(print, "typeParameters") : "",

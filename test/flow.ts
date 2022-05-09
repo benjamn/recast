@@ -149,12 +149,14 @@ describe("Flow type syntax", function () {
         eol +
         "};",
     );
+    check("var methodAnonymousParameter: { m(number): void };")
 
     // Casts
     check("(1 + 1: number);");
 
     // Declare
     check("declare var A: string;");
+    check("declare var methodAnonymousParameter: { m(number): void };")
 
     check("declare function foo(c: C): void;");
     check("declare function foo(c: C, b: B): void;");
@@ -163,6 +165,7 @@ describe("Flow type syntax", function () {
     check("declare function f(): () => void;");
     check("declare function f(): (cb: () => void) => () => void;");
     check("declare function f(m: (cb: () => void) => () => void): void;");
+    check("declare function anonymousParameter(number): void;")
     // check("declare function f(): (() => void) => () => void;"); // TODO breaks
     // check("declare function f((() => void) => () => void): void;"); // TODO breaks
 
