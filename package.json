@@ -42,7 +42,7 @@
     "fs": false
   },
   "dependencies": {
-    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.3",
+    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.5",
     "esprima": "~4.0.0",
     "source-map": "~0.6.1",
     "tslib": "^2.0.1"
