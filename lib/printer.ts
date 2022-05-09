@@ -1757,8 +1757,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const parent = path.getParentNode(0);
       const isArrowFunctionTypeAnnotation = !(
         namedTypes.ObjectTypeCallProperty.check(parent) ||
-        (namedTypes.ObjectTypeProperty.check(parent) && parent.method) ||
-        (namedTypes.ObjectTypeInternalSlot.check(parent) && parent.method) ||
+        ((namedTypes.ObjectTypeProperty.check(parent) ||
+          namedTypes.ObjectTypeInternalSlot.check(parent)) &&
+          // @ts-expect-error https://github.com/benjamn/ast-types/pull/757
+          (parent.method || parent.kind === "get" || parent.kind === "set")) ||
         namedTypes.DeclareFunction.check(path.getParentNode(2))
       );
 
@@ -1771,7 +1773,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         !(
           namedTypes.FunctionTypeAnnotation.check(n.params[0].typeAnnotation) ||
           namedTypes.UnionTypeAnnotation.check(n.params[0].typeAnnotation) ||
-          namedTypes.IntersectionTypeAnnotation.check(n.params[0].typeAnnotation)
+          namedTypes.IntersectionTypeAnnotation.check(
+            n.params[0].typeAnnotation,
+          )
         );
 
       parts.push(
@@ -1873,6 +1877,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "ObjectTypeIndexer":
     case "ObjectTypeInternalSlot":
       parts.push(n.static ? "static " : "", printVariance(path, print));
+
+      if (n.kind === "get" || n.kind === "set") parts.push(n.kind, " ");
+
       if (n.type === "ObjectTypeProperty") {
         parts.push(path.call(print, "key"));
       } else if (n.type === "ObjectTypeIndexer") {
@@ -1882,9 +1889,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       } else {
         parts.push("[[", path.call(print, "id"), "]]");
       }
+
       parts.push(
         n.optional ? "?" : "",
-        !n.method ? ": " : "",
+        !n.method && n.kind !== "get" && n.kind !== "set" ? ": " : "",
         path.call(print, "value"),
       );
       return concat(parts);

@@ -150,6 +150,10 @@ describe("Flow type syntax", function () {
     );
     check("var methodAnonymousParameter: { m(number): void };")
 
+    check(`declare var v: { get getter(): number };`);
+    check(`declare var v: { set setter(number): void };`);
+    check(`declare var v: { set setter(value: number): void };`);
+
     // Casts
     check("(1 + 1: number);");
 
@@ -181,7 +185,14 @@ describe("Flow type syntax", function () {
     check("declare class A<X> extends B<X[]> { x: X }");
     check("declare class A extends B implements I<string>, J {}");
 
+    check(`declare class C { get getter(): number }`);
+    check(`declare class C { set setter(number): void }`);
+    check(`declare class C { set setter(value: number): void }`);
+
     check("declare interface A<X> extends B<X[]>, C { a: number }");
+    check(`declare interface I { get getter(): number }`);
+    check(`declare interface I { set setter(number): void }`);
+    check(`declare interface I { set setter(value: number): void }`);
 
     check(
       "declare module M {" +
@@ -205,6 +216,10 @@ describe("Flow type syntax", function () {
     check("class A {" + eol + "  static foo(a: number): string {}" + eol + "}");
     check(`class C {${eol}  constructor() {}${eol}}`);
     check(`class C {${eol}  f(): C {}${eol}}`);
+
+    // Getters, setters
+    check(`class C {${eol}  get getter(): number {}${eol}}`);
+    check(`class C {${eol}  set setter(value: number): void {}${eol}}`);
 
     // Type parameters
     check("class A<T> {}");
