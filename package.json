@@ -29,7 +29,7 @@
     "lint": "eslint --ext .ts .",
     "format": "prettier --write .",
     "clean": "ts-emit-clean",
-    "prepack": "npm run build",
+    "prepare": "npm run build",
     "postpack": "npm run clean"
   },
   "lint-staged": {
