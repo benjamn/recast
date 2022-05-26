@@ -11,7 +11,7 @@
 - ✅ Fixed broken parenthesis when argument of UnaryExpression is LogicalExpression `!(a && b)` (https://github.com/benjamn/recast/pull/923)
 - ✅ Fixed broken quotes (https://github.com/benjamn/recast/pull/1024 )
 - ✅ Fixed ambient context in **TypeScript** tests (https://github.com/benjamn/recast/pull/1077)
-- ✅ ~Fixed additional semicolon it TSInterfaceBody (https://github.com/benjamn/recast/pull/867)~ (merged 🎉!)
+- ✅ ~Fixed additional semicolon it TSInterfaceBody (https://github.com/benjamn/recast/pull/867)~ (merged 🎉)
 - ✅ ~Fixed of parenthesizes around arrow function body returning object (https://github.com/benjamn/recast/pull/744)~ (merged as https://github.com/benjamn/recast/commit/eb94a84167b209dd024e6932bfe8f5f7c2744ddc 🎉)
 
 
