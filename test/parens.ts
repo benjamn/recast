@@ -22,7 +22,14 @@ function check_(expr: string) {
 
   const expressionAst = parseExpression(expr);
   const generic = printer.printGenerically(expressionAst).code;
-  types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
+
+  if (!types.astNodesAreEquivalent(expressionAst, parseExpression(generic))) {
+    throw new assert.AssertionError({
+      message: "Expected values to parse to equivalent ASTs",
+      actual: generic,
+      expected: expr,
+    });
+  }
 }
 
 function check(expr: string) {
