@@ -563,13 +563,14 @@ FPp.firstInStatement = function () {
   let childName, child;
 
   for (let i = s.length - 1; i >= 0; i -= 2) {
-    if (n.Node.check(s[i])) {
-      childName = parentName;
-      child = parent;
-      parentName = s[i - 1];
-      parent = s[i];
+    if (!n.Node.check(s[i])) {
+      continue;
     }
 
+    childName = parentName;
+    child = parent;
+    parentName = s[i - 1];
+    parent = s[i];
     if (!parent || !child) {
       continue;
     }
