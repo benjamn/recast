@@ -42,7 +42,10 @@ interface FastPathType {
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
   needsParens(): any;
-  firstInStatement(): any;
+  firstInExpressionStatement(): boolean;
+  firstInExpressionStatementOrExpressionBody(
+    onlyExpressionStatement?: boolean,
+  ): boolean;
 }
 
 interface FastPathConstructor {
@@ -499,10 +502,11 @@ FPp.needsParens = function () {
   }
 
   switch (node.type) {
-    case "FunctionExpression":
     case "ObjectExpression":
+      return this.firstInExpressionStatementOrExpressionBody();
+    case "FunctionExpression":
     case "ClassExpression":
-      return this.firstInStatement();
+      return this.firstInExpressionStatement();
     default:
       return false;
   }
@@ -541,7 +545,13 @@ function containsCallExpression(node: any): any {
   return false;
 }
 
-FPp.firstInStatement = function () {
+FPp.firstInExpressionStatement = function () {
+  return this.firstInExpressionStatementOrExpressionBody(true);
+};
+
+FPp.firstInExpressionStatementOrExpressionBody = function (
+  onlyExpressionStatement: boolean = false,
+) {
   const s = this.stack;
   let parentName, parent;
   let childName, child;
@@ -566,7 +576,7 @@ FPp.firstInStatement = function () {
 
     if (n.ArrowFunctionExpression.check(parent) && childName === "body") {
       assert.strictEqual(parent.body, child);
-      return true;
+      return !onlyExpressionStatement;
     }
 
     if (n.AssignmentExpression.check(parent) && childName === "left") {

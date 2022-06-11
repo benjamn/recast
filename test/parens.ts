@@ -188,6 +188,25 @@ describe("parens", function () {
     check("const x = class { static f() { return 3; } }.f()");
   });
 
+  describe("ExpressionBody", () => {
+    // We need parens if an ExpressionBody starts with an ObjectExpression:
+    check("() => ({ x: 1 })"); // ExpressionBody, with an object literal
+    check("() => { x: 1 }"); // FunctionBody, with statement labelled "x"
+
+    // But we don't for other kinds of nodes -- even some that *would* need
+    // parens if they were the start of an ExpressionStatement.
+
+    // Issue #914: FunctionExpression at start of ExpressionBody
+    check("const e = () => function(g, h) { return i; };");
+    check("() => function(){}");
+    check("() => function(){}.call(this)");
+
+    // Issue #1082: ClassExpression at start of ExpressionBody
+    check("const D = (C) => class extends C {};");
+    check("() => class {}");
+    check("() => class {}.prototype");
+  });
+
   it("ReprintedParens", function () {
     const code = "a(function g(){}.call(this));";
     const ast1 = parse(code);
