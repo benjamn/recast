@@ -329,13 +329,13 @@ FPp.needsParens = function (assumeExpressionContext) {
   const name = this.getName();
 
   // If the value of this path is some child of a Node and not a Node
-  // itself, then it doesn't need parentheses. Only Node objects (in fact,
-  // only Expression nodes) need parentheses.
+  // itself, then it doesn't need parentheses. Only Node objects
+  // need parentheses.
   if (this.getValue() !== node) {
     return false;
   }
 
-  // Only statements don't need parentheses.
+  // Statements don't need parentheses.
   if (n.Statement.check(node)) {
     return false;
   }
@@ -423,13 +423,6 @@ FPp.needsParens = function (assumeExpressionContext) {
           // explicit exceptions above if this proves overzealous.
           return true;
       }
-
-    case "OptionalIndexedAccessType":
-      return node.optional && parent.type === "IndexedAccessType";
-
-    case "IntersectionTypeAnnotation":
-    case "UnionTypeAnnotation":
-      return parent.type === "NullableTypeAnnotation";
 
     case "Literal":
       return (
@@ -531,6 +524,19 @@ FPp.needsParens = function (assumeExpressionContext) {
       ) {
         return true;
       }
+      break;
+
+    // Flow type nodes.
+    //
+    // (TS type nodes don't need any logic here, because they represent
+    // parentheses explicitly in the AST, with TSParenthesizedType.)
+
+    case "OptionalIndexedAccessType":
+      return node.optional && parent.type === "IndexedAccessType";
+
+    case "IntersectionTypeAnnotation":
+    case "UnionTypeAnnotation":
+      return parent.type === "NullableTypeAnnotation";
   }
 
   if (
