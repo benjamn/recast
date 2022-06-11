@@ -183,6 +183,11 @@ describe("parens", function () {
     check("function* test () { yield yield foo }");
   });
 
+  describe("ClassExpression", function () {
+    check("(class { static f() { return 3; } }).f()");
+    check("const x = class { static f() { return 3; } }.f()");
+  });
+
   it("ReprintedParens", function () {
     const code = "a(function g(){}.call(this));";
     const ast1 = parse(code);
