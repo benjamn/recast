@@ -41,7 +41,7 @@ interface FastPathType {
   hasParens(): any;
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
-  needsParens(assumeExpressionContext?: boolean): any;
+  needsParens(): any;
   canBeFirstInStatement(): any;
   firstInStatement(): any;
 }
@@ -269,7 +269,7 @@ FPp.getNextToken = function (node) {
 
 // Inspired by require("ast-types").NodePath.prototype.needsParens, but
 // more efficient because we're iterating backwards through a stack.
-FPp.needsParens = function (assumeExpressionContext) {
+FPp.needsParens = function () {
   const node = this.getNode();
 
   // This needs to come before `if (!parent) { return false }` because
@@ -499,11 +499,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     return containsCallExpression(node);
   }
 
-  if (
-    assumeExpressionContext !== true &&
-    !this.canBeFirstInStatement() &&
-    this.firstInStatement()
-  ) {
+  if (!this.canBeFirstInStatement() && this.firstInStatement()) {
     return true;
   }
 
