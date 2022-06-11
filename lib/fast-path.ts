@@ -225,54 +225,12 @@ FPp.map = function map(callback /*, name1, name2, ... */) {
   return result;
 };
 
-// Returns true if the node at the tip of the path is wrapped with
-// parentheses, OR if the only reason the node needed parentheses was that
-// it couldn't be the first expression in the enclosing statement (see
-// FastPath#canBeFirstInStatement), and it has an opening `(` character.
-// For example, the FunctionExpression in `(function(){}())` appears to
-// need parentheses only because it's the first expression in the AST, but
-// since it happens to be preceded by a `(` (which is not apparent from
-// the AST but can be determined using FastPath#getPrevToken), there is no
-// ambiguity about how to parse it, so it counts as having parentheses,
-// even though it is not immediately followed by a `)`.
+// Returns true if the node at the tip of the path is preceded by an
+// open-paren token `(`.
 FPp.hasParens = function () {
   const node = this.getNode();
-
   const prevToken = this.getPrevToken(node);
-  if (!prevToken) {
-    return false;
-  }
-
-  const nextToken = this.getNextToken(node);
-  if (!nextToken) {
-    return false;
-  }
-
-  if (prevToken.value === "(") {
-    if (nextToken.value === ")") {
-      // If the node preceded by a `(` token and followed by a `)` token,
-      // then of course it has parentheses.
-      return true;
-    }
-
-    // If this is one of the few Expression types that can't come first in
-    // the enclosing statement because of parsing ambiguities (namely,
-    // FunctionExpression, ObjectExpression, and ClassExpression) and
-    // this.firstInStatement() returns true, and the node would not need
-    // parentheses in an expression context because this.needsParens(true)
-    // returns false, then it just needs an opening parenthesis to resolve
-    // the parsing ambiguity that made it appear to need parentheses.
-    const justNeedsOpeningParen =
-      !this.canBeFirstInStatement() &&
-      this.firstInStatement() &&
-      !this.needsParens(true);
-
-    if (justNeedsOpeningParen) {
-      return true;
-    }
-  }
-
-  return false;
+  return prevToken && prevToken.value === "(";
 };
 
 FPp.getPrevToken = function (node) {
