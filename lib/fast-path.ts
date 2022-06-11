@@ -501,13 +501,46 @@ FPp.needsParens = function () {
     return containsCallExpression(node);
   }
 
+  // The ExpressionStatement production, and the two productions that
+  // contain ExpressionBody, have lookahead constraints that forbid some
+  // possibilities for their next node or two:
+  //   https://tc39.es/ecma262/#prod-ExpressionStatement
+  //   https://tc39.es/ecma262/#prod-ConciseBody
+  //   https://tc39.es/ecma262/#prod-AsyncConciseBody
+  //
+  // The effect of these is that if we have an expression that appears in
+  // one of those and would start with a forbidden token sequence, we need
+  // to insert parens so that the first token is `(` instead.
+  //
+  // We choose to do this on the smallest subexpression we can.
   switch (node.type) {
     case "ObjectExpression":
+      // Will start with `{`.  Therefore can't be the start of an
+      // ExpressionStatement or (either use of) an ExpressionBody.
       return this.firstInExpressionStatementOrExpressionBody();
+
     case "FunctionExpression":
     case "ClassExpression":
+      // Will start with the token `function`, tokens `async function`, or
+      // token `class`.  Therefore can't start an ExpressionStatement.
       return this.firstInExpressionStatement();
+
+    case "MemberExpression":
+      if (
+        n.Identifier.check(node.object) &&
+        node.object.name === "let" &&
+        node.computed
+      ) {
+        // Will start with the tokens `let [`.  Therefore can't start an
+        // ExpressionStatement.
+        return this.firstInExpressionStatement();
+      }
+      return false;
+
     default:
+      // Will not start with any of the above sequences of tokens, unless it
+      // starts with a child node that does.  If so, that child will take
+      // care of it (possibly by letting its own child take care of it, etc.)
       return false;
   }
 };

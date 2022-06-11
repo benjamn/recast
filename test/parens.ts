@@ -188,6 +188,21 @@ describe("parens", function () {
     check("const x = class { static f() { return 3; } }.f()");
   });
 
+  describe("let-bracket ambiguity", () => {
+    // Test the `let [` lookahead constraint of:
+    //   https://tc39.es/ecma262/#prod-ExpressionStatement
+
+    // This prints "[5]" (try it!).  A MemberExpression `let [x]` appears twice.
+    check("{var let = [[3]], x = 0; (let [x] = [5]); console.log(let [x])}");
+
+    // This prints "[3]".  The first `let [x]` starts a LexicalDeclaration.
+    check("{var let = [[3]], x = 0; {let [x] = [5];} console.log(let [x])}");
+
+    // Focussing in on the key statements:
+    check("(let [x] = [5])"); // ExpressionStatement, with MemberExpression
+    check("let [x] = [5]"); // LexicalDeclaration
+  });
+
   describe("ExpressionBody", () => {
     // We need parens if an ExpressionBody starts with an ObjectExpression:
     check("() => ({ x: 1 })"); // ExpressionBody, with an object literal
@@ -205,6 +220,10 @@ describe("parens", function () {
     check("const D = (C) => class extends C {};");
     check("() => class {}");
     check("() => class {}.prototype");
+
+    // `let [` starting an ExpressionBody
+    check("() => let[x]");
+    check("() => let [x] = [5]");
   });
 
   it("ReprintedParens", function () {
