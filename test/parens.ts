@@ -15,7 +15,7 @@ function parseExpression(expr: any) {
   return n.ExpressionStatement.check(ast) ? ast.expression : ast;
 }
 
-function check(expr: any) {
+function check_(expr: string) {
   const ast = parse(expr);
   const reprinted = printer.print(ast).code;
   assert.strictEqual(reprinted, expr);
@@ -23,6 +23,12 @@ function check(expr: any) {
   const expressionAst = parseExpression(expr);
   const generic = printer.printGenerically(expressionAst).code;
   types.astNodesAreEquivalent.assert(expressionAst, parseExpression(generic));
+}
+
+function check(expr: string) {
+  it(`handles: ${expr}`, () => {
+    check_(expr);
+  });
 }
 
 const operators = [
@@ -53,18 +59,18 @@ const operators = [
 
 describe("parens", function () {
   it("Arithmetic", function () {
-    check("1 - 2");
-    check("  2 +2 ");
+    check_("1 - 2");
+    check_("  2 +2 ");
 
     operators.forEach(function (op1) {
       operators.forEach(function (op2) {
-        check("(a " + op1 + " b) " + op2 + " c");
-        check("a " + op1 + " (b " + op2 + " c)");
+        check_("(a " + op1 + " b) " + op2 + " c");
+        check_("a " + op1 + " (b " + op2 + " c)");
       });
     });
   });
 
-  it("Unary", function () {
+  describe("Unary", function () {
     check("(-a).b");
     check("(+a).b");
     check("(!a).b");
@@ -74,14 +80,14 @@ describe("parens", function () {
     check("(delete a.b).c");
   });
 
-  it("Binary", function () {
+  describe("Binary", function () {
     check("(a && b)()");
     check("typeof (a && b)");
     check("(a && b)[c]");
     check("(a && b).c");
   });
 
-  it("Sequence", function () {
+  describe("Sequence", function () {
     check("(a, b)()");
     check("a(b, (c, d), e)");
     check("!(a, b)");
@@ -94,7 +100,7 @@ describe("parens", function () {
     check("a = (1, 2)");
   });
 
-  it("NewExpression", function () {
+  describe("NewExpression", function () {
     check("new (a.b())");
     check("new (a.b())(c)");
     check("new a.b(c)");
@@ -107,7 +113,7 @@ describe("parens", function () {
     check('(new Date)["getTime"]()');
   });
 
-  it("Numbers", function () {
+  describe("Numbers", function () {
     check("(1).foo");
     check("(-1).foo");
     check("+0");
@@ -115,7 +121,7 @@ describe("parens", function () {
     check("(-Infinity).foo");
   });
 
-  it("Assign", function () {
+  describe("Assign", function () {
     check("!(a = false)");
     check("a + (b = 2) + c");
     check("(a = fn)()");
@@ -124,7 +130,7 @@ describe("parens", function () {
     check("(a = b).c");
   });
 
-  it("Function", function () {
+  describe("Function", function () {
     check("a(function (){}.bind(this))");
     check("(function (){}).apply(this, arguments)");
     check("function f() { (function (){}).call(this) }");
@@ -134,12 +140,12 @@ describe("parens", function () {
     check("a || ((x, y={z:1}) => x + y.z)");
   });
 
-  it("ObjectLiteral", function () {
+  describe("ObjectLiteral", function () {
     check("a({b:c(d)}.b)");
     check("({a:b(c)}).a");
   });
 
-  it("ArrowFunctionExpression", () => {
+  describe("ArrowFunctionExpression", () => {
     check("(() => {})()");
     check("test(() => {})");
 
@@ -149,7 +155,7 @@ describe("parens", function () {
     check("(() => {}) + (() => {})");
   });
 
-  it("AwaitExpression", function () {
+  describe("AwaitExpression", function () {
     check("async () => (await a) && (await b)");
     check("async () => +(await a)");
     check("async () => (await f)()");
@@ -159,7 +165,7 @@ describe("parens", function () {
     check("async () => (await a).b");
   });
 
-  it("YieldExpression", function () {
+  describe("YieldExpression", function () {
     check("function* test () { return (yield a) && (yield b) }");
     check("function* test () { return +(yield a) }");
     check("function* test () { return (yield f)() }");
@@ -170,7 +176,7 @@ describe("parens", function () {
     check("function* test () { yield yield foo }");
   });
 
-  it("ArrowFunctionExpression", () => {
+  describe("ArrowFunctionExpression", () => {
     check("(() => {})()");
     check("test(() => {})");
 
@@ -333,16 +339,16 @@ describe("parens", function () {
     assert.strictEqual(printer.print(ast).code, code);
   });
 
-  it("should be added to callees that are function expressions", function () {
+  describe("should be added to callees that are function expressions", function () {
     check("(()=>{})()");
     check("(function (){})()");
   });
 
-  it("should be added to function expressions at start of sequence", function () {
+  describe("should be added to function expressions at start of sequence", function () {
     check("(function (){})(), 0");
   });
 
-  it("issues #504 and #512", function () {
+  describe("issues #504 and #512", function () {
     check("() => ({})['foo']");
     check("() => ({ foo: 123 }[foo] + 2) * 3");
     check("() => ({ foo: 123 }['foo'] + 1 - 2 - 10)");
@@ -350,11 +356,11 @@ describe("parens", function () {
     check("() => (function () { return 456 }())");
   });
 
-  it("should be added to bound arrow function expressions", function () {
+  describe("should be added to bound arrow function expressions", function () {
     check("(()=>{}).bind(x)");
   });
 
-  it("should be added to object destructuring assignment expressions", function () {
+  describe("should be added to object destructuring assignment expressions", function () {
     check("({x}={x:1})");
     // Issue #533
     check("({ foo } = bar)");
@@ -362,7 +368,7 @@ describe("parens", function () {
 
   it("regression test for issue #327", function () {
     const expr = "(function(){}())";
-    check(expr);
+    check_(expr);
 
     const ast = parse(expr);
     const callExpression = ast.program.body[0].expression;
@@ -379,7 +385,7 @@ describe("parens", function () {
 
   it("regression test for issue #366", function () {
     const code = "typeof a ? b : c";
-    check(code);
+    check_(code);
 
     const ast = parse(code);
     const exprStmt = ast.program.body[0];
