@@ -575,15 +575,6 @@ FPp.firstInStatement = function () {
       continue;
     }
 
-    if (
-      n.BlockStatement.check(parent) &&
-      parentName === "body" &&
-      childName === 0
-    ) {
-      assert.strictEqual(parent.body[0], child);
-      return true;
-    }
-
     if (n.ExpressionStatement.check(parent) && childName === "expression") {
       assert.strictEqual(parent.expression, child);
       return true;
