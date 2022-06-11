@@ -580,14 +580,14 @@ FPp.firstInStatement = function () {
       return true;
     }
 
-    if (n.AssignmentExpression.check(parent) && childName === "left") {
-      assert.strictEqual(parent.left, child);
-      return true;
-    }
-
     if (n.ArrowFunctionExpression.check(parent) && childName === "body") {
       assert.strictEqual(parent.body, child);
       return true;
+    }
+
+    if (n.AssignmentExpression.check(parent) && childName === "left") {
+      assert.strictEqual(parent.left, child);
+      continue;
     }
 
     // s[i + 1] and s[i + 2] represent the array between the parent
