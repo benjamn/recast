@@ -42,7 +42,6 @@ interface FastPathType {
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
   needsParens(): any;
-  canBeFirstInStatement(): any;
   firstInStatement(): any;
 }
 
@@ -499,11 +498,14 @@ FPp.needsParens = function () {
     return containsCallExpression(node);
   }
 
-  if (!this.canBeFirstInStatement() && this.firstInStatement()) {
-    return true;
+  switch (node.type) {
+    case "FunctionExpression":
+    case "ObjectExpression":
+    case "ClassExpression":
+      return this.firstInStatement();
+    default:
+      return false;
   }
-
-  return false;
 };
 
 function isBinary(node: any) {
@@ -538,24 +540,6 @@ function containsCallExpression(node: any): any {
 
   return false;
 }
-
-FPp.canBeFirstInStatement = function () {
-  const node = this.getNode();
-
-  if (n.FunctionExpression.check(node)) {
-    return false;
-  }
-
-  if (n.ObjectExpression.check(node)) {
-    return false;
-  }
-
-  if (n.ClassExpression.check(node)) {
-    return false;
-  }
-
-  return true;
-};
 
 FPp.firstInStatement = function () {
   const s = this.stack;
