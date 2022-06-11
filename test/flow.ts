@@ -204,6 +204,8 @@ describe("type syntax", function () {
     check("type B = Array<string>?.[number];");
     check("type C = Obj?.['bar']['baz'];");
     check("type D = (Obj?.['bar'])['baz'];");
+    check("type C3 = Obj?.['foo']['bar']['baz'];");
+    check("type D3 = (Obj?.['foo']['bar'])['baz'];");
     check("type E = Obj?.['bar'][];");
     check("type F = Obj?.['bar'][boolean][];");
     check("type G = Obj['bar']?.[boolean][];");

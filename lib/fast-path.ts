@@ -532,7 +532,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     // parentheses explicitly in the AST, with TSParenthesizedType.)
 
     case "OptionalIndexedAccessType":
-      return node.optional && parent.type === "IndexedAccessType";
+      return parent.type === "IndexedAccessType";
 
     case "IntersectionTypeAnnotation":
     case "UnionTypeAnnotation":
