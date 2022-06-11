@@ -14,6 +14,12 @@ describe("type syntax", function () {
     parser: require("flow-parser"),
   };
 
+  function checkEquiv(a: string, b: string) {
+    const aAst = parse(a, flowParserParseOptions);
+    const bAst = parse(b, flowParserParseOptions);
+    types.astNodesAreEquivalent.assert(aAst, bAst);
+  }
+
   function check(source: string, parseOptions?: any) {
     parseOptions = parseOptions || flowParserParseOptions;
     const ast1 = parse(source, parseOptions);
@@ -212,12 +218,6 @@ describe("type syntax", function () {
     check("type H = (Obj?.['bar'])[string][];");
     check("type I = Obj?.['bar']?.[string][];");
 
-    function checkEquiv(a: string, b: string) {
-      const aAst = parse(a, flowParserParseOptions);
-      const bAst = parse(b, flowParserParseOptions);
-      types.astNodesAreEquivalent.assert(aAst, bAst);
-    }
-
     // Since FastPath#needsParens does not currently add any parentheses to
     // these expressions, make sure they do not matter for parsing the AST.
 
@@ -230,5 +230,109 @@ describe("type syntax", function () {
       "type F = (Obj['bar'])?.[string][];",
       "type F = Obj['bar']?.[string][];",
     );
+  });
+
+  it("parenthesizes correctly", () => {
+    // The basic binary operators `&` and `|`.
+    // `&` binds tighter than `|`
+    check("type Num = number & (empty | mixed);"); // parens needed
+    check("type Num = number | empty & mixed;"); // equivalent to `…|(…&…)`
+
+    // Unary suffix `[]`, with the above.
+    // `[]` binds tighter than `&` or `|`
+    check("type T = (number | string)[];");
+    check("type T = number | string[];"); // a union
+    check("type T = (number & mixed)[];");
+    check("type T = number & mixed[];"); // an intersection
+
+    // Unary prefix `?`, with the above.
+    // `?` binds tighter than `&` or `|`
+    check("type T = ?(A & B);");
+    check("type T = ?(A | B);");
+    // `?` binds less tightly than `[]`
+    check("type T = (?number)[];"); // array of nullable
+    check("type T = ?number[];"); // nullable of array
+
+    // (Optional) indexed-access types, with the above.
+    // `[…]` and `?.[…]` bind (their left) tighter than either `&` or `|`
+    check("type T = (O & P)['x'];");
+    check("type T = (O | P)['x'];");
+    check("type T = (O & P)?.['x'];");
+    check("type T = (O | P)?.['x'];");
+    // `[…]` and `?.[…]` bind (their left) tighter than `?`
+    check("type T = (?O)['x'];"); // indexed-access of nullable
+    check("type T = ?O['x'];"); // nullable of indexed-access
+    check("type T = (?O)?.['x'];"); // optional-indexed-access of nullable
+    check("type T = ?O?.['x'];"); // nullable of optional-indexed-access
+    // `[…]` and `?.[…]` provide brackets on their right, so skip parens:
+    check("type T = A[B & C];");
+    check("type T = A[B | C];");
+    check("type T = A[?B];");
+    check("type T = A[B[]];");
+    check("type T = A[B[C]];");
+    check("type T = A[B?.[C]];");
+    check("type T = A?.[B & C];");
+    check("type T = A?.[B | C];");
+    check("type T = A?.[?B];");
+    check("type T = A?.[B[]];");
+    check("type T = A?.[B[C]];");
+    check("type T = A?.[B?.[C]];");
+    // `[…]` and `?.[…]` interact in a nonobvious way:
+    // OptionalIndexedAccessType inside IndexedAccessType.
+    check("type T = (O?.['x']['y'])['z'];"); // indexed of optional-indexed
+    check("type T = O?.['x']['y']['z'];"); // optional-indexed throughout
+
+    return;
+    // Skip test cases involving function types, because those are currently
+    // broken in other ways.  Those will be fixed by:
+    //   https://github.com/benjamn/recast/pull/1089
+
+    // Function types.
+    // Function binds less tightly than binary operators at right:
+    check("type T = (() => number) & O;"); // an intersection
+    check("type T = (() => number) | void;"); // a union
+    check("type T = () => number | void;"); // a function
+    check("type T = (() => void)['x'];");
+    check("type T = () => void['x'];"); // a function
+    check("type T = (() => void)?.['x'];");
+    check("type T = () => void?.['x'];"); // a function
+    // … and less tightly than suffix operator:
+    check("type T = (() => void)[];"); // an array
+    check("type T = () => void[];"); // a function
+
+    // Function does bind tighter than prefix operator (how could it not?)
+    checkEquiv("type T = ?() => void;", "type T = ?(() => void);");
+    // … and tighter than `&` or `|` at left (ditto):
+    checkEquiv("type T = A | () => void;", "type T = A | (() => void);");
+    checkEquiv("type T = A & () => void;", "type T = A & (() => void);");
+    // … but we choose to insert parens anyway:
+    check("type T = ?(() => void);");
+    check("type T = A | (() => void);");
+    check("type T = A & (() => void);");
+    // We don't insert parens for the *right* operand of indexed access,
+    // though, that'd be silly (sillier than writing such a type at all?):
+    check("type T = A[() => void];");
+    check("type T = A?.[() => void];");
+
+    // Here's one reason we insert those parens we don't strictly have to:
+    // Even when the parent is something at left so that function binds
+    // tighter than it, *its* parent (or further ancestor) might be
+    // something at right that binds tighter than function.
+    // E.g., union of nullable of function:
+    check("type T = ?(() => void) | A;");
+    checkEquiv("type T = ?() => void | A;", "type T = ?() => (void | A);");
+    // … or intersection of nullable of function:
+    check("type T = ?(() => void) & A;");
+    checkEquiv("type T = ?() => void & A;", "type T = ?() => (void & A);");
+    // … or array or (optional-)indexed-access of nullable of function:
+    check("type T = ?(() => void)[];");
+    check("type T = ?(() => void)['x'];");
+    check("type T = ?(() => void)?.['x'];");
+    // … or union of intersection:
+    check("type T = A & (() => void) | B;");
+    // Or for an example beyond the grandparent: union of cubic nullable:
+    check("type T = ???(() => void) | B;");
+    // … or union of intersection of nullable:
+    check("type T = A & ?(() => void) | B;");
   });
 });
