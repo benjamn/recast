@@ -398,6 +398,24 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       ].join(eol),
     );
   });
+
+  it("TSModuleBlock: removed child", function () {
+    const code = [
+      "namespace Numbers {",
+      "  export const four = 4;",
+      "  export const five = 5;",
+      "}",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    ast.program.body[0].body.body.shift();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      ["namespace Numbers {", "  export const five = 5;", "}"].join(eol),
+    );
+  });
 });
 
 testReprinting(
