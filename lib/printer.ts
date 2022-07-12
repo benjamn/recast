@@ -2487,25 +2487,28 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(path.call(print, "id"));
 
-      if (n.body && n.body.type === "TSModuleDeclaration") {
+      if (n.body) {
+        parts.push(" ");
         parts.push(path.call(print, "body"));
-      } else if (n.body) {
-        const bodyLines = path.call(print, "body");
-        if (bodyLines.isEmpty()) {
-          parts.push(" {}");
-        } else {
-          parts.push(" {\n", bodyLines.indent(options.tabWidth), "\n}");
-        }
       }
 
       return concat(parts);
     }
 
-    case "TSModuleBlock":
-      return path.call(
+    case "TSModuleBlock": {
+      const naked = path.call(
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
         "body",
       );
+
+      if (naked.isEmpty()) {
+        parts.push("{}");
+      } else {
+        parts.push("{\n", naked.indent(options.tabWidth), "\n}");
+      }
+
+      return concat(parts);
+    }
 
     // https://github.com/babel/babel/pull/10148
     case "V8IntrinsicIdentifier":
