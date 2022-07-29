@@ -2192,7 +2192,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSTypeLiteral": {
-      const memberLines = fromString(",\n").join(path.map(print, "members"));
+      const memberLines = fromString("\n").join(path.map(print, "members"));
 
       if (memberLines.isEmpty()) {
         return fromString("{}", options);
