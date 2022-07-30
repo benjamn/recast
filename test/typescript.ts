@@ -383,6 +383,25 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       ["namespace Numbers {", "  export const five = 5;", "}"].join(eol),
     );
   });
+
+  it("TypeLiteral: unwanted comma", function () {
+    const code = [
+      "type A = {",
+      "  x: boolean;",
+      "  y: number;",
+      "  z: string;",
+      "}",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    ast.program.body[0].typeAnnotation.members.pop();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      ["type A = {", "  x: boolean;", "  y: number;", "}"].join(eol),
+    );
+  });
 });
 
 testReprinting(
