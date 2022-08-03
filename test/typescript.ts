@@ -44,7 +44,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type I = intrinsic;",
       "",
       "type J = {",
-      "  a: string,",
+      "  a: string",
       "  b?: number",
       "};",
     ]);
@@ -60,9 +60,9 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "type A<T, U> = {",
-      '  u: "cat",',
-      "  x: number,",
-      "  y: T,",
+      '  u: "cat"',
+      "  x: number",
+      "  y: T",
       "  z: U",
       "};",
     ]);
@@ -71,7 +71,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type F = <T, U>(",
       "  a: string,",
       "  b: {",
-      "    y: T,",
+      "    y: T",
       "    z: U",
       "  }",
       ") => void;",
@@ -381,6 +381,25 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     assert.strictEqual(
       recast.print(ast).code,
       ["namespace Numbers {", "  export const five = 5;", "}"].join(eol),
+    );
+  });
+
+  it("TypeLiteral: unwanted comma", function () {
+    const code = [
+      "type A = {",
+      "  x: boolean;",
+      "  y: number;",
+      "  z: string;",
+      "}",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    ast.program.body[0].typeAnnotation.members.pop();
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      ["type A = {", "  x: boolean;", "  y: number;", "}"].join(eol),
     );
   });
 });
