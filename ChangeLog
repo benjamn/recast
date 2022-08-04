@@ -1,3 +1,14 @@
+2022.08.04, v1.7.0
+
+fix:
+- additional commas in TsTypeLiteral
+
+feature:
+- (package) flow-parser v0.184.0
+- (package) lint-staged v13.0.3
+- (package) mocha v10.0.0
+- (package) @babel/preset-env v7.18.10
+
 2022.04.28, v1.6.1
 
 fix:

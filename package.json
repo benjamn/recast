@@ -1,7 +1,7 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
   "name": "@putout/recast",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "JavaScript syntax tree transformer, nondestructive pretty-printer, and automatic source map generator",
   "keywords": [
     "ast",
@@ -58,9 +58,6 @@
     "@typescript-eslint/parser": "^5.8.0",
     "eslint": "^8.5.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
-    "flow-parser": "^0.183.0",
-    "glob": "8.0.3",
-    "lint-staged": "^13.0.1",
     "flow-parser": "^0.184.0",
     "glob": "7.2.0",
     "lint-staged": "^13.0.3",
