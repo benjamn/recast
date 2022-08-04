@@ -61,7 +61,7 @@
     "flow-parser": "^0.183.0",
     "glob": "8.0.3",
     "lint-staged": "^13.0.1",
-    "flow-parser": "^0.176.2",
+    "flow-parser": "^0.184.0",
     "glob": "7.2.0",
     "lint-staged": "^13.0.3",
     "mocha": "^10.0.0",
@@ -70,7 +70,7 @@
     "typescript": "^4.3.5"
   },
   "engines": {
-    "node": ">= 4"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"
