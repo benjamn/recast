@@ -15,6 +15,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 describe("parser", function () {
   [
     "../parsers/acorn",
+    "../parsers/meriyah",
     "../parsers/babel",
     "../parsers/esprima",
     "../parsers/flow",
@@ -84,6 +85,7 @@ function runTestsForParser(parserId: string) {
 
   const lineCommentTypes: { [name: string]: string } = {
     acorn: "Line",
+    meriyah: "Line",
     babel: "CommentLine",
     esprima: "Line",
     flow: "CommentLine",

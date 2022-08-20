@@ -1692,6 +1692,7 @@ describe("printer", function () {
 
     checkWith(require("../parsers/esprima"));
     checkWith(require("../parsers/acorn"));
+    checkWith(require("../parsers/meriyah"));
 
     if (nodeMajorVersion >= 6) {
       checkWith(require("../parsers/babel"));
