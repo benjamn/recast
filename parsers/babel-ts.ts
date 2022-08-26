@@ -1,10 +1,8 @@
-import { parser } from "./babel";
+import { parse as babelParse } from "@babel/parser";
 import getBabelOptions, { Overrides } from "./_babel_options";
-
-export { parser };
 
 export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
   babelOptions.plugins.push("jsx", "typescript");
-  return parser.parse(source, babelOptions);
+  return babelParse(source, babelOptions);
 }
