@@ -1,4 +1,4 @@
-import { parser } from "./babel";
+import { parse as babelParse } from "@babel/parser";
 import getBabelOptions, { Overrides } from "./_babel_options";
 
 // This module is suitable for passing as options.parser when calling
@@ -11,5 +11,5 @@ import getBabelOptions, { Overrides } from "./_babel_options";
 export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
   babelOptions.plugins.push("jsx", "flow");
-  return parser.parse(source, babelOptions);
+  return babelParse(source, babelOptions);
 }

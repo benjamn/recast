@@ -1341,7 +1341,7 @@ describe("printer", function () {
 
     const lines = fromString(code);
     const ast = parse(code, {
-      esprima: {
+      parser: {
         parse: function (source: string, options?: any) {
           const program = require("esprima").parse(source, options);
           n.Program.assert(program);

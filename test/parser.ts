@@ -41,7 +41,6 @@ describe("parser", function () {
       assert.strictEqual(printer.printGenerically(ast).code, "surprise;");
     }
 
-    check({ esprima: parser });
     check({ parser: parser });
   });
 });
