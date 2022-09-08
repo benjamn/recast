@@ -3,6 +3,9 @@ import * as recast from "../main";
 const n = recast.types.namedTypes;
 const b = recast.types.builders;
 import { EOL as eol } from "os";
+import traverse, {NodePath, Node} from '@babel/traverse';
+import template from '@babel/template';
+
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
@@ -452,6 +455,23 @@ describe("Babel", function () {
     assert.strictEqual(
       recast.print(ast).code,
       ["class A {", "  declare public readonly x;", "}"].join(eol),
+    );
+  });
+
+  it("should not add curly braces in ExportNamedDeclaration used with ExportNamespaceSpecifier", function () {
+    const code = 'export * as fs2 from "fs/promises"';
+    const ast = recast.parse(code, parseOptions);
+
+    traverse(ast, {
+      ExportNamedDeclaration(path: NodePath) {
+        path.replaceWith(template.ast('export * as fs from "xx"') as Node);
+        path.stop();
+      }
+    })
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      'export * as fs from "xx";'
     );
   });
 });

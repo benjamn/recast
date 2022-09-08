@@ -2960,13 +2960,17 @@ function printExportDeclaration(path: any, options: any, print: any) {
           parts.push("{", lines, "}");
         }
       }
-    } else {
+    } else if (decl.specifiers[0].type === 'ExportNamespaceSpecifier') {
       parts.push(
-        shouldPrintSpaces ? "{ " : "{",
         fromString(", ").join(path.map(print, "specifiers")),
-        shouldPrintSpaces ? " }" : "}",
       );
-    }
+    } else {
+    parts.push(
+      shouldPrintSpaces ? "{ " : "{",
+      fromString(", ").join(path.map(print, "specifiers")),
+      shouldPrintSpaces ? " }" : "}",
+    );
+  }
 
     if (decl.source) {
       parts.push(
