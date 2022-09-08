@@ -474,4 +474,21 @@ describe("Babel", function () {
       'export * as fs from "xx";'
     );
   });
+
+  it("should not add curly braces in ExportNamedDeclaration used with ExportNamespaceSpecifier: couple specifiers", function () {
+    const code = 'export * as fs2, {x, y} from "fs/promises"';
+    const ast = recast.parse(code, parseOptions);
+
+    traverse(ast, {
+      ExportNamedDeclaration(path: NodePath) {
+        path.replaceWith(template.ast('export * as fs, {x, y} from "xx"') as Node);
+        path.stop();
+      }
+    })
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      'export * as fs, { x, y } from "xx";'
+    );
+  });
 });

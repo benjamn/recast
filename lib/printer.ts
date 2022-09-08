@@ -2919,13 +2919,13 @@ function printExportDeclaration(path: any, options: any, print: any) {
       parts.push("*");
     } else if (decl.specifiers.length === 0) {
       parts.push("{}");
-    } else if (decl.specifiers[0].type === "ExportDefaultSpecifier") {
+    } else if (/^Export(Default|Namespace)Specifier$/.test(decl.specifiers[0].type)) {
       const unbracedSpecifiers: any[] = [];
       const bracedSpecifiers: any[] = [];
 
       path.each(function (specifierPath: any) {
         const spec = specifierPath.getValue();
-        if (spec.type === "ExportDefaultSpecifier") {
+        if (/^Export(Namespace|Default)Specifier$/.test(spec.type)) {
           unbracedSpecifiers.push(print(specifierPath));
         } else {
           bracedSpecifiers.push(print(specifierPath));
@@ -2960,10 +2960,6 @@ function printExportDeclaration(path: any, options: any, print: any) {
           parts.push("{", lines, "}");
         }
       }
-    } else if (decl.specifiers[0].type === 'ExportNamespaceSpecifier') {
-      parts.push(
-        fromString(", ").join(path.map(print, "specifiers")),
-      );
     } else {
     parts.push(
       shouldPrintSpaces ? "{ " : "{",
