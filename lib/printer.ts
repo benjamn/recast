@@ -2746,6 +2746,10 @@ function printMethod(path: any, options: any, print: any) {
     parts.push("abstract ");
   }
 
+  if (node.override) {
+    parts.push("override ");
+  }
+
   if (node.readonly) {
     parts.push("readonly ");
   }
