@@ -4,7 +4,7 @@ import { Printer } from "../lib/printer";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 
-describe("type syntax", function () {
+describe("Flow type syntax", function () {
   const printer = new Printer({
     tabWidth: 2,
     quote: "single",
@@ -18,15 +18,25 @@ describe("type syntax", function () {
   };
 
   function check(source: string, parseOptions?: any) {
-    parseOptions = parseOptions || esprimaParserParseOptions;
-    const ast1 = parse(source, parseOptions);
-    const code = printer.printGenerically(ast1).code;
-    const ast2 = parse(code, parseOptions);
-    types.astNodesAreEquivalent.assert(ast1, ast2);
-    assert.strictEqual(source, code);
+    it(`handles: ${source}`, () => {
+      parseOptions = parseOptions || esprimaParserParseOptions;
+      const ast1 = parse(source, parseOptions);
+      const code = printer.printGenerically(ast1).code;
+      assert.strictEqual(code, source);
+      const ast2 = parse(code, parseOptions);
+      types.astNodesAreEquivalent.assert(ast1, ast2);
+    });
   }
 
-  it("should parse and print type annotations correctly", function () {
+  function checkEquiv(a: string, b: string) {
+    it(`handles equivalently \`${a}\` vs. \`${b}\``, () => {
+      const aAst = parse(a, flowParserParseOptions);
+      const bAst = parse(b, flowParserParseOptions);
+      types.astNodesAreEquivalent.assert(aAst, bAst);
+    });
+  }
+
+  describe("should parse and print type annotations correctly", function () {
     // Import type annotations
     check("import type foo from 'foo';");
     check("import typeof foo from 'foo';");
@@ -123,6 +133,24 @@ describe("type syntax", function () {
     // Return types
     check("function a(): number {}");
     check("var a: () => X = fn;");
+    check("function f(): () => void {}", flowParserParseOptions);
+    check("function f(): () => () => void {}", flowParserParseOptions);
+    check(
+      "function f(): (cb: () => void) => () => void {}",
+      flowParserParseOptions,
+    );
+    // check(  // TODO this breaks
+    //   "function f(): (() => void) => () => void {}",
+    //   flowParserParseOptions,
+    // );
+    check(
+      "function f(m: (cb: () => void) => () => void): void {}",
+      flowParserParseOptions,
+    );
+    // check(  // TODO this breaks
+    //   "function f((() => void) => () => void): void {}",
+    //   flowParserParseOptions,
+    // );
 
     // Object
     check(
@@ -154,7 +182,28 @@ describe("type syntax", function () {
     check("declare function foo(c: C, b: B): void;");
     check("declare function foo(c: (e: Event) => void, b: B): void;");
     check("declare function foo(c: C, d?: Array<D>): void;");
+    check("declare function f(): () => void;", flowParserParseOptions);
+    check(
+      "declare function f(): (cb: () => void) => () => void;",
+      flowParserParseOptions,
+    );
+    check(
+      "declare function f(m: (cb: () => void) => () => void): void;",
+      flowParserParseOptions,
+    );
+    // check(  // TODO breaks
+    //   "declare function f(): (() => void) => () => void;",
+    //   flowParserParseOptions,
+    // );
+    // check(  // TODO breaks
+    //   "declare function f((() => void) => () => void): void;",
+    //   flowParserParseOptions,
+    // );
+
     check("declare class C { x: string }");
+    // check("declare class C { constructor(): void }");  // TODO broken
+    // check("declare class D { f(): D }");  // TODO broken
+
     check(
       "declare module M {" +
         eol +
@@ -178,6 +227,8 @@ describe("type syntax", function () {
     check("class A {" + eol + "  a: number;" + eol + "}");
     check("class A {" + eol + "  foo(a: number): string {}" + eol + "}");
     check("class A {" + eol + "  static foo(a: number): string {}" + eol + "}");
+    check(`class C {${eol}  constructor() {}${eol}}`);
+    check(`class C {${eol}  f(): C {}${eol}}`);
 
     // Type parameters
     check("class A<T> {}");
@@ -213,7 +264,7 @@ describe("type syntax", function () {
     check("function myFunction([param1]: Params) {}", flowParserParseOptions);
   });
 
-  it("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
+  describe("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
     check("type A = Obj?.['a'];", flowParserParseOptions);
     check("type B = Array<string>?.[number];", flowParserParseOptions);
     check("type C = Obj?.['bar']['baz'];", flowParserParseOptions);
@@ -223,12 +274,6 @@ describe("type syntax", function () {
     check("type G = Obj['bar']?.[boolean][];", flowParserParseOptions);
     check("type H = (Obj?.['bar'])[string][];", flowParserParseOptions);
     check("type I = Obj?.['bar']?.[string][];", flowParserParseOptions);
-
-    function checkEquiv(a: string, b: string) {
-      const aAst = parse(a, flowParserParseOptions);
-      const bAst = parse(b, flowParserParseOptions);
-      types.astNodesAreEquivalent.assert(aAst, bAst);
-    }
 
     // Since FastPath#needsParens does not currently add any parentheses to
     // these expressions, make sure they do not matter for parsing the AST.

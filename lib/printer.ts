@@ -1569,9 +1569,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     // transformed away before printing.
     case "TypeAnnotation":
       if (n.typeAnnotation) {
-        if (n.typeAnnotation.type !== "FunctionTypeAnnotation") {
-          parts.push(": ");
-        }
+        parts.push(": ");
         parts.push(path.call(print, "typeAnnotation"));
         return concat(parts);
       }
@@ -1673,7 +1671,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "DeclareFunction":
       return printFlowDeclaration(path, [
         "function ",
-        path.call(print, "id"),
+        path.call(print, "id", "name"),
+        path.call(print, "id", "typeAnnotation", "typeAnnotation"),
         ";",
       ]);
 
@@ -1757,15 +1756,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         (namedTypes.ObjectTypeInternalSlot.check(parent) && parent.method) ||
         namedTypes.DeclareFunction.check(path.getParentNode(2))
       );
-
-      const needsColon =
-        isArrowFunctionTypeAnnotation &&
-        !namedTypes.FunctionTypeParam.check(parent) &&
-        !namedTypes.TypeAlias.check(parent);
-
-      if (needsColon) {
-        parts.push(": ");
-      }
 
       const hasTypeParameters = !!n.typeParameters;
       const needsParens =
@@ -1897,7 +1887,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "id"),
         "]]",
         n.optional ? "?" : "",
-        n.value.type !== "FunctionTypeAnnotation" ? ": " : "",
+        !n.method ? ": " : "",
         path.call(print, "value"),
       ]);
 
