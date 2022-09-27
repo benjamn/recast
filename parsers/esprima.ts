@@ -20,6 +20,7 @@ export function parse(source: string, options?: any) {
     tolerant: getOption(options, "tolerant", true),
     tokens: true,
     jsx: getOption(options, "jsx", false),
+    sourceType: getOption(options, "sourceType", "module"),
   });
 
   if (!Array.isArray(ast.comments)) {
