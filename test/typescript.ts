@@ -260,7 +260,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check([
       "class Dog extends Animal {",
       "  protected override getSound() {",
-      "    return 'bark';",
+      "    return \"bark\";",
       "  }",
       "}",
     ])
