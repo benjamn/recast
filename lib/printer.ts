@@ -4,7 +4,7 @@ import { Lines, fromString, concat } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
 import * as types from "ast-types";
-const namedTypes = types.namedTypes;
+const {namedTypes} = types;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;
 import FastPath from "./fast-path";
@@ -78,7 +78,10 @@ const Printer = function Printer(this: PrinterType, config?: any) {
   // Non-destructively modifies options with overrides, and returns a
   // new print function that uses the modified options.
   function makePrintFunctionWith(options: any, overrides: any) {
-    options = Object.assign({}, options, overrides);
+    options = {
+      ...options,
+      ...overrides
+    };
     return (path: any) => print(path, options);
   }
 
@@ -98,7 +101,7 @@ const Printer = function Printer(this: PrinterType, config?: any) {
     const oldTabWidth = config.tabWidth;
 
     if (!explicitTabWidth) {
-      const loc = path.getNode().loc;
+      const {loc} = path.getNode();
       if (loc && loc.lines && loc.lines.guessTabWidth) {
         config.tabWidth = loc.lines.guessTabWidth();
       }
@@ -554,7 +557,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "ImportExpression":
       return concat(["import(", path.call(print, "source"), ")"]);
 
-    case "ImportDeclaration": {
+    case "ImportDeclaration":
       parts.push("import ");
 
       if (n.importKind && n.importKind !== "value") {
@@ -616,7 +619,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       );
 
       return concat(parts);
-    }
 
     case "ImportAttribute":
       return concat([path.call(print, "key"), ": ", path.call(print, "value")]);
@@ -654,7 +656,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
-    case "ReturnStatement": {
+    case "ReturnStatement":
       parts.push("return");
 
       if (n.argument) {
@@ -674,7 +676,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(";");
 
       return concat(parts);
-    }
 
     case "CallExpression":
     case "OptionalCallExpression":
@@ -724,9 +725,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       fields.push("properties");
 
       let len = 0;
-      fields.forEach(function (field) {
+      for (const field of fields) {
         len += n[field].length;
-      });
+      }
 
       const oneLine = (isTypeAnnotation && len === 1) || len === 0;
       const leftBrace = n.exact ? "{|" : "{";
@@ -735,7 +736,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const leftBraceIndex = parts.length - 1;
 
       let i = 0;
-      fields.forEach(function (field) {
+      for (const field of fields) {
         path.each(function (childPath: any) {
           let lines = print(childPath);
 
@@ -767,7 +768,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
           }
           i++;
         }, field);
-      });
+      }
 
       if (n.inexact) {
         const line = fromString("...", options);
@@ -1714,7 +1715,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "EnumBooleanBody":
     case "EnumNumberBody":
     case "EnumStringBody":
-    case "EnumSymbolBody": {
+    case "EnumSymbolBody":
       if (n.type === "EnumSymbolBody" || n.explicitType) {
         parts.push(
           " of ",
@@ -1732,7 +1733,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       );
 
       return concat(parts);
-    }
 
     case "EnumDefaultedMember":
       return concat([path.call(print, "id"), ","]);
@@ -2138,7 +2138,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "typeAnnotation", "typeAnnotation"),
       ]);
 
-    case "TSMappedType": {
+    case "TSMappedType":
       parts.push(
         n.readonly ? "readonly " : "",
         "[",
@@ -2152,7 +2152,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       return concat(["{\n", concat(parts).indent(options.tabWidth), "\n}"]);
-    }
 
     case "TSTupleType":
       return concat([
@@ -2377,7 +2376,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
-    case "TSTypeAssertion": {
+    case "TSTypeAssertion":
       parts.push(
         "<",
         path.call(print, "typeAnnotation"),
@@ -2385,7 +2384,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "expression"),
       );
       return concat(parts);
-    }
 
     case "TSTypeParameterDeclaration":
     case "TSTypeParameterInstantiation":
@@ -2657,7 +2655,7 @@ function printStatementSequence(path: any, options: any, print: any) {
   const parts: any[] = [];
 
   filtered.forEach(function (info, i) {
-    const printed = info.printed;
+    const {printed} = info;
     const stmt = info.node;
     const multiLine = printed.length > 1;
     const notFirst = i > 0;
@@ -2731,7 +2729,7 @@ function maxSpace(s1: any, s2: any) {
 
 function printMethod(path: any, options: any, print: any) {
   const node = path.getNode();
-  const kind = node.kind;
+  const {kind} = node;
   const parts = [];
 
   let nodeValue = node.value;
@@ -2840,7 +2838,7 @@ function printFunctionParams(path: any, options: any, print: any) {
   const fun = path.getValue();
 
   let params;
-  let printed: Array<Lines> = [];
+  let printed: Lines[] = [];
   if (fun.params) {
     params = fun.params;
     printed = path.map(print, "params");
