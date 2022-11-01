@@ -1311,12 +1311,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             typeof child.value === "string"
           ) {
             if (/\S/.test(child.value)) {
-              return child.value.replace(/^\s+|\s+$/g, "");
+              return child.value.replace(/^\s+/g, "");
             } else if (/\n/.test(child.value)) {
               return "\n";
             }
           }
-
+          
           return print(childPath);
         }, "children"),
       ).indentTail(options.tabWidth);
