@@ -2532,6 +2532,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
+    case "TSInstantiationExpression": {
+      parts.push(
+        path.call(print, "expression"),
+        path.call(print, "typeParameters"),
+      );
+
+      return concat(parts);
+    }
+
+
     // https://github.com/babel/babel/pull/10148
     case "V8IntrinsicIdentifier":
       return concat(["%", path.call(print, "name")]);

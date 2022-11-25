@@ -428,6 +428,20 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       ["type A = {", "  x: boolean;", "  y: number;", "}"].join(eol),
     );
   });
+
+  it("TSInstantiationExpression: round trip", function () {
+    const code = [
+      "const makeHammerBox = makeBox<Hammer>;",
+      "const ErrorMap = Map<string, Error>;",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    assert.strictEqual(
+      recast.prettyPrint(ast).code,
+      code
+    );
+  })
 });
 
 testReprinting(
