@@ -6,6 +6,16 @@ const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
 
+export function getLineTerminator() {
+  return isBrowser() ? "\n" : require("os").EOL || "\n";
+}
+
+export function isBrowser() {
+  return (
+    typeof window !== "undefined" && typeof window.document !== "undefined"
+  );
+}
+
 export function getOption(options: any, key: any, defaultValue: any) {
   if (options && hasOwn.call(options, key)) {
     return options[key];
