@@ -42,6 +42,7 @@
     "fs": false
   },
   "dependencies": {
+    "assert": "^2.0.0",
     "ast-types": "0.15.2",
     "esprima": "~4.0.0",
     "source-map": "~0.6.1",
