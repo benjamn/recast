@@ -44,8 +44,8 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type I = intrinsic;",
       "",
       "type J = {",
-      "  a: string",
-      "  b?: number",
+      "  a: string;",
+      "  b?: number;",
       "};",
     ]);
 
@@ -60,10 +60,10 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "type A<T, U> = {",
-      '  u: "cat"',
-      "  x: number",
-      "  y: T",
-      "  z: U",
+      '  u: "cat";',
+      "  x: number;",
+      "  y: T;",
+      "  z: U;",
       "};",
     ]);
 
@@ -71,8 +71,8 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type F = <T, U>(",
       "  a: string,",
       "  b: {",
-      "    y: T",
-      "    z: U",
+      "    y: T;",
+      "    z: U;",
       "  }",
       ") => void;",
     ]);
@@ -131,7 +131,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "",
       "function create<T>(",
       "  c: {",
-      "    new<U>(a: U): T",
+      "    new<U>(a: U): T;",
       "  }",
       "): void {}",
     ]);
