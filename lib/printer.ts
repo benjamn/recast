@@ -2428,7 +2428,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString("\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(
+        path.map(print, "body").map((element: Lines) => {
+          if (lastNonSpaceCharacter(element) !== ";") {
+            return element.concat(";");
+          }
+          return element;
+        })
+      );
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
