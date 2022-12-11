@@ -103,6 +103,24 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "someValue as string;",
     ]);
 
+    // TSSatisfiesExpression
+    check([
+      // Adapted from https://dev.to/ayc0/typescript-49-satisfies-operator-1e4i
+      "const myColor = {",
+      '  value: "red"',
+      "} satisfies Color;",
+      "",
+      "const myIncorrectColor = {",
+      "  value: 100",
+      "} satisfies Color;",
+      "",
+      "const invalidPalette = {",
+      "  red: [255, 0, 0],",
+      '  green: "#00ff00",',
+      "  blue: [1, 2, 3]",
+      "} satisfies Record<string, string | RGB> as const;",
+    ]);
+
     check(["let counter = <Counter> function(start: number) {};"]);
     check(["<Counter> function(start: number) {};"]);
 

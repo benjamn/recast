@@ -2252,11 +2252,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSQualifiedName":
       return concat([path.call(print, "left"), ".", path.call(print, "right")]);
 
-    case "TSAsExpression": {
+    case "TSAsExpression":
+    case "TSSatisfiesExpression":
+    {
       const expression = path.call(print, "expression");
       parts.push(
         expression,
-        fromString(" as "),
+        n.type === "TSSatisfiesExpression" ? " satisfies " : " as ",
         path.call(print, "typeAnnotation"),
       );
       return concat(parts);
