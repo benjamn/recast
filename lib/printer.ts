@@ -930,7 +930,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "StringLiteral":
         return fromString(nodeStr(n.value, options));
-    
+
     case "BooleanLiteral": // Babel 6 Literal split
     case "Literal":
       return fromString(
@@ -2194,13 +2194,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSTypeLiteral": {
-      const memberLines = fromString("\n").join(path.map(print, "members"));
+      const members = fromString("\n").join(
+        path.map(print, "members").map((member: Lines) => {
+          if (lastNonSpaceCharacter(member) !== ";") {
+            return member.concat(";");
+          }
+          return member;
+        })
+      );
 
-      if (memberLines.isEmpty()) {
+      if (members.isEmpty()) {
         return fromString("{}", options);
       }
 
-      parts.push("{\n", memberLines.indent(options.tabWidth), "\n}");
+      parts.push("{\n", members.indent(options.tabWidth), "\n}");
 
       return concat(parts);
     }
@@ -2421,7 +2428,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString("\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(
+        path.map(print, "body").map((element: Lines) => {
+          if (lastNonSpaceCharacter(element) !== ";") {
+            return element.concat(";");
+          }
+          return element;
+        })
+      );
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
