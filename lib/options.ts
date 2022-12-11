@@ -1,4 +1,3 @@
-import { Omit } from "ast-types/types";
 import { getLineTerminator } from "./util";
 
 /**
