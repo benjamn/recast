@@ -1,9 +1,9 @@
 import assert from "assert";
-import path from "path";
-import fs from "fs";
-import * as recast from "../main";
 import * as types from "ast-types";
+import fs from "fs";
 import { EOL as eol } from "os";
+import path from "path";
+import * as recast from "../main";
 import * as parser from "../parsers/typescript";
 
 // Babel 7 no longer supports Node 4 or 5.

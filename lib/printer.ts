@@ -1,14 +1,14 @@
 import assert from "assert";
+import * as types from "ast-types";
 import { printComments } from "./comments";
-import { Lines, fromString, concat } from "./lines";
+import FastPath from "./fast-path";
+import { concat, fromString, Lines } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
-import * as types from "ast-types";
+import * as util from "./util";
 const namedTypes = types.namedTypes;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;
-import FastPath from "./fast-path";
-import * as util from "./util";
 
 export interface PrintResultType {
   code: string;
@@ -1469,6 +1469,40 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(";");
       return concat(parts);
+
+    case "ClassAccessorProperty": {
+      if (n.static) {
+        parts.push("static ");
+      }
+
+      parts.push("accessor ");
+
+      if (n.computed) {
+        parts.push("[", path.call(print, "key"), "]");
+      } else {
+        parts.push(path.call(print, "key"));
+      }
+
+      if (n.optional) {
+        parts.push("?");
+      }
+
+      if (n.definite) {
+        parts.push("!");
+      }
+
+      if (n.typeAnnotation) {
+        parts.push(path.call(print, "typeAnnotation"));
+      }
+
+      if (n.value) {
+        parts.push(" = ", path.call(print, "value"));
+      }
+
+      parts.push(";");
+
+      return concat(parts);
+    }
 
     case "ClassDeclaration":
     case "ClassExpression":
