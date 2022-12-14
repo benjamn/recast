@@ -1471,11 +1471,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "ClassAccessorProperty": {
-      if (n.static) {
-        parts.push("static ");
-      }
-
-      parts.push("accessor ");
+      parts.push(
+        ...printClassMemberModifiers(n),
+        "accessor ",
+      );
 
       if (n.computed) {
         parts.push("[", path.call(print, "key"), "]");
@@ -2795,14 +2794,11 @@ function maxSpace(s1: any, s2: any) {
   return spaceLines1;
 }
 
-function printMethod(path: any, options: any, print: any) {
-  const node = path.getNode();
-  const kind = node.kind;
+function printClassMemberModifiers(node: any): string[] {
   const parts = [];
 
-  let nodeValue = node.value;
-  if (!namedTypes.FunctionExpression.check(nodeValue)) {
-    nodeValue = node;
+  if (node.declare) {
+    parts.push("declare ");
   }
 
   const access = node.accessibility || node.access;
@@ -2814,17 +2810,32 @@ function printMethod(path: any, options: any, print: any) {
     parts.push("static ");
   }
 
-  if (node.abstract) {
-    parts.push("abstract ");
-  }
-
   if (node.override) {
     parts.push("override ");
+  }
+
+  if (node.abstract) {
+    parts.push("abstract ");
   }
 
   if (node.readonly) {
     parts.push("readonly ");
   }
+
+  return parts;
+}
+
+function printMethod(path: any, options: any, print: any) {
+  const node = path.getNode();
+  const kind = node.kind;
+  const parts = [];
+
+  let nodeValue = node.value;
+  if (!namedTypes.FunctionExpression.check(nodeValue)) {
+    nodeValue = node;
+  }
+
+  parts.push(...printClassMemberModifiers(node));
 
   if (nodeValue.async) {
     parts.push("async ");

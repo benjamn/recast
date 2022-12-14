@@ -1299,19 +1299,17 @@ describe("printer", function () {
   });
 
   it("prints 'definite' ClassAccessorProperty correctly", function () {
-    const code = ["class A {", "  foo!: string;", "}"].join(eol);
+    const code = ["class A {", "  accessor foo!: string;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
         b.identifier("A"),
         b.classBody([
-          Object.assign(
-            b.classAccessorProperty.from({
-              key: b.identifier("foo"),
-              definite: true,
-            }),
-            { definite: true },
-          ),
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            typeAnnotation: b.tsTypeAnnotation(b.tsStringKeyword()),
+            definite: true,
+          }),
         ]),
       ),
     ]);
@@ -1335,6 +1333,54 @@ describe("printer", function () {
             key: b.identifier("foo"),
             value: b.identifier("Bar"),
             static: true,
+          }),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints abstract ClassAccessorProperty correctly", function () {
+    const code = ["class A {", "  abstract accessor foo = Bar;", "}"].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            abstract: true,
+          }),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints override ClassAccessorProperty correctly", function () {
+    const code = ["class A {", "  override accessor foo = Bar;", "}"].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            override: true,
           }),
         ]),
       ),
