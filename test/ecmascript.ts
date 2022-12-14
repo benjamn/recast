@@ -143,7 +143,7 @@ describe("import/export syntax", function () {
         throw new Error(
           "Parsing should have failed: " + JSON.stringify(source),
         );
-      } catch (err) {
+      } catch (err: any) {
         assert.strictEqual(err.message, "Line 1: " + expectedMessage);
       }
     }
