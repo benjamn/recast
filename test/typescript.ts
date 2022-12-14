@@ -1,9 +1,9 @@
 import assert from "assert";
-import path from "path";
-import fs from "fs";
-import * as recast from "../main";
 import * as types from "ast-types";
+import fs from "fs";
 import { EOL as eol } from "os";
+import path from "path";
+import * as recast from "../main";
 import * as parser from "../parsers/typescript";
 
 // Babel 7 no longer supports Node 4 or 5.
@@ -101,6 +101,24 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "<Square> {};",
       "(someValue as string).length;",
       "someValue as string;",
+    ]);
+
+    // TSSatisfiesExpression
+    check([
+      // Adapted from https://dev.to/ayc0/typescript-49-satisfies-operator-1e4i
+      "const myColor = {",
+      '  value: "red"',
+      "} satisfies Color;",
+      "",
+      "const myIncorrectColor = {",
+      "  value: 100",
+      "} satisfies Color;",
+      "",
+      "const invalidPalette = {",
+      "  red: [255, 0, 0],",
+      '  green: "#00ff00",',
+      "  blue: [1, 2, 3]",
+      "} satisfies Record<string, string | RGB> as const;",
     ]);
 
     check(["let counter = <Counter> function(start: number) {};"]);
@@ -428,6 +446,20 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       ["type A = {", "  x: boolean;", "  y: number;", "}"].join(eol),
     );
   });
+
+  it("TSInstantiationExpression: round trip", function () {
+    const code = [
+      "const makeHammerBox = makeBox<Hammer>;",
+      "const ErrorMap = Map<string, Error>;",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    assert.strictEqual(
+      recast.prettyPrint(ast).code,
+      code
+    );
+  })
 });
 
 testReprinting(

@@ -1,14 +1,14 @@
 import assert from "assert";
+import * as types from "ast-types";
 import { printComments } from "./comments";
-import { Lines, fromString, concat } from "./lines";
+import FastPath from "./fast-path";
+import { concat, fromString, Lines } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
-import * as types from "ast-types";
+import * as util from "./util";
 const namedTypes = types.namedTypes;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;
-import FastPath from "./fast-path";
-import * as util from "./util";
 
 export interface PrintResultType {
   code: string;
@@ -1470,6 +1470,39 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(";");
       return concat(parts);
 
+    case "ClassAccessorProperty": {
+      parts.push(
+        ...printClassMemberModifiers(n),
+        "accessor ",
+      );
+
+      if (n.computed) {
+        parts.push("[", path.call(print, "key"), "]");
+      } else {
+        parts.push(path.call(print, "key"));
+      }
+
+      if (n.optional) {
+        parts.push("?");
+      }
+
+      if (n.definite) {
+        parts.push("!");
+      }
+
+      if (n.typeAnnotation) {
+        parts.push(path.call(print, "typeAnnotation"));
+      }
+
+      if (n.value) {
+        parts.push(" = ", path.call(print, "value"));
+      }
+
+      parts.push(";");
+
+      return concat(parts);
+    }
+
     case "ClassDeclaration":
     case "ClassExpression":
     case "DeclareClass":
@@ -2252,15 +2285,23 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSQualifiedName":
       return concat([path.call(print, "left"), ".", path.call(print, "right")]);
 
-    case "TSAsExpression": {
+    case "TSAsExpression":
+    case "TSSatisfiesExpression":
+    {
       const expression = path.call(print, "expression");
       parts.push(
         expression,
-        fromString(" as "),
+        n.type === "TSSatisfiesExpression" ? " satisfies " : " as ",
         path.call(print, "typeAnnotation"),
       );
       return concat(parts);
     }
+
+    case "TSTypeCastExpression":
+      return concat([
+        path.call(print, "expression"),
+        path.call(print, "typeAnnotation"),
+      ]);
 
     case "TSNonNullExpression":
       return concat([path.call(print, "expression"), "!"]);
@@ -2532,6 +2573,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
+    case "TSInstantiationExpression": {
+      parts.push(
+        path.call(print, "expression"),
+        path.call(print, "typeParameters"),
+      );
+
+      return concat(parts);
+    }
+
+
     // https://github.com/babel/babel/pull/10148
     case "V8IntrinsicIdentifier":
       return concat(["%", path.call(print, "name")]);
@@ -2743,14 +2794,11 @@ function maxSpace(s1: any, s2: any) {
   return spaceLines1;
 }
 
-function printMethod(path: any, options: any, print: any) {
-  const node = path.getNode();
-  const kind = node.kind;
+function printClassMemberModifiers(node: any): string[] {
   const parts = [];
 
-  let nodeValue = node.value;
-  if (!namedTypes.FunctionExpression.check(nodeValue)) {
-    nodeValue = node;
+  if (node.declare) {
+    parts.push("declare ");
   }
 
   const access = node.accessibility || node.access;
@@ -2762,17 +2810,32 @@ function printMethod(path: any, options: any, print: any) {
     parts.push("static ");
   }
 
-  if (node.abstract) {
-    parts.push("abstract ");
-  }
-
   if (node.override) {
     parts.push("override ");
+  }
+
+  if (node.abstract) {
+    parts.push("abstract ");
   }
 
   if (node.readonly) {
     parts.push("readonly ");
   }
+
+  return parts;
+}
+
+function printMethod(path: any, options: any, print: any) {
+  const node = path.getNode();
+  const kind = node.kind;
+  const parts = [];
+
+  let nodeValue = node.value;
+  if (!namedTypes.FunctionExpression.check(nodeValue)) {
+    nodeValue = node;
+  }
+
+  parts.push(...printClassMemberModifiers(node));
 
   if (nodeValue.async) {
     parts.push("async ");

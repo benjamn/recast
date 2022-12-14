@@ -43,15 +43,15 @@
   },
   "dependencies": {
     "assert": "^2.0.0",
-    "ast-types": "0.15.2",
+    "ast-types": "^0.16.1",
     "esprima": "~4.0.0",
     "source-map": "~0.6.1",
     "tslib": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/core": "7.14.8",
-    "@babel/parser": "7.14.8",
-    "@babel/preset-env": "7.16.11",
+    "@babel/core": "7.20.2",
+    "@babel/parser": "7.20.3",
+    "@babel/preset-env": "7.20.2",
     "@types/esprima": "4.0.3",
     "@types/glob": "7.2.0",
     "@types/mocha": "8.2.0",
