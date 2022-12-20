@@ -56,7 +56,7 @@
     "@types/glob": "7.2.0",
     "@types/mocha": "8.2.0",
     "@types/node": "18.11.15",
-    "@typescript-eslint/parser": "^4.9.1",
+    "@typescript-eslint/parser": "^5.47.0",
     "eslint": "^7.1.0",
     "esprima-fb": "15001.1001.0-dev-harmony-fb",
     "flow-parser": "0.195.0",
