@@ -1,9 +1,9 @@
 import assert from "assert";
-import path from "path";
-import fs from "fs";
-import * as recast from "../main";
 import * as types from "ast-types";
+import fs from "fs";
 import { EOL as eol } from "os";
+import path from "path";
+import * as recast from "../main";
 import * as parser from "../parsers/typescript";
 
 // Babel 7 no longer supports Node 4 or 5.
@@ -44,8 +44,8 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type I = intrinsic;",
       "",
       "type J = {",
-      "  a: string",
-      "  b?: number",
+      "  a: string;",
+      "  b?: number;",
       "};",
     ]);
 
@@ -60,10 +60,10 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "type A<T, U> = {",
-      '  u: "cat"',
-      "  x: number",
-      "  y: T",
-      "  z: U",
+      '  u: "cat";',
+      "  x: number;",
+      "  y: T;",
+      "  z: U;",
       "};",
     ]);
 
@@ -71,8 +71,8 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "type F = <T, U>(",
       "  a: string,",
       "  b: {",
-      "    y: T",
-      "    z: U",
+      "    y: T;",
+      "    z: U;",
       "  }",
       ") => void;",
     ]);
@@ -103,6 +103,24 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "someValue as string;",
     ]);
 
+    // TSSatisfiesExpression
+    check([
+      // Adapted from https://dev.to/ayc0/typescript-49-satisfies-operator-1e4i
+      "const myColor = {",
+      '  value: "red"',
+      "} satisfies Color;",
+      "",
+      "const myIncorrectColor = {",
+      "  value: 100",
+      "} satisfies Color;",
+      "",
+      "const invalidPalette = {",
+      "  red: [255, 0, 0],",
+      '  green: "#00ff00",',
+      "  blue: [1, 2, 3]",
+      "} satisfies Record<string, string | RGB> as const;",
+    ]);
+
     check(["let counter = <Counter> function(start: number) {};"]);
     check(["<Counter> function(start: number) {};"]);
 
@@ -131,7 +149,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "",
       "function create<T>(",
       "  c: {",
-      "    new<U>(a: U): T",
+      "    new<U>(a: U): T;",
       "  }",
       "): void {}",
     ]);
@@ -213,23 +231,23 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
 
     check([
       "interface LabelledContainer<T> {",
-      "  label: string",
-      "  content: T",
-      "  option?: boolean",
-      "  readonly x: number",
-      "  [index: number]: string",
-      "  [propName: string]: any",
-      "  readonly [index: number]: string",
-      "  (source: string, subString: string): boolean",
-      "  (start: number): string",
-      "  reset(): void",
-      "  a(c: (this: void, e: E) => void): void",
+      "  label: string;",
+      "  content: T;",
+      "  option?: boolean;",
+      "  readonly x: number;",
+      "  [index: number]: string;",
+      "  [propName: string]: any;",
+      "  readonly [index: number]: string;",
+      "  (source: string, subString: string): boolean;",
+      "  (start: number): string;",
+      "  reset(): void;",
+      "  a(c: (this: void, e: E) => void): void;",
       "}",
     ]);
 
     check([
       "interface Square<T, U> extends Shape<T, U>, Visible<T, U> {",
-      "  sideLength: number",
+      "  sideLength: number;",
       "}",
     ]);
 
@@ -265,19 +283,31 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "}",
     ])
 
-    check(["export interface S {", "  i(s: string): boolean", "}"]);
+    check([
+      "export interface S {",
+      "  i(s: string): boolean;",
+      "}"
+    ]);
 
     check([
       "namespace Validation {",
       "  export interface S {",
-      "    i(j: string): boolean",
+      "    i(j: string): boolean;",
       "  }",
       "}",
     ]);
 
-    check(["export interface S {", "  i(j: string): boolean", "}"]);
+    check([
+      "export interface S {",
+      "  i(j: string): boolean;",
+      "}",
+    ]);
 
-    check(["declare namespace D3 {", "  export const f: number;", "}"]);
+    check([
+      "declare namespace D3 {",
+      "  export const f: number;",
+      "}",
+    ]);
 
     check(["declare function foo<K, V>(arg: T = getDefault()): R"]);
 
@@ -287,7 +317,13 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "}",
     ]);
 
-    check(["function myFunction(", "  {", "    param1", "  }: Params", ") {}"]);
+    check([
+      "function myFunction(",
+      "  {",
+      "    param1",
+      "  }: Params",
+      ") {}",
+    ]);
 
     check([
       'const unqualified: import("package") = 1;',
@@ -410,6 +446,20 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       ["type A = {", "  x: boolean;", "  y: number;", "}"].join(eol),
     );
   });
+
+  it("TSInstantiationExpression: round trip", function () {
+    const code = [
+      "const makeHammerBox = makeBox<Hammer>;",
+      "const ErrorMap = Map<string, Error>;",
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    assert.strictEqual(
+      recast.prettyPrint(ast).code,
+      code
+    );
+  })
 });
 
 testReprinting(

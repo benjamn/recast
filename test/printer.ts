@@ -1,12 +1,12 @@
 import assert from "assert";
-import * as recast from "../main";
+import * as types from "ast-types";
+import { EOL as eol } from "os";
+import { fromString } from "../lib/lines";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
-import * as types from "ast-types";
+import * as recast from "../main";
 const n = types.namedTypes;
 const b = types.builders;
-import { fromString } from "../lib/lines";
-import { EOL as eol } from "os";
 const linesModule = require("../lib/lines");
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
@@ -1174,7 +1174,11 @@ describe("printer", function () {
   });
 
   it("prints class property initializers with type annotations correctly", function () {
-    const code = ["class A {", "  foo = (a: b): void => {};", "}"].join(eol);
+    const code = [
+      "class A {",
+      "  foo = (a: b): void => {};",
+      "}",
+    ].join(eol);
 
     const arg = b.identifier("a");
     arg.typeAnnotation = b.typeAnnotation(
@@ -1200,7 +1204,11 @@ describe("printer", function () {
   });
 
   it("prints ClassProperty correctly", function () {
-    const code = ["class A {", "  foo: Type = Bar;", "}"].join(eol);
+    const code = [
+      "class A {",
+      "  foo: Type = Bar;",
+      "}",
+    ].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1226,7 +1234,11 @@ describe("printer", function () {
   });
 
   it("prints 'definite' ClassProperty correctly", function () {
-    const code = ["class A {", "  foo!: string;", "}"].join(eol);
+    const code = [
+      "class A {",
+      "  foo!: string;",
+      "}",
+    ].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1253,13 +1265,159 @@ describe("printer", function () {
   });
 
   it("prints static ClassProperty correctly", function () {
-    const code = ["class A {", "  static foo = Bar;", "}"].join(eol);
+    const code = [
+      "class A {",
+      "  static foo = Bar;",
+      "}",
+    ].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
         b.identifier("A"),
         b.classBody([
           b.classProperty(b.identifier("foo"), b.identifier("Bar"), null, true),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints ClassAccessorProperty correctly", function () {
+    const code = [
+      "class A {",
+      "  accessor foo: Type = Bar;",
+      "}",
+    ].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            typeAnnotation: b.tsTypeAnnotation(
+              b.tsTypeReference(b.identifier("Type")),
+            )
+          })
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints 'definite' ClassAccessorProperty correctly", function () {
+    const code = [
+      "class A {",
+      "  accessor foo!: string;",
+      "}",
+    ].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            typeAnnotation: b.tsTypeAnnotation(b.tsStringKeyword()),
+            definite: true,
+          }),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints static ClassAccessorProperty correctly", function () {
+    const code = [
+      "class A {",
+      "  static accessor foo = Bar;",
+      "}",
+    ].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            static: true,
+          }),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints abstract ClassAccessorProperty correctly", function () {
+    const code = [
+      "class A {",
+      "  abstract accessor foo = Bar;",
+      "}",
+    ].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            abstract: true,
+          }),
+        ]),
+      ),
+    ]);
+
+    const printer = new Printer({
+      tabWidth: 2,
+    });
+
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("prints override ClassAccessorProperty correctly", function () {
+    const code = [
+      "class A {",
+      "  override accessor foo = Bar;",
+      "}",
+    ].join(eol);
+
+    const ast = b.program([
+      b.classDeclaration(
+        b.identifier("A"),
+        b.classBody([
+          b.classAccessorProperty.from({
+            key: b.identifier("foo"),
+            value: b.identifier("Bar"),
+            override: true,
+          }),
         ]),
       ),
     ]);

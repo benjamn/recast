@@ -28,6 +28,6 @@ export const parser = (function (): BabelParser {
 //
 export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
-  babelOptions.plugins.push("jsx", "flow");
+  babelOptions.plugins.push("jsx", "flow", "decoratorAutoAccessors");
   return parser.parse(source, babelOptions);
 }

@@ -1,10 +1,12 @@
 import assert from "assert";
-import * as recast from "../main";
-const n = recast.types.namedTypes;
-const b = recast.types.builders;
 import { EOL as eol } from "os";
+import * as recast from "../main";
+
 import traverse, {NodePath, Node} from '@babel/traverse';
 import template from '@babel/template';
+
+const n = recast.types.namedTypes;
+const b = recast.types.builders;
 
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
@@ -513,6 +515,23 @@ describe("Babel", function () {
     assert.strictEqual(
       recast.print(ast, {quote: 'single'}).code,
       `'use strict';\nconst a = 1;`,
+    );
+  });
+
+  it("can handle ClassAccessorProperty elements", function () {
+    const code = [
+      "class A {",
+      "    accessor x;",
+      "    static accessor y;",
+      "    accessor z = 1;",
+      "    static accessor w = 2;",
+      "}",
+    ];
+    const ast = recast.parse(code.join(eol), parseOptions);
+
+    assert.strictEqual(
+      recast.prettyPrint(ast).code,
+      code.join(eol),
     );
   });
 });

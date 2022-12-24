@@ -1,4 +1,4 @@
-import { Omit } from "ast-types/types";
+import { getLineTerminator } from "./util";
 
 /**
  * All Recast API functions take second parameter with configuration options,
@@ -169,7 +169,7 @@ const defaults: Options = {
   tabWidth: 4,
   useTabs: false,
   reuseWhitespace: true,
-  lineTerminator: require("os").EOL || "\n",
+  lineTerminator: getLineTerminator(),
   wrapColumn: 74, // Aspirational for now.
   sourceFileName: null,
   sourceMapName: null,
