@@ -833,4 +833,15 @@ function runTestsForParser(parserId: any) {
       ["// comment", ";(function() {})();"].join(eol),
     );
   });
+  
+  it("should preserve comments attached to CallExpression argument", function () {
+    const code = 'testFunc (/** @type {string} */ (a), b);';
+    const ast = recast.parse(code, { parser });
+    const args = ast.program.body[0].expression.arguments;
+    
+    args.unshift(args[1]);
+    const expected = 'testFunc(b, /** @type {string} */ a, b);';
+    
+    assert.strictEqual(recast.print(ast).code, expected);
+  });
 }
