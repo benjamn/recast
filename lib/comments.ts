@@ -232,7 +232,7 @@ function breakTies(tiesToBreak: any[], lines: any) {
   if (indexOfFirstLeadingComment) {
       const {enclosingNode} = tiesToBreak[indexOfFirstLeadingComment - 1];
       
-      if (enclosingNode.type === 'CallExpression') {
+      if (enclosingNode?.type === 'CallExpression') {
         --indexOfFirstLeadingComment;
       }
   }
