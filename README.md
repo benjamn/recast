@@ -64,7 +64,7 @@ const ast = recast.parse(code);
 
 Now do _whatever_ you want to `ast`. Really, anything at all!
 
-See [ast-types](https://github.com/benjamn/ast-types) (especially the [def/core.ts](https://github.com/benjamn/ast-types/blob/master/def/core.ts)) module for a thorough overview of the `ast` API.
+See [ast-types](https://github.com/benjamn/ast-types) (especially the [def/core.ts](https://github.com/benjamn/ast-types/blob/master/src/def/core.ts)) module for a thorough overview of the `ast` API.
 
 ```js
 // Grab a reference to the function declaration we just parsed.
