@@ -1,14 +1,11 @@
 import assert from "assert";
-import * as types from "ast-types";
+import * as AstTypes from "ast-types";
 import { printComments } from "./comments";
-import FastPath from "./fast-path";
+import { BaseFastPath, FastPathType, bindFastPath } from "./fast-path";
 import { concat, fromString, Lines } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
 import * as util from "./util";
-const namedTypes = types.namedTypes;
-const isString = types.builtInTypes.string;
-const isObject = types.builtInTypes.object;
 
 export interface PrintResultType {
   code: string;
@@ -27,11 +24,11 @@ const PrintResult = function PrintResult(
 ) {
   assert.ok(this instanceof PrintResult);
 
-  isString.assert(code);
+  AstTypes.builtInTypes.string.assert(code);
   this.code = code;
 
   if (sourceMap) {
-    isObject.assert(sourceMap);
+    AstTypes.builtInTypes.object.assert(sourceMap);
     this.map = sourceMap;
   }
 } as any as PrintResultConstructor;
@@ -55,20 +52,23 @@ PRp.toString = function () {
 
 const emptyPrintResult = new PrintResult("");
 
-interface PrinterType {
+export declare class PrinterType {
+  constructor(config?: any);
   print(ast: any): PrintResultType;
   printGenerically(ast: any): PrintResultType;
 }
 
-interface PrinterConstructor {
+export interface PrinterConstructor {
   new (config?: any): PrinterType;
 }
 
-const Printer = function Printer(this: PrinterType, config?: any) {
+const Printer = function Printer(this: PrinterType, inputConfig?: any) {
   assert.ok(this instanceof Printer);
 
-  const explicitTabWidth = config && config.tabWidth;
-  config = normalizeOptions(config);
+  const explicitTabWidth = inputConfig && inputConfig.tabWidth;
+  const config = normalizeOptions(inputConfig);
+
+  const FastPath = bindFastPath(config.types);
 
   // It's common for client code to pass the same options into both
   // recast.parse and recast.print, but the Printer doesn't need (and
@@ -185,8 +185,13 @@ const Printer = function Printer(this: PrinterType, config?: any) {
 
 export { Printer };
 
-function genericPrint(path: any, config: any, options: any, printPath: any) {
-  assert.ok(path instanceof FastPath);
+function genericPrint(
+  path: FastPathType,
+  config: any,
+  options: any,
+  printPath: any,
+) {
+  assert.ok(path instanceof BaseFastPath);
 
   const node = path.getValue();
   const parts = [];
@@ -226,7 +231,9 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
 // functions in this file call the `config` object (that is, the
 // configuration object originally passed into the Printer constructor).
 // Its properties are documented in lib/options.js.
-function genericPrintNoParens(path: any, options: any, print: any) {
+function genericPrintNoParens(path: FastPathType, options: any, print: any) {
+  const { types } = path;
+  const { namedTypes } = types;
   const n = path.getValue();
 
   if (!n) {
@@ -915,27 +922,29 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "RegExpLiteral": // Babel 6 Literal split
       return fromString(
-        getPossibleRaw(n) || `/${n.pattern}/${n.flags || ""}`,
+        getPossibleRaw(types, n) || `/${n.pattern}/${n.flags || ""}`,
         options,
       );
 
     case "BigIntLiteral": // Babel 7 Literal split
-      return fromString(getPossibleRaw(n) || n.value + "n", options);
+      return fromString(getPossibleRaw(types, n) || n.value + "n", options);
 
     case "NumericLiteral": // Babel 6 Literal Split
-      return fromString(getPossibleRaw(n) || n.value, options);
+      return fromString(getPossibleRaw(types, n) || n.value, options);
 
     case "DecimalLiteral":
-      return fromString(getPossibleRaw(n) || n.value + "m", options);
+      return fromString(getPossibleRaw(types, n) || n.value + "m", options);
 
     case "StringLiteral":
-        return fromString(nodeStr(n.value, options));
+      return fromString(nodeStr(types, n.value, options));
 
     case "BooleanLiteral": // Babel 6 Literal split
     case "Literal":
       return fromString(
-        getPossibleRaw(n) ||
-          (typeof n.value === "string" ? nodeStr(n.value, options) : n.value),
+        getPossibleRaw(types, n) ||
+          (typeof n.value === "string"
+            ? nodeStr(types, n.value, options)
+            : n.value),
         options,
       );
 
@@ -944,7 +953,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "DirectiveLiteral": // Babel 6
       return fromString(
-        getPossibleRaw(n) || nodeStr(n.value, options),
+        getPossibleRaw(types, n) || nodeStr(types, n.value, options),
         options,
       );
 
@@ -958,7 +967,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       // The Esprima ModuleSpecifier type is just a string-valued
       // Literal identifying the imported-from module.
-      return fromString(nodeStr(n.value, options), options);
+      return fromString(nodeStr(types, n.value, options), options);
 
     case "UnaryExpression":
       parts.push(n.operator);
@@ -1471,10 +1480,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "ClassAccessorProperty": {
-      parts.push(
-        ...printClassMemberModifiers(n),
-        "accessor ",
-      );
+      parts.push(...printClassMemberModifiers(n), "accessor ");
 
       if (n.computed) {
         parts.push("[", path.call(print, "key"), "]");
@@ -1948,7 +1954,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "StringLiteralTypeAnnotation":
-      return fromString(nodeStr(n.value, options), options);
+      return fromString(nodeStr(types, n.value, options), options);
 
     case "NumberLiteralTypeAnnotation":
     case "NumericLiteralTypeAnnotation":
@@ -2233,7 +2239,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             return member.concat(";");
           }
           return member;
-        })
+        }),
       );
 
       if (members.isEmpty()) {
@@ -2286,8 +2292,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat([path.call(print, "left"), ".", path.call(print, "right")]);
 
     case "TSAsExpression":
-    case "TSSatisfiesExpression":
-    {
+    case "TSSatisfiesExpression": {
       const expression = path.call(print, "expression");
       parts.push(
         expression,
@@ -2475,7 +2480,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             return element.concat(";");
           }
           return element;
-        })
+        }),
       );
       if (lines.isEmpty()) {
         return fromString("{}", options);
@@ -2582,7 +2587,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
     }
 
-
     // https://github.com/babel/babel/pull/10148
     case "V8IntrinsicIdentifier":
       return concat(["%", path.call(print, "name")]);
@@ -2661,7 +2665,12 @@ function printDecorators(path: any, printPath: any) {
   return concat(parts);
 }
 
-function printStatementSequence(path: any, options: any, print: any) {
+function printStatementSequence(path: FastPathType, options: any, print: any) {
+  const {
+    namedTypes,
+    builtInTypes: { string: isString },
+  } = path.types;
+
   const filtered: any[] = [];
   let sawComment = false;
   let sawStatement = false;
@@ -2825,7 +2834,9 @@ function printClassMemberModifiers(node: any): string[] {
   return parts;
 }
 
-function printMethod(path: any, options: any, print: any) {
+function printMethod(path: FastPathType, options: any, print: any) {
+  const { namedTypes } = path.types;
+
   const node = path.getNode();
   const kind = node.kind;
   const parts = [];
@@ -2982,7 +2993,9 @@ function maybePrintImportAssertions(
   return fromString("");
 }
 
-function printExportDeclaration(path: any, options: any, print: any) {
+function printExportDeclaration(path: FastPathType, options: any, print: any) {
+  const { namedTypes } = path.types;
+
   const decl = path.getValue();
   const parts: (string | Lines)[] = ["export "];
   if (decl.exportKind && decl.exportKind === "type") {
@@ -3141,13 +3154,14 @@ function swapQuotes(str: string) {
 }
 
 function getPossibleRaw(
+  types: typeof AstTypes,
   node:
-    | types.namedTypes.Literal
-    | types.namedTypes.NumericLiteral
-    | types.namedTypes.StringLiteral
-    | types.namedTypes.RegExpLiteral
-    | types.namedTypes.BigIntLiteral
-    | types.namedTypes.DecimalLiteral,
+    | AstTypes.namedTypes.Literal
+    | AstTypes.namedTypes.NumericLiteral
+    | AstTypes.namedTypes.StringLiteral
+    | AstTypes.namedTypes.RegExpLiteral
+    | AstTypes.namedTypes.BigIntLiteral
+    | AstTypes.namedTypes.DecimalLiteral,
 ): string | void {
   const value = types.getFieldValue(node, "value");
   const extra = types.getFieldValue(node, "extra");
@@ -3170,8 +3184,8 @@ function jsSafeStringify(str: string) {
   });
 }
 
-function nodeStr(str: string, options: any) {
-  isString.assert(str);
+function nodeStr(types: typeof AstTypes, str: string, options: any) {
+  types.builtInTypes.string.assert(str);
   switch (options.quote) {
     case "auto": {
       const double = jsSafeStringify(str);

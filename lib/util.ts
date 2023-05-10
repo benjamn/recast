@@ -1,7 +1,6 @@
 import assert from "assert";
-import * as types from "ast-types";
-const n = types.namedTypes;
 import sourceMap from "source-map";
+import * as AstTypes from "ast-types";
 const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -159,7 +158,13 @@ function expandLoc(parentLoc: any, childLoc: any) {
   }
 }
 
-export function fixFaultyLocations(node: any, lines: any) {
+export function fixFaultyLocations(
+  types: typeof AstTypes,
+  node: any,
+  lines: any,
+) {
+  const n = types.namedTypes;
+
   const loc = node.loc;
   if (loc) {
     if (loc.start.line < 1) {

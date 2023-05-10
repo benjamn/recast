@@ -1,4 +1,5 @@
 import { getLineTerminator } from "./util";
+import * as AstTypes from "ast-types";
 
 /**
  * All Recast API functions take second parameter with configuration options,
@@ -157,6 +158,11 @@ export interface Options extends DeprecatedOptions {
    * @default true
    */
   tokens?: boolean;
+
+  /**
+   * Custom fork of ast-types, if desired
+   */
+  types?: typeof AstTypes;
 }
 
 interface DeprecatedOptions {
@@ -184,6 +190,7 @@ const defaults: Options = {
   arrowParensAlways: false,
   flowObjectCommas: true,
   tokens: true,
+  types: AstTypes,
 };
 const hasOwn = defaults.hasOwnProperty;
 
@@ -219,5 +226,6 @@ export function normalize(opts?: Options): NormalizedOptions {
     arrowParensAlways: get("arrowParensAlways"),
     flowObjectCommas: get("flowObjectCommas"),
     tokens: !!get("tokens"),
+    types: get("types"),
   };
 }

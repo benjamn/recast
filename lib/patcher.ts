@@ -1,31 +1,34 @@
 import assert from "assert";
 import * as linesModule from "./lines";
-import * as types from "ast-types";
-const Printable = types.namedTypes.Printable;
-const Expression = types.namedTypes.Expression;
-const ReturnStatement = types.namedTypes.ReturnStatement;
-const SourceLocation = types.namedTypes.SourceLocation;
+import * as AstTypes from "ast-types";
 import { comparePos, copyPos, getUnionOfKeys } from "./util";
-import FastPath from "./fast-path";
-const isObject = types.builtInTypes.object;
-const isArray = types.builtInTypes.array;
-const isString = types.builtInTypes.string;
+import {
+  bindFastPath,
+  BaseFastPath,
+  FastPathConstructor,
+  FastPathType,
+} from "./fast-path";
 const riskyAdjoiningCharExp = /[0-9a-z_$]/i;
 
-interface PatcherType {
+export declare class PatcherType {
+  constructor(lines: any);
+  get types(): typeof AstTypes;
+  get FastPath(): FastPathConstructor;
   replace(loc: any, lines: any): any;
   get(loc?: any): any;
   tryToReprintComments(newNode: any, oldNode: any, print: any): any;
   deleteComments(node: any): any;
 }
 
-interface PatcherConstructor {
+export interface PatcherConstructor {
   new (lines: any): PatcherType;
 }
 
 const Patcher = function Patcher(this: PatcherType, lines: any) {
   assert.ok(this instanceof Patcher);
   assert.ok(lines instanceof linesModule.Lines);
+
+  const isString = this.types.builtInTypes.string;
 
   const self = this,
     replacements: any[] = [];
@@ -72,9 +75,21 @@ const Patcher = function Patcher(this: PatcherType, lines: any) {
     return linesModule.concat(toConcat);
   };
 } as any as PatcherConstructor;
-export { Patcher };
 
 const Pp: PatcherType = Patcher.prototype;
+
+Object.defineProperties(Pp, {
+  types: {
+    get() {
+      throw new Error(`must be gotten from derived class from bindPatcher`);
+    },
+  },
+  FastPath: {
+    get() {
+      throw new Error(`must be gotten from derived class from bindPatcher`);
+    },
+  },
+});
 
 Pp.tryToReprintComments = function (newNode, oldNode, print) {
   const patcher = this;
@@ -84,8 +99,8 @@ Pp.tryToReprintComments = function (newNode, oldNode, print) {
     return true;
   }
 
-  const newPath = FastPath.from(newNode);
-  const oldPath = FastPath.from(oldNode);
+  const newPath = this.FastPath.from(newNode);
+  const oldPath = this.FastPath.from(oldNode);
 
   newPath.stack.push("comments", getSurroundingComments(newNode));
   oldPath.stack.push("comments", getSurroundingComments(oldNode));
@@ -159,8 +174,38 @@ Pp.deleteComments = function (node) {
   });
 };
 
-export function getReprinter(path: any) {
-  assert.ok(path instanceof FastPath);
+export { Patcher as BasePatcher };
+
+const boundPatchers: WeakMap<typeof AstTypes, PatcherConstructor> =
+  new WeakMap();
+
+export const bindPatcher = function bindPatcher(
+  types: typeof AstTypes,
+): PatcherConstructor {
+  let bound = boundPatchers.get(types);
+  if (bound) return bound;
+
+  const FastPath = bindFastPath(types);
+
+  bound = class PatcherWithTypes extends Patcher {
+    get types(): typeof AstTypes {
+      return types;
+    }
+
+    get FastPath(): FastPathConstructor {
+      return FastPath;
+    }
+  };
+  boundPatchers.set(types, bound);
+  return bound;
+};
+
+export function getReprinter(path: FastPathType) {
+  assert.ok(path instanceof BaseFastPath);
+  const Patcher = bindPatcher(path.types);
+
+  const n = path.types.namedTypes;
+  const { Printable, SourceLocation } = n;
 
   // Make sure that this path refers specifically to a Node, rather than
   // some non-Node subproperty of a Node.
@@ -281,7 +326,9 @@ function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
   );
 }
 
-function findReprints(newPath: any, reprints: any) {
+function findReprints(newPath: FastPathType, reprints: any) {
+  const { Printable } = newPath.types.namedTypes;
+
   const newNode = newPath.getValue();
   Printable.assert(newNode);
 
@@ -294,6 +341,7 @@ function findReprints(newPath: any, reprints: any) {
     return false;
   }
 
+  const FastPath: FastPathConstructor = newPath.constructor as any;
   const oldPath = new FastPath(oldNode);
   const canReprint = findChildReprints(newPath, oldPath, reprints);
 
@@ -306,22 +354,34 @@ function findReprints(newPath: any, reprints: any) {
   return canReprint;
 }
 
-function findAnyReprints(newPath: any, oldPath: any, reprints: any) {
+function findAnyReprints(
+  newPath: FastPathType,
+  oldPath: FastPathType,
+  reprints: any,
+) {
+  const { array, object } = newPath.types.builtInTypes;
+
   const newNode = newPath.getValue();
   const oldNode = oldPath.getValue();
 
   if (newNode === oldNode) return true;
 
-  if (isArray.check(newNode))
+  if (array.check(newNode))
     return findArrayReprints(newPath, oldPath, reprints);
 
-  if (isObject.check(newNode))
+  if (object.check(newNode))
     return findObjectReprints(newPath, oldPath, reprints);
 
   return false;
 }
 
-function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
+function findArrayReprints(
+  newPath: FastPathType,
+  oldPath: FastPathType,
+  reprints: any,
+) {
+  const { array } = newPath.types.builtInTypes;
+
   const newNode = newPath.getValue();
   const oldNode = oldPath.getValue();
 
@@ -333,10 +393,10 @@ function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
     return true;
   }
 
-  isArray.assert(newNode);
+  array.assert(newNode);
   const len = newNode.length;
 
-  if (!(isArray.check(oldNode) && oldNode.length === len)) return false;
+  if (!(array.check(oldNode) && oldNode.length === len)) return false;
 
   for (let i = 0; i < len; ++i) {
     newPath.stack.push(i, newNode[i]);
@@ -352,9 +412,15 @@ function findArrayReprints(newPath: any, oldPath: any, reprints: any) {
   return true;
 }
 
-function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
+function findObjectReprints(
+  newPath: FastPathType,
+  oldPath: FastPathType,
+  reprints: any,
+) {
+  const { Printable, Expression } = newPath.types.namedTypes;
+  const { object } = newPath.types.builtInTypes;
   const newNode = newPath.getValue();
-  isObject.assert(newNode);
+  object.assert(newNode);
 
   if (newNode.original === null) {
     // If newNode.original node was set to null, reprint the node.
@@ -362,7 +428,7 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
   }
 
   const oldNode = oldPath.getValue();
-  if (!isObject.check(oldNode)) return false;
+  if (!object.check(oldNode)) return false;
 
   if (
     newNode === oldNode ||
@@ -443,12 +509,20 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
   return findChildReprints(newPath, oldPath, reprints);
 }
 
-function findChildReprints(newPath: any, oldPath: any, reprints: any) {
+function findChildReprints(
+  newPath: FastPathType,
+  oldPath: FastPathType,
+  reprints: any,
+) {
+  const { types } = newPath;
+  const { object } = types.builtInTypes;
+  const { ReturnStatement } = types.namedTypes;
+
   const newNode = newPath.getValue();
   const oldNode = oldPath.getValue();
 
-  isObject.assert(newNode);
-  isObject.assert(oldNode);
+  object.assert(newNode);
+  object.assert(oldNode);
 
   if (newNode.original === null) {
     // If newNode.original node was set to null, reprint the node.
@@ -505,3 +579,6 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
   return true;
 }
+
+const boundPatcher = bindPatcher(AstTypes);
+export { boundPatcher as Patcher };
