@@ -1,10 +1,6 @@
 import assert from "assert";
-import * as types from "ast-types";
+import * as AstTypes from "ast-types";
 import * as util from "./util";
-
-const n = types.namedTypes;
-const isArray = types.builtInTypes.array;
-const isNumber = types.builtInTypes.number;
 
 const PRECEDENCE: any = {};
 [
@@ -26,7 +22,10 @@ const PRECEDENCE: any = {};
   });
 });
 
-interface FastPathType {
+export declare class FastPathType {
+  constructor(value: any);
+  static from(obj: any): FastPathType;
+  get types(): typeof AstTypes;
   stack: any[];
   copy(): any;
   getName(): any;
@@ -46,44 +45,39 @@ interface FastPathType {
   firstInStatement(): any;
 }
 
-interface FastPathConstructor {
+export interface FastPathConstructor {
   new (value: any): FastPathType;
-  from(obj: any): any;
+  from(obj: any): FastPathType;
 }
 
 const FastPath = function FastPath(this: FastPathType, value: any) {
   assert.ok(this instanceof FastPath);
+  assert.ok(this.types);
   this.stack = [value];
 } as any as FastPathConstructor;
 
-const FPp: FastPathType = FastPath.prototype;
+export { FastPath as BaseFastPath };
 
 // Static convenience function for coercing a value to a FastPath.
-FastPath.from = function (obj) {
-  if (obj instanceof FastPath) {
-    // Return a defensive copy of any existing FastPath instances.
-    return obj.copy();
-  }
-
-  if (obj instanceof types.NodePath) {
-    // For backwards compatibility, unroll NodePath instances into
-    // lightweight FastPath [..., name, value] stacks.
-    const copy = Object.create(FastPath.prototype);
-    const stack = [obj.value];
-    for (let pp; (pp = obj.parentPath); obj = pp)
-      stack.push(obj.name, pp.value);
-    copy.stack = stack.reverse();
-    return copy;
-  }
-
-  // Otherwise use obj as the value of the new FastPath instance.
-  return new FastPath(obj);
+FastPath.from = function () {
+  throw new Error("must be called in derived class from bindFastPath");
 };
 
+const FPp: FastPathType = FastPath.prototype;
+
+Object.defineProperties(FPp, {
+  types: {
+    get() {
+      throw new Error(`must be gotten in derived class from bindFastPath`);
+    },
+  },
+});
+
 FPp.copy = function copy() {
-  const copy = Object.create(FastPath.prototype);
-  copy.stack = this.stack.slice(0);
-  return copy;
+  throw new Error(`must be called from derived class from bindFastPath`);
+  // const copy = Object.create(FastPath.prototype);
+  // copy.stack = this.stack.slice(0);
+  // return copy;
 };
 
 // The name of the current property is always the penultimate element of
@@ -117,7 +111,7 @@ function getNodeHelper(path: any, count: number) {
 
   for (let i = s.length - 1; i >= 0; i -= 2) {
     const value = s[i];
-    if (n.Node.check(value) && --count < 0) {
+    if (path.types.namedTypes.Node.check(value) && --count < 0) {
       return value;
     }
   }
@@ -314,6 +308,9 @@ FPp.getNextToken = function (node) {
 FPp.needsParens = function (assumeExpressionContext) {
   const node = this.getNode();
 
+  const n = this.types.namedTypes;
+  const isNumber = this.types.builtInTypes.number;
+
   // This needs to come before `if (!parent) { return false }` because
   // an object destructuring assignment requires parens for
   // correctness even when it's the topmost expression.
@@ -499,7 +496,7 @@ FPp.needsParens = function (assumeExpressionContext) {
         return true;
       }
 
-      return isBinary(parent);
+      return isBinary(this.types, parent);
 
     case "ObjectExpression":
       if (
@@ -538,7 +535,7 @@ FPp.needsParens = function (assumeExpressionContext) {
     name === "callee" &&
     parent.callee === node
   ) {
-    return containsCallExpression(node);
+    return containsCallExpression(this.types, node);
   }
 
   if (
@@ -552,12 +549,14 @@ FPp.needsParens = function (assumeExpressionContext) {
   return false;
 };
 
-function isBinary(node: any) {
+function isBinary(types: typeof AstTypes, node: any) {
+  const n = types.namedTypes;
   return n.BinaryExpression.check(node) || n.LogicalExpression.check(node);
 }
 
 // @ts-ignore 'isUnaryLike' is declared but its value is never read. [6133]
-function isUnaryLike(node: any) {
+function isUnaryLike(types: typeof AstTypes, node: any) {
+  const n = types.namedTypes;
   return (
     n.UnaryExpression.check(node) ||
     // I considered making SpreadElement and SpreadProperty subtypes of
@@ -567,7 +566,10 @@ function isUnaryLike(node: any) {
   );
 }
 
-function containsCallExpression(node: any): any {
+function containsCallExpression(types: typeof AstTypes, node: any): any {
+  const n = types.namedTypes;
+  const isArray = types.builtInTypes.array;
+
   if (n.CallExpression.check(node)) {
     return true;
   }
@@ -578,7 +580,7 @@ function containsCallExpression(node: any): any {
 
   if (n.Node.check(node)) {
     return types.someField(node, (_name: any, child: any) =>
-      containsCallExpression(child),
+      containsCallExpression(types, child),
     );
   }
 
@@ -587,6 +589,7 @@ function containsCallExpression(node: any): any {
 
 FPp.canBeFirstInStatement = function () {
   const node = this.getNode();
+  const n = this.types.namedTypes;
 
   if (n.FunctionExpression.check(node)) {
     return false;
@@ -604,6 +607,7 @@ FPp.canBeFirstInStatement = function () {
 };
 
 FPp.firstInStatement = function () {
+  const n = this.types.namedTypes;
   const s = this.stack;
   let parentName, parent;
   let childName, child;
@@ -670,7 +674,7 @@ FPp.firstInStatement = function () {
       continue;
     }
 
-    if (isBinary(parent) && childName === "left") {
+    if (isBinary(this.types, parent) && childName === "left") {
       assert.strictEqual(parent.left, child);
       continue;
     }
@@ -690,4 +694,48 @@ FPp.firstInStatement = function () {
   return true;
 };
 
-export default FastPath;
+const boundFastPaths: WeakMap<typeof AstTypes, FastPathConstructor> =
+  new WeakMap();
+
+export const bindFastPath = function bindFastPath(
+  types: typeof AstTypes,
+): FastPathConstructor {
+  let bound = boundFastPaths.get(types);
+  if (bound) return bound;
+  bound = class FastPathWithTypes extends FastPath {
+    get types(): typeof AstTypes {
+      return types;
+    }
+
+    static from(obj: any): FastPathWithTypes {
+      if (obj instanceof FastPath) {
+        // Return a defensive copy of any existing FastPath instances.
+        return obj.copy();
+      }
+
+      if (obj instanceof types.NodePath) {
+        // For backwards compatibility, unroll NodePath instances into
+        // lightweight FastPath [..., name, value] stacks.
+        const copy = Object.create(FastPath.prototype);
+        const stack = [obj.value];
+        for (let pp; (pp = obj.parentPath); obj = pp)
+          stack.push(obj.name, pp.value);
+        copy.stack = stack.reverse();
+        return copy;
+      }
+
+      // Otherwise use obj as the value of the new FastPath instance.
+      return new FastPathWithTypes(obj);
+    }
+
+    copy() {
+      const copy = Object.create(FastPathWithTypes.prototype);
+      copy.stack = this.stack.slice(0);
+      return copy;
+    }
+  };
+  boundFastPaths.set(types, bound);
+  return bound;
+};
+
+export default bindFastPath(AstTypes);

@@ -1,19 +1,26 @@
 import assert from "assert";
-import * as types from "ast-types";
-const n = types.namedTypes;
-const isArray = types.builtInTypes.array;
-const isObject = types.builtInTypes.object;
+import * as AstTypes from "ast-types";
 import { Lines, concat } from "./lines";
 import { comparePos, fixFaultyLocations } from "./util";
+import { FastPathType } from "./fast-path";
 
-type Node = types.namedTypes.Node;
-type Comment = types.namedTypes.Comment;
+type Node = AstTypes.namedTypes.Node;
+type Comment = AstTypes.namedTypes.Comment;
 
 const childNodesCache = new WeakMap<Node, Node[]>();
 
 // TODO Move a non-caching implementation of this function into ast-types,
 // and implement a caching wrapper function here.
-function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
+function getSortedChildNodes(
+  types: typeof AstTypes,
+  node: Node,
+  lines: Lines,
+  resultArray?: Node[],
+) {
+  const {
+    namedTypes: n,
+    builtInTypes: { array: isArray, object: isObject },
+  } = types;
   if (!node) {
     return resultArray;
   }
@@ -22,7 +29,7 @@ function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
   // are fixed by this utility function. Specifically, if it decides to
   // set node.loc to null, indicating that the node's .loc information
   // is unreliable, then we don't want to add node to the resultArray.
-  fixFaultyLocations(node, lines);
+  fixFaultyLocations(types, node, lines);
 
   if (resultArray) {
     if (n.Node.check(node) && n.SourceLocation.check(node.loc)) {
@@ -64,7 +71,7 @@ function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
   }
 
   for (let i = 0, nameCount = names.length; i < nameCount; ++i) {
-    getSortedChildNodes((node as any)[names[i]], lines, resultArray);
+    getSortedChildNodes(types, (node as any)[names[i]], lines, resultArray);
   }
 
   return resultArray;
@@ -73,8 +80,13 @@ function getSortedChildNodes(node: Node, lines: Lines, resultArray?: Node[]) {
 // As efficiently as possible, decorate the comment object with
 // .precedingNode, .enclosingNode, and/or .followingNode properties, at
 // least one of which is guaranteed to be defined.
-function decorateComment(node: Node, comment: Comment, lines: Lines) {
-  const childNodes = getSortedChildNodes(node, lines);
+function decorateComment(
+  types: typeof AstTypes,
+  node: Node,
+  comment: Comment,
+  lines: Lines,
+) {
+  const childNodes = getSortedChildNodes(types, node, lines);
 
   // Time to dust off the old binary search robes and wizard hat.
   let left = 0;
@@ -91,7 +103,12 @@ function decorateComment(node: Node, comment: Comment, lines: Lines) {
       comparePos(comment.loc!.end, child.loc!.end) <= 0
     ) {
       // The comment is completely contained by this child node.
-      decorateComment(((comment as any).enclosingNode = child), comment, lines);
+      decorateComment(
+        types,
+        ((comment as any).enclosingNode = child),
+        comment,
+        lines,
+      );
       return; // Abandon the binary search at this level.
     }
 
@@ -127,8 +144,13 @@ function decorateComment(node: Node, comment: Comment, lines: Lines) {
   }
 }
 
-export function attach(comments: any[], ast: any, lines: any) {
-  if (!isArray.check(comments)) {
+export function attach(
+  types: typeof AstTypes,
+  comments: any[],
+  ast: any,
+  lines: any,
+) {
+  if (!types.builtInTypes.array.check(comments)) {
     return;
   }
 
@@ -136,7 +158,7 @@ export function attach(comments: any[], ast: any, lines: any) {
 
   comments.forEach(function (comment) {
     comment.loc.lines = lines;
-    decorateComment(ast, comment, lines);
+    decorateComment(types, ast, comment, lines);
 
     const pn = comment.precedingNode;
     const en = comment.enclosingNode;
@@ -263,7 +285,8 @@ function addTrailingComment(node: any, comment: any) {
   addCommentHelper(node, comment);
 }
 
-function printLeadingComment(commentPath: any, print: any) {
+function printLeadingComment(commentPath: FastPathType, print: any) {
+  const { namedTypes: n } = commentPath.types;
   const comment = commentPath.getValue();
   n.Comment.assert(comment);
 
@@ -297,8 +320,9 @@ function printLeadingComment(commentPath: any, print: any) {
   return concat(parts);
 }
 
-function printTrailingComment(commentPath: any, print: any) {
-  const comment = commentPath.getValue(commentPath);
+function printTrailingComment(commentPath: FastPathType, print: any) {
+  const { namedTypes: n } = commentPath.types;
+  const comment = commentPath.getValue();
   n.Comment.assert(comment);
 
   const loc = comment.loc;
@@ -325,7 +349,9 @@ function printTrailingComment(commentPath: any, print: any) {
   return concat(parts);
 }
 
-export function printComments(path: any, print: any) {
+export function printComments(path: FastPathType, print: any) {
+  const { types } = path;
+  const { namedTypes: n } = types;
   const value = path.getValue();
   const innerLines = print(path);
   const comments =

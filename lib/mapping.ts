@@ -1,10 +1,14 @@
 import assert from "assert";
 import { comparePos } from "./util";
-import { namedTypes } from "ast-types";
 import { Lines } from "./lines";
+import { Position } from "source-map";
 
-type Pos = namedTypes.Position;
-type Loc = namedTypes.SourceLocation;
+type Pos = Position;
+type Loc = {
+  start: Pos;
+  end: Pos;
+  source?: string;
+};
 
 export default class Mapping {
   constructor(
