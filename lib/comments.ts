@@ -229,6 +229,14 @@ function breakTies(tiesToBreak: any[], lines: any) {
     ++indexOfFirstLeadingComment;
   }
 
+  if (indexOfFirstLeadingComment) {
+    const { enclosingNode } = tiesToBreak[indexOfFirstLeadingComment - 1];
+
+    if (enclosingNode?.type === "CallExpression") {
+      --indexOfFirstLeadingComment;
+    }
+  }
+
   tiesToBreak.forEach(function (comment, i) {
     if (i < indexOfFirstLeadingComment) {
       addTrailingComment(pn, comment);
