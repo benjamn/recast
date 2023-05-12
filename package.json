@@ -54,7 +54,7 @@
     "@babel/preset-env": "7.20.2",
     "@types/esprima": "4.0.3",
     "@types/glob": "8.0.0",
-    "@types/mocha": "8.2.0",
+    "@types/mocha": "10.0.1",
     "@types/node": "18.11.15",
     "@typescript-eslint/parser": "^5.47.1",
     "eslint": "^8.40.0",
@@ -62,7 +62,7 @@
     "flow-parser": "0.195.0",
     "glob": "8.0.3",
     "lint-staged": "^12.4.1",
-    "mocha": "^9.2.2",
+    "mocha": "^10.2.0",
     "prettier": "^2.6.2",
     "reify": "0.20.12",
     "typescript": "^4.9.4"
