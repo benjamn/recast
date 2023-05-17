@@ -157,6 +157,12 @@ export interface Options extends DeprecatedOptions {
    * @default true
    */
   tokens?: boolean;
+
+  /**
+   * Whether to add parens around statements when possible while printing the AST.
+   * @default false
+   */
+  avoidParens?: boolean;
 }
 
 interface DeprecatedOptions {
@@ -184,6 +190,7 @@ const defaults: Options = {
   arrowParensAlways: false,
   flowObjectCommas: true,
   tokens: true,
+  avoidParens: false,
 };
 const hasOwn = defaults.hasOwnProperty;
 
@@ -219,5 +226,6 @@ export function normalize(opts?: Options): NormalizedOptions {
     arrowParensAlways: get("arrowParensAlways"),
     flowObjectCommas: get("flowObjectCommas"),
     tokens: !!get("tokens"),
+    avoidParens: !!get("avoidParens"),
   };
 }
