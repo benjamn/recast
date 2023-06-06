@@ -21,11 +21,20 @@
   "license": "MIT",
   "main": "main.js",
   "types": "main.d.ts",
-  "module": "esm/main.js",
+  "module": "esm/main.mjs",
   "exports": {
-    ".": "./esm/main.js",
-    "./parsers/*": "./esm/parsers/*.js",
-    "./types/*": "./esm/types/*.js"
+    ".": {
+      "types": "./esm/main.d.ts",
+      "import": "./esm/main.mjs"
+    },
+    "./parsers/*": {
+      "types": "./esm/parsers/*.d.ts",
+      "import": "./esm/parsers/*.mjs"
+    },
+    "./types/*": {
+      "types": "./esm/types/*.d.ts",
+      "import": "./esm/types/*.mjs"
+    }
   },
   "scripts": {
     "mocha": "test/run.sh",
@@ -33,10 +42,10 @@
     "test": "npm run lint && npm run build && npm run mocha",
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:esm": "tsc -p tsconfig.esm.json && node fix-mjs-output.mjs",
     "lint": "eslint --ext .ts .",
     "format": "prettier --write .",
-    "clean": "tsc --build --clean",
+    "clean": "tsc --build --clean && rm -rf esm",
     "prepare": "npm run build",
     "postpack": "npm run clean"
   },

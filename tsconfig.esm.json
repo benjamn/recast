@@ -4,5 +4,6 @@
     "module": "ES2022",
     "target": "ES2020",
     "outDir": "esm"
-  }
+  },
+  "exclude": ["node_modules", "esm", "test"]
 }
