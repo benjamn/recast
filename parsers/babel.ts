@@ -6,7 +6,7 @@ import * as babylon from "babylon";
 type BabelParser = { parse: typeof babelParse };
 
 // Prefer the new @babel/parser package, but fall back to babylon if
-// that's what's available.babel
+// that's what's available
 export const parser = (function (): BabelParser {
   try {
     return babelParser;
