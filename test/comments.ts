@@ -1,10 +1,10 @@
 "use strict";
 
-import * as recast from "../main";
+import * as recast from "../main.js";
 const n = recast.types.namedTypes;
 const b = recast.types.builders;
-import { Printer } from "../lib/printer";
-import { fromString } from "../lib/lines";
+import { Printer } from "../lib/printer.js";
+import { fromString } from "../lib/lines.js";
 import assert from "assert";
 import { EOL as eol } from "os";
 

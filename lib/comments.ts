@@ -3,8 +3,8 @@ import * as types from "ast-types";
 const n = types.namedTypes;
 const isArray = types.builtInTypes.array;
 const isObject = types.builtInTypes.object;
-import { Lines, concat } from "./lines";
-import { comparePos, fixFaultyLocations } from "./util";
+import { Lines, concat } from "./lines.js";
+import { comparePos, fixFaultyLocations } from "./util.js";
 
 type Node = types.namedTypes.Node;
 type Comment = types.namedTypes.Comment;

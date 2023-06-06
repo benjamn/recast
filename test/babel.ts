@@ -1,6 +1,6 @@
 import assert from "assert";
 import { EOL as eol } from "os";
-import * as recast from "../main";
+import * as recast from "../main.js";
 const n = recast.types.namedTypes;
 const b = recast.types.builders;
 const nodeMajorVersion = parseInt(process.versions.node, 10);
@@ -454,11 +454,11 @@ describe("Babel", function () {
       ["class A {", "  declare public readonly x;", "}"].join(eol),
     );
   });
-  
+
   it("should keep braces in !(a && b)", function () {
     const code = '(options || !options.bidirectional) ? false : true;';
     const ast = recast.parse(code, parseOptions);
-    
+
     ast.program.body[0].expression = b.unaryExpression('!', ast.program.body[0].expression.test);
 
     assert.strictEqual(
@@ -470,7 +470,7 @@ describe("Babel", function () {
   it("should use single quotes", function () {
     const code = 'const a = 1;';
     const ast = recast.parse(code, parseOptions);
-    
+
     ast.program.body.unshift(b.expressionStatement(b.stringLiteral('use strict')));
 
     assert.strictEqual(

@@ -1,21 +1,23 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["es2015"],
-    "module": "commonjs",
+    "lib": [
+      "es2015"
+    ],
     "declaration": true,
     "rootDir": ".",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "importHelpers": true,
     "stripInternal": true
   },
   "exclude": [
     "node_modules",
+    "esm",
     "test/data"
   ]
 }

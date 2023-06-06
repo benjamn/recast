@@ -1,8 +1,8 @@
 import fs from "fs";
 import * as types from "ast-types";
-import { parse } from "./lib/parser";
-import { Printer } from "./lib/printer";
-import { Options } from "./lib/options";
+import { parse } from "./lib/parser.js";
+import { Printer } from "./lib/printer.js";
+import { Options } from "./lib/options.js";
 
 export {
   /**
@@ -34,7 +34,7 @@ export { visit } from "ast-types";
 /**
  * Options shared between parsing and printing.
  */
-export { Options } from "./lib/options";
+export { Options } from "./lib/options.js";
 
 /**
  * Reprint a modified syntax tree using as much of the original source

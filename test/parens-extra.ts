@@ -1,9 +1,9 @@
 import assert from "assert";
 // the babel parser denotes decorative parens with extra.parenthesized
 import * as babylon from "@babel/parser";
-import { parse as recastParse } from "../lib/parser";
-import { Printer } from "../lib/printer";
-import * as parser from "../parsers/babel-ts";
+import { parse as recastParse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
+import * as parser from "../parsers/babel-ts.js";
 import * as types from "ast-types";
 
 const printer = new Printer();

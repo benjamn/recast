@@ -1,11 +1,11 @@
 import assert from "assert";
-import { parse } from "../lib/parser";
-import { getReprinter } from "../lib/patcher";
-import { Printer } from "../lib/printer";
-import { fromString } from "../lib/lines";
+import { parse } from "../lib/parser.js";
+import { getReprinter } from "../lib/patcher.js";
+import { Printer } from "../lib/printer.js";
+import { fromString } from "../lib/lines.js";
 import * as types from "ast-types";
 const namedTypes = types.namedTypes;
-import FastPath from "../lib/fast-path";
+import FastPath from "../lib/fast-path.js";
 import { EOL as eol } from "os";
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 

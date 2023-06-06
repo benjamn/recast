@@ -1,12 +1,12 @@
 import assert from "assert";
-import * as linesModule from "./lines";
+import * as linesModule from "./lines.js";
 import * as types from "ast-types";
 const Printable = types.namedTypes.Printable;
 const Expression = types.namedTypes.Expression;
 const ReturnStatement = types.namedTypes.ReturnStatement;
 const SourceLocation = types.namedTypes.SourceLocation;
-import { comparePos, copyPos, getUnionOfKeys } from "./util";
-import FastPath from "./fast-path";
+import { comparePos, copyPos, getUnionOfKeys } from "./util.js";
+import FastPath from "./fast-path.js";
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
 const isString = types.builtInTypes.string;

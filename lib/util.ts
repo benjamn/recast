@@ -2,12 +2,13 @@ import assert from "assert";
 import * as types from "ast-types";
 const n = types.namedTypes;
 import sourceMap from "source-map";
+import { EOL } from 'os';
 const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
 
 export function getLineTerminator() {
-  return isBrowser() ? "\n" : require("os").EOL || "\n";
+  return isBrowser() ? "\n" : EOL || "\n";
 }
 
 export function isBrowser() {

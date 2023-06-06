@@ -1,5 +1,5 @@
-import { parser } from "./babel";
-import getBabelOptions, { Overrides } from "./_babel_options";
+import { parser } from "./babel.js";
+import getBabelOptions, { Overrides } from "./_babel_options.js";
 
 // This module is suitable for passing as options.parser when calling
 // recast.parse to process Flow code:

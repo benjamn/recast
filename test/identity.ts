@@ -2,7 +2,7 @@ import assert from "assert";
 import fs from "fs";
 import path from "path";
 import * as types from "ast-types";
-import * as recast from "../main";
+import * as recast from "../main.js";
 
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 

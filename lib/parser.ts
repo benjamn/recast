@@ -3,11 +3,12 @@ import * as types from "ast-types";
 const b = types.builders;
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
-import { normalize as normalizeOptions } from "./options";
-import { fromString } from "./lines";
-import { attach as attachComments } from "./comments";
-import * as util from "./util";
-import { Options } from "./options";
+import { normalize as normalizeOptions } from "./options.js";
+import { fromString } from "./lines.js";
+import { attach as attachComments } from "./comments.js";
+import * as util from "./util.js";
+import { Options } from "./options.js";
+import * as esprima from 'esprima';
 
 export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
@@ -39,7 +40,7 @@ export function parse(source: string, options?: Partial<Options>) {
   // to avoid this fallback.
   const tokens: any[] = Array.isArray(ast.tokens)
     ? ast.tokens
-    : require("esprima").tokenize(sourceWithoutTabs, {
+    : esprima.tokenize(sourceWithoutTabs, {
         loc: true,
       });
 

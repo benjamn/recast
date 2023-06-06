@@ -7,12 +7,14 @@
 //     parser: require("recast/parsers/esprima")
 //   });
 //
-import { getOption } from "../lib/util";
+import { getOption } from "../lib/util.js";
+import * as esprima from "esprima";
 
 export function parse(source: string, options?: any) {
   const comments: any[] = [];
-  const ast = require("esprima").parse(source, {
+  const ast = esprima.parse(source, {
     loc: true,
+    // @ts-expect-error
     locations: true,
     comment: true,
     onComment: comments,

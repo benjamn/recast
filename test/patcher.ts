@@ -1,13 +1,13 @@
 import assert from "assert";
-import * as recast from "../main";
+import * as recast from "../main.js";
 import * as types from "ast-types";
 const n = types.namedTypes;
 const b = types.builders;
-import { getReprinter, Patcher } from "../lib/patcher";
-import { fromString } from "../lib/lines";
-import { parse } from "../lib/parser";
-import * as flowParser from "../parsers/flow";
-import FastPath from "../lib/fast-path";
+import { getReprinter, Patcher } from "../lib/patcher.js";
+import { fromString } from "../lib/lines.js";
+import { parse } from "../lib/parser.js";
+import * as flowParser from "../parsers/flow.js";
+import FastPath from "../lib/fast-path.js";
 import { EOL as eol } from "os";
 
 const code = [

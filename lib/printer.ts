@@ -1,11 +1,11 @@
 import assert from "assert";
 import * as types from "ast-types";
-import { printComments } from "./comments";
-import FastPath from "./fast-path";
-import { concat, fromString, Lines } from "./lines";
-import { normalize as normalizeOptions } from "./options";
-import { getReprinter } from "./patcher";
-import * as util from "./util";
+import { printComments } from "./comments.js";
+import FastPath from "./fast-path.js";
+import { concat, fromString, Lines } from "./lines.js";
+import { normalize as normalizeOptions } from "./options.js";
+import { getReprinter } from "./patcher.js";
+import * as util from "./util.js";
 const namedTypes = types.namedTypes;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;

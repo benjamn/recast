@@ -2,7 +2,7 @@ import assert from "assert";
 import fs from "fs";
 import path from "path";
 import * as types from "ast-types";
-import { parse } from "../lib/parser";
+import { parse } from "../lib/parser.js";
 const hasOwn = Object.prototype.hasOwnProperty;
 
 // Babel 7 no longer supports Node 4 or 5.

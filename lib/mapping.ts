@@ -1,7 +1,7 @@
 import assert from "assert";
-import { comparePos } from "./util";
+import { comparePos } from "./util.js";
 import { namedTypes } from "ast-types";
-import { Lines } from "./lines";
+import { Lines } from "./lines.js";
 
 type Pos = namedTypes.Position;
 type Loc = namedTypes.SourceLocation;

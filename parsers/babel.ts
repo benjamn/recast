@@ -1,16 +1,19 @@
 import { parse as babelParse } from "@babel/parser";
-import getBabelOptions, { Overrides } from "./_babel_options";
+import getBabelOptions, { Overrides } from "./_babel_options.js";
+import * as babelParser from "@babel/parser";
+import * as babylon from "babylon";
 
 type BabelParser = { parse: typeof babelParse };
 
 // Prefer the new @babel/parser package, but fall back to babylon if
-// that's what's available.
+// that's what's available.babel
 export const parser = (function (): BabelParser {
   try {
-    return require("@babel/parser");
+    return babelParser;
   } catch {
     try {
-      return require("babylon");
+      // @ts-expect-error
+      return babylon;
     } catch {
       throw new Error(
         "Install @babel/parser to use the `typescript`, `flow`, or `babel` parsers",

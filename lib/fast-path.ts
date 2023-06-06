@@ -1,6 +1,6 @@
 import assert from "assert";
 import * as types from "ast-types";
-import * as util from "./util";
+import * as util from "./util.js";
 
 const n = types.namedTypes;
 const isArray = types.builtInTypes.array;

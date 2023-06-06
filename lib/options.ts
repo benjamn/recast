@@ -1,4 +1,4 @@
-import { getLineTerminator } from "./util";
+import { getLineTerminator } from "./util.js";
 
 /**
  * All Recast API functions take second parameter with configuration options,
@@ -164,8 +164,10 @@ interface DeprecatedOptions {
   esprima?: any;
 }
 
+import * as esprima from "../parsers/esprima.js";
+
 const defaults: Options = {
-  parser: require("../parsers/esprima"),
+  parser: esprima,
   tabWidth: 4,
   useTabs: false,
   reuseWhitespace: true,
