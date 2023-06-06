@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "es2015"
-    ],
+    "lib": ["es2015"],
     "declaration": true,
     "rootDir": ".",
     "strict": true,
@@ -15,9 +13,5 @@
     "importHelpers": true,
     "stripInternal": true
   },
-  "exclude": [
-    "node_modules",
-    "esm",
-    "test/data"
-  ]
+  "exclude": ["node_modules", "esm", "test/data"]
 }

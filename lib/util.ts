@@ -2,7 +2,7 @@ import assert from "assert";
 import * as types from "ast-types";
 const n = types.namedTypes;
 import sourceMap from "source-map";
-import { EOL } from 'os';
+import { EOL } from "os";
 const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;

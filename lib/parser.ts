@@ -8,7 +8,7 @@ import { fromString } from "./lines.js";
 import { attach as attachComments } from "./comments.js";
 import * as util from "./util.js";
 import { Options } from "./options.js";
-import * as esprima from 'esprima';
+import * as esprima from "esprima";
 
 export function parse(source: string, options?: Partial<Options>) {
   options = normalizeOptions(options);
