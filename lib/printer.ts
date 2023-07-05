@@ -483,6 +483,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "ExportSpecifier":
+      if (n.exportKind && n.exportKind !== "value") {
+        parts.push(n.exportKind + " ");
+      }
       if (n.local) {
         parts.push(path.call(print, "local"));
         if (n.exported && n.exported.name !== n.local.name) {
