@@ -2031,6 +2031,27 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
+  for (const operator of ["-", "+", "~", "!", "typeof", "void"] as const) {
+    it(`adds parenthesis around '${operator}' unary expression in exponentiation expression`, function () {
+      const code = `(${
+        /[a-z]/.test(operator) ? `${operator} ` : operator
+      }a) ** 2;`;
+      const ast = b.program([
+        b.expressionStatement(
+          b.binaryExpression(
+            "**",
+            b.unaryExpression(operator, b.identifier("a"), true),
+            b.literal(2),
+          ),
+        ),
+      ]);
+
+      const printer = new Printer();
+      const pretty = printer.print(ast).code;
+      assert.strictEqual(pretty, code);
+    });
+  }
+
   it("prints flow object type internal slots correctly", function () {
     const code = [
       "type MyObjectType = {",
