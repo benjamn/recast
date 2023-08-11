@@ -355,6 +355,17 @@ FPp.needsParens = function (assumeExpressionContext) {
 
   if (!parent) return false;
 
+  // Wrap e.g. `-1` in parentheses inside `(-1) ** 2`.
+  if (
+    node.type === "UnaryExpression" &&
+    parent.type === "BinaryExpression" &&
+    name === "left" &&
+    parent.left === node &&
+    parent.operator === "**"
+  ) {
+    return true;
+  }
+
   switch (node.type) {
     case "UnaryExpression":
     case "SpreadElement":
