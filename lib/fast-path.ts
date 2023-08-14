@@ -41,9 +41,11 @@ interface FastPathType {
   hasParens(): any;
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
-  needsParens(assumeExpressionContext?: boolean): any;
-  canBeFirstInStatement(): any;
-  firstInStatement(): any;
+  needsParens(): any;
+  firstInExpressionStatement(): boolean;
+  firstInExpressionStatementOrExpressionBody(
+    onlyExpressionStatement?: boolean,
+  ): boolean;
 }
 
 interface FastPathConstructor {
@@ -225,54 +227,12 @@ FPp.map = function map(callback /*, name1, name2, ... */) {
   return result;
 };
 
-// Returns true if the node at the tip of the path is wrapped with
-// parentheses, OR if the only reason the node needed parentheses was that
-// it couldn't be the first expression in the enclosing statement (see
-// FastPath#canBeFirstInStatement), and it has an opening `(` character.
-// For example, the FunctionExpression in `(function(){}())` appears to
-// need parentheses only because it's the first expression in the AST, but
-// since it happens to be preceded by a `(` (which is not apparent from
-// the AST but can be determined using FastPath#getPrevToken), there is no
-// ambiguity about how to parse it, so it counts as having parentheses,
-// even though it is not immediately followed by a `)`.
+// Returns true if the node at the tip of the path is preceded by an
+// open-paren token `(`.
 FPp.hasParens = function () {
   const node = this.getNode();
-
   const prevToken = this.getPrevToken(node);
-  if (!prevToken) {
-    return false;
-  }
-
-  const nextToken = this.getNextToken(node);
-  if (!nextToken) {
-    return false;
-  }
-
-  if (prevToken.value === "(") {
-    if (nextToken.value === ")") {
-      // If the node preceded by a `(` token and followed by a `)` token,
-      // then of course it has parentheses.
-      return true;
-    }
-
-    // If this is one of the few Expression types that can't come first in
-    // the enclosing statement because of parsing ambiguities (namely,
-    // FunctionExpression, ObjectExpression, and ClassExpression) and
-    // this.firstInStatement() returns true, and the node would not need
-    // parentheses in an expression context because this.needsParens(true)
-    // returns false, then it just needs an opening parenthesis to resolve
-    // the parsing ambiguity that made it appear to need parentheses.
-    const justNeedsOpeningParen =
-      !this.canBeFirstInStatement() &&
-      this.firstInStatement() &&
-      !this.needsParens(true);
-
-    if (justNeedsOpeningParen) {
-      return true;
-    }
-  }
-
-  return false;
+  return prevToken && prevToken.value === "(";
 };
 
 FPp.getPrevToken = function (node) {
@@ -311,7 +271,7 @@ FPp.getNextToken = function (node) {
 
 // Inspired by require("ast-types").NodePath.prototype.needsParens, but
 // more efficient because we're iterating backwards through a stack.
-FPp.needsParens = function (assumeExpressionContext) {
+FPp.needsParens = function () {
   const node = this.getNode();
 
   // This needs to come before `if (!parent) { return false }` because
@@ -552,15 +512,48 @@ FPp.needsParens = function (assumeExpressionContext) {
     return containsCallExpression(node);
   }
 
-  if (
-    assumeExpressionContext !== true &&
-    !this.canBeFirstInStatement() &&
-    this.firstInStatement()
-  ) {
-    return true;
-  }
+  // The ExpressionStatement production, and the two productions that
+  // contain ExpressionBody, have lookahead constraints that forbid some
+  // possibilities for their next node or two:
+  //   https://tc39.es/ecma262/#prod-ExpressionStatement
+  //   https://tc39.es/ecma262/#prod-ConciseBody
+  //   https://tc39.es/ecma262/#prod-AsyncConciseBody
+  //
+  // The effect of these is that if we have an expression that appears in
+  // one of those and would start with a forbidden token sequence, we need
+  // to insert parens so that the first token is `(` instead.
+  //
+  // We choose to do this on the smallest subexpression we can.
+  switch (node.type) {
+    case "ObjectExpression":
+      // Will start with `{`.  Therefore can't be the start of an
+      // ExpressionStatement or (either use of) an ExpressionBody.
+      return this.firstInExpressionStatementOrExpressionBody();
 
-  return false;
+    case "FunctionExpression":
+    case "ClassExpression":
+      // Will start with the token `function`, tokens `async function`, or
+      // token `class`.  Therefore can't start an ExpressionStatement.
+      return this.firstInExpressionStatement();
+
+    case "MemberExpression":
+      if (
+        n.Identifier.check(node.object) &&
+        node.object.name === "let" &&
+        node.computed
+      ) {
+        // Will start with the tokens `let [`.  Therefore can't start an
+        // ExpressionStatement.
+        return this.firstInExpressionStatement();
+      }
+      return false;
+
+    default:
+      // Will not start with any of the above sequences of tokens, unless it
+      // starts with a child node that does.  If so, that child will take
+      // care of it (possibly by letting its own child take care of it, etc.)
+      return false;
+  }
 };
 
 function isBinary(node: any) {
@@ -596,48 +589,28 @@ function containsCallExpression(node: any): any {
   return false;
 }
 
-FPp.canBeFirstInStatement = function () {
-  const node = this.getNode();
-
-  if (n.FunctionExpression.check(node)) {
-    return false;
-  }
-
-  if (n.ObjectExpression.check(node)) {
-    return false;
-  }
-
-  if (n.ClassExpression.check(node)) {
-    return false;
-  }
-
-  return true;
+FPp.firstInExpressionStatement = function () {
+  return this.firstInExpressionStatementOrExpressionBody(true);
 };
 
-FPp.firstInStatement = function () {
+FPp.firstInExpressionStatementOrExpressionBody = function (
+  onlyExpressionStatement: boolean = false,
+) {
   const s = this.stack;
   let parentName, parent;
   let childName, child;
 
   for (let i = s.length - 1; i >= 0; i -= 2) {
-    if (n.Node.check(s[i])) {
-      childName = parentName;
-      child = parent;
-      parentName = s[i - 1];
-      parent = s[i];
-    }
-
-    if (!parent || !child) {
+    if (!n.Node.check(s[i])) {
       continue;
     }
 
-    if (
-      n.BlockStatement.check(parent) &&
-      parentName === "body" &&
-      childName === 0
-    ) {
-      assert.strictEqual(parent.body[0], child);
-      return true;
+    childName = parentName;
+    child = parent;
+    parentName = s[i - 1];
+    parent = s[i];
+    if (!parent || !child) {
+      continue;
     }
 
     if (n.ExpressionStatement.check(parent) && childName === "expression") {
@@ -645,14 +618,14 @@ FPp.firstInStatement = function () {
       return true;
     }
 
-    if (n.AssignmentExpression.check(parent) && childName === "left") {
-      assert.strictEqual(parent.left, child);
-      return true;
-    }
-
     if (n.ArrowFunctionExpression.check(parent) && childName === "body") {
       assert.strictEqual(parent.body, child);
-      return true;
+      return !onlyExpressionStatement;
+    }
+
+    if (n.AssignmentExpression.check(parent) && childName === "left") {
+      assert.strictEqual(parent.left, child);
+      continue;
     }
 
     // s[i + 1] and s[i + 2] represent the array between the parent
