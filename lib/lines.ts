@@ -1,9 +1,9 @@
 import assert from "assert";
 import sourceMap from "source-map";
-import { normalize as normalizeOptions, Options } from "./options";
+import { normalize as normalizeOptions, Options } from "./options.js";
 import { namedTypes } from "ast-types";
-import { comparePos } from "./util";
-import Mapping from "./mapping";
+import { comparePos } from "./util.js";
+import Mapping from "./mapping.js";
 
 type Pos = namedTypes.Position;
 

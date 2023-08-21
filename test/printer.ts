@@ -1,16 +1,16 @@
 import assert from "assert";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
-import { fromString } from "../lib/lines";
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
-import * as recast from "../main";
+import { fromString } from "../lib/lines.js";
+import { parse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
+import * as recast from "../main.js";
 const n = types.namedTypes;
 const b = types.builders;
 const linesModule = require("../lib/lines");
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
-import * as tsParser from "../parsers/typescript";
+import * as tsParser from "../parsers/typescript.js";
 
 describe("printer", function () {
   it("Printer", function testPrinter(done) {

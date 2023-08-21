@@ -1,7 +1,7 @@
 import assert from "assert";
 import fs from "fs";
 import path from "path";
-import { fromString, concat, countSpaces, Lines } from "../lib/lines";
+import { fromString, concat, countSpaces, Lines } from "../lib/lines.js";
 import { EOL as eol } from "os";
 
 function check(a: any, b: any) {

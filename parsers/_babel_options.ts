@@ -1,5 +1,5 @@
 import { ParserOptions, ParserPlugin } from "@babel/parser";
-import { getOption } from "../lib/util";
+import { getOption } from "../lib/util.js";
 
 export type Overrides = Partial<{
   sourceType: ParserOptions["sourceType"];

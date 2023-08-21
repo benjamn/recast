@@ -1,5 +1,5 @@
-import { parser } from "./babel";
-import getBabelOptions, { Overrides } from "./_babel_options";
+import { parser } from "./babel.js";
+import getBabelOptions, { Overrides } from "./_babel_options.js";
 
 export { parser };
 

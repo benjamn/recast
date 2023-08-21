@@ -5,12 +5,13 @@
 //     parser: require("recast/parsers/acorn")
 //   });
 //
-import { getOption } from "../lib/util";
+import { getOption } from "../lib/util.js";
+import * as acorn from "acorn";
 
 export function parse(source: string, options?: any) {
   const comments: any[] = [];
   const tokens: any[] = [];
-  const ast = require("acorn").parse(source, {
+  const ast = acorn.parse(source, {
     allowHashBang: true,
     allowImportExportEverywhere: true,
     allowReturnOutsideFunction: true,
@@ -21,11 +22,15 @@ export function parse(source: string, options?: any) {
     onToken: tokens,
   });
 
+  // @ts-expect-error
   if (!ast.comments) {
+    // @ts-expect-error
     ast.comments = comments;
   }
 
+  // @ts-expect-error
   if (!ast.tokens) {
+    // @ts-expect-error
     ast.tokens = tokens;
   }
 

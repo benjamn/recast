@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import * as recast from "../main";
+import * as recast from "../main.js";
 
 const source = fs.readFileSync(
   path.join(__dirname, "data", "backbone.js"),

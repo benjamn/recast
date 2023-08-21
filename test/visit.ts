@@ -2,8 +2,8 @@ import assert from "assert";
 import * as types from "ast-types";
 const namedTypes = types.namedTypes;
 const builders = types.builders;
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
+import { parse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
 import { EOL as eol } from "os";
 
 const lines = [

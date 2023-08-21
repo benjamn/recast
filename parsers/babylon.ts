@@ -1,1 +1,1 @@
-export * from "./babel";
+export * from "./babel.js";

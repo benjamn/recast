@@ -1,7 +1,7 @@
 "use strict";
 
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
+import { parse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
 import * as types from "ast-types";
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 

@@ -1,13 +1,13 @@
 import assert from "assert";
 import sourceMap from "source-map";
-import * as recast from "../main";
+import * as recast from "../main.js";
 import * as types from "ast-types";
 const n = types.namedTypes;
 const b = types.builders;
 const NodePath = types.NodePath;
-import { fromString } from "../lib/lines";
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
+import { fromString } from "../lib/lines.js";
+import { parse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
 import { EOL as eol } from "os";
 
 describe("source maps", function () {

@@ -1,7 +1,7 @@
 import assert from "assert";
 import * as esprima from "esprima";
-import { parse } from "../lib/parser";
-import { Printer } from "../lib/printer";
+import { parse } from "../lib/parser.js";
+import { Printer } from "../lib/printer.js";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 

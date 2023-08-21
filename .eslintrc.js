@@ -12,5 +12,5 @@ module.exports = {
     "no-case-declarations": "error",
     "no-fallthrough": "error",
   },
-  ignorePatterns: ["test/data"],
+  ignorePatterns: ["test/data", "esm", "lib/**/*.js", "parsers/**/*.js"],
 };

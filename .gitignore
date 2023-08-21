@@ -7,5 +7,7 @@
 *.js
 !.*rc.js
 *.d.ts
+esm
 # Except...
 !/types/**/*.d.ts
+
