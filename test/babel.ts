@@ -1,8 +1,13 @@
 import assert from "assert";
 import { EOL as eol } from "os";
 import * as recast from "../main";
+
+import traverse, {NodePath, Node} from '@babel/traverse';
+import template from '@babel/template';
+
 const n = recast.types.namedTypes;
 const b = recast.types.builders;
+
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 describe("Babel", function () {
@@ -452,6 +457,40 @@ describe("Babel", function () {
     assert.strictEqual(
       recast.print(ast).code,
       ["class A {", "  declare public readonly x;", "}"].join(eol),
+    );
+  });
+
+  it("should not add curly braces in ExportNamedDeclaration used with ExportNamespaceSpecifier", function () {
+    const code = 'export * as fs2 from "fs/promises"';
+    const ast = recast.parse(code, parseOptions);
+
+    traverse(ast, {
+      ExportNamedDeclaration(path: NodePath) {
+        path.replaceWith(template.ast('export * as fs from "xx"') as Node);
+        path.stop();
+      }
+    })
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      'export * as fs from "xx";'
+    );
+  });
+
+  it("should not add curly braces in ExportNamedDeclaration used with ExportNamespaceSpecifier: couple specifiers", function () {
+    const code = 'export * as fs2, {x, y} from "fs/promises"';
+    const ast = recast.parse(code, parseOptions);
+
+    traverse(ast, {
+      ExportNamedDeclaration(path: NodePath) {
+        path.replaceWith(template.ast('export * as fs, {x, y} from "xx"') as Node);
+        path.stop();
+      }
+    })
+
+    assert.strictEqual(
+      recast.print(ast).code,
+      'export * as fs, { x, y } from "xx";'
     );
   });
   
