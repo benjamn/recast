@@ -329,13 +329,13 @@ FPp.needsParens = function (assumeExpressionContext) {
   const name = this.getName();
 
   // If the value of this path is some child of a Node and not a Node
-  // itself, then it doesn't need parentheses. Only Node objects (in fact,
-  // only Expression nodes) need parentheses.
+  // itself, then it doesn't need parentheses. Only Node objects
+  // need parentheses.
   if (this.getValue() !== node) {
     return false;
   }
 
-  // Only statements don't need parentheses.
+  // Statements don't need parentheses.
   if (n.Statement.check(node)) {
     return false;
   }
@@ -434,13 +434,6 @@ FPp.needsParens = function (assumeExpressionContext) {
           // explicit exceptions above if this proves overzealous.
           return true;
       }
-
-    case "OptionalIndexedAccessType":
-      return node.optional && parent.type === "IndexedAccessType";
-
-    case "IntersectionTypeAnnotation":
-    case "UnionTypeAnnotation":
-      return parent.type === "NullableTypeAnnotation";
 
     case "Literal":
       return (
@@ -541,6 +534,89 @@ FPp.needsParens = function (assumeExpressionContext) {
         n.FunctionExpression.check(node.callee)
       ) {
         return true;
+      }
+      break;
+
+    // Flow type nodes.
+    //
+    // (TS type nodes don't need any logic here, because they represent
+    // parentheses explicitly in the AST, with TSParenthesizedType.)
+
+    case "OptionalIndexedAccessType":
+      switch (parent.type) {
+        case "IndexedAccessType":
+          // `(O?.['x'])['y']` is distinct from `O?.['x']['y']`.
+          return name === "objectType" && parent.objectType === node;
+        default:
+          return false;
+      }
+
+    case "IndexedAccessType":
+    case "ArrayTypeAnnotation":
+      return false;
+
+    case "NullableTypeAnnotation":
+      switch (parent.type) {
+        case "OptionalIndexedAccessType":
+        case "IndexedAccessType":
+          return name === "objectType" && parent.objectType === node;
+        case "ArrayTypeAnnotation":
+          return true;
+        default:
+          return false;
+      }
+
+    case "IntersectionTypeAnnotation":
+      switch (parent.type) {
+        case "OptionalIndexedAccessType":
+        case "IndexedAccessType":
+          return name === "objectType" && parent.objectType === node;
+        case "ArrayTypeAnnotation":
+        case "NullableTypeAnnotation":
+          return true;
+        default:
+          return false;
+      }
+
+    case "UnionTypeAnnotation":
+      switch (parent.type) {
+        case "OptionalIndexedAccessType":
+        case "IndexedAccessType":
+          return name === "objectType" && parent.objectType === node;
+        case "ArrayTypeAnnotation":
+        case "NullableTypeAnnotation":
+        case "IntersectionTypeAnnotation":
+          return true;
+        default:
+          return false;
+      }
+
+    case "FunctionTypeAnnotation":
+      switch (parent.type) {
+        case "OptionalIndexedAccessType":
+        case "IndexedAccessType":
+          return name === "objectType" && parent.objectType === node;
+
+        case "ArrayTypeAnnotation":
+        // We need parens.
+
+        // fallthrough
+        case "NullableTypeAnnotation":
+        // We don't *need* any parens here… unless some ancestor
+        // means we do, by putting a `&` or `|` on the right.
+        // Just use parens; probably more readable that way anyway.
+        // (FWIW, this agrees with Prettier's behavior.)
+
+        // fallthrough
+        case "IntersectionTypeAnnotation":
+        case "UnionTypeAnnotation":
+          // We need parens if there's another `&` or `|` after this node.
+          // For consistency, just always use parens.
+          // (FWIW, this agrees with Prettier's behavior.)
+          return true;
+
+        default:
+          return false;
       }
   }
 

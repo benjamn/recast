@@ -10,15 +10,18 @@ describe("type syntax", function () {
     quote: "single",
     flowObjectCommas: false,
   });
-  const esprimaParserParseOptions = {
-    parser: require("esprima-fb"),
-  };
   const flowParserParseOptions = {
     parser: require("flow-parser"),
   };
 
+  function checkEquiv(a: string, b: string) {
+    const aAst = parse(a, flowParserParseOptions);
+    const bAst = parse(b, flowParserParseOptions);
+    types.astNodesAreEquivalent.assert(aAst, bAst);
+  }
+
   function check(source: string, parseOptions?: any) {
-    parseOptions = parseOptions || esprimaParserParseOptions;
+    parseOptions = parseOptions || flowParserParseOptions;
     const ast1 = parse(source, parseOptions);
     const code = printer.printGenerically(ast1).code;
     const ast2 = parse(code, parseOptions);
@@ -30,7 +33,7 @@ describe("type syntax", function () {
     // Import type annotations
     check("import type foo from 'foo';");
     check("import typeof foo from 'foo';");
-    check("import { type foo } from 'foo';", flowParserParseOptions);
+    check("import { type foo } from 'foo';");
 
     // Export type annotations
     check("export type { foo };");
@@ -69,9 +72,8 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
-    check("type A = {| optionalNumber?: number |};", flowParserParseOptions);
+    check("type A = {| optionalNumber?: number |};");
     check(
       "type A = {|" +
         eol +
@@ -80,18 +82,14 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "|};",
-      flowParserParseOptions,
     );
 
     // Opaque types
-    check("opaque type A = B;", flowParserParseOptions);
-    check("opaque type A = B.C;", flowParserParseOptions);
-    check(
-      "opaque type A = { optionalNumber?: number };",
-      flowParserParseOptions,
-    );
-    check("opaque type A: X = B;", flowParserParseOptions);
-    check("opaque type A: X.Y = B.C;", flowParserParseOptions);
+    check("opaque type A = B;");
+    check("opaque type A = B.C;");
+    check("opaque type A = { optionalNumber?: number };");
+    check("opaque type A: X = B;");
+    check("opaque type A: X.Y = B.C;");
     check(
       "opaque type A: { stringProperty: string } = {" +
         eol +
@@ -100,10 +98,9 @@ describe("type syntax", function () {
         "  optionalNumber?: number;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
-    check("opaque type A<T>: X<T> = B<T>;", flowParserParseOptions);
-    check("opaque type A<T>: X.Y<T> = B.C<T>;", flowParserParseOptions);
+    check("opaque type A<T>: X<T> = B<T>;");
+    check("opaque type A<T>: X.Y<T> = B.C<T>;");
     check(
       "opaque type A<T>: { optional?: T } = {" +
         eol +
@@ -112,7 +109,6 @@ describe("type syntax", function () {
         "  optional?: T;" +
         eol +
         "};",
-      flowParserParseOptions,
     );
 
     // Generic
@@ -169,16 +165,13 @@ describe("type syntax", function () {
         "}",
     );
 
-    check("declare opaque type A;", flowParserParseOptions);
-    check("declare opaque type A: X;", flowParserParseOptions);
-    check("declare opaque type A: X.Y;", flowParserParseOptions);
-    check(
-      "declare opaque type A: { stringProperty: string };",
-      flowParserParseOptions,
-    );
-    check("declare opaque type A<T>: X<T>;", flowParserParseOptions);
-    check("declare opaque type A<T>: X.Y<T>;", flowParserParseOptions);
-    check("declare opaque type A<T>: { property: T };", flowParserParseOptions);
+    check("declare opaque type A;");
+    check("declare opaque type A: X;");
+    check("declare opaque type A: X.Y;");
+    check("declare opaque type A: { stringProperty: string };");
+    check("declare opaque type A<T>: X<T>;");
+    check("declare opaque type A<T>: X.Y<T>;");
+    check("declare opaque type A<T>: { property: T };");
 
     // Classes
     check("class A {" + eol + "  a: number;" + eol + "}");
@@ -200,7 +193,7 @@ describe("type syntax", function () {
     check("class A<T: number> {}");
 
     // Inexact object types
-    check("type InexactFoo = { foo: number; ... };", flowParserParseOptions);
+    check("type InexactFoo = { foo: number; ... };");
     check(
       [
         "type MultiLineInexact = {",
@@ -209,32 +202,27 @@ describe("type syntax", function () {
         "  ...",
         "};",
       ].join(eol),
-      flowParserParseOptions,
     );
 
     // typeArguments
-    check("new A<string>();", flowParserParseOptions);
-    check("createPlugin<number>();", flowParserParseOptions);
+    check("new A<string>();");
+    check("createPlugin<number>();");
 
-    check("function myFunction([param1]: Params) {}", flowParserParseOptions);
+    check("function myFunction([param1]: Params) {}");
   });
 
   it("can pretty-print [Optional]IndexedAccessType AST nodes", () => {
-    check("type A = Obj?.['a'];", flowParserParseOptions);
-    check("type B = Array<string>?.[number];", flowParserParseOptions);
-    check("type C = Obj?.['bar']['baz'];", flowParserParseOptions);
-    check("type D = (Obj?.['bar'])['baz'];", flowParserParseOptions);
-    check("type E = Obj?.['bar'][];", flowParserParseOptions);
-    check("type F = Obj?.['bar'][boolean][];", flowParserParseOptions);
-    check("type G = Obj['bar']?.[boolean][];", flowParserParseOptions);
-    check("type H = (Obj?.['bar'])[string][];", flowParserParseOptions);
-    check("type I = Obj?.['bar']?.[string][];", flowParserParseOptions);
-
-    function checkEquiv(a: string, b: string) {
-      const aAst = parse(a, flowParserParseOptions);
-      const bAst = parse(b, flowParserParseOptions);
-      types.astNodesAreEquivalent.assert(aAst, bAst);
-    }
+    check("type A = Obj?.['a'];");
+    check("type B = Array<string>?.[number];");
+    check("type C = Obj?.['bar']['baz'];");
+    check("type D = (Obj?.['bar'])['baz'];");
+    check("type C3 = Obj?.['foo']['bar']['baz'];");
+    check("type D3 = (Obj?.['foo']['bar'])['baz'];");
+    check("type E = Obj?.['bar'][];");
+    check("type F = Obj?.['bar'][boolean][];");
+    check("type G = Obj['bar']?.[boolean][];");
+    check("type H = (Obj?.['bar'])[string][];");
+    check("type I = Obj?.['bar']?.[string][];");
 
     // Since FastPath#needsParens does not currently add any parentheses to
     // these expressions, make sure they do not matter for parsing the AST.
@@ -248,5 +236,109 @@ describe("type syntax", function () {
       "type F = (Obj['bar'])?.[string][];",
       "type F = Obj['bar']?.[string][];",
     );
+  });
+
+  it("parenthesizes correctly", () => {
+    // The basic binary operators `&` and `|`.
+    // `&` binds tighter than `|`
+    check("type Num = number & (empty | mixed);"); // parens needed
+    check("type Num = number | empty & mixed;"); // equivalent to `…|(…&…)`
+
+    // Unary suffix `[]`, with the above.
+    // `[]` binds tighter than `&` or `|`
+    check("type T = (number | string)[];");
+    check("type T = number | string[];"); // a union
+    check("type T = (number & mixed)[];");
+    check("type T = number & mixed[];"); // an intersection
+
+    // Unary prefix `?`, with the above.
+    // `?` binds tighter than `&` or `|`
+    check("type T = ?(A & B);");
+    check("type T = ?(A | B);");
+    // `?` binds less tightly than `[]`
+    check("type T = (?number)[];"); // array of nullable
+    check("type T = ?number[];"); // nullable of array
+
+    // (Optional) indexed-access types, with the above.
+    // `[…]` and `?.[…]` bind (their left) tighter than either `&` or `|`
+    check("type T = (O & P)['x'];");
+    check("type T = (O | P)['x'];");
+    check("type T = (O & P)?.['x'];");
+    check("type T = (O | P)?.['x'];");
+    // `[…]` and `?.[…]` bind (their left) tighter than `?`
+    check("type T = (?O)['x'];"); // indexed-access of nullable
+    check("type T = ?O['x'];"); // nullable of indexed-access
+    check("type T = (?O)?.['x'];"); // optional-indexed-access of nullable
+    check("type T = ?O?.['x'];"); // nullable of optional-indexed-access
+    // `[…]` and `?.[…]` provide brackets on their right, so skip parens:
+    check("type T = A[B & C];");
+    check("type T = A[B | C];");
+    check("type T = A[?B];");
+    check("type T = A[B[]];");
+    check("type T = A[B[C]];");
+    check("type T = A[B?.[C]];");
+    check("type T = A?.[B & C];");
+    check("type T = A?.[B | C];");
+    check("type T = A?.[?B];");
+    check("type T = A?.[B[]];");
+    check("type T = A?.[B[C]];");
+    check("type T = A?.[B?.[C]];");
+    // `[…]` and `?.[…]` interact in a nonobvious way:
+    // OptionalIndexedAccessType inside IndexedAccessType.
+    check("type T = (O?.['x']['y'])['z'];"); // indexed of optional-indexed
+    check("type T = O?.['x']['y']['z'];"); // optional-indexed throughout
+
+    return;
+    // Skip test cases involving function types, because those are currently
+    // broken in other ways.  Those will be fixed by:
+    //   https://github.com/benjamn/recast/pull/1089
+
+    // Function types.
+    // Function binds less tightly than binary operators at right:
+    check("type T = (() => number) & O;"); // an intersection
+    check("type T = (() => number) | void;"); // a union
+    check("type T = () => number | void;"); // a function
+    check("type T = (() => void)['x'];");
+    check("type T = () => void['x'];"); // a function
+    check("type T = (() => void)?.['x'];");
+    check("type T = () => void?.['x'];"); // a function
+    // … and less tightly than suffix operator:
+    check("type T = (() => void)[];"); // an array
+    check("type T = () => void[];"); // a function
+
+    // Function does bind tighter than prefix operator (how could it not?)
+    checkEquiv("type T = ?() => void;", "type T = ?(() => void);");
+    // … and tighter than `&` or `|` at left (ditto):
+    checkEquiv("type T = A | () => void;", "type T = A | (() => void);");
+    checkEquiv("type T = A & () => void;", "type T = A & (() => void);");
+    // … but we choose to insert parens anyway:
+    check("type T = ?(() => void);");
+    check("type T = A | (() => void);");
+    check("type T = A & (() => void);");
+    // We don't insert parens for the *right* operand of indexed access,
+    // though, that'd be silly (sillier than writing such a type at all?):
+    check("type T = A[() => void];");
+    check("type T = A?.[() => void];");
+
+    // Here's one reason we insert those parens we don't strictly have to:
+    // Even when the parent is something at left so that function binds
+    // tighter than it, *its* parent (or further ancestor) might be
+    // something at right that binds tighter than function.
+    // E.g., union of nullable of function:
+    check("type T = ?(() => void) | A;");
+    checkEquiv("type T = ?() => void | A;", "type T = ?() => (void | A);");
+    // … or intersection of nullable of function:
+    check("type T = ?(() => void) & A;");
+    checkEquiv("type T = ?() => void & A;", "type T = ?() => (void & A);");
+    // … or array or (optional-)indexed-access of nullable of function:
+    check("type T = ?(() => void)[];");
+    check("type T = ?(() => void)['x'];");
+    check("type T = ?(() => void)?.['x'];");
+    // … or union of intersection:
+    check("type T = A & (() => void) | B;");
+    // Or for an example beyond the grandparent: union of cubic nullable:
+    check("type T = ???(() => void) | B;");
+    // … or union of intersection of nullable:
+    check("type T = A & ?(() => void) | B;");
   });
 });
