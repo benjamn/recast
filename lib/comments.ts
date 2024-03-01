@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import * as types from "ast-types";
 const n = types.namedTypes;
 const isArray = types.builtInTypes.array;
@@ -147,9 +147,9 @@ export function attach(comments: any[], ast: any, lines: any) {
       if (tieCount > 0) {
         const lastTie = tiesToBreak[tieCount - 1];
 
-        assert.strictEqual(
-          lastTie.precedingNode === comment.precedingNode,
-          lastTie.followingNode === comment.followingNode,
+        invariant(
+          (lastTie.precedingNode === comment.precedingNode) ===
+            (lastTie.followingNode === comment.followingNode),
         );
 
         if (lastTie.followingNode !== comment.followingNode) {
@@ -206,8 +206,8 @@ function breakTies(tiesToBreak: any[], lines: any) {
   let comment;
   for (; indexOfFirstLeadingComment > 0; --indexOfFirstLeadingComment) {
     comment = tiesToBreak[indexOfFirstLeadingComment - 1];
-    assert.strictEqual(comment.precedingNode, pn);
-    assert.strictEqual(comment.followingNode, fn);
+    invariant(comment.precedingNode === pn);
+    invariant(comment.followingNode === fn);
 
     const gap = lines.sliceString(comment.loc.end, gapEndPos);
     if (/\S/.test(gap)) {

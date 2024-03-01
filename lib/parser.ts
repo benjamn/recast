@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import * as types from "ast-types";
 const b = types.builders;
 const isObject = types.builtInTypes.object;
@@ -143,7 +143,7 @@ const TreeCopier = function TreeCopier(
   lines: any,
   tokens: any,
 ) {
-  assert.ok(this instanceof TreeCopier);
+  invariant(this instanceof TreeCopier);
   this.lines = lines;
   this.tokens = tokens;
   this.startTokenIndex = 0;
