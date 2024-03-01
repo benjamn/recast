@@ -42,10 +42,10 @@
     "fs": false
   },
   "dependencies": {
-    "assert": "^2.0.0",
     "ast-types": "^0.16.1",
     "esprima": "~4.0.0",
     "source-map": "~0.6.1",
+    "tiny-invariant": "^1.3.3",
     "tslib": "^2.0.1"
   },
   "devDependencies": {
