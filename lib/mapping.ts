@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import { comparePos } from "./util";
 import { namedTypes } from "ast-types";
 import { Lines } from "./lines";
@@ -26,7 +26,7 @@ export default class Mapping {
       if (name === "end") {
         targetToPos = end;
       } else {
-        assert.strictEqual(name, "start");
+        invariant(name === "start");
       }
 
       return skipChars(
@@ -194,17 +194,16 @@ function skipChars(
       sourceCursor.column = 0;
       targetCursor.column = 0;
     } else {
-      assert.strictEqual(lineDiff, 0);
+      invariant(lineDiff === 0);
     }
 
     while (
       comparePos(targetCursor, targetToPos) < 0 &&
       targetLines.nextPos(targetCursor, true)
     ) {
-      assert.ok(sourceLines.nextPos(sourceCursor, true));
-      assert.strictEqual(
-        sourceLines.charAt(sourceCursor),
-        targetLines.charAt(targetCursor),
+      invariant(sourceLines.nextPos(sourceCursor, true));
+      invariant(
+        sourceLines.charAt(sourceCursor) === targetLines.charAt(targetCursor),
       );
     }
   } else {
@@ -224,17 +223,16 @@ function skipChars(
       sourceCursor.column = sourceLines.getLineLength(sourceCursor.line);
       targetCursor.column = targetLines.getLineLength(targetCursor.line);
     } else {
-      assert.strictEqual(lineDiff, 0);
+      invariant(lineDiff === 0);
     }
 
     while (
       comparePos(targetToPos, targetCursor) < 0 &&
       targetLines.prevPos(targetCursor, true)
     ) {
-      assert.ok(sourceLines.prevPos(sourceCursor, true));
-      assert.strictEqual(
-        sourceLines.charAt(sourceCursor),
-        targetLines.charAt(targetCursor),
+      invariant(sourceLines.prevPos(sourceCursor, true));
+      invariant(
+        sourceLines.charAt(sourceCursor) === targetLines.charAt(targetCursor),
       );
     }
   }

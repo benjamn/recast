@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import * as types from "ast-types";
 const n = types.namedTypes;
 import sourceMap from "source-map";
@@ -275,8 +275,8 @@ function fixTemplateLiteral(node: any, lines: any) {
     // First we need to exclude the opening ` from the .loc of the first
     // quasi element, in case the parser accidentally decided to include it.
     const afterLeftBackTickPos = copyPos(node.loc.start);
-    assert.strictEqual(lines.charAt(afterLeftBackTickPos), "`");
-    assert.ok(lines.nextPos(afterLeftBackTickPos));
+    invariant(lines.charAt(afterLeftBackTickPos) === "`");
+    invariant(lines.nextPos(afterLeftBackTickPos));
     const firstQuasi = node.quasis[0];
     if (comparePos(firstQuasi.loc.start, afterLeftBackTickPos) < 0) {
       firstQuasi.loc.start = afterLeftBackTickPos;
@@ -285,8 +285,8 @@ function fixTemplateLiteral(node: any, lines: any) {
     // Next we need to exclude the closing ` from the .loc of the last quasi
     // element, in case the parser accidentally decided to include it.
     const rightBackTickPos = copyPos(node.loc.end);
-    assert.ok(lines.prevPos(rightBackTickPos));
-    assert.strictEqual(lines.charAt(rightBackTickPos), "`");
+    invariant(lines.prevPos(rightBackTickPos));
+    invariant(lines.charAt(rightBackTickPos) === "`");
     const lastQuasi = node.quasis[node.quasis.length - 1];
     if (comparePos(rightBackTickPos, lastQuasi.loc.end) < 0) {
       lastQuasi.loc.end = rightBackTickPos;
@@ -317,7 +317,7 @@ function fixTemplateLiteral(node: any, lines: any) {
     // the expression in the .loc of the following quasi element.
     const rightCurlyPos = lines.skipSpaces(expr.loc.end, false, false);
     if (lines.charAt(rightCurlyPos) === "}") {
-      assert.ok(lines.nextPos(rightCurlyPos));
+      invariant(lines.nextPos(rightCurlyPos));
       // Now rightCurlyPos is technically the position just after the }.
       const quasiAfter = node.quasis[i + 1];
       if (comparePos(quasiAfter.loc.start, rightCurlyPos) < 0) {

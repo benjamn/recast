@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import * as types from "ast-types";
 import * as util from "./util";
 
@@ -52,7 +52,7 @@ interface FastPathConstructor {
 }
 
 const FastPath = function FastPath(this: FastPathType, value: any) {
-  assert.ok(this instanceof FastPath);
+  invariant(this instanceof FastPath);
   this.stack = [value];
 } as any as FastPathConstructor;
 
@@ -402,7 +402,7 @@ FPp.needsParens = function (assumeExpressionContext) {
           }
 
           if (pp === np && name === "right") {
-            assert.strictEqual(parent.right, node);
+            invariant(parent.right === node);
             return true;
           }
 
@@ -636,22 +636,22 @@ FPp.firstInStatement = function () {
       parentName === "body" &&
       childName === 0
     ) {
-      assert.strictEqual(parent.body[0], child);
+      invariant(parent.body[0] === child);
       return true;
     }
 
     if (n.ExpressionStatement.check(parent) && childName === "expression") {
-      assert.strictEqual(parent.expression, child);
+      invariant(parent.expression === child);
       return true;
     }
 
     if (n.AssignmentExpression.check(parent) && childName === "left") {
-      assert.strictEqual(parent.left, child);
+      invariant(parent.left === child);
       return true;
     }
 
     if (n.ArrowFunctionExpression.check(parent) && childName === "body") {
-      assert.strictEqual(parent.body, child);
+      invariant(parent.body === child);
       return true;
     }
 
@@ -662,27 +662,27 @@ FPp.firstInStatement = function () {
       s[i + 1] === "expressions" &&
       childName === 0
     ) {
-      assert.strictEqual(parent.expressions[0], child);
+      invariant(parent.expressions[0] === child);
       continue;
     }
 
     if (n.CallExpression.check(parent) && childName === "callee") {
-      assert.strictEqual(parent.callee, child);
+      invariant(parent.callee === child);
       continue;
     }
 
     if (n.MemberExpression.check(parent) && childName === "object") {
-      assert.strictEqual(parent.object, child);
+      invariant(parent.object === child);
       continue;
     }
 
     if (n.ConditionalExpression.check(parent) && childName === "test") {
-      assert.strictEqual(parent.test, child);
+      invariant(parent.test === child);
       continue;
     }
 
     if (isBinary(parent) && childName === "left") {
-      assert.strictEqual(parent.left, child);
+      invariant(parent.left === child);
       continue;
     }
 
@@ -691,7 +691,7 @@ FPp.firstInStatement = function () {
       !parent.prefix &&
       childName === "argument"
     ) {
-      assert.strictEqual(parent.argument, child);
+      invariant(parent.argument === child);
       continue;
     }
 
