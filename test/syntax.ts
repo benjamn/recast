@@ -43,7 +43,7 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       },
     });
 
-    Object.keys(types.namedTypes).forEach(name => {
+    Object.keys(types.namedTypes).forEach((name) => {
       it(name, () => {
         assert.ok(hasOwn.call(typeNames, name), "unhandled type: " + name);
         assert.strictEqual(name, typeNames[name]);
