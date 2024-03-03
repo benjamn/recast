@@ -26,4 +26,5 @@ jobs:
         run: |
           npm install
           npm run build --if-present
+          npm run format:check
           npm test
