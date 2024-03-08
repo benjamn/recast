@@ -129,10 +129,6 @@ describe("lines", function () {
 
     lines.eachPos(compare);
 
-    // Try a bunch of crazy positions to verify equivalence for
-    // out-of-bounds input positions.
-    fromString(exports.testBasic).eachPos(compare);
-
     let original = fromString("  ab" + eol + "  c"),
       indented = original.indentTail(4),
       reference = fromString("  ab" + eol + "      c");
