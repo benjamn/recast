@@ -2600,4 +2600,32 @@ describe("printer", function () {
       ),
     );
   });
+
+  const withoutParens = [
+    "async function add(a, b) {",
+    "  const z = foo || await getFoo();",
+    "  return z;",
+    "}"
+  ].join(eol);
+
+  const withParens = [
+    "async function add(a, b) {",
+    "  const z = foo || (await getFoo());",
+    "  return z;",
+    "}"
+  ].join(eol);
+
+  it("With & without parens added to reprinted code", function () {
+    const ast = parse(withoutParens);
+    let printer = new Printer({ tabWidth: 2 });
+
+    const withParensPrinted = printer.print(ast).code; // Default behaviour
+    assert.strictEqual(typeof withParensPrinted, "string");
+    assert.strictEqual(withParensPrinted, withParens);
+
+    printer = new Printer({ tabWidth: 2, avoidParens: true });
+    const reprinted = printer.print(ast).code;
+    assert.strictEqual(typeof reprinted, "string");
+    assert.strictEqual(reprinted, withoutParens);
+  });
 });
