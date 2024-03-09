@@ -508,6 +508,56 @@ describe("printer", function () {
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
+  it("export namespace", function () {
+    const printer = new Printer();
+
+    assert.strictEqual(
+      printer.print({
+        type: "ExportNamedDeclaration",
+        exportKind: "value",
+        specifiers: [
+          {
+            type: "ExportNamespaceSpecifier",
+            exported: {
+              type: "Identifier",
+              name: "Foobar",
+            },
+          },
+        ],
+        source: {
+          type: "StringLiteral",
+          value: "./foo",
+        },
+      }).code,
+      `export * as Foobar from "./foo";`,
+    );
+  });
+
+  it("export type namespace", function () {
+    const printer = new Printer();
+
+    assert.strictEqual(
+      printer.print({
+        type: "ExportNamedDeclaration",
+        exportKind: "type",
+        specifiers: [
+          {
+            type: "ExportNamespaceSpecifier",
+            exported: {
+              type: "Identifier",
+              name: "Foobar",
+            },
+          },
+        ],
+        source: {
+          type: "StringLiteral",
+          value: "./foo",
+        },
+      }).code,
+      `export type * as Foobar from "./foo";`,
+    );
+  });
+
   it("export default of IIFE", function () {
     const printer = new Printer();
     let ast = b.exportDefaultDeclaration(
