@@ -2600,4 +2600,33 @@ describe("printer", function () {
       ),
     );
   });
+
+  it("can print JSXElement syntax with newlines", function () {
+    const code = ["<div>", "  <span />", "", "  <span />", "</div>;"].join(eol);
+
+    const ast = b.program([
+      b.expressionStatement(
+        b.jsxElement(
+          b.jsxOpeningElement(b.jsxIdentifier("div")),
+          b.jsxClosingElement(b.jsxIdentifier("div")),
+          [
+            b.jsxText("\n  "),
+            b.jsxElement(
+              b.jsxOpeningElement(b.jsxIdentifier("span"), [], true),
+            ),
+            b.jsxText("\n\n  "),
+            b.jsxElement(
+              b.jsxOpeningElement(b.jsxIdentifier("span"), [], true),
+            ),
+            b.jsxText("\n"),
+          ],
+        ),
+      ),
+    ]);
+
+    const printer = new Printer({ tabWidth: 2 });
+
+    const pretty = printer.print(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 });
