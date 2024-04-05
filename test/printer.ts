@@ -508,6 +508,56 @@ describe("printer", function () {
     assert.strictEqual(printer.printGenerically(ast).code, code);
   });
 
+  it("export namespace", function () {
+    const printer = new Printer();
+
+    assert.strictEqual(
+      printer.print({
+        type: "ExportNamedDeclaration",
+        exportKind: "value",
+        specifiers: [
+          {
+            type: "ExportNamespaceSpecifier",
+            exported: {
+              type: "Identifier",
+              name: "Foobar",
+            },
+          },
+        ],
+        source: {
+          type: "StringLiteral",
+          value: "./foo",
+        },
+      }).code,
+      `export * as Foobar from "./foo";`,
+    );
+  });
+
+  it("export type namespace", function () {
+    const printer = new Printer();
+
+    assert.strictEqual(
+      printer.print({
+        type: "ExportNamedDeclaration",
+        exportKind: "type",
+        specifiers: [
+          {
+            type: "ExportNamespaceSpecifier",
+            exported: {
+              type: "Identifier",
+              name: "Foobar",
+            },
+          },
+        ],
+        source: {
+          type: "StringLiteral",
+          value: "./foo",
+        },
+      }).code,
+      `export type * as Foobar from "./foo";`,
+    );
+  });
+
   it("export default of IIFE", function () {
     const printer = new Printer();
     let ast = b.exportDefaultDeclaration(
@@ -1174,11 +1224,7 @@ describe("printer", function () {
   });
 
   it("prints class property initializers with type annotations correctly", function () {
-    const code = [
-      "class A {",
-      "  foo = (a: b): void => {};",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  foo = (a: b): void => {};", "}"].join(eol);
 
     const arg = b.identifier("a");
     arg.typeAnnotation = b.typeAnnotation(
@@ -1204,11 +1250,7 @@ describe("printer", function () {
   });
 
   it("prints ClassProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  foo: Type = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  foo: Type = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1234,11 +1276,7 @@ describe("printer", function () {
   });
 
   it("prints 'definite' ClassProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  foo!: string;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  foo!: string;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1265,11 +1303,7 @@ describe("printer", function () {
   });
 
   it("prints static ClassProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  static foo = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  static foo = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1289,11 +1323,7 @@ describe("printer", function () {
   });
 
   it("prints ClassAccessorProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  accessor foo: Type = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  accessor foo: Type = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1304,8 +1334,8 @@ describe("printer", function () {
             value: b.identifier("Bar"),
             typeAnnotation: b.tsTypeAnnotation(
               b.tsTypeReference(b.identifier("Type")),
-            )
-          })
+            ),
+          }),
         ]),
       ),
     ]);
@@ -1319,11 +1349,7 @@ describe("printer", function () {
   });
 
   it("prints 'definite' ClassAccessorProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  accessor foo!: string;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  accessor foo!: string;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1347,11 +1373,7 @@ describe("printer", function () {
   });
 
   it("prints static ClassAccessorProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  static accessor foo = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  static accessor foo = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1375,11 +1397,7 @@ describe("printer", function () {
   });
 
   it("prints abstract ClassAccessorProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  abstract accessor foo = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  abstract accessor foo = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -1403,11 +1421,7 @@ describe("printer", function () {
   });
 
   it("prints override ClassAccessorProperty correctly", function () {
-    const code = [
-      "class A {",
-      "  override accessor foo = Bar;",
-      "}",
-    ].join(eol);
+    const code = ["class A {", "  override accessor foo = Bar;", "}"].join(eol);
 
     const ast = b.program([
       b.classDeclaration(
@@ -2030,6 +2044,27 @@ describe("printer", function () {
     const pretty = printer.print(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  for (const operator of ["-", "+", "~", "!", "typeof", "void"] as const) {
+    it(`adds parenthesis around '${operator}' unary expression in exponentiation expression`, function () {
+      const code = `(${
+        /[a-z]/.test(operator) ? `${operator} ` : operator
+      }a) ** 2;`;
+      const ast = b.program([
+        b.expressionStatement(
+          b.binaryExpression(
+            "**",
+            b.unaryExpression(operator, b.identifier("a"), true),
+            b.literal(2),
+          ),
+        ),
+      ]);
+
+      const printer = new Printer();
+      const pretty = printer.print(ast).code;
+      assert.strictEqual(pretty, code);
+    });
+  }
 
   it("prints flow object type internal slots correctly", function () {
     const code = [

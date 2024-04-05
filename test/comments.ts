@@ -833,4 +833,34 @@ function runTestsForParser(parserId: any) {
       ["// comment", ";(function() {})();"].join(eol),
     );
   });
+
+  pit(
+    "should preserve comments attached to CallExpression argument",
+    function () {
+      const code = "testFunc (/** @type {string} */ (a), b);";
+      const ast = recast.parse(code, { parser });
+      const args = ast.program.body[0].expression.arguments;
+
+      args.unshift(args[1]);
+      const expected = "testFunc(b, /** @type {string} */ a, b);";
+
+      assert.strictEqual(recast.print(ast).code, expected);
+    },
+  );
+
+  pit("should preserve comments attached: no enclosed", function () {
+    const code = [
+      "hello.world; // has computed value",
+      'hello["world"]; // has computed value',
+    ].join(eol);
+
+    const ast = recast.parse(code, { parser });
+
+    const expected = [
+      "hello.world; // has computed value",
+      'hello["world"]; // has computed value',
+    ].join(eol);
+
+    assert.strictEqual(recast.print(ast).code, expected);
+  });
 }

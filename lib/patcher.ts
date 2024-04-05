@@ -1,4 +1,4 @@
-import assert from "assert";
+import invariant from "tiny-invariant";
 import * as linesModule from "./lines";
 import * as types from "ast-types";
 const Printable = types.namedTypes.Printable;
@@ -24,8 +24,8 @@ interface PatcherConstructor {
 }
 
 const Patcher = function Patcher(this: PatcherType, lines: any) {
-  assert.ok(this instanceof Patcher);
-  assert.ok(lines instanceof linesModule.Lines);
+  invariant(this instanceof Patcher);
+  invariant(lines instanceof linesModule.Lines);
 
   const self = this,
     replacements: any[] = [];
@@ -51,7 +51,7 @@ const Patcher = function Patcher(this: PatcherType, lines: any) {
       toConcat: any[] = [];
 
     function pushSlice(from: any, to: any) {
-      assert.ok(comparePos(from, to) <= 0);
+      invariant(comparePos(from, to) <= 0);
       toConcat.push(lines.slice(from, to));
     }
 
@@ -99,7 +99,7 @@ Pp.tryToReprintComments = function (newNode, oldNode, print) {
   if (ableToReprintComments && reprints.length > 0) {
     reprints.forEach(function (reprint) {
       const oldComment = reprint.oldPath.getValue();
-      assert.ok(oldComment.leading || oldComment.trailing);
+      invariant(oldComment.leading || oldComment.trailing);
       patcher.replace(
         oldComment.loc,
         // Comments can't have .comments, so it doesn't matter whether we
@@ -160,7 +160,7 @@ Pp.deleteComments = function (node) {
 };
 
 export function getReprinter(path: any) {
-  assert.ok(path instanceof FastPath);
+  invariant(path instanceof FastPath);
 
   // Make sure that this path refers specifically to a Node, rather than
   // some non-Node subproperty of a Node.
@@ -288,7 +288,7 @@ function findReprints(newPath: any, reprints: any) {
   const oldNode = newNode.original;
   Printable.assert(oldNode);
 
-  assert.deepEqual(reprints, []);
+  invariant(reprints.length === 0);
 
   if (newNode.type !== oldNode.type) {
     return false;
