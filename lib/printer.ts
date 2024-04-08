@@ -6,6 +6,7 @@ import { concat, fromString, Lines } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
 import * as util from "./util";
+import { CommentKind } from "ast-types/lib/gen/kinds";
 const namedTypes = types.namedTypes;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;
@@ -2436,8 +2437,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSTypeParameterDeclaration":
     case "TSTypeParameterInstantiation":
+      // If the first parameter has a comment, we want to insert a new line to avoid causing a syntax error:
       return concat([
         "<",
+        path
+          .getValue()
+          .params?.comments?.some(
+            (comment: CommentKind) => comment.type === "CommentLine",
+          )
+          ? fromString("\n")
+          : fromString(""),
         fromString(", ").join(path.map(print, "params")),
         ">",
       ]);

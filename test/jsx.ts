@@ -22,6 +22,7 @@ for (const { title, parser } of [
     it("should parse and print attribute comments", function () {
       check("<b /* comment */ />");
       check("<b /* multi\nline\ncomment */ />");
+      check("<b // test comment\n/>")
     });
 
     it("should parse and print child comments", function () {
