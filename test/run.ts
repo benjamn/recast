@@ -14,4 +14,5 @@ import "./printer";
 import "./syntax";
 import "./flow";
 import "./typescript";
+import "./tsx";
 import "./visit";
