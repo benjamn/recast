@@ -1331,6 +1331,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "JSXOpeningElement": {
       parts.push("<", path.call(print, "name"));
+      const typeDefPart = path.call(print, "typeParameters");
+      if (typeDefPart.length) parts.push(typeDefPart);
       const attrParts: any[] = [];
 
       path.each(function (attrPath: any) {
