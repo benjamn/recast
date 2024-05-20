@@ -154,15 +154,25 @@ const TreeCopier = function TreeCopier(
 
 const TCp: TreeCopierType = TreeCopier.prototype;
 
+const originalProperty: PropertyDescriptor = {
+  configurable: false,
+  enumerable: false,
+  writable: true,
+};
+
 TCp.copy = function (node) {
+  if (typeof node !== "object") {
+    return node;
+  }
+
   if (this.seen.has(node)) {
     return this.seen.get(node);
   }
 
   if (isArray.check(node)) {
-    const copy: any = new Array(node.length);
+    const copy: any = node.slice();
     this.seen.set(node, copy);
-    node.forEach(function (this: any, item: any, i: any) {
+    node.forEach(function (this: TreeCopierType, item: any, i: any) {
       copy[i] = this.copy(item);
     }, this);
     return copy;
@@ -174,15 +184,10 @@ TCp.copy = function (node) {
 
   util.fixFaultyLocations(node, this.lines);
 
-  const copy: any = Object.create(Object.getPrototypeOf(node), {
-    original: {
-      // Provide a link from the copy to the original.
-      value: node,
-      configurable: false,
-      enumerable: false,
-      writable: true,
-    },
-  });
+  const copy: any = Object.create(Object.getPrototypeOf(node));
+  // Provide a link from the copy to the original.
+  Object.defineProperty(copy, "original", originalProperty);
+  copy.original = node;
 
   this.seen.set(node, copy);
 
@@ -190,6 +195,7 @@ TCp.copy = function (node) {
   const oldIndent = this.indent;
   let newIndent = oldIndent;
 
+  const type = node.type;
   if (loc) {
     // When node is a comment, we set node.loc.indent to
     // node.loc.start.column so that, when/if we print the comment by
@@ -197,10 +203,10 @@ TCp.copy = function (node) {
     // the comment. This only really matters for multiline Block comments,
     // but it doesn't hurt for Line comments.
     if (
-      node.type === "Block" ||
-      node.type === "Line" ||
-      node.type === "CommentBlock" ||
-      node.type === "CommentLine" ||
+      type === "Block" ||
+      type === "Line" ||
+      type === "CommentBlock" ||
+      type === "CommentLine" ||
       this.lines.isPrecededOnlyByWhitespace(loc.start)
     ) {
       newIndent = this.indent = loc.start.column;
@@ -226,11 +232,11 @@ TCp.copy = function (node) {
   for (let i = 0; i < keyCount; ++i) {
     const key = keys[i];
     if (key === "loc") {
-      copy[key] = node[key];
-    } else if (key === "tokens" && node.type === "File") {
+      copy.loc = loc;
+    } else if (key === "tokens" && type === "File") {
       // Preserve file.tokens (uncopied) in case client code cares about
       // it, even though Recast ignores it when reprinting.
-      copy[key] = node[key];
+      copy.tokens = node.tokens;
     } else {
       copy[key] = this.copy(node[key]);
     }
