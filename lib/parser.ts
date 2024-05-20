@@ -190,9 +190,6 @@ TCp.copy = function (node) {
   const oldIndent = this.indent;
   let newIndent = oldIndent;
 
-  const oldStartTokenIndex = this.startTokenIndex;
-  const oldEndTokenIndex = this.endTokenIndex;
-
   if (loc) {
     // When node is a comment, we set node.loc.indent to
     // node.loc.start.column so that, when/if we print the comment by
@@ -220,6 +217,9 @@ TCp.copy = function (node) {
     // all the tokens that make up this node.
     this.findTokenRange(loc);
   }
+
+  const oldStartTokenIndex = this.startTokenIndex;
+  const oldEndTokenIndex = this.endTokenIndex;
 
   const keys = Object.keys(node);
   const keyCount = keys.length;
@@ -262,7 +262,7 @@ TCp.findTokenRange = function (loc) {
   // *before* loc.end, we need to fast-forward this.endTokenIndex first.
   while (this.endTokenIndex < loc.tokens.length) {
     const token = loc.tokens[this.endTokenIndex];
-    if (util.comparePos(token.loc.end, loc.end) < 0) {
+    if (util.comparePos(token.loc.end, loc.end) <= 0) {
       ++this.endTokenIndex;
     } else break;
   }
