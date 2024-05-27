@@ -2333,6 +2333,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "TSMethodSignature":
+      if (n.kind === 'get') {
+        parts.push('get ')
+      } else if (n.kind === 'set') {
+        parts.push('set ')
+      }
       if (n.computed) {
         parts.push("[", path.call(print, "key"), "]");
       } else {

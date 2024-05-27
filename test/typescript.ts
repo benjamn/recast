@@ -244,6 +244,13 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
       "  a(c: (this: void, e: E) => void): void;",
       "}",
     ]);
+    
+    check([
+      "interface LabelledContainer<T> {",
+      "  get label(): string;",
+      "  set label(a: string);",
+      "}",
+    ]);
 
     check([
       "interface Square<T, U> extends Shape<T, U>, Visible<T, U> {",
