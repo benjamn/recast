@@ -29,7 +29,10 @@ export class Lines {
   private cachedSourceMap: any = null;
   private cachedTabWidth: number | void = void 0;
 
-  constructor(private infos: LineInfo[], sourceFileName: string | null = null) {
+  constructor(
+    private infos: LineInfo[],
+    sourceFileName: string | null = null,
+  ) {
     invariant(infos.length > 0);
     this.length = infos.length;
     this.name = sourceFileName || null;

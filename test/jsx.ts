@@ -54,10 +54,13 @@ for (const { title, parser } of [
     });
 
     // Esprima does not parse JSX fragments: https://github.com/jquery/esprima/issues/2020
-    (/esprima/i.test(title)
-      ? xit
-      : it)("should parse and print fragments", function () {
-      check(["<>", "  <td>Hello</td>", "  <td>world!</td>", "</>"].join("\n"));
-    });
+    (/esprima/i.test(title) ? xit : it)(
+      "should parse and print fragments",
+      function () {
+        check(
+          ["<>", "  <td>Hello</td>", "  <td>world!</td>", "</>"].join("\n"),
+        );
+      },
+    );
   });
 }
