@@ -454,27 +454,32 @@ describe("Babel", function () {
       ["class A {", "  declare public readonly x;", "}"].join(eol),
     );
   });
-  
+
   it("should keep braces in !(a && b)", function () {
-    const code = '(options || !options.bidirectional) ? false : true;';
+    const code = "(options || !options.bidirectional) ? false : true;";
     const ast = recast.parse(code, parseOptions);
-    
-    ast.program.body[0].expression = b.unaryExpression('!', ast.program.body[0].expression.test);
+
+    ast.program.body[0].expression = b.unaryExpression(
+      "!",
+      ast.program.body[0].expression.test,
+    );
 
     assert.strictEqual(
       recast.print(ast).code,
-      '!(options || !options.bidirectional);',
+      "!(options || !options.bidirectional);",
     );
   });
 
   it("should use single quotes", function () {
-    const code = 'const a = 1;';
+    const code = "const a = 1;";
     const ast = recast.parse(code, parseOptions);
-    
-    ast.program.body.unshift(b.expressionStatement(b.stringLiteral('use strict')));
+
+    ast.program.body.unshift(
+      b.expressionStatement(b.stringLiteral("use strict")),
+    );
 
     assert.strictEqual(
-      recast.print(ast, {quote: 'single'}).code,
+      recast.print(ast, { quote: "single" }).code,
       `'use strict';\nconst a = 1;`,
     );
   });
@@ -490,9 +495,6 @@ describe("Babel", function () {
     ];
     const ast = recast.parse(code.join(eol), parseOptions);
 
-    assert.strictEqual(
-      recast.prettyPrint(ast).code,
-      code.join(eol),
-    );
+    assert.strictEqual(recast.prettyPrint(ast).code, code.join(eol));
   });
 });
