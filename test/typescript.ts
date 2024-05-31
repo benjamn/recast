@@ -252,6 +252,13 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     ]);
 
     check([
+      "interface LabelledContainer<T> {",
+      "  get label(): string;",
+      "  set label(a: string);",
+      "}",
+    ]);
+
+    check([
       "class Button extends Control<T, U> implements SelectableControl<T, U>, ClickableControl<U> {",
       "  select() {}",
       "}",
