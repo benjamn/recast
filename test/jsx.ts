@@ -2,6 +2,7 @@
 
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
+import assert from "assert";
 import * as types from "ast-types";
 const nodeMajorVersion = parseInt(process.versions.node, 10);
 
@@ -61,3 +62,34 @@ for (const { title, parser } of [
     });
   });
 }
+
+it("should not remove trailing whitespaces", function () {
+  const printer = new Printer({ tabWidth: 2 });
+  const source =
+    "function App() {\n" +
+    '  const name = "world";\n' +
+    "\n" +
+    "  return (\n" +
+    '    <div className="app">\n' +
+    "        hello {name}\n" +
+    "    </div>\n" +
+    "  );\n" +
+    "}";
+  const ast = parse(source);
+  ast.program.body[0].body.body[1].argument.openingElement.attributes[0].name.name =
+    "abc";
+
+  const code = printer.printGenerically(ast).code;
+
+  assert.equal(
+    code,
+    "function App() {\n" +
+      '  const name = "world";\n' +
+      "\n" +
+      "  return (\n" +
+      '    <div abc="app">hello {name}\n' +
+      "    </div>\n" +
+      "  );\n" +
+      "}",
+  );
+});
