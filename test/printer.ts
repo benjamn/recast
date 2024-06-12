@@ -2600,4 +2600,32 @@ describe("printer", function () {
       ),
     );
   });
+
+  it("should reprint TSTypeAnnotation correctly", function () {
+    const code = "type Foo = () => Bar;";
+
+    const ast = parse(code, {
+      parser: tsParser,
+    });
+
+    recast.visit(ast, {
+      visitTSTypeReference(path) {
+        if (
+          path.node.typeName.type === "Identifier" &&
+          path.node.typeName.name === "Bar" &&
+          path.parentPath.node.type === "TSTypeAnnotation"
+        ) {
+          path.replace(
+            b.tsQualifiedName(b.identifier("Bar"), b.identifier("Baz")),
+          );
+        }
+
+        this.traverse(path);
+      },
+    });
+
+    const pretty = new Printer().print(ast).code;
+
+    assert.strictEqual(pretty, "type Foo = () => Bar.Baz;");
+  });
 });
