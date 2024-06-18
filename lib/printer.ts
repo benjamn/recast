@@ -202,7 +202,7 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
   if (decoratorsLines.isEmpty()) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing path.needsParens() except in this case.
-    if (!options.avoidRootParens) {
+    if (!options.avoidRootParens && !config.avoidParens) {
       shouldAddParens = path.needsParens();
     }
   } else {
