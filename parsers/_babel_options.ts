@@ -4,6 +4,7 @@ import { getOption } from "../lib/util";
 export type Overrides = Partial<{
   sourceType: ParserOptions["sourceType"];
   strictMode: ParserOptions["strictMode"];
+  sourceFileName: string;
 }>;
 
 export default function getBabelOptions(
@@ -16,6 +17,7 @@ export default function getBabelOptions(
   return {
     sourceType: getOption(options, "sourceType", "module"),
     strictMode: getOption(options, "strictMode", false),
+    sourceFilename: getOption(options, "sourceFileName", undefined),
     allowImportExportEverywhere: true,
     allowReturnOutsideFunction: true,
     startLine: 1,
