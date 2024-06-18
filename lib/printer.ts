@@ -661,7 +661,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push("return");
 
       if (n.argument) {
-        const argIsJsxElement = namedTypes.JSXElement?.check(n.argument)
+        const argIsJsxElement =
+          namedTypes.JSXElement?.check(n.argument) ||
+          namedTypes.JSXFragment?.check(n.argument)
 
         let argLines = path.call(print, "argument");
         if (
