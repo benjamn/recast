@@ -3,16 +3,20 @@ import fs from "fs";
 import path from "path";
 import { fromString, concat, countSpaces, Lines } from "../lib/lines";
 import { EOL as eol } from "os";
+import { namedTypes } from "ast-types";
 
-function check(a: any, b: any) {
-  assert.strictEqual(
-    a.toString({
-      lineTerminator: eol,
-    }),
-    b.toString({
-      lineTerminator: eol,
-    }),
-  );
+type LinesInput = string | Lines;
+
+function toString(s: LinesInput): string {
+  if (typeof s === "string") {
+    return s;
+  }
+
+  return s.toString({ lineTerminator: eol });
+}
+
+function check(a: LinesInput, b: LinesInput) {
+  assert.strictEqual(toString(a), toString(b));
 }
 
 describe("lines", function () {
@@ -37,7 +41,7 @@ describe("lines", function () {
   });
 
   it("FromString", function () {
-    function checkIsCached(s: any) {
+    function checkIsCached(s: LinesInput) {
       assert.strictEqual(fromString(s), fromString(s));
       check(fromString(s), s);
     }
@@ -66,19 +70,19 @@ describe("lines", function () {
     check(lines.indentTail(5).indentTail(-7).indentTail(2), code);
   });
 
-  function testEachPosHelper(lines: any, code: any) {
+  function testEachPosHelper(lines: Lines, code: string) {
     check(lines, code);
 
-    const chars: any[] = [];
+    const chars: string[] = [];
     let emptyCount = 0;
 
-    function iterator(pos: any) {
+    function iterator(pos: namedTypes.Position) {
       const ch = lines.charAt(pos);
       if (ch === "") emptyCount += 1;
       chars.push(ch);
     }
 
-    lines.eachPos(iterator, null);
+    lines.eachPos(iterator, undefined);
 
     // The character at the position just past the end (as returned by
     // lastPos) should be the only empty string.
@@ -94,7 +98,7 @@ describe("lines", function () {
 
     const withoutSpaces = code.replace(/\s+/g, "");
     chars.length = emptyCount = 0;
-    lines.eachPos(iterator, null, true); // Skip spaces this time.
+    lines.eachPos(iterator, undefined, true); // Skip spaces this time.
     assert.strictEqual(emptyCount, 0);
     joined = chars.join("");
     assert.strictEqual(joined.length, withoutSpaces.length);
@@ -123,7 +127,7 @@ describe("lines", function () {
     const code = String(CharAtTest).replace(/\r\n/g, "\n");
     const lines = fromString(code);
 
-    function compare(pos: any) {
+    function compare(pos: namedTypes.Position) {
       assert.strictEqual(lines.charAt(pos), lines.bootstrapCharAt(pos));
     }
 
@@ -133,7 +137,7 @@ describe("lines", function () {
       indented = original.indentTail(4),
       reference = fromString("  ab" + eol + "      c");
 
-    function compareIndented(pos: any) {
+    function compareIndented(pos: namedTypes.Position) {
       const c = indented.charAt(pos);
       check(c, reference.charAt(pos));
       check(c, indented.bootstrapCharAt(pos));
@@ -197,7 +201,7 @@ describe("lines", function () {
   });
 
   it("Empty", function () {
-    function c(s: any) {
+    function c(s: LinesInput) {
       const lines = fromString(s);
       check(lines, s);
       assert.strictEqual(lines.isEmpty(), s.length === 0);
@@ -254,9 +258,9 @@ describe("lines", function () {
     checkAllSlices(lines);
   });
 
-  function checkAllSlices(lines: any) {
-    lines.eachPos(function (start: any) {
-      lines.eachPos(function (end: any) {
+  function checkAllSlices(lines: Lines) {
+    lines.eachPos(function (start) {
+      lines.eachPos(function (end) {
         check(lines.slice(start, end), lines.bootstrapSlice(start, end));
         check(
           lines.sliceString(start, end),
@@ -266,7 +270,7 @@ describe("lines", function () {
     });
   }
 
-  function getSourceLocation(lines: any) {
+  function getSourceLocation(lines: Lines) {
     return { start: lines.firstPos(), end: lines.lastPos() };
   }
 
@@ -274,7 +278,7 @@ describe("lines", function () {
     const code = String(GetSourceLocationTest),
       lines = fromString(code);
 
-    function verify(indent: any) {
+    function verify(indent: number) {
       const indented = lines.indentTail(indent),
         loc = getSourceLocation(indented),
         string = indented.toString(),
