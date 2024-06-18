@@ -107,7 +107,7 @@ it("should not double parentheses in Babel", function () {
     "  );\n" +
     "}";
 
-  const ast = parse(source, {parser: require("../parsers/babel")});
+  const ast = parse(source, { parser: require("../parsers/babel") });
   ast.program.body[0].body.body[1].argument.openingElement.attributes[0].name.name =
     "abc";
 
