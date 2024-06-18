@@ -661,13 +661,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push("return");
 
       if (n.argument) {
-        const argLines = path.call(print, "argument");
+        const argIsJsxElement = namedTypes.JSXElement?.check(n.argument)
+
+        let argLines = path.call(print, "argument");
         if (
           argLines.startsWithComment() ||
-          (argLines.length > 1 &&
-            namedTypes.JSXElement &&
-            namedTypes.JSXElement.check(n.argument))
+          (argLines.length > 1 && argIsJsxElement)
         ) {
+          // Babel: regenerate parenthesized jsxElements so we don't double parentheses
+          if (argIsJsxElement && n.argument.extra?.parenthesized) {
+            n.argument.extra.parenthesized = false;
+            argLines = path.call(print, "argument");
+            n.argument.extra.parenthesized = true;
+          }
           parts.push(" (\n", argLines.indent(options.tabWidth), "\n)");
         } else {
           parts.push(" ", argLines);
