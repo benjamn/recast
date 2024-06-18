@@ -500,8 +500,11 @@ describe("Babel", function () {
 
   it("adds the sourceFilename to location", function () {
     const code = "const a = 1;";
-    const filename = "testfile.js"
-    const ast = recast.parse(code, {...parseOptions, sourceFileName: filename});
+    const filename = "testfile.js";
+    const ast = recast.parse(code, {
+      ...parseOptions,
+      sourceFileName: filename,
+    });
 
     assert.strictEqual(ast.program.body[0].loc.filename, filename);
   });
