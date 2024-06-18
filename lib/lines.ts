@@ -22,6 +22,10 @@ type LineInfo = {
   readonly sliceEnd: number;
 };
 
+type MutableLineInfo = {
+  -readonly [K in keyof LineInfo]: LineInfo[K];
+};
+
 export class Lines {
   public readonly length: number;
   public readonly name: string | null;
@@ -176,7 +180,7 @@ export class Lines {
     if (skipFirstLine && this.length === 1) return this;
 
     const lines = new Lines(
-      this.infos.map(function (info: any, i: any) {
+      this.infos.map(function (info, i) {
         if (info.line && (i > 0 || !skipFirstLine)) {
           info = {
             ...info,
@@ -190,7 +194,7 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping: any) {
+      this.mappings.forEach(function (mapping) {
         newMappings.push(mapping.indent(width, skipFirstLine, true));
       });
     }
@@ -204,7 +208,7 @@ export class Lines {
     }
 
     const lines = new Lines(
-      this.infos.map(function (info: any) {
+      this.infos.map(function (info) {
         if (info.line && !info.locked) {
           info = {
             ...info,
@@ -218,7 +222,7 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping: any) {
+      this.mappings.forEach(function (mapping) {
         newMappings.push(mapping.indent(by));
       });
     }
@@ -236,7 +240,7 @@ export class Lines {
     }
 
     const lines = new Lines(
-      this.infos.map(function (info: any, i: any) {
+      this.infos.map(function (info, i) {
         if (i > 0 && info.line && !info.locked) {
           info = {
             ...info,
@@ -251,7 +255,7 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping: any) {
+      this.mappings.forEach(function (mapping) {
         newMappings.push(mapping.indent(by, true));
       });
     }
@@ -265,7 +269,7 @@ export class Lines {
     }
 
     return new Lines(
-      this.infos.map((info: any, i: any) => ({
+      this.infos.map((info, i) => ({
         ...info,
         locked: i > 0,
       })),
@@ -282,7 +286,7 @@ export class Lines {
       return this.cachedTabWidth;
     }
 
-    const counts: any[] = []; // Sparse array.
+    const counts: number[] = []; // Sparse array.
     let lastIndent = 0;
 
     for (let line = 1, last = this.length; line <= last; ++line) {
@@ -527,7 +531,7 @@ export class Lines {
     } else {
       invariant(start.line < end.line);
       sliced[0] = sliceInfo(sliced[0], start.column);
-      sliced.push(sliceInfo(sliced.pop(), 0, end.column));
+      sliced.push(sliceInfo(sliced.pop()!, 0, end.column));
     }
 
     const lines = new Lines(sliced);
@@ -535,7 +539,7 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (this: any, mapping: any) {
+      this.mappings.forEach(function (this: Lines, mapping) {
         const sliced = mapping.slice(this, start, end);
         if (sliced) {
           newMappings.push(sliced);
@@ -618,9 +622,9 @@ export class Lines {
 
   join(elements: (string | Lines)[]) {
     const separator = this;
-    const infos: any[] = [];
-    const mappings: any[] = [];
-    let prevInfo: any;
+    const infos: LineInfo[] = [];
+    const mappings: Mapping[] = [];
+    let prevInfo: MutableLineInfo | undefined;
 
     function appendLines(linesOrNull: Lines | null) {
       if (linesOrNull === null) {
@@ -648,7 +652,7 @@ export class Lines {
         prevInfo.sliceEnd = prevInfo.line.length;
 
         if (linesOrNull.mappings.length > 0) {
-          linesOrNull.mappings.forEach(function (mapping: any) {
+          linesOrNull.mappings.forEach(function (mapping) {
             mappings.push(mapping.add(prevLine, prevColumn));
           });
         }
@@ -656,7 +660,7 @@ export class Lines {
         mappings.push.apply(mappings, linesOrNull.mappings);
       }
 
-      linesOrNull.infos.forEach(function (info: any, i: any) {
+      linesOrNull.infos.forEach(function (info, i) {
         if (!prevInfo || i > 0) {
           prevInfo = { ...info };
           infos.push(prevInfo);
@@ -670,7 +674,7 @@ export class Lines {
     }
 
     elements
-      .map(function (elem: any) {
+      .map(function (elem) {
         const lines = fromString(elem);
         if (lines.isEmpty()) return null;
         return lines;
@@ -700,11 +704,11 @@ export class Lines {
   }
 }
 
-const fromStringCache: any = {};
+const fromStringCache: Record<string, Lines> = {};
 const hasOwn = fromStringCache.hasOwnProperty;
 const maxCacheKeyLen = 10;
 
-export function countSpaces(spaces: any, tabWidth?: number) {
+export function countSpaces(spaces: string, tabWidth?: number) {
   let count = 0;
   const len = spaces.length;
 
@@ -794,7 +798,7 @@ function isOnlyWhitespace(string: string) {
   return !/\S/.test(string);
 }
 
-function sliceInfo(info: any, startCol: number, endCol?: number) {
+function sliceInfo(info: LineInfo, startCol: number, endCol?: number) {
   let sliceStart = info.sliceStart;
   let sliceEnd = info.sliceEnd;
   let indent = Math.max(info.indent, 0);
@@ -848,7 +852,7 @@ function sliceInfo(info: any, startCol: number, endCol?: number) {
   };
 }
 
-export function concat(elements: any) {
+export function concat(elements: (string | Lines)[]) {
   return emptyLines.join(elements);
 }
 
