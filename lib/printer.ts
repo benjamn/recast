@@ -1305,7 +1305,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         return openingLines;
       }
 
-      const childLines = concat(
+      let childLines = concat(
         path.map(function (childPath: any) {
           const child = childPath.getValue();
 
@@ -1322,7 +1322,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
           return print(childPath);
         }, "children"),
-      ).indentTail(options.tabWidth);
+      );
+      if (openingLines.length > 1) {
+        // If we have a multiline opening element, start the child out on a newline
+        childLines = concat(["\n", childLines]).indent(options.tabWidth);
+      } else {
+        childLines = childLines.indentTail(options.tabWidth);
+      }
 
       const closingLines = path.call(print, closingPropName);
 
@@ -1351,10 +1357,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             attrParts[i] = "\n";
           }
         });
+        attrParts.push("\n");
 
         attrLines = concat(attrParts).indentTail(options.tabWidth);
       }
-
       parts.push(attrLines, n.selfClosing ? " />" : ">");
 
       return concat(parts);
