@@ -93,3 +93,78 @@ it("should not remove trailing whitespaces", function () {
       "}",
   );
 });
+
+it("should print end jsx > on same line when not wrapping", function () {
+  const printer = new Printer({ tabWidth: 2 });
+  const source =
+    "function App() {\n" +
+    '  const name = "world";\n' +
+    "\n" +
+    "  return (\n" +
+    "    <div\n" +
+    '      className="app"\n' +
+    '      id="12345"\n' +
+    '      data-attribute="test-information"\n' +
+    "    >\n" +
+    "        hello {name}\n" +
+    "    </div>\n" +
+    "  );\n" +
+    "}";
+  const ast = parse(source);
+  ast.program.body[0].body.body[1].argument.openingElement.attributes[0].name.name =
+    "abc";
+
+  const code = printer.printGenerically(ast).code;
+
+  assert.equal(
+    code,
+    "function App() {\n" +
+      '  const name = "world";\n' +
+      "\n" +
+      "  return (\n" +
+      '    <div abc="app" id="12345" data-attribute="test-information">hello {name}\n' +
+      "    </div>\n" +
+      "  );\n" +
+      "}",
+  );
+});
+
+it("should print end jsx > on a new line when wrapping", function () {
+  const printer = new Printer({ tabWidth: 2, wrapColumn: 50 });
+  const source =
+    "function App() {\n" +
+    '  const name = "world";\n' +
+    "\n" +
+    "  return (\n" +
+    "    <div\n" +
+    '      className="app"\n' +
+    '      id="12345"\n' +
+    '      data-attribute="test-information"\n' +
+    "    >\n" +
+    "      hello {name}\n" +
+    "    </div>\n" +
+    "  );\n" +
+    "}";
+  const ast = parse(source);
+  ast.program.body[0].body.body[1].argument.openingElement.attributes[0].name.name =
+    "abc";
+
+  const code = printer.printGenerically(ast).code;
+
+  assert.equal(
+    code,
+    "function App() {\n" +
+      '  const name = "world";\n' +
+      "\n" +
+      "  return (\n" +
+      "    <div\n" +
+      '      abc="app"\n' +
+      '      id="12345"\n' +
+      '      data-attribute="test-information"\n' +
+      "    >\n" +
+      "      hello {name}\n" +
+      "    </div>\n" +
+      "  );\n" +
+      "}",
+  );
+});
