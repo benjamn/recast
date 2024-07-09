@@ -459,7 +459,6 @@ FPp.needsParens = function (assumeExpressionContext) {
       );
 
     case "YieldExpression":
-    case "AwaitExpression":
     case "AssignmentExpression":
     case "ConditionalExpression":
       switch (parent.type) {
