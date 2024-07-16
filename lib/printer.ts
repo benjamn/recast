@@ -676,7 +676,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             argLines = path.call(print, "argument");
             n.argument.extra.parenthesized = true;
           }
-          parts.push(" (\n", argLines.indent(options.tabWidth), "\n)");
+          parts.push(" ", concat(["(\n", argLines]).indentTail(options.tabWidth), "\n)");
         } else {
           parts.push(" ", argLines);
         }
