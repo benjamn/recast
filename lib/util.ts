@@ -358,3 +358,13 @@ export function isTrailingCommaEnabled(options: any, context: any) {
   }
   return !!trailingComma;
 }
+
+export function extractInlineSourceMaps(source: string) {
+  const re = /\s*\/\/(?:@|#) sourceMappingURL=data:application\/json;base64,(\S*)$/m;
+  const map = source.match(re);
+
+  return {
+    source: map ? source.replace(re, '') : source,
+    inputSourceMap: map ? (Buffer.from(map[1], 'base64')).toString() : undefined
+  };
+}
