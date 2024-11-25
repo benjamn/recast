@@ -1579,7 +1579,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "TaggedTemplateExpression":
-      return concat([path.call(print, "tag"), path.call(print, "quasi")]);
+      parts.push(path.call(print, "tag"));
+      if (n.typeParameters) {
+        parts.push(path.call(print, "typeParameters"));
+      }
+      parts.push(path.call(print, "quasi"));
+      return concat(parts);
 
     // These types are unprintable because they serve as abstract
     // supertypes for other (printable) types.

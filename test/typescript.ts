@@ -331,6 +331,14 @@ const nodeMajorVersion = parseInt(process.versions.node, 10);
     check(["type Class<T> = new (...args: any) => T;"]);
 
     check(["type T1 = [...Array<any>];", "type T2 = [...any[]];"]);
+    check([
+      "const a = styled.h1<{",
+      "  $upsideDown?: boolean;",
+      "}>`",
+      '  ${props => props.$upsideDown && "transform: rotate(180deg);"}',
+      "  text-align: center;",
+      "`;",
+    ]);
 
     check([
       "type Color = [r: number, g: number, b: number, a?: number];",
