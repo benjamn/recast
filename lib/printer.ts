@@ -2122,6 +2122,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return fromString("never", options);
 
     case "TSArrayType":
+      if (n.elementType.type === "TSUnionType") {
+        return concat(["(", path.call(print, "elementType"), ")", "[]"]);
+      }
       return concat([path.call(print, "elementType"), "[]"]);
 
     case "TSLiteralType":
