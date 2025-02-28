@@ -723,7 +723,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         ? ";"
         : ",";
       const fields = [];
-      let allowBreak = false;
 
       if (isTypeAnnotation) {
         fields.push("indexers", "callProperties");
@@ -754,19 +753,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
             lines = lines.indent(options.tabWidth);
           }
 
-          const multiLine = !isTypeAnnotation && lines.length > 1;
-          if (multiLine && allowBreak) {
-            // Similar to the logic for BlockStatement.
-            parts.push("\n");
-          }
-
           parts.push(lines);
-
           if (i < len - 1) {
-            // Add an extra line break if the previous object property
-            // had a multi-line value.
-            parts.push(separator + (multiLine ? "\n\n" : "\n"));
-            allowBreak = !multiLine;
+            parts.push(separator +  "\n");
           } else if (len !== 1 && isTypeAnnotation) {
             parts.push(separator);
           } else if (
