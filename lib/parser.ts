@@ -31,6 +31,7 @@ export function parse(source: string, options?: Partial<Options>) {
     tolerant: util.getOption(options, "tolerant", true),
     ecmaVersion: 6,
     sourceType: util.getOption(options, "sourceType", "module"),
+    sourceFileName: util.getOption(options, "sourceFileName", null),
   });
 
   // Use ast.tokens if possible, and otherwise fall back to the Esprima
