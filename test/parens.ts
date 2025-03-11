@@ -360,6 +360,20 @@ describe("parens", function () {
     check("({ foo } = bar)");
   });
 
+  it("don't parenthesize comment (issue #575)", function () {
+    const source = "(/**/{foo} = 1)";
+    const ast = parse(source); // not esprima
+    const expressionAst = ast.program.body[0].expression;
+    const reprint = printer.print(expressionAst).code;
+    if (!types.astNodesAreEquivalent(parse(reprint), ast)) {
+      throw new assert.AssertionError({
+        message: "Expected values to parse to equivalent ASTs",
+        actual: reprint,
+        expected: source,
+      });
+    }
+  });
+
   it("regression test for issue #327", function () {
     const expr = "(function(){}())";
     check(expr);
