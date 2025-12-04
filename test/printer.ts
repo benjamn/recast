@@ -2471,17 +2471,17 @@ describe("printer", function () {
   it("can pretty-print ImportAttribute syntax", function () {
     const code = [
       'import * as noAssertions from "./module";',
-      'import * as emptyAssert from "./module" assert {};',
-      'import json from "./module" assert { type: "json" };',
-      'import * as ns from "./module" assert { type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines" }',
+      'import * as emptyWith from "./module" with {};',
+      'import json from "./module" with { type: "json" };',
+      'import * as ns from "./module" with { type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines" }',
     ].join(eol);
 
     const expectedPretty = [
       'import * as noAssertions from "./module";',
-      'import * as emptyAssert from "./module";',
-      'import json from "./module" assert { type: "json" };',
+      'import * as emptyWith from "./module";',
+      'import json from "./module" with { type: "json" };',
       "",
-      'import * as ns from "./module" assert {',
+      'import * as ns from "./module" with {',
       '  type: "reallyLongStringLiteralThatShouldTriggerReflowOntoMultipleLines"',
       "};",
     ].join(eol);
@@ -2515,9 +2515,9 @@ describe("printer", function () {
       reprinted,
       [
         'import * as noAssertions from "./module";',
-        'import * as emptyAssert from "./module" assert {};',
-        'import json from "./module" assert { type: "json" };',
-        'import * as ns from "./module" assert { type: "shorter" }',
+        'import * as emptyWith from "./module" with {};',
+        'import json from "./module" with { type: "json" };',
+        'import * as ns from "./module" with { type: "shorter" }',
       ].join(eol),
     );
   });
