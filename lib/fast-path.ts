@@ -401,9 +401,20 @@ FPp.needsParens = function (assumeExpressionContext) {
             return true;
           }
 
-          if (pp === np && name === "right") {
-            invariant(parent.right === node);
-            return true;
+          if (pp === np) {
+            // `**` is right-associative, so `a ** b ** c` parses as
+            // `a ** (b ** c)`: the left operand needs parentheses
+            // (e.g. `(a ** b) ** c`), the right operand does not. Every other
+            // binary/logical operator is left-associative, so the right
+            // operand needs parentheses (e.g. `a - (b - c)`).
+            if (po === "**") {
+              return name === "left";
+            }
+
+            if (name === "right") {
+              invariant(parent.right === node);
+              return true;
+            }
           }
 
           break;

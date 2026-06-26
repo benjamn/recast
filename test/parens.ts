@@ -64,6 +64,17 @@ describe("parens", function () {
     });
   });
 
+  it("Exponentiation", function () {
+    // `**` is right-associative: `a ** b ** c` parses as `a ** (b ** c)`, so the
+    // left operand needs parentheses to override that while the right does not.
+    check("a ** b ** c");
+    check("a ** b ** c ** d");
+    check("(a ** b) ** c");
+    check("(a ** b ** c) ** d");
+    check("a ** b * c");
+    check("a * b ** c");
+  });
+
   it("Unary", function () {
     check("(-a).b");
     check("(+a).b");
