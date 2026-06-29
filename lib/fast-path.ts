@@ -370,8 +370,10 @@ FPp.needsParens = function (assumeExpressionContext) {
     case "UnaryExpression":
     case "SpreadElement":
     case "SpreadProperty":
+      // `n.MemberExpression.check` also matches `OptionalMemberExpression`, so
+      // e.g. `(-a)?.b` is parenthesized just like `(-a).b`.
       return (
-        parent.type === "MemberExpression" &&
+        n.MemberExpression.check(parent) &&
         name === "object" &&
         parent.object === node
       );
@@ -379,7 +381,11 @@ FPp.needsParens = function (assumeExpressionContext) {
     case "BinaryExpression":
     case "LogicalExpression":
       switch (parent.type) {
+        // `OptionalCallExpression` / `OptionalMemberExpression` are the
+        // optional-chaining counterparts of `CallExpression` /
+        // `MemberExpression` and parenthesize their operands the same way.
         case "CallExpression":
+        case "OptionalCallExpression":
           return name === "callee" && parent.callee === node;
 
         case "UnaryExpression":
@@ -388,6 +394,7 @@ FPp.needsParens = function (assumeExpressionContext) {
           return true;
 
         case "MemberExpression":
+        case "OptionalMemberExpression":
           return name === "object" && parent.object === node;
 
         case "BinaryExpression":
@@ -481,7 +488,9 @@ FPp.needsParens = function (assumeExpressionContext) {
         case "LogicalExpression":
           return true;
 
+        // Optional-chaining parents, e.g. `(await x)?.y` like `(await x).y`.
         case "CallExpression":
+        case "OptionalCallExpression":
         case "NewExpression":
           return name === "callee" && parent.callee === node;
 
@@ -489,6 +498,7 @@ FPp.needsParens = function (assumeExpressionContext) {
           return name === "test" && parent.test === node;
 
         case "MemberExpression":
+        case "OptionalMemberExpression":
           return name === "object" && parent.object === node;
 
         default:
