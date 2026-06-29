@@ -399,4 +399,91 @@ describe("parens", function () {
 
     assert.strictEqual(printer.print(ast).code, "(typeof a ? b : c)()");
   });
+
+  it("should be added to operands of optional member and call expressions", function () {
+    // `OptionalMemberExpression` / `OptionalCallExpression` need the same
+    // parentheses around a lower-precedence operand as their non-optional
+    // counterparts, e.g. `(await x)?.y` like `(await x).y`.
+    assert.strictEqual(
+      printer.print(
+        b.optionalMemberExpression(
+          b.awaitExpression(b.identifier("x")),
+          b.identifier("y"),
+          false,
+          true,
+        ),
+      ).code,
+      "(await x)?.y",
+    );
+
+    assert.strictEqual(
+      printer.print(
+        b.optionalCallExpression(
+          b.awaitExpression(b.identifier("x")),
+          [],
+          true,
+        ),
+      ).code,
+      "(await x)?.()",
+    );
+
+    assert.strictEqual(
+      printer.print(
+        b.optionalMemberExpression(
+          b.assignmentExpression("=", b.identifier("a"), b.identifier("b")),
+          b.identifier("c"),
+          false,
+          true,
+        ),
+      ).code,
+      "(a = b)?.c",
+    );
+
+    assert.strictEqual(
+      printer.print(
+        b.optionalMemberExpression(
+          b.binaryExpression("+", b.identifier("a"), b.identifier("b")),
+          b.identifier("c"),
+          false,
+          true,
+        ),
+      ).code,
+      "(a + b)?.c",
+    );
+
+    // Issue #1410: wrapping a call's base in `await` inside an optional chain.
+    assert.strictEqual(
+      printer.print(
+        b.optionalCallExpression(
+          b.optionalMemberExpression(
+            b.awaitExpression(b.callExpression(b.identifier("asyncFn"), [])),
+            b.identifier("filter"),
+            false,
+            true,
+          ),
+          [b.arrowFunctionExpression([b.identifier("x")], b.identifier("x"))],
+          false,
+        ),
+      ).code,
+      "(await asyncFn())?.filter(x => x)",
+    );
+
+    // A continuing chain must not gain spurious parentheses.
+    assert.strictEqual(
+      printer.print(
+        b.optionalMemberExpression(
+          b.optionalMemberExpression(
+            b.identifier("a"),
+            b.identifier("b"),
+            false,
+            true,
+          ),
+          b.identifier("c"),
+          false,
+          true,
+        ),
+      ).code,
+      "a?.b?.c",
+    );
+  });
 });
