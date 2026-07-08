@@ -85,6 +85,15 @@ describe("parens", function () {
     check("(delete a.b).c");
   });
 
+  it("Update", function () {
+    check("(a++).b");
+    check("(a--).b");
+    check("(++a).b");
+    check("(--a).b");
+    check("(a++)()");
+    check("new (a++)");
+  });
+
   it("Binary", function () {
     check("(a && b)()");
     check("typeof (a && b)");

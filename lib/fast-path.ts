@@ -376,6 +376,23 @@ FPp.needsParens = function (assumeExpressionContext) {
         parent.object === node
       );
 
+    case "UpdateExpression":
+      // An UpdateExpression binds looser than a MemberExpression /
+      // CallExpression, so it needs parentheses in those positions, e.g.
+      // `(a++).b`, `(a++)()`, `new (a++)`. Without them the output is invalid
+      // syntax (`a++.b`) or changes meaning (`++a.b` parses as `++(a.b)`).
+      switch (parent.type) {
+        case "MemberExpression":
+          return name === "object" && parent.object === node;
+
+        case "CallExpression":
+        case "NewExpression":
+          return name === "callee" && parent.callee === node;
+
+        default:
+          return false;
+      }
+
     case "BinaryExpression":
     case "LogicalExpression":
       switch (parent.type) {
