@@ -451,6 +451,29 @@ describe("parens", function () {
       "(a + b)?.c",
     );
 
+    assert.strictEqual(
+      printer.print(
+        b.optionalMemberExpression(
+          b.unaryExpression("-", b.identifier("a")),
+          b.identifier("b"),
+          false,
+          true,
+        ),
+      ).code,
+      "(-a)?.b",
+    );
+
+    assert.strictEqual(
+      printer.print(
+        b.optionalCallExpression(
+          b.binaryExpression("+", b.identifier("a"), b.identifier("b")),
+          [],
+          true,
+        ),
+      ).code,
+      "(a + b)?.()",
+    );
+
     // Issue #1410: wrapping a call's base in `await` inside an optional chain.
     assert.strictEqual(
       printer.print(
