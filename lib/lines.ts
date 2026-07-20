@@ -194,9 +194,9 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping) {
-        newMappings.push(mapping.indent(width, skipFirstLine, true));
-      });
+      this.mappings.forEach(function (this: Lines, mapping) {
+        newMappings.push(mapping.indent(this, lines));
+      }, this);
     }
 
     return lines;
@@ -222,9 +222,9 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping) {
-        newMappings.push(mapping.indent(by));
-      });
+      this.mappings.forEach(function (this: Lines, mapping) {
+        newMappings.push(mapping.indent(this, lines));
+      }, this);
     }
 
     return lines;
@@ -255,9 +255,9 @@ export class Lines {
     if (this.mappings.length > 0) {
       const newMappings = lines.mappings;
       invariant(newMappings.length === 0);
-      this.mappings.forEach(function (mapping) {
-        newMappings.push(mapping.indent(by, true));
-      });
+      this.mappings.forEach(function (this: Lines, mapping) {
+        newMappings.push(mapping.indent(this, lines));
+      }, this);
     }
 
     return lines;
