@@ -5,6 +5,8 @@
 //     parser: require("recast/parsers/oxc")
 //   });
 //
+import { registerOxcAstTypesExtensions } from "./_oxc_ast_types";
+
 export interface OxcParserOptions {
   /**
    * Oxc uses the filename in diagnostics. Syntax selection is controlled by
@@ -71,6 +73,8 @@ const parseSync: (
   options: OxcParserOptions,
 ) => OxcParseResult = require("oxc-parser").parseSync;
 
+registerOxcAstTypesExtensions();
+
 export function createOxcParser(parserOptions: OxcParserOptions = {}) {
   const {
     filename = "source.tsx",
@@ -89,8 +93,8 @@ export function createOxcParser(parserOptions: OxcParserOptions = {}) {
         // Oxc does not currently expose tokens. Explicit parenthesis nodes
         // let Recast preserve parentheses without token look-behind/ahead.
         preserveParens,
-        range: recastOptions.range ?? baseOptions.range,
-        sourceType: recastOptions.sourceType ?? baseOptions.sourceType,
+        range: baseOptions.range ?? recastOptions.range,
+        sourceType: baseOptions.sourceType ?? recastOptions.sourceType,
       });
 
       if (result.errors.length > 0) {
@@ -99,6 +103,7 @@ export function createOxcParser(parserOptions: OxcParserOptions = {}) {
 
       const getLocation = createLocationResolver(source);
       const program = result.program;
+      normalizeAst(program, source);
       addLocations(program, getLocation);
 
       const hashbang = program.hashbang as OffsetNode | null;
@@ -107,7 +112,7 @@ export function createOxcParser(parserOptions: OxcParserOptions = {}) {
           source,
           hashbang.end!,
         );
-        program.interpreter = {
+        const interpreter: OffsetNode = {
           type: "InterpreterDirective",
           value: hashbang.value,
           start: hashbang.start,
@@ -117,6 +122,10 @@ export function createOxcParser(parserOptions: OxcParserOptions = {}) {
             end: getLocation(interpreterEnd),
           },
         };
+        if (Array.isArray(hashbang.range)) {
+          interpreter.range = [hashbang.start, interpreterEnd];
+        }
+        program.interpreter = interpreter;
         // Oxc excludes the hashbang from Program.start. Recast expects the
         // Program location to contain its interpreter, or a changed Program
         // can preserve the original hashbang and print the interpreter again.
@@ -163,6 +172,311 @@ export function parse(
   options?: RecastParserOptions,
 ): OffsetNode {
   return parser.parse(source, options);
+}
+
+function normalizeAst(
+  value: unknown,
+  source: string,
+  seen = new Set<object>(),
+): void {
+  if (!value || typeof value !== "object" || seen.has(value)) {
+    return;
+  }
+  seen.add(value);
+
+  const node = value as OffsetNode;
+
+  switch (node.type) {
+    case "PropertyDefinition":
+      node.type = "ClassProperty";
+      break;
+
+    case "TSAbstractPropertyDefinition":
+      node.type = "ClassProperty";
+      node.abstract = true;
+      break;
+
+    case "AccessorProperty":
+      node.type = "ClassAccessorProperty";
+      break;
+
+    case "TSAbstractAccessorProperty":
+      node.type = "ClassAccessorProperty";
+      node.abstract = true;
+      break;
+
+    case "TSInterfaceHeritage":
+    case "TSClassImplements":
+      node.type = "TSExpressionWithTypeArguments";
+      normalizeTypeArguments(node);
+      break;
+
+    case "ClassDeclaration":
+    case "ClassExpression":
+      node.superTypeParameters = node.superTypeArguments;
+      delete node.superTypeArguments;
+      break;
+
+    case "TSTypeReference":
+    case "TSInstantiationExpression":
+    case "TSTypeQuery":
+    case "JSXOpeningElement":
+    case "TaggedTemplateExpression":
+    case "CallExpression":
+    case "OptionalCallExpression":
+    case "NewExpression":
+      normalizeTypeArguments(node);
+      break;
+
+    case "TSFunctionType":
+    case "TSConstructorType":
+    case "TSMethodSignature":
+    case "TSCallSignatureDeclaration":
+    case "TSConstructSignatureDeclaration":
+      node.parameters = node.params;
+      node.typeAnnotation = node.returnType;
+      delete node.params;
+      delete node.returnType;
+      break;
+
+    case "TSEnumDeclaration": {
+      const body = node.body as OffsetNode;
+      node.members = body.members;
+      delete node.body;
+      break;
+    }
+
+    case "TSMappedType":
+      normalizeMappedType(node);
+      break;
+
+    case "TSTypeParameter":
+      if (node.constraint === null) {
+        delete node.constraint;
+      }
+      if (node.default === null) {
+        delete node.default;
+      }
+      break;
+
+    case "MethodDefinition":
+      if (
+        (node.value as OffsetNode | undefined)?.type ===
+        "TSEmptyBodyFunctionExpression"
+      ) {
+        normalizeDeclareMethod(node, false);
+      }
+      break;
+
+    case "TSAbstractMethodDefinition":
+      normalizeDeclareMethod(node, true);
+      break;
+
+    case "PrivateIdentifier": {
+      const name = node.name;
+      node.type = "PrivateName";
+      node.id = {
+        type: "Identifier",
+        name,
+        start: node.start! + 1,
+        end: node.end,
+      };
+      if (Array.isArray(node.range)) {
+        (node.id as OffsetNode).range = [node.start! + 1, node.end];
+      }
+      delete node.name;
+      break;
+    }
+
+    case "ImportExpression":
+      if (node.options || node.phase) {
+        normalizeDynamicImport(node);
+      }
+      break;
+
+    case "TSImportType":
+      node.argument = node.source;
+      node.typeParameters = node.typeArguments;
+      delete node.source;
+      delete node.typeArguments;
+      break;
+
+    case "TSTemplateLiteralType":
+      normalizeTemplateLiteralType(node);
+      break;
+
+    case "TSLiteralType":
+      normalizeTsLiteral(node);
+      break;
+
+    case "ImportDeclaration":
+    case "ExportAllDeclaration":
+    case "ExportNamedDeclaration": {
+      if (Array.isArray(node.attributes)) {
+        const attributes = node.attributes as OffsetNode[];
+        node.assertions = attributes;
+        node.importAttributesKeyword = getImportAttributesKeyword(
+          node,
+          attributes,
+          source,
+        );
+        delete node.attributes;
+      }
+      break;
+    }
+  }
+
+  Object.keys(node).forEach((key) => {
+    const child = node[key];
+    if (Array.isArray(child)) {
+      child.forEach((item) => normalizeAst(item, source, seen));
+    } else {
+      normalizeAst(child, source, seen);
+    }
+  });
+}
+
+function normalizeDeclareMethod(node: OffsetNode, abstract: boolean): void {
+  const value = node.value as OffsetNode;
+  node.type = "TSDeclareMethod";
+  node.abstract = abstract;
+  node.async = value.async;
+  node.generator = value.generator;
+  node.params = value.params;
+  node.returnType = value.returnType;
+  node.typeParameters = value.typeParameters;
+  if (node.accessibility === null) {
+    delete node.accessibility;
+  }
+  delete node.value;
+}
+
+function normalizeTypeArguments(node: OffsetNode): void {
+  node.typeParameters = node.typeArguments;
+  delete node.typeArguments;
+}
+
+function normalizeMappedType(node: OffsetNode): void {
+  const key = node.key as OffsetNode;
+  const constraint = node.constraint as OffsetNode;
+  const typeParameter: OffsetNode = {
+    type: "TSTypeParameter",
+    name: key,
+    constraint,
+    start: key.start,
+    end: constraint.end,
+  };
+  if (Array.isArray(node.range)) {
+    typeParameter.range = [key.start, constraint.end];
+  }
+
+  node.typeParameter = typeParameter;
+  delete node.key;
+  delete node.constraint;
+}
+
+function normalizeTemplateLiteralType(node: OffsetNode): void {
+  const literal: OffsetNode = {
+    type: "TemplateLiteral",
+    quasis: node.quasis,
+    expressions: node.types,
+    start: node.start,
+    end: node.end,
+  };
+  if (Array.isArray(node.range)) {
+    literal.range = [...node.range];
+  }
+
+  node.type = "TSLiteralType";
+  node.literal = literal;
+  delete node.quasis;
+  delete node.types;
+}
+
+function normalizeTsLiteral(node: OffsetNode): void {
+  const literal = node.literal as OffsetNode;
+  if (literal.type !== "Literal") {
+    return;
+  }
+
+  if (typeof literal.value === "string") {
+    literal.type = "StringLiteral";
+  } else if (typeof literal.value === "number") {
+    literal.type = "NumericLiteral";
+  } else if (typeof literal.value === "boolean") {
+    literal.type = "BooleanLiteral";
+  } else if (typeof literal.value === "bigint") {
+    literal.type = "BigIntLiteral";
+    literal.value = String(literal.bigint ?? literal.value);
+    delete literal.bigint;
+  }
+}
+
+function normalizeDynamicImport(node: OffsetNode): void {
+  const source = node.source;
+  const options = node.options;
+  const phase = node.phase;
+  const calleeEnd = node.start! + "import".length;
+  const importCallee: OffsetNode = {
+    type: "Import",
+    start: node.start,
+    end: calleeEnd,
+  };
+  if (Array.isArray(node.range)) {
+    importCallee.range = [node.start, calleeEnd];
+  }
+
+  let callee = importCallee;
+  if (typeof phase === "string") {
+    const propertyStart = calleeEnd + 1;
+    const propertyEnd = propertyStart + phase.length;
+    const property: OffsetNode = {
+      type: "Identifier",
+      name: phase,
+      start: propertyStart,
+      end: propertyEnd,
+    };
+    callee = {
+      type: "MemberExpression",
+      object: importCallee,
+      property,
+      computed: false,
+      optional: false,
+      start: node.start,
+      end: propertyEnd,
+    };
+    if (Array.isArray(node.range)) {
+      property.range = [propertyStart, propertyEnd];
+      callee.range = [node.start, propertyEnd];
+    }
+  }
+
+  node.type = "CallExpression";
+  node.callee = callee;
+  node.arguments = options ? [source, options] : [source];
+  node.optional = false;
+  delete node.source;
+  delete node.options;
+  delete node.phase;
+}
+
+function getImportAttributesKeyword(
+  node: OffsetNode,
+  attributes: OffsetNode[],
+  source: string,
+): "assert" | "with" | undefined {
+  const sourceNode = node.source as OffsetNode;
+  const clauseEnd = attributes[0]?.start ?? node.end;
+  if (typeof sourceNode?.end === "number" && typeof clauseEnd === "number") {
+    const clause = source
+      .slice(sourceNode.end, clauseEnd)
+      .replace(/\/\*[\s\S]*?\*\/|\/\/[^\r\n]*/g, " ");
+    const match = /\b(assert|with)\s*\{/.exec(clause);
+    if (match) {
+      return match[1] as "assert" | "with";
+    }
+  }
+  return attributes.length > 0 ? "assert" : undefined;
 }
 
 function addLocations(
