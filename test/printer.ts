@@ -2600,4 +2600,122 @@ describe("printer", function () {
       ),
     );
   });
+
+  describe("modern TypeScript syntax", function () {
+    function check(
+      expected: string,
+      update?: (ast: any) => void,
+      source = expected,
+    ) {
+      const ast = parse(source, { parser: tsParser });
+      if (update) {
+        update(ast);
+      }
+      assert.strictEqual(new Printer().printGenerically(ast).code, expected);
+    }
+
+    it("prints optional calls, binding patterns, and modifiers", function () {
+      [
+        "const optional = factory?.<number>();",
+        "const array = ([value]?: [number]) => value;",
+        "type Factory = abstract new () => X;",
+        "type Query = typeof Foo<string>;",
+        "interface Variance<in T, out U> {}",
+        'import type X = require("x");',
+      ].forEach((code) => check(code));
+
+      check(
+        [
+          "class A extends B {",
+          "    constructor(public override x: number) {",
+          "        super();",
+          "    }",
+          "}",
+        ].join(eol),
+        undefined,
+        "class A extends B { constructor(public override x: number) { super(); } }",
+      );
+
+      check(
+        ["type M<T> = {", "    -readonly [K in keyof T]+?: T[K];", "};"].join(
+          eol,
+        ),
+        undefined,
+        "type M<T> = { -readonly [K in keyof T]+?: T[K] };",
+      );
+
+      check(
+        [
+          "const object = (",
+          "    {",
+          "        value",
+          "    }?: {",
+          "        value: number;",
+          "    }",
+          ") => value;",
+        ].join(eol),
+        undefined,
+        "const object = ({ value }?: { value: number }) => value;",
+      );
+
+      check(
+        "class Box<const T> {}",
+        (ast) => {
+          const declaration = ast.program.body[0];
+          declaration.typeParameters.params[0].const = true;
+        },
+        "class Box<T> {}",
+      );
+
+      check("module M {}", (ast) => {
+        const declaration = ast.program.body[0];
+        declaration.kind = "module";
+        declaration.loc = null;
+        declaration.id.loc = null;
+      });
+    });
+
+    it("prints type-only exports and import attributes", function () {
+      check(
+        'export type * from "types";',
+        (ast) => {
+          ast.program.body[0].exportKind = "type";
+        },
+        'export * from "types";',
+      );
+
+      check('export * from "x" assert { type: "json" };');
+
+      check(
+        'import data from "x" with {};',
+        (ast) => {
+          const declaration = ast.program.body[0];
+          declaration.assertions = [];
+          declaration.importAttributesKeyword = "with";
+        },
+        'import data from "x";',
+      );
+    });
+
+    it("prints options on TypeScript import types", function () {
+      const code = [
+        'type T = import("pkg", {',
+        "    with: {",
+        '        "resolution-mode": "import"',
+        "    }",
+        "}).Foo;",
+      ].join(eol);
+      const ast = parse('type T = import("pkg").Foo;', {
+        parser: tsParser,
+      }) as any;
+      const optionsAst = parse(
+        'const options = { with: { "resolution-mode": "import" } };',
+        { parser: tsParser },
+      ) as any;
+      ast.program.body[0].typeAnnotation.options =
+        optionsAst.program.body[0].declarations[0].init;
+
+      assert.strictEqual(new Printer().printGenerically(ast).code, code);
+    });
+  });
 });
