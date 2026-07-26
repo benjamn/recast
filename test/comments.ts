@@ -19,15 +19,24 @@ const annotated = [
 ];
 
 const nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMinorVersion = parseInt(process.versions.node.split(".")[1], 10);
+const supportsOxcParser =
+  (nodeMajorVersion === 20 && nodeMinorVersion >= 19) ||
+  nodeMajorVersion > 22 ||
+  (nodeMajorVersion === 22 && nodeMinorVersion >= 12);
 
 describe("comments", function () {
-  [
+  const parserIds = [
     "../parsers/acorn",
     "../parsers/babel",
     "../parsers/esprima",
     "../parsers/flow",
     "../parsers/typescript",
-  ].forEach(runTestsForParser);
+  ];
+  if (supportsOxcParser) {
+    parserIds.push("../parsers/oxc");
+  }
+  parserIds.forEach(runTestsForParser);
 });
 
 function runTestsForParser(parserId: any) {
@@ -183,6 +192,7 @@ function runTestsForParser(parserId: any) {
         babel: babelInfo,
         esprima: esprimaInfo,
         flow: babelInfo,
+        oxc: esprimaInfo,
         typescript: babelInfo,
       } as any
     )[parserName];
@@ -842,7 +852,10 @@ function runTestsForParser(parserId: any) {
       const args = ast.program.body[0].expression.arguments;
 
       args.unshift(args[1]);
-      const expected = "testFunc(b, /** @type {string} */ a, b);";
+      const expected =
+        parserName === "oxc"
+          ? "testFunc(b, /** @type {string} */ (a), b);"
+          : "testFunc(b, /** @type {string} */ a, b);";
 
       assert.strictEqual(recast.print(ast).code, expected);
     },

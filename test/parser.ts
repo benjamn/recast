@@ -8,18 +8,27 @@ const namedTypes = types.namedTypes;
 import FastPath from "../lib/fast-path";
 import { EOL as eol } from "os";
 const nodeMajorVersion = parseInt(process.versions.node, 10);
+const nodeMinorVersion = parseInt(process.versions.node.split(".")[1], 10);
+const supportsOxcParser =
+  (nodeMajorVersion === 20 && nodeMinorVersion >= 19) ||
+  nodeMajorVersion > 22 ||
+  (nodeMajorVersion === 22 && nodeMinorVersion >= 12);
 
 // Esprima seems unable to handle unnamed top-level functions, so declare
 // test functions with names and then export them later.
 
 describe("parser", function () {
-  [
+  const parserIds = [
     "../parsers/acorn",
     "../parsers/babel",
     "../parsers/esprima",
     "../parsers/flow",
     "../parsers/typescript",
-  ].forEach(runTestsForParser);
+  ];
+  if (supportsOxcParser) {
+    parserIds.push("../parsers/oxc");
+  }
+  parserIds.forEach(runTestsForParser);
 
   it("AlternateParser", function () {
     const b = types.builders;
@@ -44,6 +53,90 @@ describe("parser", function () {
     check({ esprima: parser });
     check({ parser: parser });
   });
+
+  if (supportsOxcParser) {
+    describe("oxc", function () {
+      const oxcParser = require("../parsers/oxc");
+
+      it("parses and reprints TypeScript, comments, and parentheses", function () {
+        const code = [
+          "// config",
+          "export default {",
+          "  foo: (1 + 2) * 3,",
+          "} satisfies Record<string, unknown>;",
+        ].join("\n");
+        const ast = parse(code, { parser: oxcParser });
+
+        assert.strictEqual(new Printer().print(ast).code, code);
+
+        ast.program.body[0].declaration.expression.properties.push(
+          types.builders.property(
+            "init",
+            types.builders.identifier("added"),
+            types.builders.literal(true),
+          ),
+        );
+
+        assert.strictEqual(
+          new Printer().print(ast).code,
+          [
+            "// config",
+            "export default {",
+            "  foo: (1 + 2) * 3,",
+            "  added: true",
+            "} satisfies Record<string, unknown>;",
+          ].join("\n"),
+        );
+      });
+
+      it("preserves hashbangs when inserting statements", function () {
+        const code = "#!/usr/bin/env node\nexport default {};";
+        const ast = parse(code, { parser: oxcParser });
+        ast.program.body.unshift(
+          types.builders.importDeclaration(
+            [
+              types.builders.importSpecifier(
+                types.builders.identifier("value"),
+              ),
+            ],
+            types.builders.literal("module"),
+          ),
+        );
+
+        assert.strictEqual(
+          new Printer().print(ast).code,
+          [
+            "#!/usr/bin/env node",
+            'import { value } from "module";',
+            "export default {};",
+          ].join("\n"),
+        );
+      });
+
+      it("reports syntax errors with locations", function () {
+        assert.throws(
+          () => parse("export default {", { parser: oxcParser }),
+          (error: SyntaxError & { loc?: types.namedTypes.Position }) => {
+            assert.strictEqual(error.name, "SyntaxError");
+            assert.deepStrictEqual(error.loc, { line: 1, column: 16 });
+            return true;
+          },
+        );
+      });
+
+      it("supports explicit language configuration", function () {
+        const parser = oxcParser.createOxcParser({
+          filename: "source.js",
+          lang: "js",
+        });
+
+        assert.throws(
+          () => parse("const value: number = 1", { parser }),
+          SyntaxError,
+        );
+      });
+    });
+  }
 });
 
 function runTestsForParser(parserId: string) {
@@ -87,6 +180,7 @@ function runTestsForParser(parserId: string) {
     babel: "CommentLine",
     esprima: "Line",
     flow: "CommentLine",
+    oxc: "Line",
     typescript: "CommentLine",
   };
 

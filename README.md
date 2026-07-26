@@ -168,7 +168,16 @@ const tsAst = recast.parse(source, {
 });
 ```
 
-**Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install @babel/parser` to use the `typescript`, `flow`, or `babel` parsers, or `npm install acorn` to use the `acorn` parser. Only Esprima is installed by default when Recast is installed.
+Oxc can be used for JavaScript, JSX, TypeScript, and TSX after installing
+`oxc-parser`:
+
+```js
+const oxcAst = recast.parse(source, {
+  parser: require("recast/parsers/oxc")
+});
+```
+
+**Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install @babel/parser` to use the `typescript`, `flow`, or `babel` parsers, `npm install acorn` to use the `acorn` parser, or `npm install oxc-parser` to use the `oxc` parser. Only Esprima is installed by default when Recast is installed.
 
 After calling `recast.parse`, if you're going to transform the AST, make sure that the `.original` property is preserved. With Babel, for instance, if you call `transformFromAST`, you must pass `cloneInputAst: false` in its options. ([More detail](https://github.com/babel/babel/issues/12882)).
 
