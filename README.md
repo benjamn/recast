@@ -168,8 +168,7 @@ const tsAst = recast.parse(source, {
 });
 ```
 
-Oxc can be used for JavaScript, JSX, TypeScript, and TSX after installing
-`oxc-parser`:
+Oxc can be used for JavaScript, JSX, TypeScript, and TSX after installing `oxc-parser`:
 
 ```js
 const oxcAst = recast.parse(source, {
@@ -177,8 +176,7 @@ const oxcAst = recast.parse(source, {
 });
 ```
 
-The Oxc parser defaults to TSX syntax and a TypeScript-shaped AST. Use
-`createOxcParser` to select a stricter language or AST shape:
+The Oxc parser defaults to TSX syntax and a TypeScript-shaped AST. Use `createOxcParser` to select a stricter language or AST shape:
 
 ```js
 const oxcParser = require("recast/parsers/oxc").createOxcParser({
@@ -189,8 +187,7 @@ const oxcParser = require("recast/parsers/oxc").createOxcParser({
 ```
 
 Current versions of `oxc-parser` require Node.js `^20.19.0` or `>=22.12.0`.
-Because Oxc does not expose tokens, this parser preserves parentheses using
-Oxc's explicit `ParenthesizedExpression` nodes.
+Because Oxc does not expose tokens, this parser preserves parentheses using Oxc's explicit `ParenthesizedExpression` nodes.
 
 **Note:** Some of these parsers import npm packages that Recast does not directly depend upon, so please be aware you may have to run `npm install @babel/parser` to use the `typescript`, `flow`, or `babel` parsers, `npm install acorn` to use the `acorn` parser, or `npm install oxc-parser` to use the `oxc` parser. Only Esprima is installed by default when Recast is installed.
 
