@@ -113,6 +113,20 @@ describe("parser", function () {
         );
       });
 
+      it("calculates Unicode locations and ranges across CRLF", function () {
+        const code = '// café 😀\r\nconst first = "😀"; const second = 2;';
+        const program = oxcParser.parse(code, { range: true });
+        const declaration = program.body[1];
+        const start = code.indexOf("const second");
+
+        assert.strictEqual(declaration.start, start);
+        assert.deepStrictEqual(declaration.range, [start, code.length]);
+        assert.strictEqual(declaration.loc.start.line, 2);
+        assert.strictEqual(declaration.loc.start.column, 20);
+        assert.strictEqual(declaration.loc.end.line, 2);
+        assert.strictEqual(declaration.loc.end.column, 37);
+      });
+
       it("reports syntax errors with locations", function () {
         assert.throws(
           () => parse("export default {", { parser: oxcParser }),
