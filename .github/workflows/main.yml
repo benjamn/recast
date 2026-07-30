@@ -12,7 +12,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node_version: ["12.x", "14.x", "16.x", "18.x", "19.x", "20.x"]
+        node_version:
+          ["12.x", "14.x", "16.x", "18.x", "19.x", "20.x", "22.x", "24.x"]
         os: [ubuntu-latest]
 
     steps:
