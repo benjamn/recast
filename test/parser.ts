@@ -1,5 +1,8 @@
 import assert from "assert";
+import fs from "fs";
+import path from "path";
 import { parse } from "../lib/parser";
+import * as util from "../lib/util";
 import { getReprinter } from "../lib/patcher";
 import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
@@ -235,3 +238,67 @@ function runTestsForParser(parserId: string) {
     check(" /* com\n\nment */ ");
   });
 }
+
+// The token indices recast records on every node.loc are computed incrementally
+// (see TreeCopier.findTokenRange), so they are only as good as the invariant
+// they are supposed to maintain: loc.tokens.slice(loc.start.token,
+// loc.end.token) must be exactly the tokens the node's loc covers. Checking
+// that against a brute-force scan keeps the incremental version honest.
+describe("token ranges", function () {
+  function checkTokenRanges(source: string) {
+    const ast = parse(source, { parser: require("../parsers/babel") });
+    const tokens = ast.tokens;
+    const seen = new Set();
+
+    (function walk(node: any, where: string) {
+      if (typeof node !== "object" || node === null || seen.has(node)) return;
+      seen.add(node);
+      if (Array.isArray(node)) {
+        node.forEach((item, i) => walk(item, `${where}[${i}]`));
+        return;
+      }
+
+      const loc = node.loc;
+      if (loc && loc.start && typeof loc.start.token === "number") {
+        const contained = [];
+        for (let i = 0; i < tokens.length; ++i) {
+          if (
+            util.comparePos(loc.start, tokens[i].loc.start) <= 0 &&
+            util.comparePos(tokens[i].loc.end, loc.end) <= 0
+          ) {
+            contained.push(i);
+          }
+        }
+        const claimed = [];
+        for (let i = loc.start.token; i < loc.end.token; ++i) claimed.push(i);
+        assert.deepEqual(
+          claimed,
+          contained,
+          `${node.type} at ${where} claims tokens ` +
+            `[${loc.start.token},${loc.end.token}) but contains [${contained}]`,
+        );
+      }
+
+      Object.keys(node).forEach(function (key) {
+        if (key !== "loc" && key !== "tokens" && key !== "original") {
+          walk(node[key], `${where}.${key}`);
+        }
+      });
+    })(ast, "");
+  }
+
+  it("cover exactly the tokens inside each node", function () {
+    checkTokenRanges(
+      fs.readFileSync(path.join(__dirname, "data", "backbone.js"), "utf8"),
+    );
+  });
+
+  it("include a node's final token", function () {
+    // A node whose last token ends exactly where the node ends used to be
+    // dropped from its own range, so a trailing comment ended up claiming no
+    // tokens at all (#1399).
+    checkTokenRanges("var x = 1; // c\n");
+    checkTokenRanges("if (x) {\n  y(); // c\n}\n");
+    checkTokenRanges("`before${x}middle${y}after`;\n");
+  });
+});
