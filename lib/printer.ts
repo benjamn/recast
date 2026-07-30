@@ -527,13 +527,18 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return printExportDeclaration(path, options, print);
 
     case "ExportAllDeclaration":
-      parts.push("export *");
+      parts.push(n.exportKind === "type" ? "export type *" : "export *");
 
       if (n.exported) {
         parts.push(" as ", path.call(print, "exported"));
       }
 
-      parts.push(" from ", path.call(print, "source"), ";");
+      parts.push(
+        " from ",
+        path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+        ";",
+      );
 
       return concat(parts);
 
@@ -695,19 +700,18 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "OptionalCallExpression":
       parts.push(path.call(print, "callee"));
 
+      // Optional calls place the chain operator before type arguments:
+      // fn?.<T>(), not fn<T>?.().
+      if (types.getFieldValue(n, "optional")) {
+        parts.push("?.");
+      }
+
       if (n.typeParameters) {
         parts.push(path.call(print, "typeParameters"));
       }
 
       if (n.typeArguments) {
         parts.push(path.call(print, "typeArguments"));
-      }
-
-      // Like n.optional, but defaults to true for OptionalCallExpression
-      // nodes that are missing an n.optional property (unusual),
-      // according to the OptionalCallExpression definition in ast-types.
-      if (types.getFieldValue(n, "optional")) {
-        parts.push("?.");
       }
 
       parts.push(printArgumentsList(path, options, print));
@@ -802,6 +806,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       if (i !== 0 && oneLine && options.objectCurlySpacing) {
         parts[leftBraceIndex] = leftBrace + " ";
         parts[parts.length - 1] = " " + rightBrace;
+      }
+
+      if (n.optional) {
+        parts.push("?");
       }
 
       if (n.typeAnnotation) {
@@ -907,6 +915,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" ]");
       } else {
         parts.push("]");
+      }
+
+      if (n.optional) {
+        parts.push("?");
       }
 
       if (n.typeAnnotation) {
@@ -2182,7 +2194,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSConstructorType":
       return concat([
-        "new ",
+        n.abstract ? "abstract new " : "new ",
         path.call(print, "typeParameters"),
         "(",
         printFunctionParams(path, options, print),
@@ -2191,12 +2203,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSMappedType": {
+      const readonly =
+        n.readonly === true
+          ? "readonly "
+          : n.readonly
+          ? n.readonly + "readonly "
+          : "";
+      const optional =
+        n.optional === true ? "?" : n.optional ? n.optional + "?" : "";
       parts.push(
-        n.readonly ? "readonly " : "",
+        readonly,
         "[",
         path.call(print, "typeParameter"),
         "]",
-        n.optional ? "?" : "",
+        optional,
       );
 
       if (n.typeAnnotation) {
@@ -2272,11 +2292,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "TSTypeQuery":
-      return concat(["typeof ", path.call(print, "exprName")]);
+      return concat([
+        "typeof ",
+        path.call(print, "exprName"),
+        path.call(print, "typeParameters"),
+      ]);
 
     case "TSParameterProperty":
       if (n.accessibility) {
         parts.push(n.accessibility, " ");
+      }
+
+      if (n.override) {
+        parts.push("override ");
       }
 
       if (n.export) {
@@ -2429,6 +2457,18 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSTypeParameter": {
+      if (n.const) {
+        parts.push("const ");
+      }
+
+      if (n.in) {
+        parts.push("in ");
+      }
+
+      if (n.out) {
+        parts.push("out ");
+      }
+
       parts.push(path.call(print, "name"));
 
       // ambiguous because of TSMappedType
@@ -2508,7 +2548,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "TSImportType":
-      parts.push("import(", path.call(print, "argument"), ")");
+      parts.push("import(", path.call(print, "argument"));
+
+      if (n.options) {
+        parts.push(", ", path.call(print, "options"));
+      }
+
+      parts.push(")");
 
       if (n.qualifier) {
         parts.push(".", path.call(print, "qualifier"));
@@ -2526,7 +2572,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       parts.push(
-        "import ",
+        n.importKind === "type" ? "import type " : "import ",
         path.call(print, "id"),
         " = ",
         path.call(print, "moduleReference"),
@@ -2554,6 +2600,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
           if (isExternal) {
             parts.push("module ");
+          } else if (n.kind === "module") {
+            parts.push("module ");
+          } else if (n.kind === "namespace") {
+            parts.push("namespace ");
           } else if (n.loc && n.loc.lines && n.id.loc) {
             const prefix = n.loc.lines.sliceString(n.loc.start, n.id.loc.start);
 
@@ -2986,9 +3036,14 @@ function maybePrintImportAssertions(
   print: any,
 ): Lines {
   const n = path.getValue();
-  if (n.assertions && n.assertions.length > 0) {
-    const parts: (string | Lines)[] = [" assert {"];
+  if (n.assertions && (n.assertions.length > 0 || n.importAttributesKeyword)) {
+    const keyword =
+      n.importAttributesKeyword === "with" ? " with {" : " assert {";
+    const parts: (string | Lines)[] = [keyword];
     const printed = path.map(print, "assertions");
+    if (printed.length === 0) {
+      return concat([keyword, "}"]);
+    }
     const flat = fromString(", ").join(printed);
     if (flat.length > 1 || flat.getLineLength(1) > options.wrapColumn) {
       parts.push(
