@@ -366,6 +366,30 @@ FPp.needsParens = function (assumeExpressionContext) {
     return true;
   }
 
+  // The tag of a tagged template literal occupies a MemberExpression /
+  // CallExpression (LeftHandSideExpression) position, so a lower-precedence
+  // tag expression must be wrapped in parentheses, just like the callee of a
+  // call or new expression. Without this, e.g. the AST for `(a || b)`x``
+  // would print as `a || b`x``, which parses as `a || (b`x`)`.
+  if (
+    parent.type === "TaggedTemplateExpression" &&
+    name === "tag" &&
+    parent.tag === node
+  ) {
+    switch (node.type) {
+      case "UnaryExpression":
+      case "UpdateExpression":
+      case "BinaryExpression":
+      case "LogicalExpression":
+      case "ConditionalExpression":
+      case "AssignmentExpression":
+      case "AwaitExpression":
+      case "YieldExpression":
+      case "ArrowFunctionExpression":
+        return true;
+    }
+  }
+
   switch (node.type) {
     case "UnaryExpression":
     case "SpreadElement":

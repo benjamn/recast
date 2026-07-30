@@ -181,6 +181,18 @@ describe("parens", function () {
     check("function* test () { yield yield foo }");
   });
 
+  it("TaggedTemplateExpression", function () {
+    check("(a || b)`x`");
+    check("(a + b)`x`");
+    check("(a ? b : c)`x`");
+    check("(!a)`x`");
+    check("(a++)`x`");
+    check("(a = b)`x`");
+    check("(() => {})`x`");
+    check("async () => (await a)`x`");
+    check("function* test () { return (yield a)`x` }");
+  });
+
   it("ArrowFunctionExpression", () => {
     check("(() => {})()");
     check("test(() => {})");
