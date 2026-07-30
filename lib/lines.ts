@@ -191,15 +191,7 @@ export class Lines {
       }),
     );
 
-    if (this.mappings.length > 0) {
-      const newMappings = lines.mappings;
-      invariant(newMappings.length === 0);
-      this.mappings.forEach(function (this: Lines, mapping) {
-        newMappings.push(mapping.indent(this, lines));
-      }, this);
-    }
-
-    return lines;
+    return this.reindentMappings(lines);
   }
 
   indent(by: number) {
@@ -219,15 +211,7 @@ export class Lines {
       }),
     );
 
-    if (this.mappings.length > 0) {
-      const newMappings = lines.mappings;
-      invariant(newMappings.length === 0);
-      this.mappings.forEach(function (this: Lines, mapping) {
-        newMappings.push(mapping.indent(this, lines));
-      }, this);
-    }
-
-    return lines;
+    return this.reindentMappings(lines);
   }
 
   indentTail(by: number) {
@@ -252,14 +236,16 @@ export class Lines {
       }),
     );
 
-    if (this.mappings.length > 0) {
-      const newMappings = lines.mappings;
-      invariant(newMappings.length === 0);
-      this.mappings.forEach(function (this: Lines, mapping) {
-        newMappings.push(mapping.indent(this, lines));
-      }, this);
-    }
+    return this.reindentMappings(lines);
+  }
 
+  // Copies this.mappings into the given reindented Lines, shifting each
+  // mapping by however far its own lines actually moved.
+  private reindentMappings(lines: Lines) {
+    invariant(lines.mappings.length === 0);
+    this.mappings.forEach((mapping) =>
+      lines.mappings.push(mapping.reindent(this, lines)),
+    );
     return lines;
   }
 

@@ -107,7 +107,7 @@ export default class Mapping {
     });
   }
 
-  indent(oldLines: Lines, newLines: Lines) {
+  reindent(oldLines: Lines, newLines: Lines) {
     const start = this.targetLoc.start;
     const end = this.targetLoc.end;
 
