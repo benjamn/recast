@@ -205,4 +205,82 @@ describe("source maps", function () {
     assert.deepEqual(result.map.names, []);
     assert.strictEqual(result.map.mappings, "");
   });
+
+  it("should generate correct mappings for dedented code", function () {
+    // https://github.com/benjamn/recast/issues/1402
+    const code = [
+      "(",
+      "",
+      "  () => {",
+      'update({ message: "test" });',
+      "} )",
+    ].join(eol);
+
+    const ast = parse(code, {
+      sourceFileName: "source.js",
+    });
+
+    const scope = b.identifier("scope");
+
+    recast.visit(ast, {
+      visitIdentifier: function (path) {
+        if (path.value.name === "message") return false;
+        path.replace(b.memberExpression(scope, path.node, false));
+        return false;
+      },
+    });
+
+    const expressionPath = new NodePath(ast).get("program", "body", 0);
+    n.ExpressionStatement.assert(expressionPath.value);
+
+    // Reusing the parenthesized arrow function dedents it by two columns,
+    // but the lines of its body already begin at column zero, so they do not
+    // move along with it.
+    const printed = new Printer({
+      sourceMapName: "source.map.json",
+    }).print(
+      b.arrowFunctionExpression([scope], expressionPath.value.expression),
+    );
+
+    assert.strictEqual(
+      printed.code,
+      ["scope => () => {", 'scope.update({ message: "test" });', "}"].join(eol),
+    );
+
+    const smc = new sourceMap.SourceMapConsumer(printed.map);
+
+    function check(origLine: any, origCol: any, genLine: any, genCol: any) {
+      assert.deepEqual(
+        smc.originalPositionFor({
+          line: genLine,
+          column: genCol,
+        }),
+        {
+          source: "source.js",
+          line: origLine,
+          column: origCol,
+          name: null,
+        },
+      );
+
+      assert.deepEqual(
+        smc.generatedPositionFor({
+          source: "source.js",
+          line: origLine,
+          column: origCol,
+        }),
+        {
+          line: genLine,
+          column: genCol,
+          lastColumn: null,
+        },
+      );
+    }
+
+    check(3, 2, 1, 9); // (
+    check(3, 8, 1, 15); // {
+    check(4, 0, 2, 6); // update
+    check(4, 25, 2, 31); // }
+    check(5, 0, 3, 0); // }
+  });
 });
