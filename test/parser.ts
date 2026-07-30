@@ -242,8 +242,12 @@ function runTestsForParser(parserId: string) {
 // The token indices recast records on every node.loc are computed incrementally
 // (see TreeCopier.findTokenRange), so they are only as good as the invariant
 // they are supposed to maintain: loc.tokens.slice(loc.start.token,
-// loc.end.token) must be exactly the tokens the node's loc covers. Checking
-// that against a brute-force scan keeps the incremental version honest.
+// loc.end.token) must be exactly the tokens the node's loc covers.
+//
+// Tokens are sorted and don't overlap, so the tokens a loc covers are always a
+// contiguous run, and checking the two tokens just inside the claimed range and
+// the two just outside it is equivalent to comparing the whole run -- but costs
+// O(1) per node instead of a scan over every token.
 describe("token ranges", function () {
   function checkTokenRanges(source: string) {
     const ast = parse(source, { parser: require("../parsers/babel") });
@@ -260,23 +264,30 @@ describe("token ranges", function () {
 
       const loc = node.loc;
       if (loc && loc.start && typeof loc.start.token === "number") {
-        const contained = [];
-        for (let i = 0; i < tokens.length; ++i) {
-          if (
-            util.comparePos(loc.start, tokens[i].loc.start) <= 0 &&
-            util.comparePos(tokens[i].loc.end, loc.end) <= 0
-          ) {
-            contained.push(i);
-          }
+        const first = loc.start.token;
+        const bound = loc.end.token;
+
+        const covers = (i: number) =>
+          util.comparePos(loc.start, tokens[i].loc.start) <= 0 &&
+          util.comparePos(tokens[i].loc.end, loc.end) <= 0;
+
+        const check = (i: number, expected: boolean) =>
+          assert.strictEqual(
+            covers(i),
+            expected,
+            `${node.type} at ${where} claims tokens [${first},${bound}) but ` +
+              `${expected ? "excludes covered" : "includes uncovered"} ` +
+              `token ${i} (${JSON.stringify(tokens[i].value)})`,
+          );
+
+        // Nothing outside the range may be covered...
+        if (first > 0) check(first - 1, false);
+        if (bound < tokens.length) check(bound, false);
+        // ...and everything inside it must be.
+        if (bound > first) {
+          check(first, true);
+          check(bound - 1, true);
         }
-        const claimed = [];
-        for (let i = loc.start.token; i < loc.end.token; ++i) claimed.push(i);
-        assert.deepEqual(
-          claimed,
-          contained,
-          `${node.type} at ${where} claims tokens ` +
-            `[${loc.start.token},${loc.end.token}) but contains [${contained}]`,
-        );
       }
 
       Object.keys(node).forEach(function (key) {
