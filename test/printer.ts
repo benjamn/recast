@@ -2601,6 +2601,14 @@ describe("printer", function () {
     );
   });
 
+  it("can print TSUnionType as element of TSArrayType", function () {
+    const node = b.tsArrayType(
+      b.tsUnionType([b.tsNumberKeyword(), b.tsStringKeyword()]),
+    );
+
+    assert.strictEqual(recast.print(node).code, "(number | string)[]");
+  });
+
   describe("modern TypeScript syntax", function () {
     function check(
       expected: string,
