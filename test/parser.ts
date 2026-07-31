@@ -1,5 +1,8 @@
 import assert from "assert";
+import fs from "fs";
+import path from "path";
 import { parse } from "../lib/parser";
+import * as util from "../lib/util";
 import { getReprinter } from "../lib/patcher";
 import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
@@ -235,3 +238,78 @@ function runTestsForParser(parserId: string) {
     check(" /* com\n\nment */ ");
   });
 }
+
+// The token indices recast records on every node.loc are computed incrementally
+// (see TreeCopier.findTokenRange), so they are only as good as the invariant
+// they are supposed to maintain: loc.tokens.slice(loc.start.token,
+// loc.end.token) must be exactly the tokens the node's loc covers.
+//
+// Tokens are sorted and don't overlap, so the tokens a loc covers are always a
+// contiguous run, and checking the two tokens just inside the claimed range and
+// the two just outside it is equivalent to comparing the whole run -- but costs
+// O(1) per node instead of a scan over every token.
+describe("token ranges", function () {
+  function checkTokenRanges(source: string) {
+    const ast = parse(source, { parser: require("../parsers/babel") });
+    const tokens = ast.tokens;
+    const seen = new Set();
+
+    (function walk(node: any, where: string) {
+      if (typeof node !== "object" || node === null || seen.has(node)) return;
+      seen.add(node);
+      if (Array.isArray(node)) {
+        node.forEach((item, i) => walk(item, `${where}[${i}]`));
+        return;
+      }
+
+      const loc = node.loc;
+      if (loc && loc.start && typeof loc.start.token === "number") {
+        const first = loc.start.token;
+        const bound = loc.end.token;
+
+        const covers = (i: number) =>
+          util.comparePos(loc.start, tokens[i].loc.start) <= 0 &&
+          util.comparePos(tokens[i].loc.end, loc.end) <= 0;
+
+        const check = (i: number, expected: boolean) =>
+          assert.strictEqual(
+            covers(i),
+            expected,
+            `${node.type} at ${where} claims tokens [${first},${bound}) but ` +
+              `${expected ? "excludes covered" : "includes uncovered"} ` +
+              `token ${i} (${JSON.stringify(tokens[i].value)})`,
+          );
+
+        // Nothing outside the range may be covered...
+        if (first > 0) check(first - 1, false);
+        if (bound < tokens.length) check(bound, false);
+        // ...and everything inside it must be.
+        if (bound > first) {
+          check(first, true);
+          check(bound - 1, true);
+        }
+      }
+
+      Object.keys(node).forEach(function (key) {
+        if (key !== "loc" && key !== "tokens" && key !== "original") {
+          walk(node[key], `${where}.${key}`);
+        }
+      });
+    })(ast, "");
+  }
+
+  it("cover exactly the tokens inside each node", function () {
+    checkTokenRanges(
+      fs.readFileSync(path.join(__dirname, "data", "backbone.js"), "utf8"),
+    );
+  });
+
+  it("include a node's final token", function () {
+    // A node whose last token ends exactly where the node ends used to be
+    // dropped from its own range, so a trailing comment ended up claiming no
+    // tokens at all (#1399).
+    checkTokenRanges("var x = 1; // c\n");
+    checkTokenRanges("if (x) {\n  y(); // c\n}\n");
+    checkTokenRanges("`before${x}middle${y}after`;\n");
+  });
+});
