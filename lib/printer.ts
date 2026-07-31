@@ -2357,8 +2357,21 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSNonNullExpression":
       return concat([path.call(print, "expression"), "!"]);
 
-    case "TSTypeAnnotation":
-      return concat([": ", path.call(print, "typeAnnotation")]);
+    case "TSTypeAnnotation": {
+      // The parents that print a separator other than ": " all reach through
+      // this node to print n.typeAnnotation directly, so this case runs for
+      // them only when the annotation is reprinted on its own.
+      const parent = path.getParentNode(0);
+      const separator =
+        namedTypes.TSFunctionType.check(parent) ||
+        namedTypes.TSConstructorType.check(parent)
+          ? "=> "
+          : namedTypes.TSTypePredicate.check(parent)
+          ? ""
+          : ": ";
+
+      return concat([separator, path.call(print, "typeAnnotation")]);
+    }
 
     case "TSIndexSignature":
       return concat([

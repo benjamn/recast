@@ -2755,4 +2755,43 @@ describe("printer", function () {
     const pretty = printer.print(ast).code;
     assert.strictEqual(pretty, code);
   });
+
+  it("should reprint TSTypeAnnotation with the separator its parent expects", function () {
+    // TSFunctionType, TSConstructorType, and TSTypePredicate print the
+    // separator themselves and reach through the TSTypeAnnotation, so the
+    // TSTypeAnnotation case of the printer runs only when a change of node
+    // type forces the annotation to be reprinted on its own.
+    function replaceTypeReference(code: string) {
+      const ast = parse(code, { parser: tsParser });
+
+      recast.visit(ast, {
+        visitTSTypeReference(path) {
+          path.replace(b.tsNumberKeyword());
+          return false;
+        },
+      });
+
+      return new Printer().print(ast).code;
+    }
+
+    assert.strictEqual(
+      replaceTypeReference("type Foo = () => Bar;"),
+      "type Foo = () => number;",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("type Foo = new () => Bar;"),
+      "type Foo = new () => number;",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("function f(x: any): x is Bar {}"),
+      "function f(x: any): x is number {}",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("function f(): Bar {}"),
+      "function f(): number {}",
+    );
+  });
 });
