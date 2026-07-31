@@ -125,3 +125,48 @@ it("should not double parentheses in Babel", function () {
       "}",
   );
 });
+
+describe("should preserve blank lines between JSX children", function () {
+  // The blank line only survives if the whitespace-only JSXText between the
+  // two children is reprinted as "\n\n" rather than collapsed to "\n".
+  function build(gap: string, name: string) {
+    return (
+      "function App() {\n" +
+      "  return (\n" +
+      "    <div>\n" +
+      "      <" +
+      name +
+      " />\n" +
+      gap +
+      "      <Bar />\n" +
+      "    </div>\n" +
+      "  );\n" +
+      "}"
+    );
+  }
+
+  function check(between: string) {
+    const ast = parse(build(between, "Foo"), {
+      parser: require("../parsers/babel"),
+    });
+    ast.program.body[0].body.body[0].argument.children[1].openingElement.name.name =
+      "FooMutated";
+
+    assert.strictEqual(
+      new Printer({ tabWidth: 2 }).print(ast).code,
+      build("\n", "FooMutated"),
+    );
+  }
+
+  it("with a bare blank line", function () {
+    check("\n");
+  });
+
+  it("with a blank line containing whitespace", function () {
+    check("   \n");
+  });
+
+  it("with multiple blank lines collapsed to one", function () {
+    check("\n\n\n");
+  });
+});
