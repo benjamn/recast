@@ -1339,6 +1339,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
           ) {
             if (/\S/.test(child.value)) {
               return child.value.replace(/^\s+/g, "");
+            } else if (/\n\s*\n/.test(child.value)) {
+              return "\n\n";
             } else if (/\n/.test(child.value)) {
               return "\n";
             }
