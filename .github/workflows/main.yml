@@ -12,20 +12,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node_version:
-          ["12.x", "14.x", "16.x", "18.x", "19.x", "20.x", "22.x", "24.x"]
+        node_version: ["22.x", "24.x", "26.x"]
         os: [ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node_version }}
+          cache: npm
 
-      - name: npm install, build and test
+      - name: Install, check formatting, build and test
         run: |
-          npm install
-          npm run build --if-present
+          npm ci
           npm run format:check
           npm test

@@ -6,9 +6,7 @@ import path from "path";
 import * as recast from "../main";
 import * as parser from "../parsers/typescript";
 
-// Babel 7 no longer supports Node 4 or 5.
-const nodeMajorVersion = parseInt(process.versions.node, 10);
-(nodeMajorVersion >= 6 ? describe : xdescribe)("TypeScript", function () {
+describe("TypeScript", function () {
   it("basic printing", function () {
     function check(lines: any) {
       const code = lines.join(eol);
@@ -473,11 +471,6 @@ testReprinting(
 );
 
 function testReprinting(pattern: any, description: any) {
-  // Babel no longer supports Node 4 or 5.
-  if (nodeMajorVersion < 6) {
-    return;
-  }
-
   describe(description, function () {
     require("glob")
       .sync(pattern, {

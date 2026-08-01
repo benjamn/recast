@@ -4,13 +4,12 @@ import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
 import assert from "assert";
 import * as types from "ast-types";
-const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 for (const { title, parser } of [
   { title: "Babel JSX Compatibility", parser: require("../parsers/babel") },
   { title: "Esprima JSX Compatibility", parser: require("../parsers/esprima") },
 ]) {
-  (nodeMajorVersion >= 6 ? describe : xdescribe)(title, function () {
+  describe(title, function () {
     const printer = new Printer({ tabWidth: 2 });
     const parseOptions = { parser };
 
