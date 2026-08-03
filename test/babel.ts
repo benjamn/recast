@@ -3,14 +3,7 @@ import { EOL as eol } from "os";
 import * as recast from "../main";
 const n = recast.types.namedTypes;
 const b = recast.types.builders;
-const nodeMajorVersion = parseInt(process.versions.node, 10);
-
 describe("Babel", function () {
-  // Babel no longer supports Node 4 or 5.
-  if (nodeMajorVersion < 6) {
-    return;
-  }
-
   const babelTransform = require("@babel/core").transform;
   const babelPresetEnv = require("@babel/preset-env");
   const parseOptions = {
