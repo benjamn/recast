@@ -314,6 +314,13 @@ FPp.getNextToken = function (node) {
 FPp.needsParens = function (assumeExpressionContext) {
   const node = this.getNode();
 
+  // If the value of this path is some child of a Node and not a Node
+  // itself, then it doesn't need parentheses. Only Node objects (in fact,
+  // only Expression nodes) need parentheses.
+  if (this.getValue() !== node) {
+    return false;
+  }
+
   // This needs to come before `if (!parent) { return false }` because
   // an object destructuring assignment requires parens for
   // correctness even when it's the topmost expression.
@@ -327,13 +334,6 @@ FPp.needsParens = function (assumeExpressionContext) {
   const parent = this.getParentNode();
 
   const name = this.getName();
-
-  // If the value of this path is some child of a Node and not a Node
-  // itself, then it doesn't need parentheses. Only Node objects (in fact,
-  // only Expression nodes) need parentheses.
-  if (this.getValue() !== node) {
-    return false;
-  }
 
   // Only statements don't need parentheses.
   if (n.Statement.check(node)) {
