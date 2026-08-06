@@ -8,7 +8,6 @@ import * as recast from "../main";
 const n = types.namedTypes;
 const b = types.builders;
 const linesModule = require("../lib/lines");
-const nodeMajorVersion = parseInt(process.versions.node, 10);
 
 import * as tsParser from "../parsers/typescript";
 
@@ -964,28 +963,25 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
-  (nodeMajorVersion >= 6 ? it : xit)(
-    "shouldn't print a trailing comma for a RestElement",
-    function () {
-      const code = ["function foo(", "  a,", "  b,", "  ...rest", ") {}"].join(
-        eol,
-      );
+  it("shouldn't print a trailing comma for a RestElement", function () {
+    const code = ["function foo(", "  a,", "  b,", "  ...rest", ") {}"].join(
+      eol,
+    );
 
-      const ast = parse(code, {
-        // The flow parser and Babylon recognize `...rest` as a `RestElement`
-        parser: require("@babel/parser"),
-      });
+    const ast = parse(code, {
+      // The flow parser and Babylon recognize `...rest` as a `RestElement`
+      parser: require("@babel/parser"),
+    });
 
-      const printer = new Printer({
-        tabWidth: 2,
-        wrapColumn: 1,
-        trailingComma: true,
-      });
+    const printer = new Printer({
+      tabWidth: 2,
+      wrapColumn: 1,
+      trailingComma: true,
+    });
 
-      const pretty = printer.printGenerically(ast).code;
-      assert.strictEqual(pretty, code);
-    },
-  );
+    const pretty = printer.printGenerically(ast).code;
+    assert.strictEqual(pretty, code);
+  });
 
   it("shouldn't print a trailing comma for a RestElement in destructuring", function () {
     const code = [
@@ -1737,98 +1733,95 @@ describe("printer", function () {
     assert.strictEqual(pretty, code);
   });
 
-  (nodeMajorVersion >= 6 ? it : xit)(
-    "uses the `arrayBracketSpacing` and the `objectCurlySpacing` option",
-    function () {
-      const babelParser = require("@babel/parser");
-      const parseOptions = {
-        parser: {
-          parse: (source: string) =>
-            babelParser.parse(source, {
-              sourceType: "module",
-              plugins: ["flow"],
-            }),
-        },
-      };
+  it("uses the `arrayBracketSpacing` and the `objectCurlySpacing` option", function () {
+    const babelParser = require("@babel/parser");
+    const parseOptions = {
+      parser: {
+        parse: (source: string) =>
+          babelParser.parse(source, {
+            sourceType: "module",
+            plugins: ["flow"],
+          }),
+      },
+    };
 
-      const testCaseList = [
-        {
-          printerConfig: {
-            arrayBracketSpacing: false,
-            objectCurlySpacing: false,
-          },
-          code: [
-            'import {java, script} from "javascript";',
-            "",
-            "function foo(a) {",
-            "    type MyType = {message: string};",
-            "    return [1, 2, 3];",
-            "}",
-            "",
-            "export {foo};",
-          ].join(eol),
+    const testCaseList = [
+      {
+        printerConfig: {
+          arrayBracketSpacing: false,
+          objectCurlySpacing: false,
         },
-        {
-          printerConfig: {
-            arrayBracketSpacing: true,
-            objectCurlySpacing: false,
-          },
-          code: [
-            'import {java, script} from "javascript";',
-            "",
-            "function foo(a) {",
-            "    type MyType = {message: string};",
-            "    return [ 1, 2, 3 ];",
-            "}",
-            "",
-            "export {foo};",
-          ].join(eol),
+        code: [
+          'import {java, script} from "javascript";',
+          "",
+          "function foo(a) {",
+          "    type MyType = {message: string};",
+          "    return [1, 2, 3];",
+          "}",
+          "",
+          "export {foo};",
+        ].join(eol),
+      },
+      {
+        printerConfig: {
+          arrayBracketSpacing: true,
+          objectCurlySpacing: false,
         },
-        {
-          printerConfig: {
-            arrayBracketSpacing: false,
-            objectCurlySpacing: true,
-          },
-          code: [
-            'import { java, script } from "javascript";',
-            "",
-            "function foo(a) {",
-            "    type MyType = { message: string };",
-            "    return [1, 2, 3];",
-            "}",
-            "",
-            "export { foo };",
-          ].join(eol),
+        code: [
+          'import {java, script} from "javascript";',
+          "",
+          "function foo(a) {",
+          "    type MyType = {message: string};",
+          "    return [ 1, 2, 3 ];",
+          "}",
+          "",
+          "export {foo};",
+        ].join(eol),
+      },
+      {
+        printerConfig: {
+          arrayBracketSpacing: false,
+          objectCurlySpacing: true,
         },
-        {
-          printerConfig: {
-            arrayBracketSpacing: true,
-            objectCurlySpacing: true,
-          },
-          code: [
-            'import { java, script } from "javascript";',
-            "",
-            "function foo(a) {",
-            "    type MyType = { message: string };",
-            "    return [ 1, 2, 3 ];",
-            "}",
-            "",
-            "export { foo };",
-          ].join(eol),
+        code: [
+          'import { java, script } from "javascript";',
+          "",
+          "function foo(a) {",
+          "    type MyType = { message: string };",
+          "    return [1, 2, 3];",
+          "}",
+          "",
+          "export { foo };",
+        ].join(eol),
+      },
+      {
+        printerConfig: {
+          arrayBracketSpacing: true,
+          objectCurlySpacing: true,
         },
-      ];
+        code: [
+          'import { java, script } from "javascript";',
+          "",
+          "function foo(a) {",
+          "    type MyType = { message: string };",
+          "    return [ 1, 2, 3 ];",
+          "}",
+          "",
+          "export { foo };",
+        ].join(eol),
+      },
+    ];
 
-      testCaseList.forEach(function (testCase) {
-        const code = testCase.code;
-        const printer = new Printer(testCase.printerConfig);
+    testCaseList.forEach(function (testCase) {
+      const code = testCase.code;
+      const printer = new Printer(testCase.printerConfig);
 
-        const ast = parse(code, parseOptions);
-        const pretty = printer.printGenerically(ast).code;
+      const ast = parse(code, parseOptions);
+      const pretty = printer.printGenerically(ast).code;
 
-        assert.strictEqual(pretty, code);
-      });
-    },
-  );
+      assert.strictEqual(pretty, code);
+    });
+  });
 
   it("prints no extra semicolons in for-loop heads (#377)", function () {
     function check(head: any, parser: any) {
@@ -1865,11 +1858,9 @@ describe("printer", function () {
     checkWith(require("../parsers/esprima"));
     checkWith(require("../parsers/acorn"));
 
-    if (nodeMajorVersion >= 6) {
-      checkWith(require("../parsers/babel"));
-      checkWith(require("../parsers/typescript"));
-      checkWith(require("../parsers/flow"));
-    }
+    checkWith(require("../parsers/babel"));
+    checkWith(require("../parsers/typescript"));
+    checkWith(require("../parsers/flow"));
   });
 
   it("parenthesizes NumericLiteral MemberExpression objects", function () {
@@ -2601,6 +2592,14 @@ describe("printer", function () {
     );
   });
 
+  it("can print TSUnionType as element of TSArrayType", function () {
+    const node = b.tsArrayType(
+      b.tsUnionType([b.tsNumberKeyword(), b.tsStringKeyword()]),
+    );
+
+    assert.strictEqual(recast.print(node).code, "(number | string)[]");
+  });
+
   describe("modern TypeScript syntax", function () {
     function check(
       expected: string,
@@ -2717,5 +2716,73 @@ describe("printer", function () {
 
       assert.strictEqual(new Printer().printGenerically(ast).code, code);
     });
+  });
+
+  it("can print JSXElement syntax with newlines", function () {
+    const code = ["<div>", "  <span />", "", "  <span />", "</div>;"].join(eol);
+
+    const ast = b.program([
+      b.expressionStatement(
+        b.jsxElement(
+          b.jsxOpeningElement(b.jsxIdentifier("div")),
+          b.jsxClosingElement(b.jsxIdentifier("div")),
+          [
+            b.jsxText("\n  "),
+            b.jsxElement(
+              b.jsxOpeningElement(b.jsxIdentifier("span"), [], true),
+            ),
+            b.jsxText("\n\n  "),
+            b.jsxElement(
+              b.jsxOpeningElement(b.jsxIdentifier("span"), [], true),
+            ),
+            b.jsxText("\n"),
+          ],
+        ),
+      ),
+    ]);
+
+    const printer = new Printer({ tabWidth: 2 });
+
+    const pretty = printer.print(ast).code;
+    assert.strictEqual(pretty, code);
+  });
+
+  it("should reprint TSTypeAnnotation with the separator its parent expects", function () {
+    // TSFunctionType, TSConstructorType, and TSTypePredicate print the
+    // separator themselves and reach through the TSTypeAnnotation, so the
+    // TSTypeAnnotation case of the printer runs only when a change of node
+    // type forces the annotation to be reprinted on its own.
+    function replaceTypeReference(code: string) {
+      const ast = parse(code, { parser: tsParser });
+
+      recast.visit(ast, {
+        visitTSTypeReference(path) {
+          path.replace(b.tsNumberKeyword());
+          return false;
+        },
+      });
+
+      return new Printer().print(ast).code;
+    }
+
+    assert.strictEqual(
+      replaceTypeReference("type Foo = () => Bar;"),
+      "type Foo = () => number;",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("type Foo = new () => Bar;"),
+      "type Foo = new () => number;",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("function f(x: any): x is Bar {}"),
+      "function f(x: any): x is number {}",
+    );
+
+    assert.strictEqual(
+      replaceTypeReference("function f(): Bar {}"),
+      "function f(): number {}",
+    );
   });
 });
