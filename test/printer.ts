@@ -2605,7 +2605,6 @@ describe("printer", function () {
       "  a: #{",
       "    b: 1234",
       "  },",
-      "",
       "  c: #{",
       '    d: "dee"',
       "  }",
