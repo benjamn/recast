@@ -74,12 +74,11 @@ export interface Options extends DeprecatedOptions {
   sourceRoot?: string | null;
 
   /**
-   * If you provide a source map that was generated from a previous call
-   * to recast.print as options.inputSourceMap, the old source map will be
-   * composed with the new source map.
+   * If a source map is provided here, it will be composed with the new source
+   * map. The input source map can be provided as a JSON string or as an object.
    * @default null
    */
-  inputSourceMap?: string | null;
+  inputSourceMap?: string | any | null;
 
   /**
    * If you want esprima to generate .range information (recast only uses
