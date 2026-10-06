@@ -144,7 +144,7 @@ const Printer = function Printer(this: PrinterType, config?: any) {
       lines.toString(config),
       util.composeSourceMaps(
         config.inputSourceMap,
-        lines.getSourceMap(config.sourceMapName, config.sourceRoot),
+        lines.getSourceMap(config.sourceMapName, config.sourceRoot, config),
       ),
     );
   };
