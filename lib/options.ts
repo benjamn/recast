@@ -128,7 +128,13 @@ export interface Options extends DeprecatedOptions {
    *
    * @default false
    */
-  trailingComma?: boolean;
+  trailingComma?:
+    | boolean
+    | {
+        objects?: boolean;
+        arrays?: boolean;
+        parameters?: boolean;
+      };
 
   /**
    * Controls the printing of spaces inside array brackets.

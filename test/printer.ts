@@ -877,6 +877,13 @@ describe("printer", function () {
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+    assert.strictEqual(
+      recast.prettyPrint(ast, {
+        tabWidth: 2,
+        trailingComma: { objects: true },
+      }).code,
+      code,
+    );
   });
 
   it("prints trailing commas in function calls", function () {
@@ -905,6 +912,14 @@ describe("printer", function () {
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+    assert.strictEqual(
+      recast.prettyPrint(ast, {
+        tabWidth: 2,
+        wrapColumn: 1,
+        trailingComma: { parameters: true },
+      }).code,
+      code,
+    );
   });
 
   it("prints trailing commas in array expressions", function () {
@@ -933,6 +948,14 @@ describe("printer", function () {
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+    assert.strictEqual(
+      recast.prettyPrint(ast, {
+        tabWidth: 2,
+        wrapColumn: 1,
+        trailingComma: { arrays: true },
+      }).code,
+      code,
+    );
   });
 
   it("prints trailing commas in function definitions", function () {
