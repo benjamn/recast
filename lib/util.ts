@@ -2,6 +2,7 @@ import invariant from "tiny-invariant";
 import * as types from "ast-types";
 const n = types.namedTypes;
 import sourceMap from "source-map";
+import type { Options, TrailingCommaOptions } from "./options";
 const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -351,9 +352,12 @@ export function getParentExportDeclaration(path: any) {
   return null;
 }
 
-export function isTrailingCommaEnabled(options: any, context: any) {
+export function isTrailingCommaEnabled(
+  options: Pick<Options, "trailingComma">,
+  context: keyof TrailingCommaOptions,
+) {
   const trailingComma = options.trailingComma;
-  if (typeof trailingComma === "object") {
+  if (trailingComma && typeof trailingComma === "object") {
     return !!trailingComma[context];
   }
   return !!trailingComma;

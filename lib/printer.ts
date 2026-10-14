@@ -3,7 +3,7 @@ import * as types from "ast-types";
 import { printComments } from "./comments";
 import FastPath from "./fast-path";
 import { concat, fromString, Lines } from "./lines";
-import { normalize as normalizeOptions } from "./options";
+import { normalize as normalizeOptions, Options } from "./options";
 import { getReprinter } from "./patcher";
 import * as util from "./util";
 const namedTypes = types.namedTypes;
@@ -61,14 +61,14 @@ interface PrinterType {
 }
 
 interface PrinterConstructor {
-  new (config?: any): PrinterType;
+  new (config?: Options): PrinterType;
 }
 
-const Printer = function Printer(this: PrinterType, config?: any) {
+const Printer = function Printer(this: PrinterType, userConfig?: Options) {
   invariant(this instanceof Printer);
 
-  const explicitTabWidth = config && config.tabWidth;
-  config = normalizeOptions(config);
+  const explicitTabWidth = userConfig && userConfig.tabWidth;
+  const config = normalizeOptions(userConfig);
 
   // It's common for client code to pass the same options into both
   // recast.parse and recast.print, but the Printer doesn't need (and
