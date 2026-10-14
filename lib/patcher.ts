@@ -462,6 +462,19 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     return false;
   }
 
+  // An unaliased import can give imported/local the same source range.
+  // Patching those identifiers separately cannot add or remove `as` syntax.
+  if (
+    types.namedTypes.ImportSpecifier.check(newNode) &&
+    types.namedTypes.ImportSpecifier.check(oldNode) &&
+    newNode.imported &&
+    oldNode.imported &&
+    !!(newNode.local && newNode.imported.name !== newNode.local.name) !==
+      !!(oldNode.local && oldNode.imported.name !== oldNode.local.name)
+  ) {
+    return false;
+  }
+
   const keys = getUnionOfKeys(oldNode, newNode);
 
   if (oldNode.type === "File" || newNode.type === "File") {

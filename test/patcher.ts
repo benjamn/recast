@@ -200,3 +200,66 @@ describe("patcher", function () {
     );
   });
 });
+
+describe("import specifier aliases", function () {
+  it("reprints an alias added to an existing specifier", function () {
+    const ast = recast.parse('import { load, untouched } from "mod";');
+    ast.program.body[0].specifiers[0].local = b.identifier("messages");
+    assert.strictEqual(
+      recast.print(ast).code,
+      'import { load as messages, untouched } from "mod";',
+    );
+  });
+
+  it("keeps comments and neighboring import formatting", function () {
+    const ast = recast.parse(
+      'import { /* keep */ foo,   untouched } from "mod";',
+    );
+    const specifier = ast.program.body[0].specifiers[0];
+    specifier.imported = b.identifier("load");
+    specifier.local = b.identifier("messages");
+    assert.strictEqual(
+      recast.print(ast).code,
+      'import { /* keep */ load as messages,   untouched } from "mod";',
+    );
+  });
+
+  ["esprima", "babel", "typescript"].forEach(function (parserName) {
+    const parser = require("../parsers/" + parserName);
+
+    [false, true].forEach(function (originalAliased) {
+      [false, true].forEach(function (replacementAliased) {
+        it(
+          parserName +
+            " changes alias syntax from " +
+            originalAliased +
+            " to " +
+            replacementAliased,
+          function () {
+            const source =
+              "import { foo" +
+              (originalAliased ? " as bar" : "") +
+              ', untouched } from "mod";';
+            const ast = recast.parse(source, { parser });
+            const imported = "load";
+            const local = replacementAliased ? "$loadMessages$" : imported;
+            ast.program.body[0].specifiers[0] = b.importSpecifier(
+              b.identifier(imported),
+              b.identifier(local),
+            );
+            const expected =
+              "import { load" +
+              (replacementAliased ? " as " + local : "") +
+              ', untouched } from "mod";';
+            const output = recast.print(ast).code;
+            assert.strictEqual(output, expected);
+            types.astNodesAreEquivalent.assert(
+              recast.parse(output, { parser }).program,
+              ast.program,
+            );
+          },
+        );
+      });
+    });
+  });
+});
