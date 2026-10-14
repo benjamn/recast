@@ -984,6 +984,14 @@ describe("printer", function () {
 
     pretty = printer.printGenerically(ast).code;
     assert.strictEqual(pretty, code);
+    assert.strictEqual(
+      recast.prettyPrint(ast, {
+        tabWidth: 2,
+        wrapColumn: 1,
+        trailingComma: { parameters: true },
+      }).code,
+      code,
+    );
   });
 
   it("shouldn't print a trailing comma for a RestElement", function () {
