@@ -353,7 +353,7 @@ export function getParentExportDeclaration(path: any) {
 
 export function isTrailingCommaEnabled(options: any, context: any) {
   const trailingComma = options.trailingComma;
-  if (typeof trailingComma === "object") {
+  if (trailingComma && typeof trailingComma === "object") {
     return !!trailingComma[context];
   }
   return !!trailingComma;
