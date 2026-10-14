@@ -1,6 +1,22 @@
 import { getLineTerminator } from "./util";
 
 /**
+ * Per-context form of the `trailingComma` option. Contexts that are omitted
+ * are treated as disabled.
+ */
+export interface TrailingCommaOptions {
+  /** Object literals and object patterns. */
+  objects?: boolean;
+  /** Array expressions and array patterns. */
+  arrays?: boolean;
+  /**
+   * Function parameter lists and call arguments (including `new`
+   * expressions).
+   */
+  parameters?: boolean;
+}
+
+/**
  * All Recast API functions take second parameter with configuration options,
  * documented in options.js
  */
@@ -128,13 +144,7 @@ export interface Options extends DeprecatedOptions {
    *
    * @default false
    */
-  trailingComma?:
-    | boolean
-    | {
-        objects?: boolean;
-        arrays?: boolean;
-        parameters?: boolean;
-      };
+  trailingComma?: boolean | TrailingCommaOptions;
 
   /**
    * Controls the printing of spaces inside array brackets.
