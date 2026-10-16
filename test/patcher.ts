@@ -263,3 +263,90 @@ describe("import specifier aliases", function () {
     });
   });
 });
+
+describe("sibling children with shared source ranges", function () {
+  ["esprima", "acorn", "babel", "typescript", "flow"].forEach(function (
+    parserName,
+  ) {
+    const parser = require("../parsers/" + parserName);
+
+    function check(
+      source: string,
+      mutate: (body: any[]) => void,
+      expected: string,
+    ) {
+      const ast = recast.parse(source, { parser });
+      mutate(ast.program.body);
+      const output = recast.print(ast).code;
+      assert.strictEqual(output, expected);
+      types.astNodesAreEquivalent.assert(
+        recast.parse(output, { parser }).program,
+        ast.program,
+      );
+    }
+
+    it(
+      parserName + " renames an unaliased import's local in place",
+      function () {
+        check(
+          'import { foo, x } from "m";',
+          (body) => {
+            body[0].specifiers[0].local.name = "bar";
+          },
+          'import { foo as bar, x } from "m";',
+        );
+      },
+    );
+
+    it(parserName + " removes an import alias in place", function () {
+      check(
+        'import { foo as bar, x } from "m";',
+        (body) => {
+          body[0].specifiers[0].local.name = "foo";
+        },
+        'import { foo, x } from "m";',
+      );
+    });
+
+    it(parserName + " adds an export alias", function () {
+      check(
+        "var foo, x;\nexport { foo, x };",
+        (body) => {
+          body[1].specifiers[0].exported = b.identifier("bar");
+        },
+        "var foo, x;\nexport { foo as bar, x };",
+      );
+    });
+
+    it(parserName + " renames an unaliased export in place", function () {
+      check(
+        'export { foo, x } from "m";',
+        (body) => {
+          body[0].specifiers[0].exported.name = "bar";
+        },
+        'export { foo as bar, x } from "m";',
+      );
+    });
+
+    it(parserName + " removes an export alias", function () {
+      check(
+        "var foo, x;\nexport { foo as bar, x };",
+        (body) => {
+          body[1].specifiers[0].exported = b.identifier("foo");
+        },
+        "var foo, x;\nexport { foo, x };",
+      );
+    });
+
+    it(
+      parserName + " renames a shorthand property value in place",
+      function () {
+        // Leave .shorthand alone (as most codemods do), so the reparsed
+        // AST is not equivalent; only the printed code is checked.
+        const ast = recast.parse("({ foo, x });", { parser });
+        ast.program.body[0].expression.properties[0].value.name = "bar";
+        assert.strictEqual(recast.print(ast).code, "({ foo: bar, x });");
+      },
+    );
+  });
+});

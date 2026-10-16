@@ -470,7 +470,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
       if (n.imported) {
         parts.push(path.call(print, "imported"));
-        if (n.local && n.local.name !== n.imported.name) {
+        if (!util.isShorthandSpecifier(n)) {
           parts.push(" as ", path.call(print, "local"));
         }
       } else if (n.id) {
@@ -488,7 +488,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
       if (n.local) {
         parts.push(path.call(print, "local"));
-        if (n.exported && n.exported.name !== n.local.name) {
+        if (!util.isShorthandSpecifier(n)) {
           parts.push(" as ", path.call(print, "exported"));
         }
       } else if (n.id) {

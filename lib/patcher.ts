@@ -5,7 +5,12 @@ const Printable = types.namedTypes.Printable;
 const Expression = types.namedTypes.Expression;
 const ReturnStatement = types.namedTypes.ReturnStatement;
 const SourceLocation = types.namedTypes.SourceLocation;
-import { comparePos, copyPos, getUnionOfKeys } from "./util";
+import {
+  comparePos,
+  copyPos,
+  getUnionOfKeys,
+  isShorthandSpecifier,
+} from "./util";
 import FastPath from "./fast-path";
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
@@ -462,16 +467,9 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     return false;
   }
 
-  // An unaliased import can give imported/local the same source range.
-  // Patching those identifiers separately cannot add or remove `as` syntax.
-  if (
-    types.namedTypes.ImportSpecifier.check(newNode) &&
-    types.namedTypes.ImportSpecifier.check(oldNode) &&
-    newNode.imported &&
-    oldNode.imported &&
-    !!(newNode.local && newNode.imported.name !== newNode.local.name) !==
-      !!(oldNode.local && oldNode.imported.name !== oldNode.local.name)
-  ) {
+  // Adding or removing an import/export alias changes syntax that belongs
+  // to the specifier itself, not to either of its identifiers.
+  if (isShorthandSpecifier(newNode) !== isShorthandSpecifier(oldNode)) {
     return false;
   }
 
@@ -506,6 +504,18 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     }
   }
 
+  // Some parsers give sibling children the same source range (e.g. the
+  // imported/local identifiers of an unaliased import specifier). Patching
+  // such children separately cannot add or remove the syntax (like `as`)
+  // that the parent's printer derives from comparing them, so reprint the
+  // parent if anything changed within it.
+  if (
+    reprints.length > originalReprintCount &&
+    hasOverlappingChildren(oldNode)
+  ) {
+    return false;
+  }
+
   // Return statements might end up running into ASI issues due to
   // comments inserted deep within the tree, so reprint them if anything
   // changed within them.
@@ -517,4 +527,34 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   }
 
   return true;
+}
+
+// Returns true if any two direct child nodes of node have overlapping
+// source ranges.
+function hasOverlappingChildren(node: any) {
+  const locs: any[] = [];
+
+  Object.keys(node).forEach(function (key) {
+    if (key === "loc" || key.charAt(0) === "_") {
+      return;
+    }
+
+    const child = node[key];
+    if (isObject.check(child) && !isArray.check(child) && child.loc) {
+      locs.push(child.loc);
+    }
+  });
+
+  for (let i = 0; i < locs.length; ++i) {
+    for (let j = i + 1; j < locs.length; ++j) {
+      if (
+        comparePos(locs[i].start, locs[j].end) < 0 &&
+        comparePos(locs[j].start, locs[i].end) < 0
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
