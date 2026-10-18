@@ -7,6 +7,25 @@ const SourceMapConsumer = sourceMap.SourceMapConsumer;
 const SourceMapGenerator = sourceMap.SourceMapGenerator;
 const hasOwn = Object.prototype.hasOwnProperty;
 
+export function hasDanglingElse(
+  node: types.namedTypes.IfStatement["consequent"],
+): boolean {
+  switch (node.type) {
+    case "IfStatement":
+      return !node.alternate || hasDanglingElse(node.alternate);
+    case "ForStatement":
+    case "ForInStatement":
+    case "ForOfStatement":
+    case "ForAwaitStatement":
+    case "WhileStatement":
+    case "WithStatement":
+    case "LabeledStatement":
+      return hasDanglingElse(node.body);
+    default:
+      return false;
+  }
+}
+
 export function getLineTerminator() {
   return isBrowser() ? "\n" : require("os").EOL || "\n";
 }
