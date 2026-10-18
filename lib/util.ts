@@ -362,3 +362,22 @@ export function isTrailingCommaEnabled(
   }
   return !!trailingComma;
 }
+
+// Returns true if node is an import/export specifier whose alias the
+// printer omits because both of its names are the same.
+export function isShorthandSpecifier(node: any) {
+  switch (node.type) {
+    case "ImportSpecifier":
+      return (
+        !!node.imported &&
+        (!node.local || node.local.name === node.imported.name)
+      );
+    case "ExportSpecifier":
+      return (
+        !!node.local &&
+        (!node.exported || node.exported.name === node.local.name)
+      );
+    default:
+      return false;
+  }
+}

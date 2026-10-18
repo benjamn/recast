@@ -200,3 +200,153 @@ describe("patcher", function () {
     );
   });
 });
+
+describe("import specifier aliases", function () {
+  it("reprints an alias added to an existing specifier", function () {
+    const ast = recast.parse('import { load, untouched } from "mod";');
+    ast.program.body[0].specifiers[0].local = b.identifier("messages");
+    assert.strictEqual(
+      recast.print(ast).code,
+      'import { load as messages, untouched } from "mod";',
+    );
+  });
+
+  it("keeps comments and neighboring import formatting", function () {
+    const ast = recast.parse(
+      'import { /* keep */ foo,   untouched } from "mod";',
+    );
+    const specifier = ast.program.body[0].specifiers[0];
+    specifier.imported = b.identifier("load");
+    specifier.local = b.identifier("messages");
+    assert.strictEqual(
+      recast.print(ast).code,
+      'import { /* keep */ load as messages,   untouched } from "mod";',
+    );
+  });
+
+  ["esprima", "babel", "typescript"].forEach(function (parserName) {
+    const parser = require("../parsers/" + parserName);
+
+    [false, true].forEach(function (originalAliased) {
+      [false, true].forEach(function (replacementAliased) {
+        it(
+          parserName +
+            " changes alias syntax from " +
+            originalAliased +
+            " to " +
+            replacementAliased,
+          function () {
+            const source =
+              "import { foo" +
+              (originalAliased ? " as bar" : "") +
+              ', untouched } from "mod";';
+            const ast = recast.parse(source, { parser });
+            const imported = "load";
+            const local = replacementAliased ? "$loadMessages$" : imported;
+            ast.program.body[0].specifiers[0] = b.importSpecifier(
+              b.identifier(imported),
+              b.identifier(local),
+            );
+            const expected =
+              "import { load" +
+              (replacementAliased ? " as " + local : "") +
+              ', untouched } from "mod";';
+            const output = recast.print(ast).code;
+            assert.strictEqual(output, expected);
+            types.astNodesAreEquivalent.assert(
+              recast.parse(output, { parser }).program,
+              ast.program,
+            );
+          },
+        );
+      });
+    });
+  });
+});
+
+describe("sibling children with shared source ranges", function () {
+  ["esprima", "acorn", "babel", "typescript", "flow"].forEach(function (
+    parserName,
+  ) {
+    const parser = require("../parsers/" + parserName);
+
+    function check(
+      source: string,
+      mutate: (body: any[]) => void,
+      expected: string,
+    ) {
+      const ast = recast.parse(source, { parser });
+      mutate(ast.program.body);
+      const output = recast.print(ast).code;
+      assert.strictEqual(output, expected);
+      types.astNodesAreEquivalent.assert(
+        recast.parse(output, { parser }).program,
+        ast.program,
+      );
+    }
+
+    it(
+      parserName + " renames an unaliased import's local in place",
+      function () {
+        check(
+          'import { foo, x } from "m";',
+          (body) => {
+            body[0].specifiers[0].local.name = "bar";
+          },
+          'import { foo as bar, x } from "m";',
+        );
+      },
+    );
+
+    it(parserName + " removes an import alias in place", function () {
+      check(
+        'import { foo as bar, x } from "m";',
+        (body) => {
+          body[0].specifiers[0].local.name = "foo";
+        },
+        'import { foo, x } from "m";',
+      );
+    });
+
+    it(parserName + " adds an export alias", function () {
+      check(
+        "var foo, x;\nexport { foo, x };",
+        (body) => {
+          body[1].specifiers[0].exported = b.identifier("bar");
+        },
+        "var foo, x;\nexport { foo as bar, x };",
+      );
+    });
+
+    it(parserName + " renames an unaliased export in place", function () {
+      check(
+        'export { foo, x } from "m";',
+        (body) => {
+          body[0].specifiers[0].exported.name = "bar";
+        },
+        'export { foo as bar, x } from "m";',
+      );
+    });
+
+    it(parserName + " removes an export alias", function () {
+      check(
+        "var foo, x;\nexport { foo as bar, x };",
+        (body) => {
+          body[1].specifiers[0].exported = b.identifier("foo");
+        },
+        "var foo, x;\nexport { foo, x };",
+      );
+    });
+
+    it(
+      parserName + " renames a shorthand property value in place",
+      function () {
+        // Leave .shorthand alone (as most codemods do), so the reparsed
+        // AST is not equivalent; only the printed code is checked.
+        const ast = recast.parse("({ foo, x });", { parser });
+        ast.program.body[0].expression.properties[0].value.name = "bar";
+        assert.strictEqual(recast.print(ast).code, "({ foo: bar, x });");
+      },
+    );
+  });
+});

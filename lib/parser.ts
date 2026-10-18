@@ -165,7 +165,10 @@ TCp.copy = function (node) {
     return node;
   }
 
-  if (this.seen.has(node)) {
+  // Some parsers (e.g. esprima and acorn) reuse one Identifier object for
+  // both names of an unaliased specifier or shorthand property. Copy each
+  // occurrence separately so renaming one name doesn't rename the other.
+  if (this.seen.has(node) && node.type !== "Identifier") {
     return this.seen.get(node);
   }
 
