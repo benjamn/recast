@@ -1,4 +1,5 @@
 import assert from "assert";
+import { parseExpression as parseBabelExpression } from "@babel/parser";
 import * as esprima from "esprima";
 import { parse } from "../lib/parser";
 import { Printer } from "../lib/printer";
@@ -92,6 +93,46 @@ describe("parens", function () {
     check("(--a).b");
     check("(a++)()");
     check("new (a++)");
+  });
+
+  (["++", "--"] as const).forEach(function (operator) {
+    [false, true].forEach(function (prefix) {
+      const operand = prefix ? operator + "a" : "a" + operator;
+
+      it("should parenthesize " + operand + " in optional chains", function () {
+        const update = b.updateExpression(operator, b.identifier("a"), prefix);
+        const cases = [
+          {
+            node: b.optionalMemberExpression(
+              update,
+              b.identifier("b"),
+              false,
+              true,
+            ),
+            code: "(" + operand + ")?.b",
+          },
+          {
+            node: b.optionalMemberExpression(
+              update,
+              b.identifier("b"),
+              true,
+              true,
+            ),
+            code: "(" + operand + ")?.[b]",
+          },
+          {
+            node: b.optionalCallExpression(update, [], true),
+            code: "(" + operand + ")?.()",
+          },
+        ];
+
+        cases.forEach(function ({ node, code }) {
+          assert.strictEqual(printer.print(node).code, code);
+          assert.strictEqual(printer.printGenerically(node).code, code);
+          types.astNodesAreEquivalent.assert(node, parseBabelExpression(code));
+        });
+      });
+    });
   });
 
   it("Binary", function () {
