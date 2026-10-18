@@ -26,6 +26,61 @@ describe("type syntax", function () {
     assert.strictEqual(source, code);
   }
 
+  function addValueImport(specifier: string) {
+    const ast = parse(
+      "import { " + specifier + " } from 'types';",
+      flowParserParseOptions,
+    );
+    ast.program.body[0].specifiers.push(
+      types.builders.importSpecifier(types.builders.identifier("bar")),
+    );
+    return printer.print(ast).code;
+  }
+
+  ["type Foo", "typeof Foo", "Foo", "type", "type as foo"].forEach(function (
+    specifier,
+  ) {
+    it(`preserves ${specifier} when adding a value import`, () => {
+      assert.strictEqual(
+        addValueImport(specifier),
+        "import { " + specifier + ", bar } from 'types';",
+      );
+    });
+  });
+
+  ["/* keep */", "// keep\n"].forEach(function (comment) {
+    it(`preserves trailing ${comment.trim()} on type imports`, () => {
+      const code = addValueImport("type Foo " + comment);
+      assert.ok(code.includes(comment.trim()), code);
+      const specifiers = parse(code, flowParserParseOptions).program.body[0]
+        .specifiers;
+      assert.strictEqual(specifiers[0].importKind, "type");
+      assert.strictEqual(specifiers[1].imported.name, "bar");
+    });
+  });
+
+  it("preserves type imports with tab indentation", function () {
+    assert.strictEqual(
+      addValueImport("type\n\tFoo"),
+      "import {\ntype\n    Foo, bar\n} from 'types';",
+    );
+  });
+
+  it("preserves valid TypeScript import specifier locations", function () {
+    const ast = parse("import { type Foo } from 'types';", {
+      parser: require("../parsers/typescript"),
+    });
+    const declaration = ast.program.body[0];
+    assert.strictEqual(declaration.specifiers[0].loc.start.column, 9);
+    declaration.specifiers.push(
+      types.builders.importSpecifier(types.builders.identifier("bar")),
+    );
+    assert.strictEqual(
+      printer.print(ast).code,
+      "import { type Foo, bar } from 'types';",
+    );
+  });
+
   it("should parse and print type annotations correctly", function () {
     // Import type annotations
     check("import type foo from 'foo';");

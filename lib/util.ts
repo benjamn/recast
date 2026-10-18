@@ -218,6 +218,37 @@ export function fixFaultyLocations(node: any, lines: any) {
       // because their .id fields are ignored anyway.
       node.value.id = null;
     }
+  } else if (node.type === "ImportDeclaration" && loc) {
+    let start = loc.start;
+    node.specifiers.forEach(function (specifier: any) {
+      const specifierLoc = specifier.loc;
+      if (
+        (specifier.importKind === "type" ||
+          specifier.importKind === "typeof") &&
+        specifierLoc &&
+        specifier.imported &&
+        specifier.imported.loc &&
+        comparePos(specifierLoc.start, specifier.imported.loc.start) === 0
+      ) {
+        // Flow omits the import kind from specifier locations. Include it
+        // while preserving the location needed for comment attachment.
+        const match = lines
+          .sliceString(start, specifierLoc.start, {
+            reuseWhitespace: false,
+            useTabs: false,
+            lineTerminator: "\n",
+          })
+          .match(/\b(type|typeof)(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\n]*\n)*$/);
+        if (match && match[1] === specifier.importKind) {
+          const keywordStart = copyPos(specifierLoc.start);
+          for (let i = match[0].length; i > 0; --i) {
+            lines.prevPos(keywordStart);
+          }
+          specifierLoc.start = keywordStart;
+        }
+      }
+      start = specifierLoc ? specifierLoc.end : start;
+    });
   } else if (node.type === "ObjectTypeProperty") {
     const loc = node.loc;
     let end = loc && loc.end;
