@@ -230,8 +230,10 @@ export function fixFaultyLocations(node: any, lines: any) {
         specifier.imported.loc &&
         comparePos(specifierLoc.start, specifier.imported.loc.start) === 0
       ) {
-        // Flow omits the import kind from specifier locations. Include it
-        // while preserving the location needed for comment attachment.
+        // flow-parser starts ImportSpecifier locations at the imported
+        // name, leaving out a leading `type`/`typeof` (Babel and
+        // TypeScript include it). Move the start back to the keyword so
+        // reusing the original source keeps it.
         const match = lines
           .sliceString(start, specifierLoc.start, {
             reuseWhitespace: false,
