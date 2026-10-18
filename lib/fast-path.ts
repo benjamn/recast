@@ -427,9 +427,11 @@ FPp.needsParens = function (assumeExpressionContext) {
       // syntax (`a++.b`) or changes meaning (`++a.b` parses as `++(a.b)`).
       switch (parent.type) {
         case "MemberExpression":
+        case "OptionalMemberExpression":
           return name === "object" && parent.object === node;
 
         case "CallExpression":
+        case "OptionalCallExpression":
         case "NewExpression":
           return name === "callee" && parent.callee === node;
 
