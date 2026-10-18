@@ -32,6 +32,58 @@ describe("printer", function () {
     done();
   });
 
+  it("preserves the outer else with dangling if consequents", function () {
+    const dangling = b.ifStatement(
+      b.identifier("b"),
+      b.expressionStatement(b.identifier("x")),
+    );
+    const cases: [types.namedTypes.IfStatement["consequent"], boolean][] = [
+      [dangling, true],
+      [b.ifStatement(b.identifier("b"), b.emptyStatement(), dangling), true],
+      [b.whileStatement(b.identifier("b"), dangling), true],
+      [b.forStatement(null, b.identifier("b"), null, dangling), true],
+      [b.forInStatement(b.identifier("k"), b.identifier("o"), dangling), true],
+      [b.forOfStatement(b.identifier("k"), b.identifier("o"), dangling), true],
+      [b.labeledStatement(b.identifier("label"), dangling), true],
+      [b.withStatement(b.identifier("obj"), dangling), true],
+      [b.blockStatement([dangling]), true],
+      [b.ifStatement(b.identifier("b"), dangling, b.emptyStatement()), false],
+      [b.doWhileStatement(dangling, b.identifier("b")), false],
+    ];
+    cases.forEach(([consequent, block]) => {
+      const ast = b.ifStatement(
+        b.identifier("a"),
+        consequent,
+        b.expressionStatement(b.identifier("y")),
+      );
+      [recast.print, recast.prettyPrint].forEach((print) => {
+        const code = print(ast).code;
+        const outer = parse(code).program.body[0];
+        assert.ok(outer.alternate, code);
+        assert.strictEqual(
+          n.BlockStatement.check(outer.consequent),
+          block,
+          code,
+        );
+      });
+    });
+  });
+
+  ["", "while (c) "].forEach((loop) => {
+    it("preserves the outer else after editing " + (loop || "if"), function () {
+      const ast = parse(`if (a) ${loop}if (b) x; else z; else y;`);
+      const consequent = ast.program.body[0].consequent;
+      if (loop) {
+        consequent.body = parse("if (b) x;").program.body[0];
+      } else {
+        consequent.alternate = null;
+      }
+      const code = recast.print(ast).code;
+      const outer = parse(code).program.body[0];
+      assert.strictEqual(outer.alternate.expression.name, "y");
+    });
+  });
+
   const uselessSemicolons = [
     "function a() {",
     '  return "a";',

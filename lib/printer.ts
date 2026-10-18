@@ -1089,7 +1089,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "IfStatement": {
-      const con = adjustClause(path.call(print, "consequent"), options);
+      let con = path.call(print, "consequent");
+      if (n.alternate && util.hasDanglingElse(n.consequent)) {
+        con = concat(["{\n", con.indent(options.tabWidth), "\n}"]);
+      }
+      con = adjustClause(con, options);
       parts.push("if (", path.call(print, "test"), ")", con);
 
       if (n.alternate)

@@ -9,6 +9,7 @@ import {
   comparePos,
   copyPos,
   getUnionOfKeys,
+  hasDanglingElse,
   isShorthandSpecifier,
 } from "./util";
 import FastPath from "./fast-path";
@@ -457,6 +458,14 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
   if (newNode.original === null) {
     // If newNode.original node was set to null, reprint the node.
+    return false;
+  }
+
+  if (
+    types.namedTypes.IfStatement.check(newNode) &&
+    newNode.alternate &&
+    hasDanglingElse(newNode.consequent)
+  ) {
     return false;
   }
 
