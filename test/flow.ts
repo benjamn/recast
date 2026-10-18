@@ -26,6 +26,113 @@ describe("type syntax", function () {
     assert.strictEqual(source, code);
   }
 
+  function reprintImport(
+    specifiers: string,
+    edit: (specifiers: any[]) => void,
+    parseOptions: any = flowParserParseOptions,
+  ) {
+    const ast = parse(
+      "import { " + specifiers + " } from 'types';",
+      parseOptions,
+    );
+    edit(ast.program.body[0].specifiers);
+    return printer.print(ast).code;
+  }
+
+  function addBar(specifiers: any[]) {
+    specifiers.push(
+      types.builders.importSpecifier(types.builders.identifier("bar")),
+    );
+  }
+
+  function addValueImport(specifier: string) {
+    return reprintImport(specifier, addBar);
+  }
+
+  // Reparse printed code and describe each specifier as "kind name".
+  function describeSpecifiers(code: string) {
+    return parse(code, flowParserParseOptions).program.body[0].specifiers.map(
+      function (specifier: any) {
+        return (specifier.importKind || "value") + " " + specifier.local.name;
+      },
+    );
+  }
+
+  [
+    "type Foo",
+    "typeof Foo",
+    "Foo",
+    "type",
+    "type as foo",
+    "type A, typeof B",
+  ].forEach(function (specifier) {
+    it(`preserves ${specifier} when adding a value import`, () => {
+      assert.strictEqual(
+        addValueImport(specifier),
+        "import { " + specifier + ", bar } from 'types';",
+      );
+    });
+  });
+
+  [
+    ["trailing /* keep */", "type Foo /* keep */"],
+    ["trailing // keep", "type Foo // keep\n"],
+    ["/* keep */ after the keyword", "type /* keep */ Foo"],
+    ["// keep after the keyword", "type // keep\n Foo"],
+  ].forEach(function ([name, specifier]) {
+    it(`preserves ${name} on type imports`, () => {
+      const code = addValueImport(specifier);
+      assert.ok(code.includes("keep"), code);
+      assert.deepStrictEqual(describeSpecifiers(code), [
+        "type Foo",
+        "value bar",
+      ]);
+    });
+  });
+
+  it("preserves type imports with tab indentation", function () {
+    assert.deepStrictEqual(describeSpecifiers(addValueImport("type\n\tFoo")), [
+      "type Foo",
+      "value bar",
+    ]);
+  });
+
+  it("keeps import kinds with their specifiers when reordering", function () {
+    const code = reprintImport("type Foo, bar", function (specifiers) {
+      specifiers.reverse();
+    });
+    assert.strictEqual(code, "import { bar, type Foo } from 'types';");
+  });
+
+  it("drops the import kind when changed to a value import", function () {
+    const code = reprintImport("type Foo, bar", function (specifiers) {
+      specifiers[0].importKind = "value";
+    });
+    assert.strictEqual(code, "import { Foo, bar } from 'types';");
+  });
+
+  it("keeps the import kind when removing an earlier specifier", function () {
+    const code = reprintImport("type Foo, type Bar", function (specifiers) {
+      specifiers.shift();
+    });
+    assert.strictEqual(code, "import { type Bar } from 'types';");
+  });
+
+  [
+    ["TypeScript", "../parsers/typescript"],
+    ["Babel Flow", "../parsers/flow"],
+  ].forEach(function ([name, parserPath]) {
+    it(`preserves valid ${name} import specifier locations`, function () {
+      const parseOptions = { parser: require(parserPath) };
+      const ast = parse("import { type Foo } from 'types';", parseOptions);
+      assert.strictEqual(ast.program.body[0].specifiers[0].loc.start.column, 9);
+      assert.strictEqual(
+        reprintImport("type Foo", addBar, parseOptions),
+        "import { type Foo, bar } from 'types';",
+      );
+    });
+  });
+
   it("should parse and print type annotations correctly", function () {
     // Import type annotations
     check("import type foo from 'foo';");
