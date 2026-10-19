@@ -7,6 +7,7 @@ import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
 import assert from "assert";
 import { EOL as eol } from "os";
+import { SourceMapConsumer } from "source-map";
 
 const annotated = [
   "function dup(/* string */ s,",
@@ -597,10 +598,120 @@ function runTestsForParser(parserId: any) {
       ["[/* neither leading nor trailing */] // trailing"].join(eol),
     );
 
-    // Unfortuantely altering the elements of the array leads to
-    // reprinting which blows away the dangling comment.
+    // Reprinting changed elements also preserves the array's own comment.
     array.elements.push(b.literal(1));
-    assert.strictEqual(recast.print(ast).code, "[1] // trailing");
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        "[",
+        "  /* neither leading nor trailing */",
+        "  1",
+        "] // trailing",
+      ].join(eol),
+    );
+  });
+
+  const danglingContainers = [
+    {
+      name: "array",
+      source: (comment: string) => `const value = [${comment}];`,
+      container: (ast: any) => ast.program.body[0].declarations[0].init,
+      append: (node: any) => node.elements.push(b.literal(1)),
+      delimiters: ["[", "]"],
+    },
+    {
+      name: "array pattern",
+      source: (comment: string) => `const [${comment}] = source;`,
+      container: (ast: any) => ast.program.body[0].declarations[0].id,
+      append: (node: any) => node.elements.push(b.identifier("value")),
+      delimiters: ["[", "]"],
+    },
+    {
+      name: "object",
+      source: (comment: string) => `const value = {${comment}};`,
+      container: (ast: any) => ast.program.body[0].declarations[0].init,
+      append: (node: any) =>
+        node.properties.push(
+          b.property("init", b.identifier("value"), b.literal(1)),
+        ),
+      delimiters: ["{", "}"],
+    },
+    {
+      name: "object pattern",
+      source: (comment: string) => `const {${comment}} = source;`,
+      container: (ast: any) => ast.program.body[0].declarations[0].id,
+      append: (node: any) =>
+        node.properties.push(
+          b.property("init", b.identifier("value"), b.identifier("value")),
+        ),
+      delimiters: ["{", "}"],
+    },
+    {
+      name: "block",
+      source: (comment: string) => `function value() {${comment}}`,
+      container: (ast: any) => ast.program.body[0].body,
+      append: (node: any) => node.body.push(b.returnStatement(b.literal(1))),
+      delimiters: ["{", "}"],
+    },
+    {
+      name: "program",
+      source: (comment: string) => comment,
+      container: (ast: any) => ast.program,
+      append: (node: any) =>
+        node.body.push(
+          b.expressionStatement(b.callExpression(b.identifier("done"), [])),
+        ),
+      delimiters: null,
+    },
+  ];
+
+  danglingContainers.forEach(function (fixture) {
+    ["/* first */", "// first\n", "/* first */\n// second\n"].forEach(function (
+      comment,
+    ) {
+      pit(
+        "preserves dangling " +
+          fixture.name +
+          " comments: " +
+          JSON.stringify(comment),
+        function () {
+          const code = fixture.source(comment);
+          const ast = recast.parse(code, { parser });
+          const expected = comment.includes("second")
+            ? ["first", "second"]
+            : ["first"];
+
+          function check(printed: string) {
+            const reparsed = recast.parse(printed, { parser });
+            const values: string[] = [];
+            recast.visit(reparsed, {
+              visitComment(path) {
+                values.push(path.value.value.trim());
+                return false;
+              },
+            });
+            assert.deepStrictEqual(values, expected);
+            if (fixture.delimiters) {
+              const start = printed.indexOf(fixture.delimiters[0]);
+              const end = printed.lastIndexOf(fixture.delimiters[1]);
+              expected.forEach(function (value) {
+                const position = printed.indexOf(value);
+                assert(
+                  position > start && position < end,
+                  "comment stays inside",
+                );
+              });
+            }
+          }
+
+          assert.strictEqual(recast.print(ast).code, code);
+          check(recast.prettyPrint(ast, { tabWidth: 2 }).code);
+          fixture.append(fixture.container(ast));
+          check(recast.print(ast).code);
+          check(recast.prettyPrint(ast, { tabWidth: 2 }).code);
+        },
+      );
+    });
   });
 
   pit("should attach to program.body[0] instead of program", function () {
@@ -823,6 +934,49 @@ function runTestsForParser(parserId: any) {
       ["// comment", ";(function() {})();"].join(eol),
     );
   });
+
+  pit(
+    "does not duplicate outer comments when preserving an inner comment",
+    function () {
+      const code = "// before\nconst value = [/* inside */]; // after";
+      const ast = recast.parse(code, { parser });
+      ast.program.body[0].declarations[0].init.elements.push(b.literal(1));
+      [recast.print(ast).code, recast.prettyPrint(ast).code].forEach(function (
+        printed,
+      ) {
+        recast.parse(printed, { parser });
+        ["before", "inside", "after"].forEach(function (comment) {
+          assert.strictEqual(printed.split(comment).length - 1, 1);
+        });
+      });
+    },
+  );
+
+  pit(
+    "preserves source mappings for a dangling comment in a changed array",
+    function () {
+      const code = "const value = [/* original */];";
+      const ast = recast.parse(code, { parser, sourceFileName: "input.js" });
+      ast.program.body[0].declarations[0].init.elements.push(b.literal(1));
+      const printed = recast.print(ast, { sourceMapName: "output.js.map" });
+      const before = printed.code
+        .slice(0, printed.code.indexOf("original"))
+        .split(/\r\n|\r|\n/);
+      const consumer = new SourceMapConsumer(printed.map);
+      assert.deepStrictEqual(
+        consumer.originalPositionFor({
+          line: before.length,
+          column: before[before.length - 1].length,
+        }),
+        {
+          source: "input.js",
+          line: 1,
+          column: code.indexOf("original"),
+          name: null,
+        },
+      );
+    },
+  );
 
   pit(
     "should preserve comments attached to CallExpression argument",

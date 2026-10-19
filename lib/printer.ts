@@ -245,7 +245,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "File":
       return path.call(print, "program");
 
-    case "Program":
+    case "Program": {
       // Babel 6
       if (n.directives) {
         path.each(function (childPath: any) {
@@ -257,6 +257,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(path.call(print, "interpreter"));
       }
 
+      const dangling = printDanglingComments(path, print);
+      if (!dangling.isEmpty()) {
+        parts.push(dangling, "\n");
+      }
+
       parts.push(
         path.call(
           (bodyPath: any) => printStatementSequence(bodyPath, options, print),
@@ -265,6 +270,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       );
 
       return concat(parts);
+    }
 
     case "Noop": // Babel extension.
     case "EmptyStatement":
@@ -634,12 +640,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     // Intentionally fall through to BlockStatement below.
 
     case "BlockStatement": {
+      const dangling = printDanglingComments(path, print);
       const naked = path.call(
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
         "body",
       );
 
-      if (naked.isEmpty()) {
+      if (naked.isEmpty() && dangling.isEmpty()) {
         if (!n.directives || n.directives.length === 0) {
           parts.push("{}");
           return concat(parts);
@@ -647,6 +654,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       parts.push("{\n");
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth));
+        if (!naked.isEmpty() || (n.directives && n.directives.length > 0)) {
+          parts.push("\n");
+        }
+      }
       // Babel 6
       if (n.directives) {
         path.each(function (childPath: any) {
@@ -747,11 +760,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         len += n[field].length;
       });
 
-      const oneLine = (isTypeAnnotation && len === 1) || len === 0;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && ((isTypeAnnotation && len === 1) || len === 0);
       const leftBrace = n.exact ? "{|" : "{";
       const rightBrace = n.exact ? "|}" : "}";
       parts.push(oneLine ? leftBrace : leftBrace + "\n");
       const leftBraceIndex = parts.length - 1;
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth));
+        if (len > 0) parts.push("\n");
+      }
 
       let i = 0;
       fields.forEach(function (field) {
@@ -872,7 +891,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const len = elems.length;
       const printed = path.map(print, "elements");
       const joined = fromString(", ").join(printed);
-      const oneLine = joined.getLineLength(1) <= options.wrapColumn;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && joined.getLineLength(1) <= options.wrapColumn;
 
       if (oneLine) {
         if (options.arrayBracketSpacing) {
@@ -882,6 +903,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
       } else {
         parts.push("[\n");
+      }
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth), "\n");
       }
 
       path.each(function (elemPath: any) {
@@ -2731,6 +2755,25 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       debugger;
       throw new Error("unknown type: " + JSON.stringify(n.type));
   }
+}
+
+function printDanglingComments(path: any, print: any): Lines {
+  const comments = types.getFieldValue(path.getValue(), "comments");
+  if (!comments || comments.length === 0) {
+    return fromString("");
+  }
+
+  const parts: Lines[] = [];
+  path.each(function (commentPath: any) {
+    const comment = commentPath.getValue();
+    if (
+      !types.getFieldValue(comment, "leading") &&
+      !types.getFieldValue(comment, "trailing")
+    ) {
+      parts.push(print(commentPath));
+    }
+  }, "comments");
+  return fromString("\n").join(parts);
 }
 
 function printDecorators(path: any, printPath: any) {
