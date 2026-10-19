@@ -254,12 +254,14 @@ export class Lines {
       return this;
     }
 
-    return new Lines(
+    const lines = new Lines(
       this.infos.map((info, i) => ({
         ...info,
         locked: i > 0,
       })),
     );
+    lines.mappings = this.mappings.slice();
+    return lines;
   }
 
   getIndentAt(line: number) {

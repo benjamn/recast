@@ -1,4 +1,5 @@
 import assert from "assert";
+import * as esprima from "esprima";
 import * as types from "ast-types";
 import { EOL as eol } from "os";
 import { fromString } from "../lib/lines";
@@ -12,6 +13,135 @@ const linesModule = require("../lib/lines");
 import * as tsParser from "../parsers/typescript";
 
 describe("printer", function () {
+  describe("reused template literal indentation", function () {
+    function values(code: string) {
+      const result: { raw: string; cooked: string | null }[] = [];
+      types.visit(esprima.parseScript(code), {
+        visitTemplateElement(path) {
+          result.push(path.node.value);
+          return false;
+        },
+      });
+      return result;
+    }
+
+    const cases: [string, string][] = [
+      ["empty multiline", "{`\n`}"],
+      ["reused nested block", "{{`\n`}}"],
+      ["spaces", "{`first\n  second\nlast`}"],
+      ["tabs", "{`first\n\tsecond\nlast`}"],
+      ["tagged raw literal", "{String.raw`first\n  second\\n\nlast`}"],
+      ["interpolation", "{`first\n${ value }\nlast`}"],
+      ["multiline expression", "{`first\n${ (\n  value + other\n) }\nlast`}"],
+      ["nested template", "{`first\n${ `nested\n  raw` }\nlast`}"],
+      ["single line", "{`first`}"],
+    ];
+
+    cases.forEach(function ([name, code]) {
+      it(
+        "preserves " + name + " when its enclosing block is printed",
+        function () {
+          const ast = parse(code);
+          assert.strictEqual(recast.print(ast).code, code);
+          ast.program.body[0].body.push(
+            b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+          );
+          const output = recast.print(ast).code;
+          assert.deepStrictEqual(values(output), values(code));
+          const body = parse(output).program.body[0].body;
+          assert.strictEqual(
+            body[body.length - 1].expression.callee.name,
+            "added",
+          );
+        },
+      );
+    });
+
+    ["babel", "typescript", "flow"].forEach(function (parserName) {
+      it("preserves reused template locations with " + parserName, function () {
+        const options = { parser: require("../parsers/" + parserName) };
+        const code = "{{tag`first\n${value}\nlast`}}";
+        const ast = parse(code, options);
+        assert.strictEqual(recast.print(ast).code, code);
+        ast.program.body[0].body.push(
+          b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+        );
+        const output = recast.print(ast).code;
+        assert.deepStrictEqual(values(output), values(code));
+        const body = parse(output, options).program.body[0].body;
+        assert.strictEqual(
+          body[body.length - 1].expression.callee.name,
+          "added",
+        );
+      });
+    });
+
+    it("preserves null cooked values in tagged Babel templates", function () {
+      const options = { parser: require("../parsers/babel") };
+      const ast = parse("{tag`first\n\\unicode`}", options);
+      ast.program.body[0].body.push(
+        b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+      );
+      const output = recast.print(ast).code;
+      const template = parse(output, options).program.body[0].body[0].expression
+        .quasi;
+      assert.deepStrictEqual(template.quasis[0].value, {
+        raw: "first\n\\unicode",
+        cooked: null,
+      });
+    });
+
+    it("preserves the empty-statement insertion case", function () {
+      const ast = parse("{`\n`}");
+      ast.program.body[0].body.push(b.emptyStatement());
+      assert.deepStrictEqual(values(recast.print(ast).code), [
+        { raw: "\n", cooked: "\n" },
+      ]);
+    });
+
+    ["remove", "replace", "change-quasi", "change-expression"].forEach(
+      function (action) {
+        it("does not restore old source after " + action, function () {
+          const ast = parse("{`old\n${value}\ntail`}");
+          const body = ast.program.body[0].body;
+          if (action === "remove") body.pop();
+          if (action === "replace") {
+            body[0] = b.expressionStatement(b.literal("replacement"));
+          }
+          if (action === "change-quasi") {
+            body[0].expression.quasis[0].value = {
+              raw: "new\n",
+              cooked: "new\n",
+            };
+          }
+          if (action === "change-expression") {
+            body[0].expression.expressions[0] = b.identifier("changed");
+          }
+          body.push(
+            b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+          );
+          const output = recast.print(ast).code;
+          if (action === "remove" || action === "replace") {
+            assert.deepStrictEqual(values(output), []);
+          }
+          if (action === "change-quasi") {
+            assert.deepStrictEqual(values(output)[0], {
+              raw: "new\n",
+              cooked: "new\n",
+            });
+          }
+          if (action === "change-expression") {
+            assert.strictEqual(
+              parse(output).program.body[0].body[0].expression.expressions[0]
+                .name,
+              "changed",
+            );
+          }
+        });
+      },
+    );
+  });
+
   it("Printer", function testPrinter(done) {
     const code = testPrinter + "";
     const ast = parse(code);
