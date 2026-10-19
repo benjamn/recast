@@ -189,6 +189,14 @@ export function getReprinter(path: any) {
 
       SourceLocation.assert(oldNode.loc, true);
 
+      if (reprint.preserveIndent) {
+        patcher.replace(
+          oldNode.loc,
+          lines.slice(oldNode.loc.start, oldNode.loc.end).lockIndentTail(),
+        );
+        return;
+      }
+
       const needToPrintNewPathWithComments = !patcher.tryToReprintComments(
         newNode,
         oldNode,
@@ -407,6 +415,20 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
       const childReprints: any[] = [];
 
       if (findChildReprints(newPath, oldPath, childReprints)) {
+        if (
+          types.namedTypes.TemplateElement.check(newNode) &&
+          childReprints.length === 0 &&
+          oldNode.loc &&
+          oldNode.loc.start.line < oldNode.loc.end.line
+        ) {
+          // Reused source must preserve the same literal whitespace as the
+          // generic TemplateElement printer when an ancestor is reindented.
+          reprints.push({
+            oldPath: oldPath.copy(),
+            newPath: newPath.copy(),
+            preserveIndent: true,
+          });
+        }
         reprints.push.apply(reprints, childReprints);
       } else if (oldNode.loc) {
         // If we have no .loc information for oldNode, then we won't be
