@@ -5,6 +5,7 @@ import "./identity";
 import "./jsx";
 import "./lines";
 import "./mapping";
+import "./oxc-compat";
 import "./parens-extra";
 import "./parens";
 import "./parser";
