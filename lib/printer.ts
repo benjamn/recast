@@ -1350,9 +1350,15 @@ function genericPrintNoParens(path: any, options: any, print: any) {
               // a {expression} container); per JSX text semantics it collapses
               // to a single space and must be preserved, otherwise e.g.
               // `foo {bar} baz` would reprint as `foo {bar}baz`.
-              return child.value.replace(/^\s+/, (whitespace: string) =>
-                /\n/.test(whitespace) ? "" : " ",
-              );
+              //
+              // Likewise, the indentation after a trailing newline is source
+              // indentation of the closing tag, which indentTail would
+              // otherwise stack on top of the existing indentation.
+              return child.value
+                .replace(/^\s+/, (whitespace: string) =>
+                  /\n/.test(whitespace) ? "" : " ",
+                )
+                .replace(/\n[ \t]+$/, "\n");
             } else if (/\n\s*\n/.test(child.value)) {
               return "\n\n";
             } else if (/\n/.test(child.value)) {

@@ -259,3 +259,28 @@ describe("should preserve blank lines between JSX children", function () {
     check("\n\n\n");
   });
 });
+
+describe("should not add extra indentation before JSXClosingElement", function () {
+  it("when removing all attributes from an element with text children", function () {
+    const source =
+      "function App() {\n" +
+      "  return (\n" +
+      "    <Button slim tall noShadow link>\n" +
+      "      Button with deprecated props to remove\n" +
+      "    </Button>\n" +
+      "  );\n" +
+      "}";
+    const ast = parse(source, { parser: require("../parsers/babel") });
+    ast.program.body[0].body.body[0].argument.openingElement.attributes = [];
+
+    assert.strictEqual(
+      new Printer({ tabWidth: 2 }).print(ast).code,
+      "function App() {\n" +
+        "  return (\n" +
+        "    <Button>Button with deprecated props to remove\n" +
+        "    </Button>\n" +
+        "  );\n" +
+        "}",
+    );
+  });
+});
