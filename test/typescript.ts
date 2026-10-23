@@ -458,6 +458,23 @@ describe("TypeScript", function () {
 
     assert.strictEqual(recast.prettyPrint(ast).code, code);
   });
+
+  it("type parameters: leading line comment on first parameter", function () {
+    [
+      {
+        input: "const foo: Array<\n  // A comment here\n  number> = [];",
+        output: "const foo: Array<\n    // A comment here\n    number\n> = [];",
+      },
+      {
+        input: "function f<\n  // A comment here\n  T>() {}",
+        output: "function f<\n    // A comment here\n    T\n>() {}",
+      },
+    ].forEach(({ input, output }) => {
+      const code = recast.prettyPrint(recast.parse(input, { parser })).code;
+      assert.strictEqual(code, output.split("\n").join(eol));
+      recast.parse(code, { parser });
+    });
+  });
 });
 
 testReprinting(

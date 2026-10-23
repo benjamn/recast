@@ -2532,12 +2532,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     }
 
     case "TSTypeParameterDeclaration":
-    case "TSTypeParameterInstantiation":
-      return concat([
-        "<",
-        fromString(", ").join(path.map(print, "params")),
-        ">",
-      ]);
+    case "TSTypeParameterInstantiation": {
+      const params = fromString(", ").join(path.map(print, "params"));
+      const first = n.params[0];
+      // A line comment before the first parameter would swallow the rest of
+      // the line, so start the parameters on a fresh line.
+      if (
+        first &&
+        first.comments &&
+        first.comments.some((c: any) => c.leading && c.type === "CommentLine")
+      ) {
+        return concat(["<\n", params.indent(options.tabWidth), "\n>"]);
+      }
+      return concat(["<", params, ">"]);
+    }
 
     case "TSEnumDeclaration": {
       parts.push(
