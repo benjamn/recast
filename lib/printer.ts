@@ -1447,20 +1447,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "ClassBody":
-      if (n.body.length === 0) {
-        return fromString("{}");
-      }
-
-      return concat([
-        "{\n",
-        path
-          .call(
-            (bodyPath: any) => printStatementSequence(bodyPath, options, print),
-            "body",
-          )
-          .indent(options.tabWidth),
-        "\n}",
-      ]);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        path.call(
+          (bodyPath: any) => printStatementSequence(bodyPath, options, print),
+          "body",
+        ),
+        options,
+      );
 
     case "ClassPropertyDefinition":
       parts.push("static ", path.call(print, "definition"));
@@ -1715,7 +1709,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TupleTypeAnnotation": {
       const printed = path.map(print, "types");
       const joined = fromString(", ").join(printed);
-      const oneLine = joined.getLineLength(1) <= options.wrapColumn;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && joined.getLineLength(1) <= options.wrapColumn;
       if (oneLine) {
         if (options.arrayBracketSpacing) {
           parts.push("[ ");
@@ -1724,6 +1720,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
       } else {
         parts.push("[\n");
+      }
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth), "\n");
       }
 
       path.each(function (elemPath: any) {
@@ -2318,13 +2317,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }),
       );
 
-      if (members.isEmpty()) {
-        return fromString("{}", options);
-      }
-
-      parts.push("{\n", members.indent(options.tabWidth), "\n}");
-
-      return concat(parts);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        members,
+        options,
+      );
     }
 
     case "TSEnumMember":
@@ -2597,10 +2594,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
           return element;
         }),
       );
-      if (lines.isEmpty()) {
-        return fromString("{}", options);
-      }
-      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        lines,
+        options,
+      );
     }
 
     case "TSImportType":
@@ -2694,13 +2692,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         "body",
       );
 
-      if (naked.isEmpty()) {
-        parts.push("{}");
-      } else {
-        parts.push("{\n", naked.indent(options.tabWidth), "\n}");
-      }
-
-      return concat(parts);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        naked,
+        options,
+      );
     }
 
     case "TSInstantiationExpression": {
@@ -2755,6 +2751,22 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       debugger;
       throw new Error("unknown type: " + JSON.stringify(n.type));
   }
+}
+
+// Prints `{}` when there is nothing inside, and otherwise puts any
+// dangling comments before the body on their own indented lines.
+function printBracedBody(dangling: Lines, body: Lines, options: any): Lines {
+  if (dangling.isEmpty() && body.isEmpty()) {
+    return fromString("{}", options);
+  }
+
+  const inner = dangling.isEmpty()
+    ? body
+    : body.isEmpty()
+    ? dangling
+    : fromString("\n").join([dangling, body]);
+
+  return concat(["{\n", inner.indent(options.tabWidth), "\n}"]);
 }
 
 function printDanglingComments(path: any, print: any): Lines {

@@ -611,105 +611,159 @@ function runTestsForParser(parserId: any) {
     );
   });
 
-  const danglingContainers = [
+  // Each case checks that a dangling comment (one with no sibling to attach
+  // to) survives a no-op print, prettyPrint, and a reprint after the
+  // container gains a child.
+  const declaration = (ast: any) => ast.program.body[0].declarations[0];
+  const shorthand = (name: string) => {
+    const property = b.property("init", b.identifier(name), b.identifier(name));
+    property.shorthand = true;
+    return property;
+  };
+  const tsProperty = () =>
+    b.tsPropertySignature(
+      b.identifier("a"),
+      b.tsTypeAnnotation(b.tsNumberKeyword()),
+    );
+  const danglingCases: {
+    name: string;
+    parsers?: string[];
+    source: string[];
+    append: (ast: any) => void;
+    pretty: string[];
+    changed: string[];
+  }[] = [
     {
-      name: "array",
-      source: (comment: string) => `const value = [${comment}];`,
-      container: (ast: any) => ast.program.body[0].declarations[0].init,
-      append: (node: any) => node.elements.push(b.literal(1)),
-      delimiters: ["[", "]"],
+      name: "array, block comment",
+      source: ["const value = [/* c */];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  /* c */", "];"],
+      changed: ["const value = [", "  /* c */", "  1", "];"],
     },
     {
-      name: "array pattern",
-      source: (comment: string) => `const [${comment}] = source;`,
-      container: (ast: any) => ast.program.body[0].declarations[0].id,
-      append: (node: any) => node.elements.push(b.identifier("value")),
-      delimiters: ["[", "]"],
+      name: "array, line comment",
+      source: ["const value = [", "  // c", "];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  // c", "];"],
+      changed: ["const value = [", "  // c", "  1", "];"],
     },
     {
-      name: "object",
-      source: (comment: string) => `const value = {${comment}};`,
-      container: (ast: any) => ast.program.body[0].declarations[0].init,
-      append: (node: any) =>
-        node.properties.push(
-          b.property("init", b.identifier("value"), b.literal(1)),
-        ),
-      delimiters: ["{", "}"],
+      // Valid, but the hole's comma lands oddly; this records the current
+      // multi-line hole formatting rather than endorsing it.
+      name: "array with a hole",
+      source: ["const value = [, /* c */];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  /* c */", ",];"],
+      changed: ["const value = [", "  /* c */", ",  1", "];"],
     },
     {
       name: "object pattern",
-      source: (comment: string) => `const {${comment}} = source;`,
-      container: (ast: any) => ast.program.body[0].declarations[0].id,
-      append: (node: any) =>
-        node.properties.push(
-          b.property("init", b.identifier("value"), b.identifier("value")),
-        ),
-      delimiters: ["{", "}"],
+      source: ["const {/* c */} = source;"],
+      append: (ast) => declaration(ast).id.properties.push(shorthand("value")),
+      pretty: ["const {", "  /* c */", "} = source;"],
+      changed: ["const {", "  /* c */", "  value", "} = source;"],
     },
     {
-      name: "block",
-      source: (comment: string) => `function value() {${comment}}`,
-      container: (ast: any) => ast.program.body[0].body,
-      append: (node: any) => node.body.push(b.returnStatement(b.literal(1))),
-      delimiters: ["{", "}"],
+      name: "object, line comment",
+      source: ["const value = {", "  // c", "};"],
+      append: (ast) =>
+        declaration(ast).init.properties.push(
+          b.property("init", b.identifier("value"), b.literal(1)),
+        ),
+      pretty: ["const value = {", "  // c", "};"],
+      changed: ["const value = {", "  // c", "  value: 1", "};"],
+    },
+    {
+      name: "block, line comment",
+      source: ["function f() {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(b.returnStatement(b.literal(1))),
+      pretty: ["function f() {", "  // c", "}"],
+      changed: ["function f() {", "  // c", "  return 1;", "}"],
+    },
+    {
+      name: "class body",
+      source: ["class A {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(
+          b.methodDefinition(
+            "method",
+            b.identifier("m"),
+            b.functionExpression(null, [], b.blockStatement([])),
+          ),
+        ),
+      pretty: ["class A {", "  // c", "}"],
+      changed: ["class A {", "  // c", "  m() {}", "}"],
     },
     {
       name: "program",
-      source: (comment: string) => comment,
-      container: (ast: any) => ast.program,
-      append: (node: any) =>
-        node.body.push(
+      source: ["// c", ""],
+      append: (ast) =>
+        ast.program.body.push(
           b.expressionStatement(b.callExpression(b.identifier("done"), [])),
         ),
-      delimiters: null,
+      pretty: ["// c"],
+      changed: ["// c", "done();"],
+    },
+    {
+      name: "TS interface body",
+      parsers: ["typescript"],
+      source: ["interface I {", "  // c", "}"],
+      append: (ast) => ast.program.body[0].body.body.push(tsProperty()),
+      pretty: ["interface I {", "  // c", "}"],
+      changed: ["interface I {", "  // c", "  a: number;", "}"],
+    },
+    {
+      name: "TS type literal",
+      parsers: ["typescript"],
+      source: ["type T = {", "  // c", "};"],
+      append: (ast) =>
+        ast.program.body[0].typeAnnotation.members.push(tsProperty()),
+      pretty: ["type T = {", "  // c", "};"],
+      changed: ["type T = {", "  // c", "  a: number;", "};"],
+    },
+    {
+      name: "TS namespace body",
+      parsers: ["typescript"],
+      source: ["namespace N {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(
+          b.expressionStatement(b.identifier("x")),
+        ),
+      pretty: ["namespace N {", "  // c", "}"],
+      changed: ["namespace N {", "  // c", "  x;", "}"],
+    },
+    {
+      name: "Flow tuple type",
+      parsers: ["flow", "babel"],
+      source: ["type T = [/* c */];"],
+      append: (ast) =>
+        ast.program.body[0].right.types.push(b.numberTypeAnnotation()),
+      pretty: ["type T = [", "  /* c */", "];"],
+      changed: ["type T = [", "  /* c */", "  number", "];"],
     },
   ];
 
-  danglingContainers.forEach(function (fixture) {
-    ["/* first */", "// first\n", "/* first */\n// second\n"].forEach(function (
-      comment,
-    ) {
-      pit(
-        "preserves dangling " +
-          fixture.name +
-          " comments: " +
-          JSON.stringify(comment),
-        function () {
-          const code = fixture.source(comment);
-          const ast = recast.parse(code, { parser });
-          const expected = comment.includes("second")
-            ? ["first", "second"]
-            : ["first"];
+  danglingCases.forEach(function (testCase) {
+    if (testCase.parsers && !testCase.parsers.includes(parserName)) {
+      return;
+    }
 
-          function check(printed: string) {
-            const reparsed = recast.parse(printed, { parser });
-            const values: string[] = [];
-            recast.visit(reparsed, {
-              visitComment(path) {
-                values.push(path.value.value.trim());
-                return false;
-              },
-            });
-            assert.deepStrictEqual(values, expected);
-            if (fixture.delimiters) {
-              const start = printed.indexOf(fixture.delimiters[0]);
-              const end = printed.lastIndexOf(fixture.delimiters[1]);
-              expected.forEach(function (value) {
-                const position = printed.indexOf(value);
-                assert(
-                  position > start && position < end,
-                  "comment stays inside",
-                );
-              });
-            }
-          }
+    pit("preserves dangling comments: " + testCase.name, function () {
+      const source = testCase.source.join(eol);
+      const ast = recast.parse(source, { parser });
+      assert.strictEqual(recast.print(ast).code, source);
+      assert.strictEqual(
+        recast.prettyPrint(ast, { tabWidth: 2 }).code.trimEnd(),
+        testCase.pretty.join(eol),
+      );
 
-          assert.strictEqual(recast.print(ast).code, code);
-          check(recast.prettyPrint(ast, { tabWidth: 2 }).code);
-          fixture.append(fixture.container(ast));
-          check(recast.print(ast).code);
-          check(recast.prettyPrint(ast, { tabWidth: 2 }).code);
-        },
+      testCase.append(ast);
+      // trimEnd: esprima drops the program's trailing newline and the other
+      // parsers keep it.
+      assert.strictEqual(
+        recast.print(ast, { tabWidth: 2 }).code.trimEnd(),
+        testCase.changed.join(eol),
       );
     });
   });
