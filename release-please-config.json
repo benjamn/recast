@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "include-component-in-tag": false,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "bootstrap-sha": "93325e37b544b1f3d69d46efbee23cf2f5b86efd",
+  "packages": {
+    ".": {
+      "package-name": "recast",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
