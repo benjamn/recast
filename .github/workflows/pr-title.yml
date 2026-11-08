@@ -1,0 +1,31 @@
+name: PR title
+
+# With squash merges the PR title becomes the commit message on master,
+# which release-please reads to build the changelog and pick the version.
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            fix
+            feat
+            perf
+            refactor
+            test
+            docs
+            chore
+            ci
+            build
+            revert
+          requireScope: false
