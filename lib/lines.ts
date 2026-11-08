@@ -31,6 +31,7 @@ export class Lines {
   public readonly name: string | null;
   private mappings: Mapping[] = [];
   private cachedSourceMap: any = null;
+  private cachedSourceMapKey: string | null = null;
   private cachedTabWidth: number | void = void 0;
 
   constructor(private infos: LineInfo[], sourceFileName: string | null = null) {
@@ -52,7 +53,7 @@ export class Lines {
     return this.sliceString(this.firstPos(), this.lastPos(), options);
   }
 
-  getSourceMap(sourceMapName: string, sourceRoot?: string) {
+  getSourceMap(sourceMapName: string, sourceRoot?: string, options?: Options) {
     if (!sourceMapName) {
       // Although we could make up a name or generate an anonymous
       // source map, instead we assume that any consumer who does not
@@ -74,7 +75,14 @@ export class Lines {
       return json;
     }
 
-    if (targetLines.cachedSourceMap) {
+    // The printed indentation, and so the generated columns, depend on these
+    const { tabWidth, useTabs, reuseWhitespace } = normalizeOptions(options);
+    const cacheKey = [tabWidth, useTabs, reuseWhitespace].join();
+
+    if (
+      targetLines.cachedSourceMap &&
+      targetLines.cachedSourceMapKey === cacheKey
+    ) {
       // Since Lines objects are immutable, we can reuse any source map
       // that was previously generated. Nevertheless, we return a new
       // JSON object here to protect the cached source map from outside
@@ -84,6 +92,34 @@ export class Lines {
 
     const smg = new sourceMap.SourceMapGenerator(updateJSON());
     const sourcesToContents: any = {};
+
+    // Source map columns count characters, but positions count a leading tab
+    // as tabWidth columns. The cursors below skip whitespace, so they are
+    // never inside the indentation: the offset in the line is the length of
+    // the indentation, as written, plus the column past the indent.
+    function getSourceColumn(lines: Lines, pos: Pos) {
+      const info = lines.infos[pos.line - 1];
+      return info.sliceStart + pos.column - lines.getIndentAt(pos.line);
+    }
+
+    const targetIndentationLengths: number[] = [];
+
+    function getTargetColumn(pos: Pos) {
+      if (targetIndentationLengths[pos.line] === undefined) {
+        targetIndentationLengths[pos.line] = getIndentation(
+          targetLines.infos[pos.line - 1],
+          tabWidth,
+          useTabs,
+          reuseWhitespace,
+        ).length;
+      }
+
+      return (
+        targetIndentationLengths[pos.line] +
+        pos.column -
+        targetLines.getIndentAt(pos.line)
+      );
+    }
 
     targetLines.mappings.forEach(function (mapping: any) {
       const sourceCursor =
@@ -107,8 +143,14 @@ export class Lines {
         // Add mappings one character at a time for maximum resolution.
         smg.addMapping({
           source: sourceName,
-          original: { line: sourceCursor.line, column: sourceCursor.column },
-          generated: { line: targetCursor.line, column: targetCursor.column },
+          original: {
+            line: sourceCursor.line,
+            column: getSourceColumn(mapping.sourceLines, sourceCursor),
+          },
+          generated: {
+            line: targetCursor.line,
+            column: getTargetColumn(targetCursor),
+          },
         });
 
         if (!hasOwn.call(sourcesToContents, sourceName)) {
@@ -123,6 +165,7 @@ export class Lines {
     });
 
     targetLines.cachedSourceMap = smg;
+    targetLines.cachedSourceMapKey = cacheKey;
 
     return (smg as any).toJSON();
   }
@@ -563,40 +606,10 @@ export class Lines {
         info = sliceInfo(info, 0, end.column);
       }
 
-      const indent = Math.max(info.indent, 0);
-
-      const before = info.line.slice(0, info.sliceStart);
-      if (
-        reuseWhitespace &&
-        isOnlyWhitespace(before) &&
-        countSpaces(before, tabWidth) === indent
-      ) {
-        // Reuse original spaces if the indentation is correct.
-        parts.push(info.line.slice(0, info.sliceEnd));
-        continue;
-      }
-
-      let tabs = 0;
-      let spaces = indent;
-
-      if (useTabs) {
-        tabs = Math.floor(indent / tabWidth);
-        spaces -= tabs * tabWidth;
-      }
-
-      let result = "";
-
-      if (tabs > 0) {
-        result += new Array(tabs + 1).join("\t");
-      }
-
-      if (spaces > 0) {
-        result += new Array(spaces + 1).join(" ");
-      }
-
-      result += info.line.slice(info.sliceStart, info.sliceEnd);
-
-      parts.push(result);
+      parts.push(
+        getIndentation(info, tabWidth, useTabs, reuseWhitespace) +
+          info.line.slice(info.sliceStart, info.sliceEnd),
+      );
     }
 
     return parts.join(lineTerminator);
@@ -782,6 +795,46 @@ export function fromString(string: string | Lines, options?: Options): Lines {
 
 function isOnlyWhitespace(string: string) {
   return !/\S/.test(string);
+}
+
+// The whitespace that indents a line when it is printed.
+function getIndentation(
+  info: LineInfo,
+  tabWidth: number,
+  useTabs: boolean,
+  reuseWhitespace: boolean,
+) {
+  const indent = Math.max(info.indent, 0);
+
+  const before = info.line.slice(0, info.sliceStart);
+  if (
+    reuseWhitespace &&
+    isOnlyWhitespace(before) &&
+    countSpaces(before, tabWidth) === indent
+  ) {
+    // Reuse original spaces if the indentation is correct.
+    return before;
+  }
+
+  let tabs = 0;
+  let spaces = indent;
+
+  if (useTabs) {
+    tabs = Math.floor(indent / tabWidth);
+    spaces -= tabs * tabWidth;
+  }
+
+  let result = "";
+
+  if (tabs > 0) {
+    result += new Array(tabs + 1).join("\t");
+  }
+
+  if (spaces > 0) {
+    result += new Array(spaces + 1).join(" ");
+  }
+
+  return result;
 }
 
 function sliceInfo(info: LineInfo, startCol: number, endCol?: number) {

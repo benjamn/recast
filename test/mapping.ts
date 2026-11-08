@@ -283,4 +283,154 @@ describe("source maps", function () {
     check(4, 25, 2, 31); // }
     check(5, 0, 3, 0); // }
   });
+
+  describe("with tab indentation", function () {
+    // Recast counts a leading tab as tabWidth columns, but source map columns
+    // count characters.
+    function checkMappings(code: string, printed: any, positions: number[][]) {
+      const smc = new sourceMap.SourceMapConsumer(printed.map);
+      const sourceLines = code.split(eol);
+      const generatedLines = printed.code.split(eol);
+
+      // Every mapping must point at the same character on both sides
+      smc.eachMapping(function (mapping) {
+        const generated = generatedLines[mapping.generatedLine - 1].charAt(
+          mapping.generatedColumn,
+        );
+        const original = sourceLines[mapping.originalLine - 1].charAt(
+          mapping.originalColumn,
+        );
+
+        assert.notStrictEqual(generated.trim(), "");
+        assert.strictEqual(generated, original);
+      });
+
+      positions.forEach(function ([origLine, origCol, genLine, genCol]) {
+        assert.deepEqual(
+          smc.originalPositionFor({ line: genLine, column: genCol }),
+          { source: "source.js", line: origLine, column: origCol, name: null },
+        );
+
+        assert.deepEqual(
+          smc.generatedPositionFor({
+            source: "source.js",
+            line: origLine,
+            column: origCol,
+          }),
+          { line: genLine, column: genCol, lastColumn: null },
+        );
+      });
+    }
+
+    function reprintInsideIf(ast: any, options: any) {
+      const statements = ast.program.body;
+      ast.program.body = [
+        b.ifStatement(b.literal(true), b.blockStatement(statements)),
+      ];
+
+      return recast.print(ast, {
+        sourceMapName: "source.map.json",
+        ...options,
+      });
+    }
+
+    it("should map reused tab indentation", function () {
+      const code = ["function f() {", "\treturn 1;", "}"].join(eol);
+      const ast = parse(code, { sourceFileName: "source.js" });
+      ast.program.body.unshift(b.expressionStatement(b.literal("x")));
+
+      const printed = recast.print(ast, { sourceMapName: "source.map.json" });
+
+      assert.strictEqual(
+        printed.code,
+        ['"x";', "function f() {", "\treturn 1;", "}"].join(eol),
+      );
+      checkMappings(code, printed, [
+        [2, 1, 3, 1], // return
+        [2, 9, 3, 9], // ;
+      ]);
+    });
+
+    it("should map tab indentation reprinted with spaces", function () {
+      const code = ["function f() {", "\treturn 1;", "}"].join(eol);
+      const ast = parse(code, { sourceFileName: "source.js" });
+
+      const printed = reprintInsideIf(ast, {});
+
+      assert.strictEqual(
+        printed.code,
+        [
+          "if (true) {",
+          "    function f() {",
+          "        return 1;",
+          "    }",
+          "}",
+        ].join(eol),
+      );
+      checkMappings(code, printed, [
+        [2, 1, 3, 8], // return
+        [3, 0, 4, 4], // }
+      ]);
+    });
+
+    it("should map space indentation printed with tabs", function () {
+      const code = ["function f() {", "    return 1;", "}"].join(eol);
+      const ast = parse(code, { sourceFileName: "source.js" });
+      ast.program.body.unshift(b.expressionStatement(b.literal("x")));
+
+      const printed = recast.print(ast, {
+        sourceMapName: "source.map.json",
+        useTabs: true,
+        reuseWhitespace: false,
+      });
+
+      assert.strictEqual(
+        printed.code,
+        ['"x";', "", "function f() {", "\treturn 1;", "}"].join(eol),
+      );
+      checkMappings(code, printed, [
+        [2, 4, 4, 1], // return
+        [2, 12, 4, 9], // ;
+      ]);
+    });
+
+    it("should map mixed tabs and spaces", function () {
+      const code = [
+        "function f() {",
+        "\t  if (a) {",
+        "  \treturn 1;",
+        "\t  }",
+        "}",
+      ].join(eol);
+      const ast = parse(code, { sourceFileName: "source.js" });
+      ast.program.body.unshift(b.expressionStatement(b.literal("x")));
+
+      const printed = recast.print(ast, { sourceMapName: "source.map.json" });
+
+      assert.strictEqual(printed.code, ['"x";', code].join(eol));
+      checkMappings(code, printed, [
+        [2, 3, 3, 3], // if
+        [3, 3, 4, 3], // return
+        [4, 3, 5, 3], // }
+      ]);
+    });
+
+    it("should map tabs with a custom tabWidth", function () {
+      const code = ["function f() {", "\treturn 1;", "}"].join(eol);
+      const ast = parse(code, { sourceFileName: "source.js", tabWidth: 2 });
+
+      const printed = reprintInsideIf(ast, { tabWidth: 2, useTabs: true });
+
+      assert.strictEqual(
+        printed.code,
+        ["if (true) {", "  function f() {", "\t\treturn 1;", "\t}", "}"].join(
+          eol,
+        ),
+      );
+      checkMappings(code, printed, [
+        [2, 1, 3, 2], // return
+        [3, 0, 4, 1], // }
+      ]);
+    });
+  });
 });
