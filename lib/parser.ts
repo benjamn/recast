@@ -225,6 +225,12 @@ TCp.copy = function (node) {
     // loc.tokens.slice(loc.start.token, loc.end.token) returns a list of
     // all the tokens that make up this node.
     this.findTokenRange(loc);
+
+    // The text after a newline in a template literal is part of the string's
+    // value, so reusing this source must never reindent those lines.
+    if (type === "TemplateElement" && loc.end.line > loc.start.line) {
+      this.lines.lockIndentation(loc.start.line + 1, loc.end.line);
+    }
   }
 
   const oldStartTokenIndex = this.startTokenIndex;

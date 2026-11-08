@@ -264,6 +264,15 @@ export class Lines {
     return lines;
   }
 
+  // Marks lines firstLine..lastLine (1-based, inclusive) so that indent and
+  // indentTail never change them. Lines objects are otherwise immutable, so
+  // this is only for use by the parser, before the Lines are shared.
+  lockIndentation(firstLine: number, lastLine: number) {
+    for (let line = firstLine; line <= lastLine; ++line) {
+      this.infos[line - 1] = { ...this.infos[line - 1], locked: true };
+    }
+  }
+
   getIndentAt(line: number) {
     invariant(line >= 1, "no line " + line + " (line numbers start from 1)");
     return Math.max(this.infos[line - 1].indent, 0);
@@ -633,9 +642,11 @@ export class Lines {
           indent +
           info.line.slice(info.sliceStart, info.sliceEnd);
 
-        // If any part of a line is indentation-locked, the whole line
-        // will be indentation-locked.
-        prevInfo.locked = prevInfo.locked || info.locked;
+        // Whether a line can be reindented depends on what starts it, so a
+        // locked piece only locks the line when nothing comes before it.
+        prevInfo.locked =
+          prevInfo.locked ||
+          (info.locked && prevInfo.sliceStart === prevInfo.sliceEnd);
 
         prevInfo.sliceEnd = prevInfo.line.length;
 
@@ -787,6 +798,7 @@ function isOnlyWhitespace(string: string) {
 }
 
 function sliceInfo(info: LineInfo, startCol: number, endCol?: number) {
+  const keepsLineStart = startCol <= 0;
   let sliceStart = info.sliceStart;
   let sliceEnd = info.sliceEnd;
   let indent = Math.max(info.indent, 0);
@@ -833,8 +845,9 @@ function sliceInfo(info: LineInfo, startCol: number, endCol?: number) {
   return {
     line: info.line,
     indent: indent,
-    // A destructive slice always unlocks indentation.
-    locked: false,
+    // Cutting into the start of a line unlocks its indentation, but
+    // trimming only the end of the line does not.
+    locked: keepsLineStart && info.locked,
     sliceStart: sliceStart,
     sliceEnd: sliceEnd,
   };
