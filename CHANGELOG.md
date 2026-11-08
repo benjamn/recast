@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.24.2](https://github.com/benjamn/recast/compare/v0.24.1...v0.24.2) (2026-11-08)
+
+
+### Bug Fixes
+
+* don't parenthesize comments on object destructuring assignments ([#1129](https://github.com/benjamn/recast/issues/1129)) ([1947cde](https://github.com/benjamn/recast/commit/1947cde07915d7f699faa8a7508d02aaebadcdca))
+* don't stack source indentation before JSX closing tags ([#1454](https://github.com/benjamn/recast/issues/1454)) ([96747ce](https://github.com/benjamn/recast/commit/96747cec11fc44c02b149f1e7412ab2faecb8b6f))
+* print newline after "&lt;" when first type parameter has a leading line comment ([#1453](https://github.com/benjamn/recast/issues/1453)) ([9535a21](https://github.com/benjamn/recast/commit/9535a218e358cc6f2bcab605e39ffb59e38bfa3a))
+
 ## [0.24.1](https://github.com/benjamn/recast/compare/v0.24.0...v0.24.1) (2026-11-08)
 
 ### Bug Fixes
