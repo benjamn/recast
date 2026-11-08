@@ -245,7 +245,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "File":
       return path.call(print, "program");
 
-    case "Program":
+    case "Program": {
       // Babel 6
       if (n.directives) {
         path.each(function (childPath: any) {
@@ -257,6 +257,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(path.call(print, "interpreter"));
       }
 
+      const dangling = printDanglingComments(path, print);
+      if (!dangling.isEmpty()) {
+        parts.push(dangling, "\n");
+      }
+
       parts.push(
         path.call(
           (bodyPath: any) => printStatementSequence(bodyPath, options, print),
@@ -265,6 +270,7 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       );
 
       return concat(parts);
+    }
 
     case "Noop": // Babel extension.
     case "EmptyStatement":
@@ -634,12 +640,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     // Intentionally fall through to BlockStatement below.
 
     case "BlockStatement": {
+      const dangling = printDanglingComments(path, print);
       const naked = path.call(
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
         "body",
       );
 
-      if (naked.isEmpty()) {
+      if (naked.isEmpty() && dangling.isEmpty()) {
         if (!n.directives || n.directives.length === 0) {
           parts.push("{}");
           return concat(parts);
@@ -647,6 +654,12 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       parts.push("{\n");
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth));
+        if (!naked.isEmpty() || (n.directives && n.directives.length > 0)) {
+          parts.push("\n");
+        }
+      }
       // Babel 6
       if (n.directives) {
         path.each(function (childPath: any) {
@@ -747,11 +760,17 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         len += n[field].length;
       });
 
-      const oneLine = (isTypeAnnotation && len === 1) || len === 0;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && ((isTypeAnnotation && len === 1) || len === 0);
       const leftBrace = n.exact ? "{|" : "{";
       const rightBrace = n.exact ? "|}" : "}";
       parts.push(oneLine ? leftBrace : leftBrace + "\n");
       const leftBraceIndex = parts.length - 1;
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth));
+        if (len > 0) parts.push("\n");
+      }
 
       let i = 0;
       fields.forEach(function (field) {
@@ -872,7 +891,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       const len = elems.length;
       const printed = path.map(print, "elements");
       const joined = fromString(", ").join(printed);
-      const oneLine = joined.getLineLength(1) <= options.wrapColumn;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && joined.getLineLength(1) <= options.wrapColumn;
 
       if (oneLine) {
         if (options.arrayBracketSpacing) {
@@ -882,6 +903,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
       } else {
         parts.push("[\n");
+      }
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth), "\n");
       }
 
       path.each(function (elemPath: any) {
@@ -1429,20 +1453,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "ClassBody":
-      if (n.body.length === 0) {
-        return fromString("{}");
-      }
-
-      return concat([
-        "{\n",
-        path
-          .call(
-            (bodyPath: any) => printStatementSequence(bodyPath, options, print),
-            "body",
-          )
-          .indent(options.tabWidth),
-        "\n}",
-      ]);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        path.call(
+          (bodyPath: any) => printStatementSequence(bodyPath, options, print),
+          "body",
+        ),
+        options,
+      );
 
     case "ClassPropertyDefinition":
       parts.push("static ", path.call(print, "definition"));
@@ -1697,7 +1715,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TupleTypeAnnotation": {
       const printed = path.map(print, "types");
       const joined = fromString(", ").join(printed);
-      const oneLine = joined.getLineLength(1) <= options.wrapColumn;
+      const dangling = printDanglingComments(path, print);
+      const oneLine =
+        dangling.isEmpty() && joined.getLineLength(1) <= options.wrapColumn;
       if (oneLine) {
         if (options.arrayBracketSpacing) {
           parts.push("[ ");
@@ -1706,6 +1726,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }
       } else {
         parts.push("[\n");
+      }
+      if (!dangling.isEmpty()) {
+        parts.push(dangling.indent(options.tabWidth), "\n");
       }
 
       path.each(function (elemPath: any) {
@@ -2300,13 +2323,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         }),
       );
 
-      if (members.isEmpty()) {
-        return fromString("{}", options);
-      }
-
-      parts.push("{\n", members.indent(options.tabWidth), "\n}");
-
-      return concat(parts);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        members,
+        options,
+      );
     }
 
     case "TSEnumMember":
@@ -2587,10 +2608,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
           return element;
         }),
       );
-      if (lines.isEmpty()) {
-        return fromString("{}", options);
-      }
-      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        lines,
+        options,
+      );
     }
 
     case "TSImportType":
@@ -2684,13 +2706,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         "body",
       );
 
-      if (naked.isEmpty()) {
-        parts.push("{}");
-      } else {
-        parts.push("{\n", naked.indent(options.tabWidth), "\n}");
-      }
-
-      return concat(parts);
+      return printBracedBody(
+        printDanglingComments(path, print),
+        naked,
+        options,
+      );
     }
 
     case "TSInstantiationExpression": {
@@ -2745,6 +2765,41 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       debugger;
       throw new Error("unknown type: " + JSON.stringify(n.type));
   }
+}
+
+// Prints `{}` when there is nothing inside, and otherwise puts any
+// dangling comments before the body on their own indented lines.
+function printBracedBody(dangling: Lines, body: Lines, options: any): Lines {
+  if (dangling.isEmpty() && body.isEmpty()) {
+    return fromString("{}", options);
+  }
+
+  const inner = dangling.isEmpty()
+    ? body
+    : body.isEmpty()
+    ? dangling
+    : fromString("\n").join([dangling, body]);
+
+  return concat(["{\n", inner.indent(options.tabWidth), "\n}"]);
+}
+
+function printDanglingComments(path: any, print: any): Lines {
+  const comments = types.getFieldValue(path.getValue(), "comments");
+  if (!comments || comments.length === 0) {
+    return fromString("");
+  }
+
+  const parts: Lines[] = [];
+  path.each(function (commentPath: any) {
+    const comment = commentPath.getValue();
+    if (
+      !types.getFieldValue(comment, "leading") &&
+      !types.getFieldValue(comment, "trailing")
+    ) {
+      parts.push(print(commentPath));
+    }
+  }, "comments");
+  return fromString("\n").join(parts);
 }
 
 function printDecorators(path: any, printPath: any) {

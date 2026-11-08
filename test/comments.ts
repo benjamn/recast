@@ -7,6 +7,7 @@ import { Printer } from "../lib/printer";
 import { fromString } from "../lib/lines";
 import assert from "assert";
 import { EOL as eol } from "os";
+import { SourceMapConsumer } from "source-map";
 
 const annotated = [
   "function dup(/* string */ s,",
@@ -597,10 +598,174 @@ function runTestsForParser(parserId: any) {
       ["[/* neither leading nor trailing */] // trailing"].join(eol),
     );
 
-    // Unfortuantely altering the elements of the array leads to
-    // reprinting which blows away the dangling comment.
+    // Reprinting changed elements also preserves the array's own comment.
     array.elements.push(b.literal(1));
-    assert.strictEqual(recast.print(ast).code, "[1] // trailing");
+    assert.strictEqual(
+      recast.print(ast).code,
+      [
+        "[",
+        "  /* neither leading nor trailing */",
+        "  1",
+        "] // trailing",
+      ].join(eol),
+    );
+  });
+
+  // Each case checks that a dangling comment (one with no sibling to attach
+  // to) survives a no-op print, prettyPrint, and a reprint after the
+  // container gains a child.
+  const declaration = (ast: any) => ast.program.body[0].declarations[0];
+  const shorthand = (name: string) => {
+    const property = b.property("init", b.identifier(name), b.identifier(name));
+    property.shorthand = true;
+    return property;
+  };
+  const tsProperty = () =>
+    b.tsPropertySignature(
+      b.identifier("a"),
+      b.tsTypeAnnotation(b.tsNumberKeyword()),
+    );
+  const danglingCases: {
+    name: string;
+    parsers?: string[];
+    source: string[];
+    append: (ast: any) => void;
+    pretty: string[];
+    changed: string[];
+  }[] = [
+    {
+      name: "array, block comment",
+      source: ["const value = [/* c */];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  /* c */", "];"],
+      changed: ["const value = [", "  /* c */", "  1", "];"],
+    },
+    {
+      name: "array, line comment",
+      source: ["const value = [", "  // c", "];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  // c", "];"],
+      changed: ["const value = [", "  // c", "  1", "];"],
+    },
+    {
+      // Valid, but the hole's comma lands oddly; this records the current
+      // multi-line hole formatting rather than endorsing it.
+      name: "array with a hole",
+      source: ["const value = [, /* c */];"],
+      append: (ast) => declaration(ast).init.elements.push(b.literal(1)),
+      pretty: ["const value = [", "  /* c */", ",];"],
+      changed: ["const value = [", "  /* c */", ",  1", "];"],
+    },
+    {
+      name: "object pattern",
+      source: ["const {/* c */} = source;"],
+      append: (ast) => declaration(ast).id.properties.push(shorthand("value")),
+      pretty: ["const {", "  /* c */", "} = source;"],
+      changed: ["const {", "  /* c */", "  value", "} = source;"],
+    },
+    {
+      name: "object, line comment",
+      source: ["const value = {", "  // c", "};"],
+      append: (ast) =>
+        declaration(ast).init.properties.push(
+          b.property("init", b.identifier("value"), b.literal(1)),
+        ),
+      pretty: ["const value = {", "  // c", "};"],
+      changed: ["const value = {", "  // c", "  value: 1", "};"],
+    },
+    {
+      name: "block, line comment",
+      source: ["function f() {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(b.returnStatement(b.literal(1))),
+      pretty: ["function f() {", "  // c", "}"],
+      changed: ["function f() {", "  // c", "  return 1;", "}"],
+    },
+    {
+      name: "class body",
+      source: ["class A {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(
+          b.methodDefinition(
+            "method",
+            b.identifier("m"),
+            b.functionExpression(null, [], b.blockStatement([])),
+          ),
+        ),
+      pretty: ["class A {", "  // c", "}"],
+      changed: ["class A {", "  // c", "  m() {}", "}"],
+    },
+    {
+      name: "program",
+      source: ["// c", ""],
+      append: (ast) =>
+        ast.program.body.push(
+          b.expressionStatement(b.callExpression(b.identifier("done"), [])),
+        ),
+      pretty: ["// c"],
+      changed: ["// c", "done();"],
+    },
+    {
+      name: "TS interface body",
+      parsers: ["typescript"],
+      source: ["interface I {", "  // c", "}"],
+      append: (ast) => ast.program.body[0].body.body.push(tsProperty()),
+      pretty: ["interface I {", "  // c", "}"],
+      changed: ["interface I {", "  // c", "  a: number;", "}"],
+    },
+    {
+      name: "TS type literal",
+      parsers: ["typescript"],
+      source: ["type T = {", "  // c", "};"],
+      append: (ast) =>
+        ast.program.body[0].typeAnnotation.members.push(tsProperty()),
+      pretty: ["type T = {", "  // c", "};"],
+      changed: ["type T = {", "  // c", "  a: number;", "};"],
+    },
+    {
+      name: "TS namespace body",
+      parsers: ["typescript"],
+      source: ["namespace N {", "  // c", "}"],
+      append: (ast) =>
+        ast.program.body[0].body.body.push(
+          b.expressionStatement(b.identifier("x")),
+        ),
+      pretty: ["namespace N {", "  // c", "}"],
+      changed: ["namespace N {", "  // c", "  x;", "}"],
+    },
+    {
+      name: "Flow tuple type",
+      parsers: ["flow", "babel"],
+      source: ["type T = [/* c */];"],
+      append: (ast) =>
+        ast.program.body[0].right.types.push(b.numberTypeAnnotation()),
+      pretty: ["type T = [", "  /* c */", "];"],
+      changed: ["type T = [", "  /* c */", "  number", "];"],
+    },
+  ];
+
+  danglingCases.forEach(function (testCase) {
+    if (testCase.parsers && !testCase.parsers.includes(parserName)) {
+      return;
+    }
+
+    pit("preserves dangling comments: " + testCase.name, function () {
+      const source = testCase.source.join(eol);
+      const ast = recast.parse(source, { parser });
+      assert.strictEqual(recast.print(ast).code, source);
+      assert.strictEqual(
+        recast.prettyPrint(ast, { tabWidth: 2 }).code.trimEnd(),
+        testCase.pretty.join(eol),
+      );
+
+      testCase.append(ast);
+      // trimEnd: esprima drops the program's trailing newline and the other
+      // parsers keep it.
+      assert.strictEqual(
+        recast.print(ast, { tabWidth: 2 }).code.trimEnd(),
+        testCase.changed.join(eol),
+      );
+    });
   });
 
   pit("should attach to program.body[0] instead of program", function () {
@@ -823,6 +988,49 @@ function runTestsForParser(parserId: any) {
       ["// comment", ";(function() {})();"].join(eol),
     );
   });
+
+  pit(
+    "does not duplicate outer comments when preserving an inner comment",
+    function () {
+      const code = "// before\nconst value = [/* inside */]; // after";
+      const ast = recast.parse(code, { parser });
+      ast.program.body[0].declarations[0].init.elements.push(b.literal(1));
+      [recast.print(ast).code, recast.prettyPrint(ast).code].forEach(function (
+        printed,
+      ) {
+        recast.parse(printed, { parser });
+        ["before", "inside", "after"].forEach(function (comment) {
+          assert.strictEqual(printed.split(comment).length - 1, 1);
+        });
+      });
+    },
+  );
+
+  pit(
+    "preserves source mappings for a dangling comment in a changed array",
+    function () {
+      const code = "const value = [/* original */];";
+      const ast = recast.parse(code, { parser, sourceFileName: "input.js" });
+      ast.program.body[0].declarations[0].init.elements.push(b.literal(1));
+      const printed = recast.print(ast, { sourceMapName: "output.js.map" });
+      const before = printed.code
+        .slice(0, printed.code.indexOf("original"))
+        .split(/\r\n|\r|\n/);
+      const consumer = new SourceMapConsumer(printed.map);
+      assert.deepStrictEqual(
+        consumer.originalPositionFor({
+          line: before.length,
+          column: before[before.length - 1].length,
+        }),
+        {
+          source: "input.js",
+          line: 1,
+          column: code.indexOf("original"),
+          name: null,
+        },
+      );
+    },
+  );
 
   pit(
     "should preserve comments attached to CallExpression argument",
