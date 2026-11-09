@@ -11,6 +11,45 @@ import { Printer } from "../lib/printer";
 import { EOL as eol } from "os";
 
 describe("source maps", function () {
+  it("preserves mappings when locking indentation", function () {
+    const lines = fromString("alpha\n  beta", { sourceFileName: "source.js" });
+    const originalMap = lines.getSourceMap("source.map");
+    const locked = lines.lockIndentTail();
+    assert.deepStrictEqual(locked.getSourceMap("source.map"), originalMap);
+    assert.strictEqual(lines.indent(2).toString(), "  alpha\n    beta");
+    assert.strictEqual(locked.indent(2).toString(), "  alpha\n  beta");
+  });
+
+  it("maps reused multiline literals when an enclosing block changes", function () {
+    const code =
+      "function outer() {\n  {`alpha\n  beta\n  gamma`; following();}\n}";
+    const ast = parse(code, { sourceFileName: "original.js" });
+    ast.program.body[0].body.body[0].body.push(
+      b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+    );
+    const printed = recast.print(ast, { sourceMapName: "output.map" });
+    const consumer = new sourceMap.SourceMapConsumer(printed.map!);
+    const expected: [string, number, number][] = [
+      ["outer", 1, 9],
+      ["alpha", 2, 4],
+      ["beta", 3, 2],
+      ["gamma", 4, 2],
+      ["following", 4, 10],
+    ];
+    expected.forEach(function ([token, line, column]) {
+      const index = printed.code.indexOf(token);
+      assert.ok(index >= 0);
+      const prefix = printed.code.slice(0, index).split("\n");
+      assert.deepStrictEqual(
+        consumer.originalPositionFor({
+          line: prefix.length,
+          column: prefix[prefix.length - 1].length,
+        }),
+        { source: "original.js", line, column, name: null },
+      );
+    });
+  });
+
   it("should generate correct mappings", function () {
     const code = ["function foo(bar) {", "  return 1 + bar;", "}"].join(eol);
 

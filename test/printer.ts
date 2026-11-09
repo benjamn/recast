@@ -12,6 +12,167 @@ const linesModule = require("../lib/lines");
 import * as tsParser from "../parsers/typescript";
 
 describe("printer", function () {
+  // Text after a newline in a template literal is part of the string's
+  // value, so reusing the template's source somewhere with different
+  // indentation must leave those lines alone (issue #1419).
+  describe("reused template literal indentation", function () {
+    const wrapInIf = (ast: any) => {
+      ast.program.body = [
+        b.ifStatement(b.identifier("c"), b.blockStatement(ast.program.body)),
+      ];
+    };
+    const unwrapIf = (ast: any) => {
+      ast.program.body = ast.program.body[0].consequent.body;
+    };
+    const pushCall = (ast: any) => {
+      ast.program.body[0].body.push(
+        b.expressionStatement(b.callExpression(b.identifier("added"), [])),
+      );
+    };
+    const renameFirstDeclaration = (ast: any) => {
+      ast.program.body[0].declarations[0].id.name = "renamed";
+    };
+    const allParsers = ["acorn", "babel", "esprima", "flow", "typescript"];
+
+    const cases: {
+      name: string;
+      parsers?: string[];
+      source: string[];
+      mutate: (ast: any) => void;
+      expected: string[];
+    }[] = [
+      {
+        name: "an empty multiline template in a changed block",
+        source: ["{`", "`}"],
+        mutate: (ast) => ast.program.body[0].body.push(b.emptyStatement()),
+        expected: ["{", "  `", "`", "}"],
+      },
+      {
+        name: "a template moved into a new block",
+        parsers: allParsers,
+        source: ["foo(`a", "  b`);"],
+        mutate: wrapInIf,
+        expected: ["if (c) {", "  foo(`a", "  b`);", "}"],
+      },
+      {
+        name: "a template moved out of a block",
+        parsers: allParsers,
+        source: ["if (c) {", "  foo(`a", "  b`);", "}"],
+        mutate: unwrapIf,
+        expected: ["foo(`a", "  b`);"],
+      },
+      {
+        // The edited quasi originally ended at the start of a line, so the
+        // rest of that line is reused after the new text and must not stop
+        // the joined line from being reindented.
+        name: "an edited template moved into a new block",
+        parsers: allParsers,
+        source: ["x = `a", "${y}`;", "z;"],
+        mutate: (ast) => {
+          ast.program.body[0].expression.right.quasis[0].value = {
+            raw: "z ",
+            cooked: "z ",
+          };
+          wrapInIf(ast);
+        },
+        expected: ["if (c) {", "  x = `z ${y}`;", "  z;", "}"],
+      },
+      {
+        // The code inside ${} may be reindented; the string text may not.
+        name: "a multiline expression inside a template",
+        source: ["{`first", "${ (", "  value + other", ") }", "last`}"],
+        mutate: pushCall,
+        expected: [
+          "{",
+          "  `first",
+          "${ (",
+          "    value + other",
+          "  ) }",
+          "last`",
+          "  added();",
+          "}",
+        ],
+      },
+      {
+        name: "tagged and nested templates",
+        source: ["{String.raw`a", "  b${`nested", "  raw`}\\n`}"],
+        mutate: pushCall,
+        expected: [
+          "{",
+          "  String.raw`a",
+          "  b${`nested",
+          "  raw`}\\n`",
+          "  added();",
+          "}",
+        ],
+      },
+      {
+        // Unrelated edits must not make recast reprint return statements
+        // that contain multiline templates.
+        name: "a returned JSX element after an unrelated edit",
+        parsers: ["babel"],
+        source: [
+          "const q = 1;",
+          "function g() {",
+          "  return <div className={`a",
+          "    b`} />;",
+          "}",
+        ],
+        mutate: renameFirstDeclaration,
+        expected: [
+          "const renamed = 1;",
+          "function g() {",
+          "  return <div className={`a",
+          "    b`} />;",
+          "}",
+        ],
+      },
+      {
+        name: "a returned call with comments after an unrelated edit",
+        source: [
+          "const q = 1;",
+          "function f() {",
+          "  return /* why */ foo(  1,   `a",
+          "b`  ) // trailing",
+          "  ;",
+          "}",
+        ],
+        mutate: renameFirstDeclaration,
+        expected: [
+          "const renamed = 1;",
+          "function f() {",
+          "  return /* why */ foo(  1,   `a",
+          "b`  ) // trailing",
+          "  ;",
+          "}",
+        ],
+      },
+    ];
+
+    cases.forEach(function ({ name, parsers, source, mutate, expected }) {
+      (parsers || ["esprima"]).forEach(function (parserName) {
+        it("preserves " + name + " [" + parserName + "]", function () {
+          const options = { parser: require("../parsers/" + parserName) };
+          const code = source.join(eol);
+          const ast = parse(code, options);
+          assert.strictEqual(recast.print(ast).code, code);
+          mutate(ast);
+          assert.strictEqual(recast.print(ast).code, expected.join(eol));
+        });
+      });
+    });
+
+    it("preserves tabs inside a reindented template", function () {
+      const options = { tabWidth: 4, useTabs: true };
+      const ast = parse(["foo(`a", "\tb`);"].join(eol), options);
+      wrapInIf(ast);
+      const output = recast.print(ast, options).code;
+      // Check the text itself: recast.parse expands tabs before parsing, so
+      // reparsing the output can't tell a tab from spaces.
+      assert.ok(output.includes(["`a", "\tb`"].join(eol)), output);
+    });
+  });
+
   it("Printer", function testPrinter(done) {
     const code = testPrinter + "";
     const ast = parse(code);
