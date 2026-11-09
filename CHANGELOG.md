@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.24.3](https://github.com/benjamn/recast/compare/v0.24.2...v0.24.3) (2026-11-09)
+
+
+### Bug Fixes
+
+* preserve dangling comments when reprinting containers ([#1450](https://github.com/benjamn/recast/issues/1450)) ([f993267](https://github.com/benjamn/recast/commit/f99326787f7959c8ce497dca324fe8c0c2c0a054))
+* preserve multiline template values when reprinting changed blocks ([#1449](https://github.com/benjamn/recast/issues/1449)) ([813e822](https://github.com/benjamn/recast/commit/813e8221136a8b93ddbf364639288c7bc12bb70d))
+
 ## [0.24.2](https://github.com/benjamn/recast/compare/v0.24.1...v0.24.2) (2026-11-08)
 
 
