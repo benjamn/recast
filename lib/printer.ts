@@ -983,12 +983,23 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return fromString(nodeStr(n.value, options));
 
     case "BooleanLiteral": // Babel 6 Literal split
-    case "Literal":
-      return fromString(
-        getPossibleRaw(n) ||
-          (typeof n.value === "string" ? nodeStr(n.value, options) : n.value),
-        options,
-      );
+    case "Literal": {
+      const raw = getPossibleRaw(n);
+      if (raw) {
+        return fromString(raw, options);
+      }
+      if (typeof n.value === "string") {
+        return fromString(nodeStr(n.value, options), options);
+      }
+      if (typeof n.value === "bigint") {
+        const digits = types.getFieldValue(n, "bigint");
+        return fromString(
+          (typeof digits === "string" ? digits : String(n.value)) + "n",
+          options,
+        );
+      }
+      return fromString(n.value, options);
+    }
 
     case "Directive": // Babel 6
       return path.call(print, "value");
@@ -3342,8 +3353,21 @@ function getPossibleRaw(
 
   if (node.type === "Literal") {
     const raw = (node as typeof extra).raw;
-    if (typeof raw === "string" && value == raw) {
-      return raw;
+    if (typeof raw === "string") {
+      if (value == raw) {
+        return raw;
+      }
+      // ESTree BigInt literals store the source in `raw` (e.g. "0x1fn")
+      // and the numeric value in `value`, so `value == raw` is always false.
+      if (typeof value === "bigint" && raw.endsWith("n")) {
+        try {
+          if (BigInt(raw.slice(0, -1)) === value) {
+            return raw;
+          }
+        } catch (_err) {
+          // Ignore `raw` that is not a valid BigInt literal.
+        }
+      }
     }
   }
 }
