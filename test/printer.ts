@@ -2206,6 +2206,21 @@ describe("printer", function () {
     assert.strictEqual(recast.print(babelNode).code, "(1).foo");
   });
 
+  it("keeps the n suffix of ESTree BigInt Literal nodes", function () {
+    const babelParser = require("@babel/parser");
+    const ast = recast.parse("var a = 0n, b = 0x1fn;", {
+      parser: {
+        parse: (source: string) =>
+          babelParser.parse(source, { plugins: ["estree"], tokens: true }),
+      },
+    });
+
+    assert.strictEqual(recast.prettyPrint(ast).code, "var a = 0n, b = 0x1fn;");
+
+    const value = ast.program.body[0].declarations[1].init.value;
+    assert.strictEqual(recast.print(b.literal(value)).code, "31n");
+  });
+
   it("obeys 'optional' property of OptionalMemberExpression", function () {
     const node = b.optionalMemberExpression(
       b.identifier("foo"),
