@@ -986,7 +986,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "Literal":
       return fromString(
         getPossibleRaw(n) ||
-          (typeof n.value === "string" ? nodeStr(n.value, options) : n.value),
+          (typeof n.value === "string"
+            ? nodeStr(n.value, options)
+            : typeof n.value === "bigint"
+            ? n.value + "n"
+            : n.value),
         options,
       );
 
@@ -3342,8 +3346,11 @@ function getPossibleRaw(
 
   if (node.type === "Literal") {
     const raw = (node as typeof extra).raw;
-    if (typeof raw === "string" && value == raw) {
-      return raw;
+    if (typeof raw === "string") {
+      const rawValue = typeof value === "bigint" ? raw.slice(0, -1) : raw;
+      if (value == rawValue) {
+        return raw;
+      }
     }
   }
 }
