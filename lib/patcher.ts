@@ -484,21 +484,29 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
   const keys = getUnionOfKeys(oldNode, newNode);
 
-  if (oldNode.type === "File" || newNode.type === "File") {
-    // Don't bother traversing file.tokens, an often very large array
-    // returned by Babylon, and useless for our purposes.
-    delete keys.tokens;
-  }
-
-  // Don't bother traversing .loc objects looking for reprintable nodes.
-  delete keys.loc;
+  // Don't bother traversing file.tokens, an often very large array
+  // returned by Babylon, and useless for our purposes. Skipping keys here
+  // instead of deleting them keeps the keys object in fast mode.
+  const skipTokens = oldNode.type === "File" || newNode.type === "File";
 
   const originalReprintCount = reprints.length;
 
   for (let k in keys) {
-    if (k.charAt(0) === "_") {
+    if (
+      // Don't bother traversing .loc objects looking for reprintable nodes.
+      k === "loc" ||
+      (skipTokens && k === "tokens") ||
       // Ignore "private" AST properties added by e.g. Babel plugins and
       // parsers like Babylon.
+      k.charAt(0) === "_"
+    ) {
+      continue;
+    }
+
+    // An identical defined value (e.g. an unchanged primitive) can always
+    // be reused, so skip pushing it onto the paths.
+    const newValue = newNode[k];
+    if (newValue !== undefined && newValue === oldNode[k]) {
       continue;
     }
 
