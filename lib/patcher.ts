@@ -506,12 +506,21 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     // An identical defined value (e.g. an unchanged primitive) can always
     // be reused, so skip pushing it onto the paths.
     const newValue = newNode[k];
-    if (newValue !== undefined && newValue === oldNode[k]) {
+    const oldValue = oldNode[k];
+    if (newValue !== undefined && newValue === oldValue) {
       continue;
     }
 
-    newPath.stack.push(k, types.getFieldValue(newNode, k));
-    oldPath.stack.push(k, types.getFieldValue(oldNode, k));
+    // types.getFieldValue only differs from a plain property read when the
+    // value is undefined (it may then return the field's default).
+    newPath.stack.push(
+      k,
+      newValue !== undefined ? newValue : types.getFieldValue(newNode, k),
+    );
+    oldPath.stack.push(
+      k,
+      oldValue !== undefined ? oldValue : types.getFieldValue(oldNode, k),
+    );
     const canReprint = findAnyReprints(newPath, oldPath, reprints);
     newPath.stack.length -= 2;
     oldPath.stack.length -= 2;
