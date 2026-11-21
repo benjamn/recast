@@ -484,26 +484,43 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
   const keys = getUnionOfKeys(oldNode, newNode);
 
-  if (oldNode.type === "File" || newNode.type === "File") {
-    // Don't bother traversing file.tokens, an often very large array
-    // returned by Babylon, and useless for our purposes.
-    delete keys.tokens;
-  }
-
-  // Don't bother traversing .loc objects looking for reprintable nodes.
-  delete keys.loc;
+  // Don't bother traversing file.tokens, an often very large array
+  // returned by Babylon, and useless for our purposes. Skipping keys here
+  // instead of deleting them keeps the keys object in fast mode.
+  const skipTokens = oldNode.type === "File" || newNode.type === "File";
 
   const originalReprintCount = reprints.length;
 
   for (let k in keys) {
-    if (k.charAt(0) === "_") {
+    if (
+      // Don't bother traversing .loc objects looking for reprintable nodes.
+      k === "loc" ||
+      (skipTokens && k === "tokens") ||
       // Ignore "private" AST properties added by e.g. Babel plugins and
       // parsers like Babylon.
+      k.charAt(0) === "_"
+    ) {
       continue;
     }
 
-    newPath.stack.push(k, types.getFieldValue(newNode, k));
-    oldPath.stack.push(k, types.getFieldValue(oldNode, k));
+    // An identical defined value (e.g. an unchanged primitive) can always
+    // be reused, so skip pushing it onto the paths.
+    const newValue = newNode[k];
+    const oldValue = oldNode[k];
+    if (newValue !== undefined && newValue === oldValue) {
+      continue;
+    }
+
+    // types.getFieldValue only differs from a plain property read when the
+    // value is undefined (it may then return the field's default).
+    newPath.stack.push(
+      k,
+      newValue !== undefined ? newValue : types.getFieldValue(newNode, k),
+    );
+    oldPath.stack.push(
+      k,
+      oldValue !== undefined ? oldValue : types.getFieldValue(oldNode, k),
+    );
     const canReprint = findAnyReprints(newPath, oldPath, reprints);
     newPath.stack.length -= 2;
     oldPath.stack.length -= 2;
