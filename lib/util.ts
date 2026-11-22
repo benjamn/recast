@@ -208,6 +208,10 @@ export function fixFaultyLocations(node: any, lines: any) {
       expandLoc(loc, decorator.loc);
     });
   } else if (node.declaration && isExportDeclaration(node)) {
+    // fixTemplateLiteral needs the template literal's .loc to trim the
+    // backticks from its quasis, so it has to run before the .loc is gone.
+    fixTemplateLiteral(node.declaration, lines);
+
     // Nullify .loc information for the child declaration so that we never
     // try to reprint it without also reprinting the export declaration.
     node.declaration.loc = null;

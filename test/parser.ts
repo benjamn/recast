@@ -226,6 +226,27 @@ function runTestsForParser(parserId: string) {
     check("/* com\n\nment */ ");
     check(" /* com\n\nment */ ");
   });
+
+  it("[" + parserName + "] export default template literal", function () {
+    const printer = new Printer();
+
+    function check(template: string) {
+      const code = "export default " + template;
+      const ast = parse(code, { parser });
+      assert.strictEqual(printer.print(ast).code, code);
+      assert.strictEqual(
+        printer.print(ast.program.body[0].declaration).code,
+        template,
+      );
+    }
+
+    check("`hello`");
+    check("`${3}`");
+    check("`a${3}b`");
+    check("`a${1}b${2}c`");
+    check("`a\n${3}\nb`");
+    check("`${`${3}`}`");
+  });
 }
 
 // The token indices recast records on every node.loc are computed incrementally
